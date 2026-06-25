@@ -36,7 +36,7 @@ Platform work is **complete**. Changes require SemVer and maintainer gate — se
 
 > User enters parameters and gets a plan with required bankroll.
 
-Brief + wireframe ✅ · Implement next.
+Brief + wireframe ✅ · **Implemented** in `src/App.tsx` — dogfood next.
 
 Success: complete in **< 30 seconds** without reading docs.
 
