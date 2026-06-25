@@ -8,7 +8,7 @@ import fc from 'fast-check';
 import { describe, expect, it, vi } from 'vitest';
 
 import { optimize } from '@/core/optimization';
-import * as publicApi from '@/public';
+import * as publicApi from '@/public/capabilities';
 import {
   canonicalProfitEvaluationOrder,
   isFeasibleUnderBankroll,

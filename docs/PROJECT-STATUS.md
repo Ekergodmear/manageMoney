@@ -4,7 +4,7 @@
 **Branch:** `optimization-v1`
 
 **Last updated:** 2026-06-25  
-**Phase:** Product (Sprint 3.5) — Product Technical Lead
+**Phase:** Consumer Validation (Sprint 3.6) — Product Technical Lead
 
 ---
 
@@ -13,9 +13,9 @@
 | Component          | Status                                    |
 | ------------------ | ----------------------------------------- |
 | Core SDK (`main`)  | Stable — `v1.0.0-rc.1`                    |
-| Public API         | Frozen on `main` — no Optimization export |
-| OptimizationEngine | **Production Ready** — internal module (Sprint 3.3 ✅) |
-| Stake Planner      | RFC ✅ — **Demo CLI** next                         |
+| Public API         | Core + **Optimization export** (Sprint 3.6) |
+| OptimizationEngine | **Production Ready** — exported via public API (Sprint 3.3 ✅) |
+| Stake Planner      | RFC ✅ — **Consumer Validation** → Demo CLI |
 
 ---
 
@@ -41,6 +41,7 @@
 | 3.2C.2 | ✅ Done     | Round reduction + nested prefix (frozen)     |
 | 3.3    | ✅ Frozen   | Formal verification — Production Ready         |
 | 3.5    | ✅ Done     | RFC-101 + RFC-102 product spec (no code)       |
+| 3.6    | ✅ Done     | `examples/minimal-consumer` + arch isolation test |
 
 **Next:** Demo CLI (`generate` + `optimize`) → Sprint 4 Product
 

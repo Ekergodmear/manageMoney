@@ -6,7 +6,12 @@
 
 import type { CalculationRequest } from '@/application/dto';
 import type { ProfitAmount } from '@/core/models';
-import { buildStatistics, buildStrategy, solve, validateCalculationRequest } from '@/public';
+import {
+  buildStatistics,
+  buildStrategy,
+  solve,
+  validateCalculationRequest,
+} from '@/public/capabilities';
 
 import { createProfitCandidate, createRoundCandidate } from './candidates';
 import type { OptimizationExplanation } from './models/optimization-explanation';

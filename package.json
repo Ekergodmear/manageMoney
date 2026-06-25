@@ -58,6 +58,7 @@
     "test:property:stress": "node scripts/run-property-tests.mjs stress",
     "benchmark": "tsx benchmarks/run.ts",
     "benchmark:record": "tsx benchmarks/run.ts --record",
+    "example:minimal-consumer": "pnpm build:lib && tsx --tsconfig examples/minimal-consumer/tsconfig.json examples/minimal-consumer/index.ts",
     "docs:api": "typedoc",
     "verify": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm build:lib && pnpm test && pnpm build:app",
     "check": "pnpm verify"

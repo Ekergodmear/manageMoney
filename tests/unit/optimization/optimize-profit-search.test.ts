@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { optimize } from '@/core/optimization';
 import { OptimizationReasons } from '@/core/optimization/models/optimization-explanation';
-import * as publicApi from '@/public';
+import * as publicApi from '@/public/capabilities';
 import {
   makeOptimizationRequest,
   measureRequiredBankroll,

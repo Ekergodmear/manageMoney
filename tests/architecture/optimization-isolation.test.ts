@@ -53,9 +53,10 @@ describe('Architecture — OptimizationEngine isolation', () => {
     }
   });
 
-  it('optimize.ts imports capabilities from @/public only', () => {
+  it('optimize.ts imports capabilities from @/public/capabilities only', () => {
     const content = readFileSync(join(OPT_DIR, 'optimize.ts'), 'utf-8');
-    expect(content).toMatch(/from '@\/public'/);
+    expect(content).toMatch(/from '@\/public\/capabilities'/);
+    expect(content).not.toMatch(/from '@\/public'/);
 
     for (const capability of PUBLIC_CAPABILITY_IMPORTS) {
       if (content.includes(capability)) {

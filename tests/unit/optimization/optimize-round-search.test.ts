@@ -8,7 +8,7 @@ import type { CalculationRequest } from '@/application/dto';
 import { optimize } from '@/core/optimization';
 import { OptimizationReasons } from '@/core/optimization/models/optimization-explanation';
 import type { OptimizationRequest } from '@/core/optimization/models/optimization-request';
-import * as publicApi from '@/public';
+import * as publicApi from '@/public/capabilities';
 import {
   makeOptimizationRequest,
   measureRequiredBankroll,

@@ -14,6 +14,7 @@ const ALLOWED_IMPORT_PREFIXES = [
   '@/application/dto',
   '@/core/contracts',
   '@/core/models',
+  '@/core/optimization',
   '@/core/simulation',
   '@/core/solver',
   '@/core/statistics-builder',

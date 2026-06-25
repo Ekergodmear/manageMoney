@@ -1,5 +1,5 @@
 /**
- * Public API Contract — Core SDK v1
+ * Public API Contract — Core SDK v1 + Optimization (RFC-005)
  *
  * Every change in this file is a public contract change (breaking review candidate).
  * Consumers MUST import only from this entry — no deep imports.
@@ -8,7 +8,7 @@
  * @see docs/design/public-api-inventory.md
  */
 
-// --- Capabilities (use cases) ---
+// --- Core capabilities ---
 
 export {
   validateCalculationRequest,
@@ -17,9 +17,7 @@ export {
   buildStatistics,
   simulateWinAtRound,
   ValidationCodes,
-} from './exports';
-
-// --- Input DTOs ---
+} from './capabilities';
 
 export type {
   CalculationRequest,
@@ -29,11 +27,6 @@ export type {
   RoundCount,
   MinimumBet,
   BetStep,
-} from './exports';
-
-// --- Domain models ---
-
-export type {
   Strategy,
   Round,
   StrategyStatistics,
@@ -44,11 +37,6 @@ export type {
   RewardAmount,
   ProfitAmount,
   BankrollAmount,
-} from './exports';
-
-// --- Result & errors ---
-
-export type {
   Result,
   Success,
   Failure,
@@ -57,4 +45,18 @@ export type {
   ValidationLayer,
   SimulationError,
   SolverError,
-} from './exports';
+} from './capabilities';
+
+// --- Optimization (RFC-005) ---
+
+export { optimize, OptimizationReasons } from '@/core/optimization';
+
+export type {
+  OptimizationRequest,
+  OptimizationResult,
+  OptimizationSuccess,
+  OptimizationFailure,
+  OptimizationExplanation,
+  OptimizationReason,
+  OptimizationErrorCode,
+} from '@/core/optimization';

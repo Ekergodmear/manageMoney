@@ -9,7 +9,7 @@ import { describe, expect, it, vi } from 'vitest';
 import * as candidateBuilders from '@/core/optimization/candidates';
 import { optimize } from '@/core/optimization';
 import { OptimizationReasons } from '@/core/optimization/models/optimization-explanation';
-import * as publicApi from '@/public';
+import * as publicApi from '@/public/capabilities';
 import { validCalculationRequest } from '../validation/fixtures';
 import {
   canonicalNestedEvaluationOrder,
