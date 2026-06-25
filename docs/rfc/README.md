@@ -11,13 +11,13 @@ Core SDK release line (`main`) stays frozen at `v1.0.0-rc.1`. Optimization propo
 
 | RFC                                                   | Title                    | Status      | Review order |
 | ----------------------------------------------------- | ------------------------ | ----------- | ------------ |
-| [RFC-001](optimization/RFC-001-why-optimization.md)   | Why Optimization         | Draft       | 1            |
+| [RFC-001](optimization/RFC-001-why-optimization.md)   | Why Optimization         | ✅ Accepted | 1            |
 | [RFC-002](optimization/RFC-002-assumptions.md)        | Optimization Assumptions | ✅ Accepted | 2            |
 | [RFC-003](optimization/RFC-003-domain.md)             | Optimization Domain      | ✅ Accepted | 3            |
 | [RFC-004](optimization/RFC-004-mathematical-model.md) | Mathematical Model       | ✅ Accepted | 4            |
-| [RFC-005](optimization/RFC-005-request.md)            | Request & Result         | Draft       | 5            |
+| [RFC-005](optimization/RFC-005-request.md)            | Request & Result         | ✅ Accepted | 5            |
 
-**Gate:** No Sprint 3 code until all RFCs are maintainer-approved.  
+**RFC stack:** ✅ Complete — Sprint 3 implementation gate **open** on `optimization-v1`.  
 **After approval:** RFCs may merge to `main` as historical record, or stay on branch — maintainer decision at Sprint 3 start.
 
 ---

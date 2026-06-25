@@ -1,6 +1,6 @@
 # RFC-001 — Why Optimization
 
-**Status:** Draft  
+**Status:** ✅ Accepted (foundation — RFC stack complete)  
 **Branch:** `optimization-v1`  
 **Next:** [RFC-002 Assumptions](RFC-002-assumptions.md)
 

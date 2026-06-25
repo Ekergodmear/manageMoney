@@ -175,7 +175,16 @@ profitGranularity : positive integer   (e.g. 1000)
 
 Declared on `OptimizationRequest` (RFC-005). Independent of solver internals.
 
-Example: 100k → 99k → 98k … with `profitGranularity = 1000`.
+### SearchBounds (internal — not public API)
+
+OptimizationEngine derives search boundaries from `intent` + `profitGranularity` + validation rules:
+
+```text
+profit: targetProfit(I₀) → … → profit_min (derived)
+rounds: rounds(I₀) → … → rounds_min (derived, if allowRoundReduction)
+```
+
+`profit_min` / `rounds_min` are **never** fields on `OptimizationRequest` (RFC-005).
 
 ---
 

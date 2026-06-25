@@ -1,55 +1,59 @@
 # Project Status
 
 **Purpose:** Maintainer dashboard — current state at a glance.  
-**Branch:** `optimization-v1` — Optimization RFC development line.
+**Branch:** `optimization-v1` — Optimization RFC + Sprint 3 implementation
 
 **Last updated:** 2026-06-25
 
 ---
 
-## Components (Core SDK — from `main`)
+## Components
 
-| Component          | Status                           |
-| ------------------ | -------------------------------- |
-| Core SDK           | Stable (`v1.0.0-rc.1` on `main`) |
-| Public API         | Frozen                           |
-| OptimizationEngine | RFC phase (this branch)          |
-| UI                 | Planned                          |
+| Component          | Status                                         |
+| ------------------ | ---------------------------------------------- |
+| Core SDK (`main`)  | Stable — `v1.0.0-rc.1`                         |
+| Public API         | Frozen on `main`                               |
+| OptimizationEngine | RFC ✅ complete — **implementation gate open** |
+| UI                 | Planned                                        |
 
 ---
 
-## Current work
+## RFC stack
 
-```text
-Optimization RFC — design only, no code
-```
-
-| RFC     | Title              | Status               |
-| ------- | ------------------ | -------------------- |
-| RFC-001 | Why Optimization   | Draft                |
-| RFC-002 | Assumptions        | ✅ Accepted          |
-| RFC-003 | Domain             | ✅ Accepted          |
-| RFC-004 | Mathematical Model | ✅ Accepted          |
-| RFC-005 | Request & Result   | Draft — final review |
+| RFC     | Title              | Status      |
+| ------- | ------------------ | ----------- |
+| RFC-001 | Why Optimization   | ✅ Accepted |
+| RFC-002 | Assumptions        | ✅ Accepted |
+| RFC-003 | Domain             | ✅ Accepted |
+| RFC-004 | Mathematical Model | ✅ Accepted |
+| RFC-005 | Request & Result   | ✅ Accepted |
 
 Index: `docs/rfc/README.md`
 
-**Review order:** 001 → 002 → 003 → 004 → 005
+---
+
+## Next milestone
+
+```text
+Sprint 3 — implement OptimizationEngine at src/core/optimization/
+```
+
+Specification → Implementation → module contract (not Core v1 public export).
 
 ---
 
 ## Branch policy
 
 - `main` = Core SDK release line only
-- `optimization-v1` = RFC + future Optimization code
-- RFC drafts **not** merged to `main` until approved
+- `optimization-v1` = RFC + Optimization code
+- RFCs stay on branch until maintainer decides merge policy
 
 ---
 
 ## Quick links
 
-| Topic           | Document                         |
-| --------------- | -------------------------------- |
-| RFC process     | `docs/rfc/README.md`             |
-| Sprint gate     | `docs/design/sprint-3-gate.md`   |
-| Core SDK (main) | `API_FREEZE.md`, `PUBLIC_API.md` |
+| Topic       | Document                       |
+| ----------- | ------------------------------ |
+| RFC process | `docs/rfc/README.md`           |
+| Sprint gate | `docs/design/sprint-3-gate.md` |
+| Core SDK    | `API_FREEZE.md` (on `main`)    |
