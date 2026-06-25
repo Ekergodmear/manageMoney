@@ -9,17 +9,17 @@
 
 ## Components
 
-| Component          | Status             |
-| ------------------ | ------------------ |
-| Core SDK           | Stable             |
-| Public API         | Frozen             |
-| ValidationEngine   | Stable             |
-| ConstraintSolver   | Production Ready   |
-| StrategyBuilder    | Stable             |
-| StatisticsBuilder  | Stable             |
-| SimulationEngine   | Stable             |
-| OptimizationEngine | Planned            |
-| UI                 | Planned            |
+| Component          | Status           |
+| ------------------ | ---------------- |
+| Core SDK           | Stable           |
+| Public API         | Frozen           |
+| ValidationEngine   | Stable           |
+| ConstraintSolver   | Production Ready |
+| StrategyBuilder    | Stable           |
+| StatisticsBuilder  | Stable           |
+| SimulationEngine   | Stable           |
+| OptimizationEngine | Planned          |
+| UI                 | Planned          |
 
 ---
 
@@ -53,20 +53,20 @@ Sprint 3 — OptimizationEngine
 
 **Sprint 3 review focus:**
 
-| Criterion      | Question |
-| -------------- | -------- |
-| Correctness    | Does the optimization algorithm match its specification? |
-| Composition    | Does it use the Core SDK Public API correctly? |
-| Isolation      | Is Optimization independent of Core internals? |
-| Performance    | Does it meet expected complexity bounds? |
+| Criterion   | Question                                                 |
+| ----------- | -------------------------------------------------------- |
+| Correctness | Does the optimization algorithm match its specification? |
+| Composition | Does it use the Core SDK Public API correctly?           |
+| Isolation   | Is Optimization independent of Core internals?           |
+| Performance | Does it meet expected complexity bounds?                 |
 
 ---
 
 ## Quick links
 
-| Topic | Document |
-| ----- | -------- |
-| Release steps | `RELEASE_MANIFEST.md` |
-| Module gates | `docs/CORE-STABILITY.md` |
-| Public contract | `API_FREEZE.md`, `PUBLIC_API.md` |
-| Sprint 3 | `docs/design/sprint-3-gate.md`, `specs/007-optimization/` |
+| Topic           | Document                                                  |
+| --------------- | --------------------------------------------------------- |
+| Release steps   | `RELEASE_MANIFEST.md`                                     |
+| Module gates    | `docs/CORE-STABILITY.md`                                  |
+| Public contract | `API_FREEZE.md`, `PUBLIC_API.md`                          |
+| Sprint 3        | `docs/design/sprint-3-gate.md`, `specs/007-optimization/` |

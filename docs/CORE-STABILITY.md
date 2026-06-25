@@ -8,14 +8,14 @@
 
 ## Module status
 
-| Module             | Status               | Gate                         |
-| ------------------ | -------------------- | ---------------------------- |
-| ValidationEngine   | **Stable**           | ADR-026                      |
-| ConstraintSolver   | **Production Ready** | ADR-033 — design gate only   |
-| StrategyBuilder    | **Stable**           | ADR-034                      |
-| StatisticsBuilder  | **Stable**           | ADR-035                      |
-| SimulationEngine   | **Stable**           | ADR-036                      |
-| OptimizationEngine | Planned              | Sprint 3 — `optimization-v1` |
+| Module             | Status               | Gate                           |
+| ------------------ | -------------------- | ------------------------------ |
+| ValidationEngine   | **Stable**           | ADR-026                        |
+| ConstraintSolver   | **Production Ready** | ADR-033 — design gate only     |
+| StrategyBuilder    | **Stable**           | ADR-034                        |
+| StatisticsBuilder  | **Stable**           | ADR-035                        |
+| SimulationEngine   | **Stable**           | ADR-036                        |
+| OptimizationEngine | Planned              | Sprint 3 — `optimization-v1`   |
 | Application / UI   | Planned              | After Optimization (Sprint 3+) |
 
 ---

@@ -18,10 +18,10 @@ main
 └── optimization-v1    ← Sprint 3 (or feature/optimization)
 ```
 
-| Branch | Role |
-| ------ | ---- |
-| `main` | Release / hotfix only — reflects published SDK state |
-| `optimization-v1` | All OptimizationEngine work (Sprint 3+) |
+| Branch            | Role                                                 |
+| ----------------- | ---------------------------------------------------- |
+| `main`            | Release / hotfix only — reflects published SDK state |
+| `optimization-v1` | All OptimizationEngine work (Sprint 3+)              |
 
 **Benefits:**
 
@@ -67,24 +67,24 @@ const simulation = simulateWinAtRound(strategy, winAtRound);
 
 Architecture decisions are **locked**. Maintainer/reviewer focus — four criteria:
 
-| Criterion     | Question |
-| ------------- | -------- |
-| Correctness   | Does the optimization algorithm match its specification? |
-| Composition   | Does it use the Core SDK Public API correctly? |
-| Isolation     | Is Optimization independent of Core internals? |
-| Performance   | Does it meet expected complexity bounds? |
+| Criterion   | Question                                                 |
+| ----------- | -------------------------------------------------------- |
+| Correctness | Does the optimization algorithm match its specification? |
+| Composition | Does it use the Core SDK Public API correctly?           |
+| Isolation   | Is Optimization independent of Core internals?           |
+| Performance | Does it meet expected complexity bounds?                 |
 
-**Design test:** *If Core SDK were an npm package you cannot modify, would this design still work?*  
+**Design test:** _If Core SDK were an npm package you cannot modify, would this design still work?_  
 If yes → architecture is on track.
 
 **Core change bar** — only with spec evidence:
 
-| # | Gate question |
-| - | ------------- |
-| 1 | Uses Public API correctly? — `@stake/constraint-engine` only |
-| 2 | Changes Core SDK behavior? — if yes → spec proof required |
-| 3 | Breaks backward compatibility? — if yes → SemVer + ADR |
-| 4 | Belongs in Optimization vs sneaking into Core? |
+| #   | Gate question                                                |
+| --- | ------------------------------------------------------------ |
+| 1   | Uses Public API correctly? — `@stake/constraint-engine` only |
+| 2   | Changes Core SDK behavior? — if yes → spec proof required    |
+| 3   | Breaks backward compatibility? — if yes → SemVer + ADR       |
+| 4   | Belongs in Optimization vs sneaking into Core?               |
 
 If (2) or (3) is "yes" → require specification evidence before merge.
 
