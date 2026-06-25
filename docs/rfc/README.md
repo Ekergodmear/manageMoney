@@ -31,12 +31,15 @@ Optimization v2+ uses new RFC numbers (e.g. RFC-010) without rewriting Sprint hi
 ## Implementation phases (after RFC approval)
 
 ```text
-Sprint 3.1  Mathematical model implementation checks
-Sprint 3.2  Request/Result types
-Sprint 3.3  Search / solver
-Sprint 3.4  SDK composition
-Sprint 3.5  Verification
+Sprint 3.1A  Contracts                    ✅
+Sprint 3.1B  Identity (optimize)          ✅ maintainer sign-off
+Sprint 3.2A  SearchPolicy                 planned
+Sprint 3.2B  Profit search                planned
+Sprint 3.2C  Nested search                planned
+Sprint 3.3   Verification                 planned
 ```
+
+See `docs/design/sprint-3.2-spec.md`, `docs/rfc/optimization/OPTIMIZATION-INVARIANTS.md`.
 
 ---
 
