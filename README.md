@@ -1,275 +1,106 @@
-# Calculation Engine SDK
+# Stake Planner
 
-**Constraint-based bankroll planning** — validate input, solve optimal bets, build strategy aggregates, derive statistics, optimize for budget, and run deterministic simulations.
+**A betting planning application** powered by [`@stake/constraint-engine`](PUBLIC_API.md).
 
-|                    |                                                                            |
-| ------------------ | -------------------------------------------------------------------------- |
-| **Status**         | Platform-ready — Core + Optimization on `optimization-v1`                  |
-| **Public API**     | [`src/public/index.ts`](src/public/index.ts)                               |
-| **Package**        | `@stake/constraint-engine`                                                 |
-| **License**        | [MIT](LICENSE)                                                             |
+Help users create a plan, adjust it when bankroll is tight, understand why it works, and keep it with confidence — in under 30 seconds, without reading documentation.
 
-> **New here?** Read the [SDK Cookbook](docs/cookbook/README.md) — 5-minute start, common workflows, error mapping.  
-> This repository also contains the **Stake Planner** UI (a consumer app). Import only from `@stake/constraint-engine`.
+| | |
+| --- | --- |
+| **Product** | Stake Planner — in development |
+| **Platform** | `@stake/constraint-engine` v1.0.0-rc.1 — stable |
+| **License** | [MIT](LICENSE) |
 
 ---
 
-## How it fits together
+## What Stake Planner does
+
+```text
+Generate Plan  →  Improve Plan  →  Understand Plan  →  Keep Plan  →  Trust Plan
+```
+
+| Feature | Goal |
+| ------- | ---- |
+| **Generate Plan** | User enters parameters and gets a betting plan |
+| **Improve Plan** | When bankroll is not enough, still get a feasible suggestion |
+| **Understand Plan** | Simulation + explanation — user trusts the result |
+| **Keep Plan** | Export for later |
+| **Trust Plan** | Polish — loading, microcopy, confidence |
+
+Product spec: [`docs/rfc/product/`](docs/rfc/product/README.md) · Roadmap: [`ROADMAP.md`](ROADMAP.md) · Status: [`docs/PROJECT-STATUS.md`](docs/PROJECT-STATUS.md)
+
+---
+
+## User journey
 
 ```mermaid
 sequenceDiagram
   participant User
-  participant App
+  participant Stake Planner
   participant SDK as @stake/constraint-engine
 
-  User->>App: Input (multiplier, rounds, profit, …)
-  App->>SDK: validateCalculationRequest()
-  SDK-->>App: ValidatedCalculationRequest
-  App->>SDK: solve()
-  SDK-->>App: Strategy (rounds)
-  App->>SDK: buildStrategy() + buildStatistics()
-  SDK-->>App: requiredBankrollAmount
+  User->>Stake Planner: Enter multiplier, rounds, profit, budget
+  Stake Planner->>SDK: Generate plan
+  SDK-->>Stake Planner: Required bankroll + rounds
 
-  alt requiredBankroll > budget
-    App->>SDK: optimize()
-    SDK-->>App: Suggested plan + explanation
+  alt bankroll not enough
+    Stake Planner->>SDK: Improve plan (optimize)
+    SDK-->>Stake Planner: Suggested plan + explanation
   end
 
-  App->>SDK: simulateWinAtRound()
-  SDK-->>App: Scenario profit & trace
-  App->>User: Display / Export JSON
+  Stake Planner->>SDK: Simulate scenario
+  SDK-->>Stake Planner: Confidence data
+  Stake Planner->>User: Clear next step / export
 ```
-
-Runnable end-to-end example: `pnpm example:minimal-consumer` → [`examples/minimal-consumer/`](examples/minimal-consumer/index.ts)
 
 ---
 
-## Installation
+## Getting started (developers)
 
-```bash
-npm install @stake/constraint-engine
-```
-
-Pre-release (monorepo):
+Clone and run the app (monorepo):
 
 ```bash
 git clone https://github.com/Ekergodmear/manageMoney.git
 cd manageMoney
 pnpm install
-pnpm build:lib
+pnpm verify
 ```
 
 Requires **Node.js ≥ 22**.
 
----
+| Script | Description |
+| ------ | ----------- |
+| `pnpm dev` | Stake Planner UI (dev) |
+| `pnpm build:app` | Product build → `dist-app/` |
+| `pnpm build:lib` | Platform SDK → `dist/` |
+| `pnpm verify` | lint + typecheck + test + build |
 
-## Quick Start
-
-See **[Getting Started (5 min)](docs/cookbook/README.md)** for the full product workflow.
-
-Minimal generate + simulate:
-
-```typescript
-import {
-  validateCalculationRequest,
-  solve,
-  buildStrategy,
-  buildStatistics,
-  simulateWinAtRound,
-} from '@stake/constraint-engine';
-
-const request = {
-  rewardMultiplier: 20,
-  roundCount: 5,
-  minimumBet: 10_000,
-  betStep: 1_000,
-  targetProfit: { mode: 'fixedAmount', amount: 100_000 },
-} as const;
-
-const validated = validateCalculationRequest(request);
-if (validated.kind === 'failure') {
-  console.error(validated.error);
-  process.exit(1);
-}
-
-const solved = solve(validated.value);
-if (solved.kind === 'failure') {
-  throw new Error('solver should not fail on valid input');
-}
-
-const strategy = buildStrategy(solved.value.rounds);
-const statistics = buildStatistics(strategy);
-const simulation = simulateWinAtRound(strategy, 3);
-
-if (simulation.kind === 'success') {
-  console.log(statistics.requiredBankrollAmount);
-  console.log(simulation.value.winningRoundIndex);
-}
-```
+**Contributing:** see [CONTRIBUTING.md](CONTRIBUTING.md) — platform vs product vs UI.
 
 ---
 
-## Capabilities
+## Architecture (platform)
 
-Six public functions — use cases, not internal layers.
-
-| Function | Recipe |
-| -------- | ------ |
-| `validateCalculationRequest` | [Generate a plan](docs/cookbook/generate-plan.md) |
-| `solve` | [Generate a plan](docs/cookbook/generate-plan.md) |
-| `buildStrategy` | [Generate a plan](docs/cookbook/generate-plan.md) |
-| `buildStatistics` | [Generate a plan](docs/cookbook/generate-plan.md) |
-| `optimize` | [Optimize for bankroll](docs/cookbook/optimize-for-bankroll.md) |
-| `simulateWinAtRound` | [Run simulation](docs/cookbook/run-simulation.md) |
-
-Error mapping: [Error Cookbook](docs/cookbook/error-codes.md)
-
-### 1. `validateCalculationRequest`
-
-Trust boundary. Returns `Result<ValidatedCalculationRequest, ValidationResult>`.
-
-```typescript
-import { validateCalculationRequest, ValidationCodes } from '@stake/constraint-engine';
-
-const result = validateCalculationRequest(request);
-
-if (result.kind === 'failure') {
-  for (const err of result.error.errors) {
-    if (err.code === ValidationCodes.B001_REWARD_MULTIPLIER_TOO_LOW) {
-      // handle business rule violation
-    }
-  }
-}
-```
-
-### 2. `solve`
-
-Optimal betting plan. Returns `Result<Strategy, SolverError>` (`SolverError` is `never` on valid input).
-
-```typescript
-import { solve } from '@stake/constraint-engine';
-
-const result = solve(validatedRequest);
-if (result.kind === 'success') {
-  const { rounds } = result.value;
-  console.log(rounds[0]?.betAmount);
-}
-```
-
-### 3. `buildStrategy`
-
-Canonical `Strategy` aggregate from `Round[]`.
-
-```typescript
-import { buildStrategy } from '@stake/constraint-engine';
-
-const strategy = buildStrategy(solved.value.rounds);
-```
-
-### 4. `buildStatistics`
-
-Observational snapshot — does not mutate `Strategy`.
-
-```typescript
-import { buildStatistics } from '@stake/constraint-engine';
-
-const stats = buildStatistics(strategy);
-// stats.requiredBankrollAmount, stats.averageBetAmount, stats.expectedProfitAmount
-```
-
-### 5. `simulateWinAtRound`
-
-Deterministic scenario: win at round _k_, lose elsewhere.
-
-```typescript
-import { simulateWinAtRound } from '@stake/constraint-engine';
-
-const result = simulateWinAtRound(strategy, 3);
-if (result.kind === 'success') {
-  console.log(result.value.rounds);
-}
-```
-
----
-
-### 6. `optimize`
-
-Find a feasible plan under a bankroll limit. Returns suggested `CalculationRequest` + structured `explanation`.
-
-```typescript
-import { optimize, OptimizationReasons } from '@stake/constraint-engine';
-
-const result = optimize({
-  intent: request,
-  bankrollLimit: 1_000_000,
-  allowRoundReduction: true,
-  profitGranularity: 5_000,
-});
-
-if (result.kind === 'success' && result.explanation.reason === OptimizationReasons.PROFIT_REDUCED) {
-  console.log(result.request, result.explanation.profitReducedBy);
-}
-```
-
----
-
-## API Reference
-
-| Document                                                       | Purpose                          |
-| -------------------------------------------------------------- | -------------------------------- |
-| [`docs/cookbook/`](docs/cookbook/README.md)                    | **SDK user guide** — start here  |
-| [`PUBLIC_API.md`](PUBLIC_API.md)                               | Supported symbols + stable since |
-| [`RELEASE_MANIFEST.md`](RELEASE_MANIFEST.md)                   | Pre-flight checklist + RC gate   |
-| [`API_FREEZE.md`](API_FREEZE.md)                               | Frozen capabilities (v1)         |
-| [`docs/COMPATIBILITY-POLICY.md`](docs/COMPATIBILITY-POLICY.md) | SemVer rules                     |
-
-Typedoc — run `pnpm docs:api` (output: `docs-api/`, public exports only).
-
----
-
-## Development
-
-```bash
-pnpm install
-pnpm verify
-```
-
-| Script                  | Description                                         |
-| ----------------------- | --------------------------------------------------- |
-| `pnpm build:lib`        | SDK → `dist/index.js`                               |
-| `pnpm build:app`        | UI → `dist-app/`                                    |
-| `pnpm verify`           | lint + typecheck + build:lib + test + build:app     |
-| `pnpm test:property`    | property tests (nightly profile)                    |
-| `pnpm benchmark`        | latency baseline → `benchmarks/results/latest.json` |
-| `pnpm benchmark:record` | refresh committed `baseline.json` (maintainer)      |
-| `pnpm example:minimal-consumer` | Full public API workflow (dist)           |
-
----
-
-## Architecture (contributors)
+Stake Planner is built on **`@stake/constraint-engine`** — a constraint-based planning SDK.
 
 ```text
-Construction          Observation
-─────────────         ───────────
-ValidationEngine      StatisticsBuilder
-ConstraintSolver      SimulationEngine
-StrategyBuilder
+Stake Planner (product)     src/features/, src/pages/, apps/
+        ↓ imports only
+@stake/constraint-engine    src/public/index.ts → dist/
+        ↓
+Engine modules              src/core/ (validation, solver, optimization, …)
 ```
 
-| Layer         | Path                          |
-| ------------- | ----------------------------- |
-| Public API    | `src/public/index.ts`         |
-| Engine        | `src/core/`                   |
-| DTOs          | `src/application/dto/`        |
-| UI (consumer) | `src/features/`, `src/pages/` |
+| Layer | Path | Docs |
+| ----- | ---- | ---- |
+| Product UI | `src/features/`, `src/pages/` | `docs/rfc/product/` |
+| Public API | `src/public/index.ts` | [`PUBLIC_API.md`](PUBLIC_API.md) |
+| Engine | `src/core/` | [`docs/CORE-STABILITY.md`](docs/CORE-STABILITY.md) |
+| SDK cookbook | `docs/cookbook/` | Workflows for package consumers |
+| Example consumer | `examples/minimal-consumer/` | `pnpm example:minimal-consumer` |
 
-See [`docs/CORE-STABILITY.md`](docs/CORE-STABILITY.md) and [`ROADMAP.md`](ROADMAP.md).
+Platform capabilities: `validateCalculationRequest`, `solve`, `buildStrategy`, `buildStatistics`, `optimize`, `simulateWinAtRound`.
 
----
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+SDK install (external consumers): `npm install @stake/constraint-engine` — see [`docs/cookbook/README.md`](docs/cookbook/README.md).
 
 ---
 
