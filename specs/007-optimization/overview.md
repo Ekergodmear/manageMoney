@@ -1,8 +1,16 @@
 # Spec 007 — Optimization Engine
 
-**Sprint:** 3  
-**Branch:** `optimization-v1` (after RC — not `main`)
+**Branch:** `optimization-v1` only  
+**Phase:** Optimization RFC (no code)
 
-Find optimal plan under constraints. Uses **ConstraintSolver + StrategyBuilder** — NOT SimulationEngine.
+**Start here:** `docs/rfc/README.md`
 
-**Gate:** `docs/design/sprint-3-gate.md` — SDK client only, four review questions.
+| RFC     | File                                                  |
+| ------- | ----------------------------------------------------- |
+| RFC-001 | `docs/rfc/optimization/RFC-001-why-optimization.md`   |
+| RFC-002 | `docs/rfc/optimization/RFC-002-assumptions.md`        |
+| RFC-003 | `docs/rfc/optimization/RFC-003-domain.md`             |
+| RFC-004 | `docs/rfc/optimization/RFC-004-mathematical-model.md` |
+| RFC-005 | `docs/rfc/optimization/RFC-005-request.md`            |
+
+**Gate:** `docs/design/sprint-3-gate.md`
