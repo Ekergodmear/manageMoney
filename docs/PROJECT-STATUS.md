@@ -32,9 +32,11 @@ Platform work is **complete**. Changes require SemVer and maintainer gate — se
 
 ## Current focus
 
-**Feature 1 — Generate Plan**
+**Feature 1 — Generate Plan** — [`docs/product/feature-1-generate-plan.md`](product/feature-1-generate-plan.md)
 
 > User enters parameters and gets a plan with required bankroll.
+
+Brief + wireframe ✅ · Implement next.
 
 Success: complete in **< 30 seconds** without reading docs.
 
