@@ -13,7 +13,7 @@
 | ------------------ | ----------------------------------------- |
 | Core SDK (`main`)  | Stable — `v1.0.0-rc.1`                    |
 | Public API         | Frozen on `main` — no Optimization export |
-| OptimizationEngine | Sprint 3.2A ✅ — 3.2B next                |
+| OptimizationEngine | Sprint 3.2B ✅ — 3.2C next                |
 | UI                 | Planned                                   |
 
 ---
@@ -30,9 +30,11 @@ All accepted — `docs/rfc/README.md`
 | ------ | ----------- | ------------------------------------------- |
 | 3.1A   | ✅ Approved | Contracts + 10 unit tests                   |
 | 3.1B   | ✅ Approved | `optimize()` identity + 7 tests + arch test |
-| 3.2A   | ✅ Done     | `SearchPolicy` + 16 tests                   |
-| 3.2B   | Planned     | Profit search only                          |
-| 3.2C   | Planned     | Nested search (RFC-004)                     |
+| 3.2A   | ✅ Approved | `SearchPolicy` + invariant tests            |
+| 3.2B   | ✅ Done     | Profit search + First Feasible Wins (frozen) |
+| 3.2C.1 | Planned     | Monotonic Budget + Prefix Stability          |
+| 3.2C.2 | Planned     | Round reduction (independent unit)           |
+| 3.3    | Planned     | Full Optimization verification               |
 
 Invariants: `docs/rfc/optimization/OPTIMIZATION-INVARIANTS.md`  
 Next spec: `docs/design/sprint-3.2-spec.md`

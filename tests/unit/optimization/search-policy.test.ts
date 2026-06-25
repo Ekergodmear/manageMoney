@@ -155,6 +155,47 @@ describe('SearchPolicy — mode guard', () => {
     };
     expect(policy.nextProfit(breakEvenIntent, 100_000, granularity)).toBeNull();
   });
+
+  it('returns null for percentage intent profit steps (deterministic unsupported)', () => {
+    const percentageIntent: CalculationRequest = {
+      ...intent,
+      targetProfit: { mode: 'percentage', percent: 10 },
+    };
+    expect(policy.nextProfit(percentageIntent, 100_000, granularity)).toBeNull();
+  });
+});
+
+describe('SearchPolicy — terminal idempotence', () => {
+  it('returns null on repeated calls after terminal profit state', () => {
+    expect(policy.nextProfit(intent, 0, granularity)).toBeNull();
+    expect(policy.nextProfit(intent, 0, granularity)).toBeNull();
+    expect(policy.nextProfit(intent, 0, granularity)).toBeNull();
+  });
+
+  it('returns null on repeated calls after terminal round state', () => {
+    expect(policy.nextRoundCount(intent, 1)).toBeNull();
+    expect(policy.nextRoundCount(intent, 1)).toBeNull();
+  });
+
+  it('stays null after landing on 0 profit', () => {
+    expect(policy.nextProfit(intent, 5_000, granularity)).toBe(0);
+    expect(policy.nextProfit(intent, 0, granularity)).toBeNull();
+    expect(policy.nextProfit(intent, 0, granularity)).toBeNull();
+  });
+});
+
+describe('SearchPolicy — intent immutability', () => {
+  it('does not mutate intent on nextProfit', () => {
+    const frozen = structuredClone(intent);
+    policy.nextProfit(intent, 100_000, granularity);
+    expect(intent).toEqual(frozen);
+  });
+
+  it('does not mutate intent on nextRoundCount', () => {
+    const frozen = structuredClone(intent);
+    policy.nextRoundCount(intent, 50);
+    expect(intent).toEqual(frozen);
+  });
 });
 
 function collectTsFiles(dir: string): string[] {

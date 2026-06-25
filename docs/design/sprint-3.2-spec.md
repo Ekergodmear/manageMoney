@@ -70,6 +70,8 @@ interface SearchPolicy {
 
 Pure · deterministic · minimal-step. Policy does not import Core SDK.
 
+**Policy boundary (locked):** policy generates candidates only — no feasibility, bankroll, or pipeline calls.
+
 Search engine **consumes** `SearchPolicy`; it does not embed granularity rules.
 
 ---
@@ -82,32 +84,80 @@ Search engine **consumes** `SearchPolicy`; it does not embed granularity rules.
 - Pure, deterministic, minimal-step — gate before 3.2B
 - `search-policy/` must not import Core SDK
 
+**Locked invariants (maintainer sign-off):**
+
+| Invariant | Rule |
+| --------- | ---- |
+| Candidate only | Policy returns next candidate; never evaluates |
+| Terminal `null` | `nextProfit(x) === null` → idempotent on repeat |
+| Mode guard | `fixedAmount` steps; `breakEven` / `percentage` → `null` |
+| Intent immutable | `nextProfit` / `nextRoundCount` do not mutate `intent` |
+| O(1) policy | No loops, no large allocations — see `PERFORMANCE-CONTRACT.md` |
+
 **Gate (maintainer):** Pure · Deterministic · Minimal-step — enforced by tests
 
-### 3.2B — Profit search only
+### 3.2B — Profit search only ✅
 
 ```text
-Identity → profit loop → return first feasible
+Identity
+    ↓ (not feasible)
+candidate = policy.nextProfit(intent, currentProfit, profitGranularity)
+    ↓
+while (candidate !== null)
+    evaluate(candidate) via @/public
+    feasible? → return PROFIT_REDUCED (first feasible wins)
+    candidate = policy.nextProfit(...)
+    ↓
+NO_FEASIBLE_SOLUTION
 ```
 
-- No round reduction
+- No round reduction (`nextRoundCount` not used until 3.2C)
+- Engine must not inline `profit -= granularity` — architecture test
+- **First Feasible Wins:** stop at first feasible reduced profit (RFC-004 Minimal Change)
 - Explanation: `PROFIT_REDUCED` when applicable
 - Identity invariant preserved
 
-### 3.2C — Nested search
+**Frozen after sign-off:** profit search semantics — no further changes before 3.2C.2 ships.
 
-Full RFC-004 nested algorithm:
+**Backlog (before 3.2C.2):** extract `createProfitCandidate(intent, profit)` — candidate construction must not live inline in `optimize()`. Policy decides the next value; a single helper owns `CalculationRequest` shaping.
+
+### 3.2C.1 — Profit search freeze + Monotonic Budget
+
+Profit search is complete. Add property:
 
 ```text
-profit loop (outer per round level)
-    → round decrement
+If budget₁ < budget₂
+Then optimizedProfit(result₁) ≤ optimizedProfit(result₂)
+```
+
+Property-based test. **Freeze** profit search semantics after sign-off.
+
+**Prefix Stability** (property test):
+
+```text
+profitGranularity = 5k
+
+100 → 95 → 90   must be a prefix of   100 → 95 → 90 → 85 → 80 → ...
+```
+
+Search must not emit different candidate sequences depending on `bankrollLimit`. Enables future cache/heuristic without semantic drift.
+
+### 3.2C.2 — Round reduction
+
+Independent unit — changes search space; do not mix with 3.2C.1 in one commit.
+
+```text
+profit loop (at fixed round level)
+    → round decrement via policy.nextRoundCount
     → profit loop again
 ```
 
-- Monotonic budget property test (property-based)
 - Explanation: `PROFIT_AND_ROUNDS_REDUCED` / `ROUNDS_REDUCED` as needed
+- `createRoundCandidate(intent, roundCount)` — same candidate-builder pattern as profit
 
-### 3.3 — Verification (after 3.2C)
+### 3.3 — Verification (after 3.2C.1 + 3.2C.2 frozen)
+
+Property-based verification of **full** Optimization — only after both profit and round search are frozen:
 
 - Lexicographic optimality checks
 - Stability (determinism)
@@ -137,11 +187,13 @@ Heuristics later → separate RFC + benchmarks.
 
 ## Review checklist (maintainer)
 
-- [ ] Identity property still holds after every 3.2 sub-phase
-- [ ] No search state in `OptimizationResult`
-- [ ] `src/public/index.ts` unchanged
-- [ ] Architecture isolation test still passes
-- [ ] Monotonic budget property tested in 3.2C
+- [x] Identity property still holds after every 3.2 sub-phase
+- [x] No search state in `OptimizationResult`
+- [x] `src/public/index.ts` unchanged
+- [x] Architecture isolation test still passes
+- [ ] Monotonic budget property tested in 3.2C.1
+- [ ] Prefix Stability tested in 3.2C.1
+- [ ] Round reduction in 3.2C.2 (separate commit)
 
 ---
 

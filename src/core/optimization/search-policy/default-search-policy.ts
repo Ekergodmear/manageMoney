@@ -9,17 +9,17 @@ import type { SearchPolicy } from './search-policy';
 
 const MIN_ROUND_COUNT = 1;
 
-function isFixedAmountIntent(intent: CalculationRequest): boolean {
+function isProfitSearchSupported(intent: CalculationRequest): boolean {
   return intent.targetProfit.mode === 'fixedAmount';
 }
 
 /**
- * v1 profit stepping applies to `fixedAmount` intent only.
- * Other modes return `null` — engine does not reduce via amount steps.
+ * v1 profit stepping: `fixedAmount` only.
+ * `breakEven` and `percentage` return `null` (deterministic unsupported).
  */
 export const defaultSearchPolicy: SearchPolicy = {
   nextProfit(intent, currentProfit, profitGranularity) {
-    if (!isFixedAmountIntent(intent)) {
+    if (!isProfitSearchSupported(intent)) {
       return null;
     }
 

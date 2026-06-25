@@ -73,4 +73,26 @@ describe('Architecture — OptimizationEngine isolation', () => {
       );
     }
   });
+
+  describe('engine delegates movement to SearchPolicy (Sprint 3.2B)', () => {
+    const optimizeContent = readFileSync(join(OPT_DIR, 'optimize.ts'), 'utf-8');
+
+    it('optimize.ts uses policy.nextProfit for profit steps', () => {
+      expect(optimizeContent).toMatch(/policy\.nextProfit/);
+      expect(optimizeContent).toMatch(/defaultSearchPolicy/);
+    });
+
+    it('optimize.ts does not inline profit decrement', () => {
+      expect(optimizeContent).not.toMatch(/currentProfit\s*-\s*profitGranularity/);
+      expect(optimizeContent).not.toMatch(/profitGranularity\s*-/);
+      expect(optimizeContent).not.toMatch(/-=\s*profitGranularity/);
+      expect(optimizeContent).not.toMatch(/targetProfit\.amount\s*-/);
+    });
+
+    it('optimize.ts does not inline round decrement before 3.2C', () => {
+      expect(optimizeContent).not.toMatch(/policy\.nextRoundCount/);
+      expect(optimizeContent).not.toMatch(/roundCount\s*-\s*1/);
+      expect(optimizeContent).not.toMatch(/currentRoundCount\s*-/);
+    });
+  });
 });
