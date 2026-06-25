@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.0-rc.1] - TBD — Core SDK Release Candidate
+## [1.0.0-rc.1] - 2026-06-25 — Core SDK Release Candidate
 
 ### Added
 

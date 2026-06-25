@@ -1,6 +1,6 @@
 {
   "name": "@stake/constraint-engine",
-  "version": "0.2.0",
+  "version": "1.0.0-rc.1",
   "private": true,
   "description": "Constraint optimization SDK — validate, solve, build strategy, statistics, and deterministic simulation",
   "license": "MIT",
