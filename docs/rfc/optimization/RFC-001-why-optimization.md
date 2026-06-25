@@ -42,13 +42,13 @@ Core SDK does not search alternatives. That is **out of scope** — not a bug.
 
 ## Optimization is a Decision Engine
 
-| Option | Change               | Example    |
-| ------ | -------------------- | ---------- |
-| A      | Reduce target profit | 100k → 80k |
-| B      | Reduce rounds        | 50 → 30    |
-| C      | Change multiplier    | x20 → x25  |
-| D      | Raise minimum bet    | ↑          |
-| E      | Change strategy mode | TBD        |
+| Option | Change               | Example    | RFC-002 (v1)   |
+| ------ | -------------------- | ---------- | -------------- |
+| A      | Reduce target profit | 100k → 80k | ✅ Allowed     |
+| B      | Reduce rounds        | 50 → 30    | ✅ If enabled  |
+| C      | Change multiplier    | x20 → x25  | ❌ New request |
+| D      | Raise minimum bet    | 10k → 20k  | ❌ Fixed       |
+| E      | Change profit mode   | —          | ❌ New request |
 
 Which options are **allowed** is a **domain** decision → [RFC-002](RFC-002-assumptions.md).
 

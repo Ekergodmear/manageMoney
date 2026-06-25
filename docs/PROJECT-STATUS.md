@@ -24,13 +24,13 @@
 Optimization RFC — design only, no code
 ```
 
-| RFC     | Title              | Status |
-| ------- | ------------------ | ------ |
-| RFC-001 | Why Optimization   | Draft  |
-| RFC-002 | Assumptions        | Draft  |
-| RFC-003 | Domain             | Draft  |
-| RFC-004 | Mathematical Model | Draft  |
-| RFC-005 | Request & Result   | Draft  |
+| RFC     | Title              | Status                   |
+| ------- | ------------------ | ------------------------ |
+| RFC-001 | Why Optimization   | Draft                    |
+| RFC-002 | Assumptions        | ✅ Accepted              |
+| RFC-003 | Domain             | Draft — ready for review |
+| RFC-004 | Mathematical Model | Draft                    |
+| RFC-005 | Request & Result   | Draft                    |
 
 Index: `docs/rfc/README.md`
 

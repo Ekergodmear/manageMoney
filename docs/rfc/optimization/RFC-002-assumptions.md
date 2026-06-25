@@ -1,8 +1,8 @@
 # RFC-002 — Optimization Assumptions
 
-**Status:** Draft — **maintainer must approve before RFC-003**  
+**Status:** ✅ **Accepted** (maintainer, 2026-06-25)  
 **Prerequisite:** [RFC-001 Why](RFC-001-why-optimization.md)  
-**Next:** [RFC-003 Domain](RFC-003-domain.md)
+**Next:** [RFC-003 Domain](RFC-003-domain.md) — domain boundary locked; ready for review
 
 ---
 
@@ -12,87 +12,218 @@ Answer the **most important question before any code:**
 
 > **Which parameters may Optimization change — and which are fixed facts of the game or user intent?**
 
-If assumptions are wrong, the mathematical model and `OptimizationRequest` will be rewritten repeatedly.
-
-This document is ~1 page of **locked domain facts**, not algorithm design.
+This document locks the **domain boundary** for Optimization v1.
 
 ---
 
-## Assumption format
+## Parameter classification
 
-| ID  | Assumption | Status                               | Notes |
-| --- | ---------- | ------------------------------------ | ----- |
-| —   | —          | `proposed` / `accepted` / `rejected` | —     |
+| Parameter          | Fixed | Optimizable | Condition / role                             |
+| ------------------ | ----- | ----------- | -------------------------------------------- |
+| `rewardMultiplier` | ✅    | ❌          | Environment — new request required to change |
+| `minimumBet`       | ✅    | ❌          | Environment                                  |
+| `betStep`          | ✅    | ❌          | Environment                                  |
+| `roundCount`       | ⚠️    | ✅          | Only if `allowRoundReduction` enabled        |
+| `targetProfit`     | ❌    | ✅          | Always (primary knob)                        |
+| `requiredBankroll` | N/A   | Objective   | Derived — not an optimization variable       |
 
----
-
-## Game vs user parameters
-
-Some fields describe the **game** (e.g. Bingo18 x20).  
-Some describe **user choices** (target profit, round count).
-
-Optimization may only vary parameters classified as **user-adjustable** unless product explicitly allows game-parameter search.
+**This table is the authoritative Sprint 3 domain boundary.**
 
 ---
 
-## Proposed assumptions (v1 — for maintainer review)
+## Accepted assumptions
 
-### Fixed by game / product (Optimization must NOT change)
+### A1 — RewardMultiplier (environment)
 
-| ID  | Assumption                                                   | Status       | Rationale                                        |
-| --- | ------------------------------------------------------------ | ------------ | ------------------------------------------------ |
-| A1  | `rewardMultiplier` is fixed for a session (e.g. Bingo18 x20) | **proposed** | Multiplier is a game property, not a tuning knob |
-| A2  | `betStep` is fixed by platform rules                         | **proposed** | Step size is structural                          |
-| A3  | Validation rules and phases are fixed                        | **accepted** | Core SDK contract                                |
+**Status:** ✅ Accepted
 
-### Possibly fixed (needs product decision)
+```text
+RewardMultiplier is an environment parameter, not an optimization variable.
+```
 
-| ID  | Assumption                                            | Status       | Question                                       |
-| --- | ----------------------------------------------------- | ------------ | ---------------------------------------------- |
-| A4  | `minimumBet` is fixed by user bankroll policy         | **proposed** | Or may Optimization suggest raising it?        |
-| A5  | `profitMode` is fixed when user picks a strategy type | **proposed** | Or may Optimization switch fixed ↔ percentage? |
+If the user analyzes **x20**, Optimization works with **M = 20**. It must not change to x25 or x30.
 
-### User-adjustable (Optimization MAY change)
+Optimization answers:
 
-| ID  | Assumption                                                | Status       | Notes                                       |
-| --- | --------------------------------------------------------- | ------------ | ------------------------------------------- |
-| A6  | `targetProfit` may decrease (or adjust within mode rules) | **proposed** | Primary knob for "500k budget" scenario     |
-| A7  | `rounds` may decrease                                     | **proposed** | Shorter plan → lower bankroll               |
-| A8  | `targetProfit` may not increase beyond user's stated goal | **proposed** | Optimization is feasibility help, not greed |
+> _With current conditions, what is the best plan?_
 
-### Explicitly rejected for v1
+Not:
 
-| ID  | Assumption                                 | Status                                                                                                                                  |
-| --- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| A9  | Optimization may change `rewardMultiplier` | **rejected** (pending maintainer) — if multiplier is user-selectable from {x10,x20,x30}, revisit as **accepted** with discrete set only |
-| A10 | Optimization may modify solver internals   | **rejected**                                                                                                                            |
-| A11 | Optimization may call non-public Core APIs | **rejected**                                                                                                                            |
+> _Change the rules of the game._
+
+If the UI offers a dropdown (x10 / x20 / x30), that creates a **new `CalculationRequest`** — it is **not** Optimization changing multiplier within a session.
 
 ---
 
-## Critical open decision: multiplier
+### A2 — MinimumBet (fixed)
 
-> If `rewardMultiplier` is a **game constant** → **A1 accepted, A9 rejected**.  
-> If `rewardMultiplier` is a **user dropdown** (x10 / x20 / x30) → Optimization may search that **finite set**; update A1/A9 accordingly.
+**Status:** ✅ Accepted
 
-**This is a product/domain decision, not a technical one.**
+`minimumBet` is **fixed**. Optimization must not propose increasing minimum bet (e.g. 10k → 20k) unless the user creates a new request with a different minimum bet.
+
+---
+
+### A3 — BetStep (fixed)
+
+**Status:** ✅ Accepted
+
+`betStep` is **fixed**. Optimization must not change it.
+
+---
+
+### A4 — RoundCount (conditionally optimizable)
+
+**Status:** ✅ Accepted
+
+Optimization **may** propose reducing round count (e.g. 50 → 32) **only if** the caller enables `allowRoundReduction`.
+
+If not enabled: round count is **fixed** for that optimization run.
+
+Direction: **decrease only** (see A12 monotonic search).
+
+---
+
+### A5 — TargetProfit (optimizable)
+
+**Status:** ✅ Accepted
+
+`targetProfit` is the **primary optimization knob**.
+
+Optimization may propose reductions (e.g. 100k → 90k) to improve feasibility or meet bankroll limits.
+
+Must not increase profit beyond the user's stated goal (feasibility help, not greed).
+
+Direction: **decrease only** unless a future RFC defines otherwise (see A12).
+
+---
+
+### A6 — RequiredBankroll (objective, not variable)
+
+**Status:** ✅ Accepted
+
+`requiredBankroll` is **not an input** and **not directly optimizable**.
+
+It is a **derived objective metric** (from solver / statistics). Optimization minimizes or constrains it indirectly by changing allowed knobs.
+
+---
+
+### A7 — Solver (compose only)
+
+**Status:** ✅ Accepted
+
+Optimization **MUST NOT** change the solver algorithm or its objective (min Σ bet).
+
+It may only **compose** the public `solve()` capability.
+
+---
+
+### A8 — Simulation (read-only evaluator)
+
+**Status:** ✅ Accepted
+
+Simulation is a **read-only evaluator**. Optimization may call `simulateWinAtRound`.
+
+Simulation **must not** call Optimization. The existing DAG is preserved:
+
+```text
+Optimization → Core SDK (including Simulation)
+```
+
+Not the reverse.
+
+---
+
+### A9 — Strategy (no mutation)
+
+**Status:** ✅ Accepted
+
+Optimization does not mutate `Strategy`. Flow:
+
+```text
+request → solve → buildStrategy → strategy
+```
+
+A different strategy requires a **different request** through the pipeline — not in-place mutation.
+
+---
+
+### A10 — Statistics (read-only)
+
+**Status:** ✅ Accepted
+
+`buildStatistics` output is **read-only** for Optimization. No mutation of statistics objects to fake feasibility.
+
+---
+
+### A11 — Public API only
+
+**Status:** ✅ Accepted
+
+Optimization uses only:
+
+```text
+validateCalculationRequest
+solve
+buildStrategy
+buildStatistics
+simulateWinAtRound
+```
+
+Forbidden:
+
+```text
+import "@/core/..."
+```
+
+Deep imports and private Core surfaces are out of scope.
+
+---
+
+### A12 — Monotonic search
+
+**Status:** ✅ Accepted
+
+Optimization v1 must use **monotonic search** on each optimizable knob:
+
+```text
+targetProfit:  100k → 95k → 90k → …   (allowed)
+               100k → 20k → 80k → 30k   (forbidden — non-monotonic jumps)
+```
+
+Each knob changes only in the **declared direction** (e.g. profit ↓, rounds ↓).
+
+Non-monotonic heuristics require a **new RFC** — not v1.
+
+---
+
+## Additional fixed constraints
+
+| ID  | Assumption                                   | Status                                  |
+| --- | -------------------------------------------- | --------------------------------------- |
+| —   | Validation rules and phases fixed            | ✅ Accepted                             |
+| —   | `profitMode` fixed per request               | ✅ Accepted — mode change = new request |
+| —   | Changing `rewardMultiplier` via Optimization | ❌ Rejected                             |
 
 ---
 
 ## Dependency rule
 
-RFC-003 (Domain) may only list knobs that are **accepted** as user-adjustable here.  
-RFC-005 (Request) mirrors this table — no new knobs without new assumption ID.
+- RFC-003 (Domain) lists only **optimizable** parameters from the classification table.
+- RFC-005 (Request) exposes flags matching A4 (`allowRoundReduction`) and objectives matching A6.
+- No new knob without a new assumption ID + maintainer approval.
 
 ---
 
 ## Maintainer checklist
 
-- [ ] Classify each `CalculationRequest` field: fixed | adjustable | forbidden
-- [ ] Resolve multiplier (A1 vs A9)
-- [ ] Resolve minimumBet (A4)
-- [ ] Resolve profitMode (A5)
-- [ ] Sign off before RFC-003 review
+- [x] Classify each parameter — see classification table
+- [x] `rewardMultiplier` = fixed (A1)
+- [x] `minimumBet` = fixed (A2)
+- [x] `betStep` = fixed (A3)
+- [x] `targetProfit` = optimizable (A5)
+- [x] `roundCount` = conditionally optimizable (A4)
+- [x] A12 monotonic search
+- [x] Domain boundary locked → **RFC-003 ready for review**
 
 ---
 
