@@ -1,16 +1,16 @@
 # RFC-004 — Optimization Mathematical Model
 
-**Status:** Draft — **ready for maintainer review** (RFC-003 accepted)  
+**Status:** ✅ **Accepted** (maintainer, 2026-06-25)  
 **Prerequisite:** [RFC-003 Domain](RFC-003-domain.md) ✅  
-**Next:** [RFC-005 Request](RFC-005-request.md)
+**Next:** [RFC-005 Request](RFC-005-request.md) — ready for final review
 
 ---
 
 ## Purpose
 
-Formalize **Minimal Change Optimization** — distance from user intent under hard constraints — without changing the Core solver.
+Formalize **Minimal Change Optimization** — asymmetric distance from user intent, lexicographic order, nested search — without changing the Core solver.
 
-RFC-003 defines the product goal. This RFC makes it precise.
+RFC-003 defines the product goal. This RFC is the mathematical contract for Sprint 3.5 verification.
 
 ---
 
@@ -25,137 +25,243 @@ Optimization **does not** replace or extend this objective.
 
 ---
 
-## Problem statement (v1)
+## Search space (v1)
 
-Given:
+Optimization searches **only**:
 
-- `I₀` — original request (user intent)
-- `C` — hard constraints (e.g. `bankroll(I) ≤ B_max`)
-- `S` — search space from RFC-002 (allowed knobs, monotonic directions)
+| Dimension | Field                               |
+| --------- | ----------------------------------- |
+| Profit    | `targetProfit`                      |
+| Rounds    | `rounds` (if `allowRoundReduction`) |
 
-Find:
-
-```text
-I* = argmin_{I ∈ F} distance(I₀, I)
-```
-
-where:
-
-```text
-F = { I ∈ N(I₀, S) : validate(I) ok ∧ solve(I) ok ∧ C satisfied }
-```
-
-`N(I₀, S)` = candidates reachable by monotonic knob changes (RFC-002 A12).
-
-If `F = ∅` → Optimization failure (`No feasible solution`).
+**Not searched** (RFC-002): `rewardMultiplier`, `minimumBet`, `betStep`, `profitMode`.
 
 ---
 
-## Distance function (v1)
-
-For candidates where only **decrease** is allowed on optimizable fields:
+## Feasibility
 
 ```text
-profit_loss(I₀, I) = targetProfit(I₀) − targetProfit(I)   (≥ 0)
-round_loss(I₀, I)    = rounds(I₀) − rounds(I)               (≥ 0)
+feasible(I, B_max) ≡
+  validateCalculationRequest(I) succeeds
+  ∧ solve(I) succeeds
+  ∧ requiredBankroll(I) ≤ B_max
 ```
 
-Combined distance vector:
+`F` = feasible set over candidates in `N(I₀, S)`:
 
 ```text
-d(I₀, I) = (profit_loss, round_loss)
+F = { I ∈ N(I₀, S) : feasible(I, B_max) }
 ```
 
-**No weighted sum in v1.**
+If `F = ∅` → Optimization failure (`NO_FEASIBLE_SOLUTION`).
+
+---
+
+## Asymmetric distance (v1)
+
+Distance is **not** symmetric absolute difference. Higher profit than intent is not penalized.
+
+### profit_loss
+
+```text
+profit_loss(I₀, I) = max(0, targetProfit(I₀) − targetProfit(I))
+```
+
+| Original | Candidate | profit_loss     |
+| -------- | --------- | --------------- |
+| 100k     | 95k       | 5k              |
+| 100k     | 120k      | **0** (not 20k) |
+
+### round_loss
+
+RFC-002 forbids increasing rounds. Candidates satisfy `rounds(I) ≤ rounds(I₀)`.
+
+```text
+round_loss(I₀, I) = rounds(I₀) − rounds(I)    (≥ 0 when candidate ≤ original)
+```
+
+| Original | Candidate | round_loss                              |
+| -------- | --------- | --------------------------------------- |
+| 50       | 48        | 2                                       |
+| 50       | 52        | **invalid candidate** (excluded from N) |
+
+### Distance vector
+
+```text
+d(I₀, I) = (profit_loss(I₀, I), round_loss(I₀, I))
+```
+
+**Not** a scalar. **Not** a weighted sum.
 
 ---
 
 ## Lexicographic order
 
-Compare candidates `Iₐ`, `Iᵦ` by:
-
-1. Minimize `profit_loss` — **Priority 1: preserve profit**
-2. If tie, minimize `round_loss` — **Priority 2: preserve rounds**
+Candidates are compared by **lexicographic order** on `(profit_loss, round_loss)`:
 
 ```text
 Iₐ ≺ Iᵦ  iff
   profit_loss(I₀, Iₐ) < profit_loss(I₀, Iᵦ)
-  ∨ (profit_loss equal ∧ round_loss(I₀, Iₐ) < round_loss(I₀, Iᵦ))
+  ∨ (profit_loss(I₀, Iₐ) = profit_loss(I₀, Iᵦ)
+     ∧ round_loss(I₀, Iₐ) < round_loss(I₀, Iᵦ))
 ```
 
-### Ruled example (from RFC-003)
+Lower vector is better (closer to user intent).
 
-|              | profit_loss | round_loss |
+### Ruled example (RFC-003)
+
+| Candidate    | profit_loss | round_loss |
 | ------------ | ----------- | ---------- |
 | A: 95k, 50r  | 5_000       | 0          |
 | B: 100k, 30r | 0           | 20         |
 
-`B ≺ A` — profit_loss 0 < 5_000.
+`B ≺ A` — compare first component: 0 < 5_000.
 
 ---
 
-## Minimal Change Principle (formal)
+## Minimal feasible request (definition)
 
-Among all `I ∈ F` that are optimal under `≺`, prefer the candidate that modifies the **fewest** knobs, then the **smallest** monotonic steps.
+A request `I'` is a **minimal feasible request** (with respect to `I₀`, `B_max`, `S`) iff:
 
-Implementation strategy (informative, not normative for v1):
+1. `feasible(I', B_max)`
+2. There is no `J ∈ N(I₀, S)` such that `feasible(J, B_max)` and `J ≺ I'`
 
-1. Search profit reductions only until feasible or exhausted
-2. Only if `allowRoundReduction` and profit-only search fails, introduce round reduction
-3. Never adjust both knobs when one suffices
+Equivalently: `I'` is **lexicographically optimal** in `F`.
 
-Exact algorithm → Sprint 3.3; this RFC defines **what** correct means.
+This is a **mathematical definition**, not an algorithm.
+
+---
+
+## Nested search (normative v1 algorithm)
+
+Search is **nested**, not a heuristic blend of knobs.
+
+```text
+profit ← targetProfit(I₀)
+
+while profit ≥ profit_min:
+  I ← copy(I₀) with targetProfit = profit
+  if feasible(I, B_max):
+    return I
+  profit ← profit − profitGranularity
+
+if allowRoundReduction:
+  rounds ← rounds(I₀)
+  while rounds ≥ rounds_min:
+    profit ← targetProfit(I₀)
+    while profit ≥ profit_min:
+      I ← copy(I₀) with targetProfit = profit, rounds = rounds
+      if feasible(I, B_max):
+        return I
+      profit ← profit − profitGranularity
+    rounds ← rounds − 1
+
+return NO_FEASIBLE_SOLUTION
+```
+
+**Order:** exhaust profit reductions at fixed rounds **before** decrementing rounds.
+
+This implements Minimal Change: profit-only adjustment is tried before touching rounds.
+
+---
+
+## ProfitGranularity
+
+Profit step size is **not** `betStep`. Bet step governs **bets**; profit granularity governs **domain search**.
+
+```text
+profitGranularity : positive integer   (e.g. 1000)
+```
+
+Declared on `OptimizationRequest` (RFC-005). Independent of solver internals.
+
+Example: 100k → 99k → 98k … with `profitGranularity = 1000`.
+
+---
+
+## Optimization stability (determinism)
+
+```text
+∀ input X: optimize(X) = optimize(X)
+```
+
+Optimization **must be deterministic**. No random tie-breaking.
+
+Same `OptimizationRequest` → same `OptimizationResult` on every run.
+
+---
+
+## Tie-breaking
+
+When two candidates have **identical** `d(I₀, I)` (e.g. same profit and rounds but different internal strategy paths):
+
+1. Core **Solver is deterministic** → same request yields same strategy
+2. If multiple requests tie on distance, **first feasible wins** in nested search iteration order (highest profit, then highest rounds attempted first)
+
+No random selection. Document iteration order in implementation; property tests verify stability.
+
+---
+
+## Monotonicity property
+
+For fixed `I₀` and `S`, let `optimize(B_max)` return successful candidate `I*` (or failure).
+
+```text
+If B₁ > B₂  then  targetProfit(I*₁) ≥ targetProfit(I*₂)
+```
+
+Lowering `bankrollLimit` must not **increase** the recommended profit relative to a looser limit.
+
+**Property-based test candidate** for Sprint 3.5.
+
+(Intuition: tighter budget cannot justify a higher profit target in the minimal-change feasible solution.)
 
 ---
 
 ## Hard constraints (v1)
 
 ```text
-requiredBankroll(I) ≤ B_max    (from buildStatistics / solver output)
+requiredBankroll(I) ≤ B_max
 ```
 
-`requiredBankroll` is **evaluated**, not optimized directly (RFC-002 A6).
+`requiredBankroll` is **evaluated** via Core pipeline — not optimized directly (RFC-002 A6).
 
 ---
 
-## Pipeline (unchanged)
+## Pipeline
 
 ```text
 pipeline(I) = validateCalculationRequest → solve → buildStrategy → buildStatistics
 ```
 
-Optional: `simulateWinAtRound` for explanation enrichment — read-only (RFC-002 A8).
+`simulateWinAtRound` optional for explanation — read-only (RFC-002 A8).
 
 ---
 
 ## Correctness properties (Sprint 3.5)
 
-- [ ] `I* ∈ F` when success
-- [ ] No `I' ∈ F` with `I' ≺ I*` (lexicographic optimality)
-- [ ] Minimal Change: no success result where a single-knob feasible neighbor is strictly closer
-- [ ] Monotonic search per RFC-002 A12
-- [ ] Search terminates under declared bounds
+- [ ] Success result `I* ∈ F`
+- [ ] No `J ∈ F` with `J ≺ I*` (minimal feasible request)
+- [ ] Nested search order matches normative algorithm
+- [ ] `profit_loss` asymmetric; `round_loss` only for `rounds ≤ original`
+- [ ] Optimization stability (determinism)
+- [ ] Monotonicity w.r.t. `bankrollLimit`
+- [ ] RFC-002 A12 monotonic steps on each knob
+- [ ] Search terminates (`profit_min`, `rounds_min` bounds)
 
 ---
 
 ## Non-goals
 
-- Pareto / multi-objective optimality
-- Weighted distance
-- Global optimum over continuous space
+- Weighted distance / scalarization
+- Pareto optimality
+- Continuous profit space
 - Extending `solve()` proof
-
----
-
-## Open questions (RFC-004)
-
-- [ ] Profit decrement step size (discrete granularity)
-- [ ] Max pipeline evaluations per request
-- [ ] Tie-breaking when `d` identical (same vector) — rare with integer steps
 
 ---
 
 ## References
 
+- [RFC-002 Assumptions](RFC-002-assumptions.md)
 - [RFC-003 Domain](RFC-003-domain.md)
 - [RFC-005 Request](RFC-005-request.md)

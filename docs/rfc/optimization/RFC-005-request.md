@@ -1,8 +1,8 @@
 # RFC-005 — Optimization Request & Result
 
-**Status:** Draft — **ready for maintainer review** (RFC-003 accepted)  
-**Prerequisite:** RFC-002 ✅, RFC-003 ✅, RFC-004 (review)  
-**Note:** Types project domain rules — not the source of truth.
+**Status:** Draft — **ready for final maintainer review** (RFC-004 accepted)  
+**Prerequisite:** RFC-002 ✅, RFC-003 ✅, RFC-004 ✅  
+**Note:** Types are a projection of RFC-002–004 — not the source of truth.
 
 ---
 
@@ -21,26 +21,30 @@ interface OptimizationRequest {
   /** Original request — user intent (RFC-003) */
   intent: CalculationRequest;
 
-  /** Hard constraints — e.g. bankroll ceiling */
+  /** Hard constraints */
   constraints: OptimizationConstraints;
 
-  /** Which knobs may change (RFC-002) */
+  /** Search knobs (RFC-002) */
   searchSpace: OptimizationSearchSpace;
+
+  /**
+   * Profit search step — domain policy, NOT betStep (RFC-004).
+   * Example: 1000
+   */
+  profitGranularity: number;
 }
 
 interface OptimizationConstraints {
-  /** Primary v1 constraint */
   bankrollLimit: number;
 }
 
 interface OptimizationSearchSpace {
   /** Round reduction allowed (RFC-002 A4) */
   allowRoundReduction?: boolean;
-  /** Profit may decrease (RFC-002 A5) — default true when optimizing */
 }
 ```
 
-No `objective` enum for v1 — objective is fixed: **closest feasible to intent** (RFC-003).
+v1 objective is implicit: **minimal feasible request** (RFC-003 / RFC-004).
 
 ---
 
@@ -64,14 +68,25 @@ interface OptimizationFailure {
 }
 
 interface OptimizationExplanation {
-  /** Human-readable — required for UI (RFC-003) */
   summary: string;
-  /** Optional structured detail */
   details?: string[];
 }
 ```
 
-**Rejected for v1:** `alternatives[]`, `partial`, ranked lists, Pareto sets.
+**v1:** one result only — no alternatives, Pareto, or ranked lists.
+
+---
+
+## Mapping to mathematical model
+
+| Request field                     | RFC                                    |
+| --------------------------------- | -------------------------------------- |
+| `intent`                          | `I₀` — user intent                     |
+| `constraints.bankrollLimit`       | `B_max`                                |
+| `searchSpace.allowRoundReduction` | enables round dimension in `N`         |
+| `profitGranularity`               | profit decrement step in nested search |
+| Success `request`                 | minimal feasible `I*`                  |
+| `explanation`                     | RFC-003 OptimizationExplanation        |
 
 ---
 
@@ -91,25 +106,31 @@ No feasible plan found within search limits.
 
 ---
 
-## Pipeline
+## Pipeline (summary)
 
 ```text
 OptimizationRequest
-  → generate candidates ∈ N(intent, searchSpace) monotonically
+  → nested search (RFC-004 normative algorithm)
   → Core public API per candidate
-  → filter by constraints.bankrollLimit
-  → select I* by lexicographic distance (RFC-004)
-  → build explanation
-  → OptimizationResult (one answer or failure)
+  → minimal feasible I* or failure
+  → OptimizationResult
 ```
 
 ---
 
-## Open questions
+## Open questions (RFC-005)
 
-- [ ] Error code catalog beyond `NO_FEASIBLE_SOLUTION`?
+- [ ] `profit_min` / `rounds_min` — derived from validation rules or explicit fields?
 - [ ] Module path: `src/optimization/`?
-- [ ] SemVer for Optimization module vs Core?
+- [ ] Error code catalog beyond `NO_FEASIBLE_SOLUTION`?
+
+---
+
+## Maintainer checklist
+
+- [ ] Request fields cover RFC-004 (incl. `profitGranularity`)
+- [ ] Result shape matches RFC-003 (one answer + explanation)
+- [ ] Ready to freeze → Sprint 3 implementation gate
 
 ---
 
