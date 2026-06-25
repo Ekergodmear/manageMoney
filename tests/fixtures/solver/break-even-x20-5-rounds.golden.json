@@ -1,0 +1,46 @@
+{
+  "name": "break-even-x20-5",
+  "request": {
+    "rewardMultiplier": 20,
+    "roundCount": 5,
+    "minimumBet": 10000,
+    "betStep": 1000,
+    "targetProfit": {
+      "mode": "breakEven"
+    }
+  },
+  "strategy": {
+    "rounds": [
+      {
+        "index": 1,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 10000
+      },
+      {
+        "index": 2,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 20000
+      },
+      {
+        "index": 3,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 30000
+      },
+      {
+        "index": 4,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 40000
+      },
+      {
+        "index": 5,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 50000
+      }
+    ]
+  }
+}

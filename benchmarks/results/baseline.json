@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 2,
+  "sdkVersion": "0.2.0",
+  "benchmarkRunnerVersion": "1.0.0",
+  "gitCommitSha": null,
+  "measuredAt": "2026-06-25T08:56:11.550Z",
+  "label": "baseline",
+  "nodeVersion": "v24.11.1",
+  "platform": "win32",
+  "arch": "x64",
+  "cpu": "AMD Ryzen 7 5800H with Radeon Graphics",
+  "profiles": ["small", "medium", "large", "stress"],
+  "results": {
+    "latency": [
+      {
+        "capability": "validateCalculationRequest",
+        "scenario": "small",
+        "roundCount": 5,
+        "iterations": 50000,
+        "latencyUsPerOp": 0.3819220000000007,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "solve",
+        "scenario": "small",
+        "roundCount": 5,
+        "iterations": 50000,
+        "latencyUsPerOp": 0.17013999999999896,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "buildStrategy",
+        "scenario": "small",
+        "roundCount": 5,
+        "iterations": 50000,
+        "latencyUsPerOp": 0.009650000000000318,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "buildStatistics",
+        "scenario": "small",
+        "roundCount": 5,
+        "iterations": 50000,
+        "latencyUsPerOp": 0.04811399999999935,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "simulateWinAtRound",
+        "scenario": "small",
+        "roundCount": 5,
+        "iterations": 50000,
+        "latencyUsPerOp": 0.12212199999999938,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "validateCalculationRequest",
+        "scenario": "medium",
+        "roundCount": 50,
+        "iterations": 5000,
+        "latencyUsPerOp": 0.1988200000000006,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "solve",
+        "scenario": "medium",
+        "roundCount": 50,
+        "iterations": 5000,
+        "latencyUsPerOp": 0.9613599999999906,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "buildStrategy",
+        "scenario": "medium",
+        "roundCount": 50,
+        "iterations": 5000,
+        "latencyUsPerOp": 0.0216199999999958,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "buildStatistics",
+        "scenario": "medium",
+        "roundCount": 50,
+        "iterations": 5000,
+        "latencyUsPerOp": 0.07264000000000125,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "simulateWinAtRound",
+        "scenario": "medium",
+        "roundCount": 50,
+        "iterations": 5000,
+        "latencyUsPerOp": 0.9158599999999978,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "validateCalculationRequest",
+        "scenario": "large",
+        "roundCount": 500,
+        "iterations": 500,
+        "latencyUsPerOp": 0.19040000000006785,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "solve",
+        "scenario": "large",
+        "roundCount": 500,
+        "iterations": 500,
+        "latencyUsPerOp": 11.05880000000002,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "buildStrategy",
+        "scenario": "large",
+        "roundCount": 500,
+        "iterations": 500,
+        "latencyUsPerOp": 0.012600000000020373,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "buildStatistics",
+        "scenario": "large",
+        "roundCount": 500,
+        "iterations": 500,
+        "latencyUsPerOp": 1.3075999999999794,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "simulateWinAtRound",
+        "scenario": "large",
+        "roundCount": 500,
+        "iterations": 500,
+        "latencyUsPerOp": 9.089200000000005,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "validateCalculationRequest",
+        "scenario": "stress",
+        "roundCount": 5000,
+        "iterations": 50,
+        "latencyUsPerOp": 0.22000000000048203,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "solve",
+        "scenario": "stress",
+        "roundCount": 5000,
+        "iterations": 50,
+        "latencyUsPerOp": 125.88999999999942,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "buildStrategy",
+        "scenario": "stress",
+        "roundCount": 5000,
+        "iterations": 50,
+        "latencyUsPerOp": 0.013999999999896318,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "buildStatistics",
+        "scenario": "stress",
+        "roundCount": 5000,
+        "iterations": 50,
+        "latencyUsPerOp": 6.753999999999678,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "simulateWinAtRound",
+        "scenario": "stress",
+        "roundCount": 5000,
+        "iterations": 50,
+        "latencyUsPerOp": 158.67799999999988,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "pipeline",
+        "scenario": "small",
+        "roundCount": 5,
+        "iterations": 50000,
+        "latencyUsPerOp": 0.4879880000000003,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "pipeline",
+        "scenario": "medium",
+        "roundCount": 50,
+        "iterations": 5000,
+        "latencyUsPerOp": 2.2472399999999992,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "pipeline",
+        "scenario": "large",
+        "roundCount": 500,
+        "iterations": 500,
+        "latencyUsPerOp": 20.811399999999935,
+        "unit": "µs/op"
+      },
+      {
+        "capability": "pipeline",
+        "scenario": "stress",
+        "roundCount": 5000,
+        "iterations": 50,
+        "latencyUsPerOp": 250.53999999999976,
+        "unit": "µs/op"
+      }
+    ]
+  },
+  "notes": [
+    "Latency only — memory profiling deferred.",
+    "Public API only — benchmarks do not prove algorithmic correctness.",
+    "Absolute µs/op is environment-specific; see benchmarks/BASELINE.md."
+  ]
+}

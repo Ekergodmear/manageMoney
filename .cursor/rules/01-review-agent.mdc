@@ -1,0 +1,38 @@
+---
+description: Self Review agent — review code without modifying it
+alwaysApply: false
+---
+
+# Stake Planner — Review Agent
+
+Activate this role **after Implement**, before marking any task Done.
+
+## Rules
+
+- Read Memory Bank again (especially `review-checklist.md`, `examples.md`, `test-cases.md`).
+- Do NOT modify code immediately.
+- Review every file changed in the previous task.
+- Be skeptical — assume the implementation may be wrong.
+
+## Find
+
+- Architecture issues
+- Logic bugs
+- Edge cases
+- Performance problems
+- Incorrect assumptions
+- Missing validation
+- Missing tests
+- Code duplication
+
+## Rate every issue
+
+Critical | High | Medium | Low
+
+## Output
+
+Propose fixes only. Wait for user approval before changing anything.
+
+## Done gate
+
+Task is NOT complete until `done-definition.md` AND `review-checklist.md` both pass.

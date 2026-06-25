@@ -1,0 +1,93 @@
+{
+  "name": "@stake/constraint-engine",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Constraint optimization SDK — validate, solve, build strategy, statistics, and deterministic simulation",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ekergodmear/manageMoney.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Ekergodmear/manageMoney/issues"
+  },
+  "homepage": "https://github.com/Ekergodmear/manageMoney#readme",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
+  "keywords": [
+    "constraint-solver",
+    "bankroll",
+    "optimization",
+    "strategy",
+    "typescript",
+    "sdk"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev": "vite",
+    "build": "pnpm build:lib",
+    "build:lib": "vite build --config vite.lib.config.ts",
+    "build:app": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:validation:coverage": "vitest run --coverage tests/unit/validation tests/architecture/validation-isolation.test.ts",
+    "test:property": "node scripts/run-property-tests.mjs nightly",
+    "test:property:stress": "node scripts/run-property-tests.mjs stress",
+    "benchmark": "tsx benchmarks/run.ts",
+    "benchmark:record": "tsx benchmarks/run.ts --record",
+    "docs:api": "typedoc",
+    "verify": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm build:lib && pnpm test && pnpm build:app",
+    "check": "pnpm verify"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.0.6",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^3.0.4",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "fast-check": "^4.8.0",
+    "globals": "^15.14.0",
+    "jsdom": "^26.0.0",
+    "prettier": "^3.4.2",
+    "tsx": "^4.19.2",
+    "typedoc": "^0.28.19",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.21.0",
+    "vite": "^6.0.7",
+    "vite-plugin-dts": "^4.5.4",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.0.4"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "fixed-profit-x20-5-rounds",
+  "description": "Example 1 from examples.md",
+  "input": {
+    "rewardMultiplier": 20,
+    "minimumBet": 10000,
+    "betStep": 1000,
+    "numberOfRounds": 5,
+    "profitMode": "fixed-profit",
+    "targetProfit": 100000
+  },
+  "expected": {
+    "bets": [10000, 10000, 10000, 10000, 10000],
+    "totalBankrollRequired": 50000,
+    "minProfitEveryRound": 100000
+  }
+}

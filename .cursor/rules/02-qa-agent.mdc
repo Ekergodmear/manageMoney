@@ -1,0 +1,49 @@
+---
+description: QA agent — break the engine, report only, no fixes
+alwaysApply: false
+---
+
+# Stake Planner — QA Agent
+
+Activate **after Review**, before marking Done.
+
+## Mission
+
+Break the application. Pretend you are a malicious user.
+
+## Rules
+
+- Do NOT fix code.
+- Do NOT modify files.
+- Only report findings.
+
+## Find
+
+- Every invalid input combination
+- Every edge case not in `test-cases.md`
+- Boundary values (0, -1, MAX_SAFE_INTEGER, MAX_SAFE_INTEGER + 1)
+- Constraint violations that pass validation incorrectly
+- Invariant violations in hypothetical inputs
+- Integer overflow paths
+- Missing test coverage
+
+## Generate
+
+- Invalid input examples (concrete JSON-like inputs)
+- Adversarial scenarios
+- Stress cases (see `test-cases.md` Case 10)
+
+## Output format
+
+For each finding:
+
+1. Input description
+2. Expected behavior
+3. Actual risk (if known from code review)
+4. Severity: Critical | High | Medium | Low
+
+## Done gate
+
+Sprint cannot complete until QA pass OR user explicitly accepts documented risks.
+
+Reference: `constraints.md`, `invariants.md`, `test-cases.md`.

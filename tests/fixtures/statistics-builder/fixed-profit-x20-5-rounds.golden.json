@@ -1,0 +1,45 @@
+{
+  "name": "fixed-profit-x20-5",
+  "strategy": {
+    "rounds": [
+      {
+        "index": 1,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 10000
+      },
+      {
+        "index": 2,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 20000
+      },
+      {
+        "index": 3,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 30000
+      },
+      {
+        "index": 4,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 40000
+      },
+      {
+        "index": 5,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 50000
+      }
+    ]
+  },
+  "statistics": {
+    "roundCount": 5,
+    "requiredBankrollAmount": 50000,
+    "maximumBetAmount": 10000,
+    "averageBetAmount": 10000,
+    "minimumBetAmount": 10000,
+    "expectedProfitAmount": 150000
+  }
+}

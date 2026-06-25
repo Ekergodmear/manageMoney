@@ -1,0 +1,17 @@
+{
+  "name": "min-bet-equals-step",
+  "description": "Case 3 / Example 3 from examples.md",
+  "input": {
+    "rewardMultiplier": 20,
+    "minimumBet": 5000,
+    "betStep": 5000,
+    "numberOfRounds": 3,
+    "profitMode": "fixed-profit",
+    "targetProfit": 100000
+  },
+  "expected": {
+    "bets": [5000, 10000, 10000],
+    "spent": [5000, 15000, 25000],
+    "profits": [95000, 185000, 175000]
+  }
+}

@@ -1,0 +1,26 @@
+---
+description: Session discipline — Global Memory + current spec only
+alwaysApply: true
+---
+
+# Stake Planner — Session Rules
+
+**Doc freeze active.** Do not edit frozen docs (architecture, contracts, roadmap, decisions).
+
+Read `session-start.md` — **Global Memory + current `specs/00X-*/` ONLY.**
+
+Do not read entire Memory Bank. Do not read future specs.
+
+Never implement outside `current-task.md` and current spec.
+
+## Workflow
+
+```
+Architect → Developer → Reviewer → QA → Release Manager → Done
+```
+
+Wait for **Approved** before code.
+
+One sprint = one commit. Update only: progress, current-task, CHANGELOG, TASKS.
+
+Do not auto-continue to next sprint.

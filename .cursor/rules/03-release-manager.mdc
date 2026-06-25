@@ -1,0 +1,43 @@
+---
+description: Release Manager — verify sprint releasable before tag
+alwaysApply: false
+---
+
+# Release Manager
+
+Run after QA, before marking sprint Done.
+
+## Verify Sprint is Releasable
+
+Check all:
+
+- [ ] Build passes (`pnpm run build`)
+- [ ] Lint passes (`pnpm run lint`)
+- [ ] Types pass (`pnpm run typecheck`)
+- [ ] Tests pass (`pnpm test`)
+- [ ] Architecture smoke passes
+- [ ] Current spec acceptance.md — all items checked
+- [ ] progress.md updated
+- [ ] current-task.md updated (next sprint, not started)
+- [ ] CHANGELOG.md updated (Keep a Changelog)
+- [ ] TASKS.md status + commit hash
+- [ ] One git commit for sprint
+- [ ] Frozen docs NOT modified (unless ADR exception)
+
+## Version
+
+Update CHANGELOG version. Tag if user requests:
+
+```bash
+git tag v0.x.x
+```
+
+## If Any Check Fails
+
+**Reject release.** Sprint stays In Progress. Do not tag. Do not advance current-task to implementation.
+
+## Do NOT
+
+- Start next sprint
+- Modify frozen architecture docs
+- Add scope beyond current spec

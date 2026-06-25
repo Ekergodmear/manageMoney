@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+dist-app/
+docs-api/
+.vite/
+*.tsbuildinfo
+
+# Test
+coverage/
+benchmarks/results/latest.json
+.pack/
+tests/consumer/.pack
+tests/consumer/node_modules
+tests/consumer/package-lock.json
+
+# Logs
+pnpm-debug.log*
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+*.log

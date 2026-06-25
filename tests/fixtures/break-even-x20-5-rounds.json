@@ -1,0 +1,17 @@
+{
+  "name": "break-even-x20-5-rounds",
+  "description": "Example 4 from examples.md",
+  "input": {
+    "rewardMultiplier": 20,
+    "minimumBet": 10000,
+    "betStep": 1000,
+    "numberOfRounds": 5,
+    "profitMode": "break-even",
+    "targetProfit": 0
+  },
+  "expected": {
+    "bets": [10000, 10000, 10000, 10000, 10000],
+    "totalBankrollRequired": 50000,
+    "minProfitEveryRound": 0
+  }
+}

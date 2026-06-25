@@ -1,0 +1,51 @@
+{
+  "name": "fixed-profit-win-at-1",
+  "strategy": {
+    "rounds": [
+      {
+        "index": 1,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 10000
+      },
+      {
+        "index": 2,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 20000
+      },
+      {
+        "index": 3,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 30000
+      }
+    ]
+  },
+  "winAtRound": 1,
+  "simulation": {
+    "winningRoundIndex": 1,
+    "profitAmount": 190000,
+    "requiredBankrollAmount": 10000,
+    "rounds": [
+      {
+        "index": 1,
+        "result": "Win",
+        "betAmount": 10000,
+        "accumulatedSpent": 10000
+      },
+      {
+        "index": 2,
+        "result": "NotPlayed",
+        "betAmount": 10000,
+        "accumulatedSpent": 20000
+      },
+      {
+        "index": 3,
+        "result": "NotPlayed",
+        "betAmount": 10000,
+        "accumulatedSpent": 30000
+      }
+    ]
+  }
+}

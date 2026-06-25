@@ -1,0 +1,35 @@
+{
+  "name": "percentage-x20-3",
+  "request": {
+    "rewardMultiplier": 20,
+    "roundCount": 3,
+    "minimumBet": 10000,
+    "betStep": 1000,
+    "targetProfit": {
+      "mode": "percentage",
+      "percentage": 10
+    }
+  },
+  "strategy": {
+    "rounds": [
+      {
+        "index": 1,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 10000
+      },
+      {
+        "index": 2,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 20000
+      },
+      {
+        "index": 3,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 30000
+      }
+    ]
+  }
+}

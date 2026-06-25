@@ -1,0 +1,45 @@
+{
+  "name": "percentage-x20-3",
+  "rounds": [
+    {
+      "index": 1,
+      "betAmount": 10000,
+      "rewardAmount": 200000,
+      "accumulatedSpent": 10000
+    },
+    {
+      "index": 2,
+      "betAmount": 10000,
+      "rewardAmount": 200000,
+      "accumulatedSpent": 20000
+    },
+    {
+      "index": 3,
+      "betAmount": 10000,
+      "rewardAmount": 200000,
+      "accumulatedSpent": 30000
+    }
+  ],
+  "strategy": {
+    "rounds": [
+      {
+        "index": 1,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 10000
+      },
+      {
+        "index": 2,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 20000
+      },
+      {
+        "index": 3,
+        "betAmount": 10000,
+        "rewardAmount": 200000,
+        "accumulatedSpent": 30000
+      }
+    ]
+  }
+}

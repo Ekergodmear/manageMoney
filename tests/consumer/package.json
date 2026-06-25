@@ -1,0 +1,8 @@
+{
+  "name": "constraint-engine-consumer-smoke",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@stake/constraint-engine": "file:.pack/stake-constraint-engine-0.2.0.tgz"
+  }
+}

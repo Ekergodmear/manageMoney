@@ -1,0 +1,17 @@
+{
+  "name": "break-even-x40-100-rounds",
+  "description": "Case 2 from test-cases.md",
+  "input": {
+    "rewardMultiplier": 40,
+    "minimumBet": 10000,
+    "betStep": 10000,
+    "numberOfRounds": 100,
+    "profitMode": "break-even",
+    "targetProfit": 0
+  },
+  "expected": {
+    "roundCount": 100,
+    "minProfitEveryRound": 0,
+    "allBetsMultipleOf": 10000
+  }
+}

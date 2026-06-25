@@ -1,0 +1,12 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/public/index.ts"],
+  "out": "docs-api",
+  "readme": "none",
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "excludeExternals": true,
+  "sort": ["source-order"],
+  "kindSortOrder": ["Function", "Variable", "TypeAlias", "Interface", "Class"],
+  "name": "@stake/constraint-engine API"
+}
