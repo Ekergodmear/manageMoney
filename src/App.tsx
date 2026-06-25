@@ -48,20 +48,47 @@ const DEFAULT_FORM: FormValues = {
   userBankroll: '',
 };
 
+function normalizeNumericInput(raw: string): string {
+  return raw.trim().replace(/,/g, '').replace(/\s/g, '');
+}
+
 function formatAmount(amount: number): string {
-  return amount.toLocaleString('en-US');
+  return amount.toLocaleString('vi-VN');
 }
 
 function parsePositiveInt(raw: string): number | null {
-  const trimmed = raw.trim();
-  if (trimmed === '') {
+  const normalized = normalizeNumericInput(raw);
+  if (normalized === '') {
     return null;
   }
-  const value = Number(trimmed);
+  const value = Number(normalized);
   if (!Number.isFinite(value) || !Number.isInteger(value)) {
     return null;
   }
   return value;
+}
+
+const VALIDATION_MESSAGE_VI: Record<string, string> = {
+  'roundCount must be at least 1': 'Số vòng phải từ 1 trở lên.',
+  'roundCount must be an integer': 'Số vòng phải là số nguyên.',
+  'roundCount must be a finite number': 'Số vòng phải là số hợp lệ.',
+  'rewardMultiplier must be greater than 1': 'Hệ số thưởng phải lớn hơn 1.',
+  'rewardMultiplier must be a finite number': 'Hệ số thưởng phải là số hợp lệ.',
+  'minimumBet must be a multiple of betStep': 'Cược tối thiểu phải chia hết cho bước cược.',
+  'minimumBet must be at least 1': 'Cược tối thiểu phải từ 1 trở lên.',
+  'betStep must be at least 1': 'Bước cược phải từ 1 trở lên.',
+  'targetProfit.amount must be non-negative': 'Lợi nhuận mục tiêu không được âm.',
+  'targetProfit.amount must be an integer': 'Lợi nhuận mục tiêu phải là số nguyên.',
+};
+
+function userFacingValidationMessage(message: string): string {
+  return VALIDATION_MESSAGE_VI[message] ?? 'Giá trị không hợp lệ.';
+}
+
+function clientFieldError(raw: string): string {
+  return normalizeNumericInput(raw) === ''
+    ? 'Vui lòng nhập số.'
+    : 'Vui lòng nhập số nguyên.';
 }
 
 function mapValidationPath(path: string): FormField {
@@ -79,29 +106,61 @@ function mapValidationPath(path: string): FormField {
   return 'request';
 }
 
-function buildRequest(values: FormValues): CalculationRequest | null {
-  const targetProfit = parsePositiveInt(values.targetProfit);
-  const roundCount = parsePositiveInt(values.roundCount);
-  const rewardMultiplier = parsePositiveInt(values.rewardMultiplier);
-  const minimumBet = parsePositiveInt(values.minimumBet);
-  const betStep = parsePositiveInt(values.betStep);
+function buildRequest(
+  values: FormValues,
+): { request: CalculationRequest } | { fieldErrors: Partial<Record<FormField, string>> } {
+  const fields: Array<{ key: FormField; raw: string; parsed: number | null }> = [
+    { key: 'targetProfit', raw: values.targetProfit, parsed: parsePositiveInt(values.targetProfit) },
+    { key: 'roundCount', raw: values.roundCount, parsed: parsePositiveInt(values.roundCount) },
+    {
+      key: 'rewardMultiplier',
+      raw: values.rewardMultiplier,
+      parsed: parsePositiveInt(values.rewardMultiplier),
+    },
+    { key: 'minimumBet', raw: values.minimumBet, parsed: parsePositiveInt(values.minimumBet) },
+    { key: 'betStep', raw: values.betStep, parsed: parsePositiveInt(values.betStep) },
+  ];
+
+  const fieldErrors: Partial<Record<FormField, string>> = {};
+  for (const field of fields) {
+    if (field.parsed === null) {
+      fieldErrors[field.key] = clientFieldError(field.raw);
+    }
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return { fieldErrors };
+  }
+
+  const targetProfit = fields[0]?.parsed;
+  const roundCount = fields[1]?.parsed;
+  const rewardMultiplier = fields[2]?.parsed;
+  const minimumBet = fields[3]?.parsed;
+  const betStep = fields[4]?.parsed;
 
   if (
     targetProfit === null ||
+    targetProfit === undefined ||
     roundCount === null ||
+    roundCount === undefined ||
     rewardMultiplier === null ||
+    rewardMultiplier === undefined ||
     minimumBet === null ||
-    betStep === null
+    minimumBet === undefined ||
+    betStep === null ||
+    betStep === undefined
   ) {
-    return null;
+    return { fieldErrors: { request: 'Vui lòng kiểm tra lại các ô bắt buộc.' } };
   }
 
   return {
-    rewardMultiplier,
-    roundCount,
-    minimumBet,
-    betStep,
-    targetProfit: { mode: 'fixedAmount', amount: targetProfit },
+    request: {
+      rewardMultiplier,
+      roundCount,
+      minimumBet,
+      betStep,
+      targetProfit: { mode: 'fixedAmount', amount: targetProfit },
+    },
   };
 }
 
@@ -109,22 +168,18 @@ function generatePlan(values: FormValues): {
   result?: GenerateResult;
   fieldErrors?: Partial<Record<FormField, string>>;
 } {
-  const request = buildRequest(values);
-  if (request === null) {
-    return {
-      fieldErrors: {
-        request: 'Please enter whole numbers in all required fields.',
-      },
-    };
+  const built = buildRequest(values);
+  if ('fieldErrors' in built) {
+    return { fieldErrors: built.fieldErrors };
   }
 
-  const validated = validateCalculationRequest(request);
+  const validated = validateCalculationRequest(built.request);
   if (validated.kind === 'failure') {
     const fieldErrors: Partial<Record<FormField, string>> = {};
     for (const err of validated.error.errors) {
       const field = mapValidationPath(err.path);
       if (fieldErrors[field] === undefined) {
-        fieldErrors[field] = err.message;
+        fieldErrors[field] = userFacingValidationMessage(err.message);
       }
     }
     return { fieldErrors };
@@ -132,7 +187,7 @@ function generatePlan(values: FormValues): {
 
   const solved = solve(validated.value);
   if (solved.kind === 'failure') {
-    return { fieldErrors: { request: 'Could not generate plan. Please check your inputs.' } };
+    return { fieldErrors: { request: 'Không tạo được kế hoạch. Vui lòng kiểm tra lại thông tin.' } };
   }
 
   const strategy = buildStrategy(solved.value.rounds);
@@ -145,7 +200,7 @@ function generatePlan(values: FormValues): {
     result: {
       strategy,
       statistics,
-      request,
+      request: built.request,
       userBankroll,
     },
   };
@@ -197,6 +252,7 @@ const styles = {
   statLabel: { color: '#555', fontSize: '0.85rem', marginBottom: '0.15rem' } as const,
   statValueHero: { fontSize: '2.25rem', fontWeight: 700, lineHeight: 1.2 } as const,
   statValueSecondary: { fontSize: '1.15rem', fontWeight: 600 } as const,
+  statHint: { color: '#666', fontSize: '0.8rem', marginTop: '0.35rem', lineHeight: 1.4 } as const,
   divider: { border: 'none', borderTop: '1px solid #ddd', margin: '0.25rem 0 1.25rem' } as const,
   statusOk: { color: '#0d6b0d', margin: '1rem 0' } as const,
   statusWarn: { color: '#9a6700', margin: '1rem 0', lineHeight: 1.45 } as const,
@@ -230,7 +286,7 @@ export function App(): JSX.Element {
     event.preventDefault();
 
     if (form.userBankroll.trim() !== '' && parsePositiveInt(form.userBankroll) === null) {
-      setFieldErrors({ userBankroll: 'Please enter a whole number.' });
+      setFieldErrors({ userBankroll: 'Vui lòng nhập số nguyên.' });
       return;
     }
 
@@ -248,9 +304,11 @@ export function App(): JSX.Element {
   }
 
   if (screen === 'decision' && generated !== null) {
-    const { statistics, userBankroll } = generated;
+    const { statistics, userBankroll, request } = generated;
     const bankrollShort =
       userBankroll !== null && userBankroll < statistics.requiredBankrollAmount;
+    const targetAmount =
+      request.targetProfit.mode === 'fixedAmount' ? request.targetProfit.amount : null;
 
     return (
       <main style={styles.page}>
@@ -258,26 +316,36 @@ export function App(): JSX.Element {
           ← Sửa ý định
         </button>
 
-        <h2 style={styles.sectionTitle}>Plan Generated</h2>
+        <h2 style={styles.sectionTitle}>Kế hoạch đã tạo</h2>
 
         <div style={styles.statBlock}>
-          <div style={styles.statLabel}>Required bankroll</div>
+          <div style={styles.statLabel}>Vốn cần chuẩn bị</div>
           <div style={styles.statValueHero}>
             {formatAmount(statistics.requiredBankrollAmount)}
           </div>
+          <p style={styles.statHint}>
+            Đây là mức vốn tối đa bạn cần có nếu chưa thắng vòng nào.
+          </p>
         </div>
 
         <hr style={styles.divider} />
 
+        {targetAmount !== null ? (
+          <div style={styles.statBlock}>
+            <div style={styles.statLabel}>Mục tiêu của bạn</div>
+            <div style={styles.statValueSecondary}>{formatAmount(targetAmount)}</div>
+          </div>
+        ) : null}
+
         <div style={styles.statBlock}>
-          <div style={styles.statLabel}>Expected profit</div>
+          <div style={styles.statLabel}>Lợi nhuận ước tính (nếu thắng)</div>
           <div style={styles.statValueSecondary}>
             {formatAmount(statistics.expectedProfitAmount)}
           </div>
         </div>
 
         <div style={styles.statBlock}>
-          <div style={styles.statLabel}>Maximum bet</div>
+          <div style={styles.statLabel}>Cược lớn nhất</div>
           <div style={styles.statValueSecondary}>
             {formatAmount(statistics.maximumBetAmount)}
           </div>
@@ -285,18 +353,17 @@ export function App(): JSX.Element {
 
         {bankrollShort ? (
           <p style={styles.statusWarn}>
-            ⚠ Your bankroll is only {formatAmount(userBankroll)}.
+            ⚠ Vốn của bạn: {formatAmount(userBankroll)} — thấp hơn mức cần{' '}
+            {formatAmount(statistics.requiredBankrollAmount)}.
             <br />
-            Required: {formatAmount(statistics.requiredBankrollAmount)}.
-            <br />
-            Plan generated — review before use.
+            Kế hoạch đã tạo — hãy xem lại trước khi dùng.
           </p>
         ) : (
-          <p style={styles.statusOk}>✓ Your betting plan is ready.</p>
+          <p style={styles.statusOk}>✓ Kế hoạch cược của bạn đã sẵn sàng.</p>
         )}
 
         <button type="button" style={styles.button} onClick={() => setScreen('plan')}>
-          View Betting Plan
+          Xem kế hoạch cược
         </button>
       </main>
     );
@@ -446,7 +513,7 @@ export function App(): JSX.Element {
         ) : null}
 
         <button type="submit" style={styles.button}>
-          Generate Plan
+          Tạo kế hoạch
         </button>
       </form>
     </main>
