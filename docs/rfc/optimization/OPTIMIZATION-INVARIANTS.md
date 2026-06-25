@@ -136,7 +136,28 @@ policy.nextProfit(...)  →  value
 createProfitCandidate(intent, value)  →  CalculationRequest
 ```
 
-Not inline spread/`targetProfit` in `optimize()`. Required before round reduction ships.
+Not inline spread/`targetProfit` in `optimize()`. Shipped in `candidates/` (3.2C.2).
+
+---
+
+## Nested evaluation order (Sprint 3.2C.2)
+
+RFC-004 nested prefix — profit exhausted at `R₀`, then profit resets at each lower round:
+
+```text
+(100k,50) → (95k,50) → … → (100k,49) → (95k,49) → …
+```
+
+Tests: `tests/unit/optimization/optimize-nested-properties.test.ts`
+
+---
+
+## Round monotonicity (Sprint 3.2C.2)
+
+- `allowRoundReduction: false` → round count unchanged on success
+- Round levels step by `policy.nextRoundCount` only (50 → 49 → 48, never skips)
+
+Tests: `tests/unit/optimization/optimize-nested-properties.test.ts`
 
 ---
 

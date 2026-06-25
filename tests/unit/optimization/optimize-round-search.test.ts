@@ -12,6 +12,7 @@ import * as publicApi from '@/public';
 import {
   makeOptimizationRequest,
   measureRequiredBankroll,
+  profitFromRequest,
   profitSearchIntent,
   withFixedProfit,
 } from '../../support/optimization-test-helpers';
@@ -25,13 +26,6 @@ function makeRequest(
     ...makeOptimizationRequest(intent, bankrollLimit),
     allowRoundReduction,
   };
-}
-
-function profitFromRequest(request: CalculationRequest): number | null {
-  if (request.targetProfit.mode !== 'fixedAmount') {
-    return null;
-  }
-  return request.targetProfit.amount;
 }
 
 function collectEvaluatedPairs(bankrollLimit: number, allowRoundReduction: boolean): Array<{

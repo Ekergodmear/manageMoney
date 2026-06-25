@@ -13,7 +13,7 @@
 | ------------------ | ----------------------------------------- |
 | Core SDK (`main`)  | Stable — `v1.0.0-rc.1`                    |
 | Public API         | Frozen on `main` — no Optimization export |
-| OptimizationEngine | Sprint 3.2C.1 ✅ — 3.2C.2 next           |
+| OptimizationEngine | Sprint 3.2C.2 ✅ — 3.3 next              |
 | UI                 | Planned                                   |
 
 ---
@@ -33,8 +33,8 @@ All accepted — `docs/rfc/README.md`
 | 3.2A   | ✅ Approved | `SearchPolicy` + invariant tests            |
 | 3.2B   | ✅ Done     | Profit search + First Feasible Wins (frozen) |
 | 3.2C.1 | ✅ Done     | Monotonic Budget + Prefix Stability (frozen) |
-| 3.2C.2 | Planned     | Round reduction (independent unit)           |
-| 3.3    | Planned     | Full Optimization verification               |
+| 3.2C.2 | ✅ Done     | Round reduction + nested prefix (frozen)     |
+| 3.3    | Planned     | Full Optimization formal verification        |
 
 Invariants: `docs/rfc/optimization/OPTIMIZATION-INVARIANTS.md`  
 Next spec: `docs/design/sprint-3.2-spec.md`

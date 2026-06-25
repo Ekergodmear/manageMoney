@@ -132,18 +132,22 @@ Profit search is complete. Property tests (no new features):
 
 **Frozen:** profit search semantics — no changes until 3.2C.2 ships.
 
-### 3.2C.2 — Round reduction
+### 3.2C.2 — Round reduction ✅
 
-Independent unit — changes search space; do not mix with 3.2C.1 in one commit.
+Independent unit — nested RFC-004 search shipped in three commits:
+
+1. `candidates/` — pure builders
+2. `optimize()` — nested profit → round search via policy
+3. Property verification — round monotonicity, nested prefix, identity skips builders
 
 ```text
 profit loop (at fixed round level)
     → round decrement via policy.nextRoundCount
-    → profit loop again
+    → profit loop again (profit resets to original)
 ```
 
-- Explanation: `PROFIT_AND_ROUNDS_REDUCED` / `ROUNDS_REDUCED` as needed
-- `createRoundCandidate(intent, roundCount)` — same candidate-builder pattern as profit
+- Explanation: `PROFIT_AND_ROUNDS_REDUCED` / `ROUNDS_REDUCED` / `PROFIT_REDUCED`
+- **Frozen** after sign-off — ready for 3.3 formal verification
 
 ### 3.3 — Verification (after 3.2C.1 + 3.2C.2 frozen)
 
@@ -183,7 +187,7 @@ Heuristics later → separate RFC + benchmarks.
 - [x] Architecture isolation test still passes
 - [x] Monotonic budget property tested in 3.2C.1
 - [x] Prefix Stability tested in 3.2C.1
-- [ ] Round reduction in 3.2C.2 (separate commit)
+- [x] Round reduction in 3.2C.2 (separate commits)
 
 ---
 

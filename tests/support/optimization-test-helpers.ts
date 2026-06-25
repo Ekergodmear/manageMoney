@@ -89,3 +89,62 @@ export function canonicalProfitEvaluationOrder(
 export function isFeasibleUnderBankroll(intent: CalculationRequest, bankrollLimit: number): boolean {
   return measureRequiredBankroll(intent) <= bankrollLimit;
 }
+
+export interface EvaluatedPair {
+  readonly profit: number;
+  readonly rounds: number;
+}
+
+/** RFC-004 nested evaluation order — identity + profit at R₀ + (profit reset × round steps). */
+export function canonicalNestedEvaluationOrder(
+  intent: CalculationRequest,
+  profitGranularity: number,
+  allowRoundReduction: boolean,
+): EvaluatedPair[] {
+  if (intent.targetProfit.mode !== 'fixedAmount') {
+    return [];
+  }
+
+  const policy = defaultSearchPolicy;
+  const originalProfit = intent.targetProfit.amount;
+  const originalRounds = intent.roundCount;
+  const order: EvaluatedPair[] = [{ profit: originalProfit, rounds: originalRounds }];
+
+  let currentProfit = originalProfit;
+  let nextProfit = policy.nextProfit(intent, currentProfit, profitGranularity);
+  while (nextProfit !== null) {
+    order.push({ profit: nextProfit, rounds: originalRounds });
+    currentProfit = nextProfit;
+    nextProfit = policy.nextProfit(intent, currentProfit, profitGranularity);
+  }
+
+  if (!allowRoundReduction) {
+    return order;
+  }
+
+  let currentRounds = originalRounds;
+  let nextRounds = policy.nextRoundCount(intent, currentRounds);
+  while (nextRounds !== null) {
+    currentProfit = originalProfit;
+    order.push({ profit: originalProfit, rounds: nextRounds });
+
+    nextProfit = policy.nextProfit(intent, currentProfit, profitGranularity);
+    while (nextProfit !== null) {
+      order.push({ profit: nextProfit, rounds: nextRounds });
+      currentProfit = nextProfit;
+      nextProfit = policy.nextProfit(intent, currentProfit, profitGranularity);
+    }
+
+    currentRounds = nextRounds;
+    nextRounds = policy.nextRoundCount(intent, currentRounds);
+  }
+
+  return order;
+}
+
+export function profitFromRequest(request: CalculationRequest): number | null {
+  if (request.targetProfit.mode !== 'fixedAmount') {
+    return null;
+  }
+  return request.targetProfit.amount;
+}
