@@ -26,7 +26,7 @@ The engine does **not** predict wins. It only sizes bets so that a win at any ro
 
 | Symbol  | Domain field        | Meaning                                     |
 | ------- | ------------------- | ------------------------------------------- |
-| `M`     | `rewardMultiplier`  | Reward multiplier (must be > 1)             |
+| `M`     | `rewardMultiplier`  | Reward multiplier (must be > 1; up to 2 decimal places) |
 | `B_min` | `minimumBet`        | Floor bet per round                         |
 | `S`     | `betStep`           | Bet increment (all bets are multiples of S) |
 | `N`     | `roundCount`        | Number of rounds                            |
@@ -187,7 +187,7 @@ flowchart TD
 | I2  | `bᵢ ≥ B_min`                                                              |
 | I3  | `bᵢ mod S = 0`                                                            |
 | I4  | `Aᵢ = Aᵢ₋₁ + bᵢ`; hence `Aᵢ > Aᵢ₋₁` when `bᵢ > 0` (validated `B_min > 0`) |
-| I5  | `Rᵢ = bᵢ × M` (exact integer)                                             |
+| I5  | `Rᵢ = bᵢ × M` (exact integer) — scaled fixed-point arithmetic in implementation |
 | I6  | All amount fields are integers                                            |
 | I7  | Same `ValidatedCalculationRequest` → same `Strategy`                      |
 | I8  | `Aᵢ = Σ bₖ` for k = 1..i (accumulatedSpent equals sum of bets)            |
@@ -328,6 +328,7 @@ Shape and type sanity — reject before business rules.
 | Required fields present            | missing `roundCount`            |
 | `undefined`, `null`                | any field                       |
 | `NaN`, `Infinity`                  | `rewardMultiplier`              |
+| `rewardMultiplier` precision       | M = 1.333 (more than 2 decimals) |
 | Non-integer where integer required | `roundCount = 1.5`              |
 | Wrong discriminant                 | `targetProfit.mode = "unknown"` |
 

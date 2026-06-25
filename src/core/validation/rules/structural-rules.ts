@@ -3,6 +3,7 @@
  */
 
 import type { CalculationRequest } from '@/application/dto';
+import { hasAtMostTwoDecimalPlaces } from '@/core/monetary/reward-multiplier-encoding';
 
 import {
   getTargetProfitMode,
@@ -44,6 +45,17 @@ export const structuralRules: ValidationPhase = [
     layer: 'structural',
     message: 'rewardMultiplier must be a finite number',
     isValid: (request) => whenRequestValid(request, (r) => isFiniteNumber(r.rewardMultiplier)),
+  },
+  {
+    code: ValidationCodes.S013_REWARD_MULTIPLIER_PRECISION,
+    path: 'rewardMultiplier',
+    layer: 'structural',
+    message: 'rewardMultiplier must have at most 2 decimal places',
+    isValid: (request) =>
+      whenRequestValid(
+        request,
+        (r) => isFiniteNumber(r.rewardMultiplier) && hasAtMostTwoDecimalPlaces(r.rewardMultiplier),
+      ),
   },
   {
     code: ValidationCodes.S003_ROUND_COUNT_NAN,

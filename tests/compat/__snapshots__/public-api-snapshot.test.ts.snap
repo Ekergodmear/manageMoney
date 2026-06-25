@@ -24,5 +24,6 @@ exports[`Compat — public API runtime snapshot > matches ValidationCodes regist
   "S010_FIXED_AMOUNT_NAN": "S010",
   "S011_FIXED_AMOUNT_NOT_INTEGER": "S011",
   "S012_PERCENTAGE_NAN": "S012",
+  "S013_REWARD_MULTIPLIER_PRECISION": "S013",
 }
 `;

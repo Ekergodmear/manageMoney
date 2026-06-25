@@ -17,9 +17,15 @@ const targetProfitArb: fc.Arbitrary<TargetProfit> = fc.oneof(
 );
 
 function buildRequestArb(roundCountMax: number): fc.Arbitrary<CalculationRequest> {
+  const integerMultiplierArb = fc.integer({ min: 2, max: 30 });
+  const decimalMultiplierArb = fc
+    .tuple(fc.integer({ min: 2, max: 30 }), fc.integer({ min: 0, max: 99 }))
+    .map(([whole, cents]) => whole + cents / 100)
+    .filter((m) => m > 1);
+
   return fc
     .tuple(
-      fc.integer({ min: 2, max: 30 }),
+      fc.oneof(integerMultiplierArb, decimalMultiplierArb),
       fc.integer({ min: 1, max: roundCountMax }),
       fc.integer({ min: 100, max: 2_000 }),
       fc.integer({ min: 1, max: 25 }),

@@ -3,15 +3,23 @@
  * @see docs/design/solver-pseudocode.md
  */
 
+import type { EncodedRewardMultiplier } from '@/core/monetary/reward-multiplier-encoding';
+import { scaledProfitMargin } from '@/core/monetary/reward-multiplier-encoding';
+
 import { ceilToStep } from './integer-math';
 
 export function solveMinimalFeasibleBet(
   accumulatedSpentBefore: number,
   pStar: number,
-  rewardMultiplier: number,
+  encodedRewardMultiplier: EncodedRewardMultiplier,
   minimumBet: number,
   betStep: number,
 ): number {
-  const candidate = ceilToStep(accumulatedSpentBefore + pStar, rewardMultiplier - 1, betStep);
+  const numerator = (accumulatedSpentBefore + pStar) * encodedRewardMultiplier.scale;
+  const candidate = ceilToStep(
+    numerator,
+    scaledProfitMargin(encodedRewardMultiplier),
+    betStep,
+  );
   return Math.max(minimumBet, candidate);
 }

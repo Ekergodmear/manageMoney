@@ -8,13 +8,17 @@ import type { ValidatedCalculationRequest } from '@/application/dto';
 import type { Result } from '@/core/contracts';
 import { success } from '@/core/contracts';
 import type { Round, Strategy } from '@/core/models';
+import {
+  encodeRewardMultiplier,
+  rewardFromBet,
+} from '@/core/monetary/reward-multiplier-encoding';
 
 import { resolveTarget } from './resolve-target';
 import { solveMinimalFeasibleBet } from './solve-minimal-feasible-bet';
 import type { SolverError } from './solver-error';
 
 export function solve(validated: ValidatedCalculationRequest): Result<Strategy, SolverError> {
-  const rewardMultiplier = validated.rewardMultiplier;
+  const encodedRewardMultiplier = encodeRewardMultiplier(validated.rewardMultiplier);
   const minimumBet = validated.minimumBet;
   const betStep = validated.betStep;
   const roundCount = validated.roundCount;
@@ -29,11 +33,11 @@ export function solve(validated: ValidatedCalculationRequest): Result<Strategy, 
     const bet = solveMinimalFeasibleBet(
       accumulatedSpentBefore,
       pStar,
-      rewardMultiplier,
+      encodedRewardMultiplier,
       minimumBet,
       betStep,
     );
-    const reward = bet * rewardMultiplier;
+    const reward = rewardFromBet(bet, encodedRewardMultiplier);
     const accumulatedSpentAfter = accumulatedSpentBefore + bet;
     accumulatedSpent = accumulatedSpentAfter;
 
