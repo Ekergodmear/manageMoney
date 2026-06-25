@@ -195,7 +195,9 @@ const styles = {
   } as const,
   statBlock: { marginBottom: '1.25rem' } as const,
   statLabel: { color: '#555', fontSize: '0.85rem', marginBottom: '0.15rem' } as const,
-  statValue: { fontSize: '1.35rem', fontWeight: 700 } as const,
+  statValueHero: { fontSize: '2.25rem', fontWeight: 700, lineHeight: 1.2 } as const,
+  statValueSecondary: { fontSize: '1.15rem', fontWeight: 600 } as const,
+  divider: { border: 'none', borderTop: '1px solid #ddd', margin: '0.25rem 0 1.25rem' } as const,
   statusOk: { color: '#0d6b0d', margin: '1rem 0' } as const,
   statusWarn: { color: '#9a6700', margin: '1rem 0', lineHeight: 1.45 } as const,
   sectionTitle: { fontSize: '1.15rem', fontWeight: 700, margin: '0 0 1rem' } as const,
@@ -260,17 +262,25 @@ export function App(): JSX.Element {
 
         <div style={styles.statBlock}>
           <div style={styles.statLabel}>Required bankroll</div>
-          <div style={styles.statValue}>{formatAmount(statistics.requiredBankrollAmount)}</div>
+          <div style={styles.statValueHero}>
+            {formatAmount(statistics.requiredBankrollAmount)}
+          </div>
         </div>
+
+        <hr style={styles.divider} />
 
         <div style={styles.statBlock}>
           <div style={styles.statLabel}>Expected profit</div>
-          <div style={styles.statValue}>{formatAmount(statistics.expectedProfitAmount)}</div>
+          <div style={styles.statValueSecondary}>
+            {formatAmount(statistics.expectedProfitAmount)}
+          </div>
         </div>
 
         <div style={styles.statBlock}>
           <div style={styles.statLabel}>Maximum bet</div>
-          <div style={styles.statValue}>{formatAmount(statistics.maximumBetAmount)}</div>
+          <div style={styles.statValueSecondary}>
+            {formatAmount(statistics.maximumBetAmount)}
+          </div>
         </div>
 
         {bankrollShort ? (
@@ -282,11 +292,11 @@ export function App(): JSX.Element {
             Plan generated — review before use.
           </p>
         ) : (
-          <p style={styles.statusOk}>✓ Your plan is ready.</p>
+          <p style={styles.statusOk}>✓ Your betting plan is ready.</p>
         )}
 
         <button type="button" style={styles.button} onClick={() => setScreen('plan')}>
-          View Plan
+          View Betting Plan
         </button>
       </main>
     );

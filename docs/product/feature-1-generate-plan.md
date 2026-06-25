@@ -101,7 +101,7 @@ Inline error example (field-level):
 
 Shown immediately after successful Generate. **Decision screen** — answers *“Bây giờ tôi nên làm gì?”* Not a passive summary.
 
-**Only 3 numbers** (no average bet, min bet, round count on this screen):
+**Only 3 numbers** — required bankroll **hero** (larger), divider, then expected profit and maximum bet:
 
 ```text
 ┌──────────────────────────────────────┐
@@ -111,7 +111,9 @@ Shown immediately after successful Generate. **Decision screen** — answers *�
 │ Plan Generated                       │
 │                                      │
 │ Required bankroll                    │
-│ 1,520,000                            │
+│ 1,520,000          ← hero size       │
+│                                      │
+│ ─────────────────────────────────    │
 │                                      │
 │ Expected profit                      │
 │ 100,000                              │
@@ -119,9 +121,9 @@ Shown immediately after successful Generate. **Decision screen** — answers *�
 │ Maximum bet                          │
 │ 81,000                               │
 │                                      │
-│ ✓ Your plan is ready.                │
+│ ✓ Your betting plan is ready.        │
 │                                      │
-│            [ View Plan ]             │
+│      [ View Betting Plan ]           │
 │                                      │
 └──────────────────────────────────────┘
 ```
