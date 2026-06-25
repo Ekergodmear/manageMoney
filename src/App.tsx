@@ -48,6 +48,8 @@ const DEFAULT_FORM: FormValues = {
   userBankroll: '',
 };
 
+const MULTIPLIER_DECIMAL_PLACES = 2;
+
 function normalizeNumericInput(raw: string): string {
   return raw.trim().replace(/,/g, '').replace(/\s/g, '');
 }
@@ -68,12 +70,31 @@ function parsePositiveInt(raw: string): number | null {
   return value;
 }
 
+function parseDecimal(raw: string, maxDecimalPlaces: number): number | null {
+  const normalized = normalizeNumericInput(raw);
+  if (normalized === '') {
+    return null;
+  }
+  const value = Number(normalized);
+  if (!Number.isFinite(value)) {
+    return null;
+  }
+  const scale = 10 ** maxDecimalPlaces;
+  const scaled = Math.round(value * scale);
+  if (Math.abs(value * scale - scaled) > 1e-6) {
+    return null;
+  }
+  return value;
+}
+
 const VALIDATION_MESSAGE_VI: Record<string, string> = {
   'roundCount must be at least 1': 'Số vòng phải từ 1 trở lên.',
   'roundCount must be an integer': 'Số vòng phải là số nguyên.',
   'roundCount must be a finite number': 'Số vòng phải là số hợp lệ.',
   'rewardMultiplier must be greater than 1': 'Hệ số thưởng phải lớn hơn 1.',
   'rewardMultiplier must be a finite number': 'Hệ số thưởng phải là số hợp lệ.',
+  'rewardMultiplier must have at most 2 decimal places':
+    'Hệ số thưởng hỗ trợ tối đa 2 chữ số thập phân.',
   'minimumBet must be a multiple of betStep': 'Cược tối thiểu phải chia hết cho bước cược.',
   'minimumBet must be at least 1': 'Cược tối thiểu phải từ 1 trở lên.',
   'betStep must be at least 1': 'Bước cược phải từ 1 trở lên.',
@@ -85,10 +106,16 @@ function userFacingValidationMessage(message: string): string {
   return VALIDATION_MESSAGE_VI[message] ?? 'Giá trị không hợp lệ.';
 }
 
-function clientFieldError(raw: string): string {
+function clientIntegerFieldError(raw: string): string {
   return normalizeNumericInput(raw) === ''
     ? 'Vui lòng nhập số.'
     : 'Vui lòng nhập số nguyên.';
+}
+
+function clientMultiplierFieldError(raw: string): string {
+  return normalizeNumericInput(raw) === ''
+    ? 'Vui lòng nhập số.'
+    : 'Vui lòng nhập số hợp lệ (tối đa 2 chữ số thập phân).';
 }
 
 function mapValidationPath(path: string): FormField {
@@ -109,46 +136,43 @@ function mapValidationPath(path: string): FormField {
 function buildRequest(
   values: FormValues,
 ): { request: CalculationRequest } | { fieldErrors: Partial<Record<FormField, string>> } {
-  const fields: Array<{ key: FormField; raw: string; parsed: number | null }> = [
-    { key: 'targetProfit', raw: values.targetProfit, parsed: parsePositiveInt(values.targetProfit) },
-    { key: 'roundCount', raw: values.roundCount, parsed: parsePositiveInt(values.roundCount) },
-    {
-      key: 'rewardMultiplier',
-      raw: values.rewardMultiplier,
-      parsed: parsePositiveInt(values.rewardMultiplier),
-    },
-    { key: 'minimumBet', raw: values.minimumBet, parsed: parsePositiveInt(values.minimumBet) },
-    { key: 'betStep', raw: values.betStep, parsed: parsePositiveInt(values.betStep) },
-  ];
-
   const fieldErrors: Partial<Record<FormField, string>> = {};
-  for (const field of fields) {
-    if (field.parsed === null) {
-      fieldErrors[field.key] = clientFieldError(field.raw);
-    }
+
+  const targetProfit = parsePositiveInt(values.targetProfit);
+  if (targetProfit === null) {
+    fieldErrors.targetProfit = clientIntegerFieldError(values.targetProfit);
+  }
+
+  const roundCount = parsePositiveInt(values.roundCount);
+  if (roundCount === null) {
+    fieldErrors.roundCount = clientIntegerFieldError(values.roundCount);
+  }
+
+  const rewardMultiplier = parseDecimal(values.rewardMultiplier, MULTIPLIER_DECIMAL_PLACES);
+  if (rewardMultiplier === null) {
+    fieldErrors.rewardMultiplier = clientMultiplierFieldError(values.rewardMultiplier);
+  }
+
+  const minimumBet = parsePositiveInt(values.minimumBet);
+  if (minimumBet === null) {
+    fieldErrors.minimumBet = clientIntegerFieldError(values.minimumBet);
+  }
+
+  const betStep = parsePositiveInt(values.betStep);
+  if (betStep === null) {
+    fieldErrors.betStep = clientIntegerFieldError(values.betStep);
   }
 
   if (Object.keys(fieldErrors).length > 0) {
     return { fieldErrors };
   }
 
-  const targetProfit = fields[0]?.parsed;
-  const roundCount = fields[1]?.parsed;
-  const rewardMultiplier = fields[2]?.parsed;
-  const minimumBet = fields[3]?.parsed;
-  const betStep = fields[4]?.parsed;
-
   if (
     targetProfit === null ||
-    targetProfit === undefined ||
     roundCount === null ||
-    roundCount === undefined ||
     rewardMultiplier === null ||
-    rewardMultiplier === undefined ||
     minimumBet === null ||
-    minimumBet === undefined ||
-    betStep === null ||
-    betStep === undefined
+    betStep === null
   ) {
     return { fieldErrors: { request: 'Vui lòng kiểm tra lại các ô bắt buộc.' } };
   }
@@ -193,8 +217,7 @@ function generatePlan(values: FormValues): {
   const strategy = buildStrategy(solved.value.rounds);
   const statistics = buildStatistics(strategy);
   const bankrollRaw = values.userBankroll.trim();
-  const userBankroll =
-    bankrollRaw === '' ? null : parsePositiveInt(bankrollRaw);
+  const userBankroll = bankrollRaw === '' ? null : parsePositiveInt(bankrollRaw);
 
   return {
     result: {
@@ -208,10 +231,10 @@ function generatePlan(values: FormValues): {
 
 const styles = {
   page: {
-    fontFamily: 'system-ui, sans-serif',
-    maxWidth: '28rem',
+    fontFamily: 'system-ui, -apple-system, sans-serif',
+    maxWidth: 'min(28rem, 100%)',
     margin: '0 auto',
-    padding: '1.5rem 1rem',
+    padding: 'clamp(1rem, 4vw, 1.75rem) clamp(1rem, 3vw, 1.25rem)',
     color: '#111',
     lineHeight: 1.5,
   } as const,
@@ -220,23 +243,24 @@ const styles = {
   label: { display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' } as const,
   input: {
     width: '100%',
-    padding: '0.5rem 0.6rem',
+    padding: '0.55rem 0.65rem',
     fontSize: '1rem',
     border: '1px solid #ccc',
-    borderRadius: '4px',
+    borderRadius: '6px',
     boxSizing: 'border-box' as const,
   },
   field: { marginBottom: '1rem' } as const,
+  fieldHint: { color: '#666', fontSize: '0.8rem', marginTop: '0.3rem', lineHeight: 1.4 } as const,
   error: { color: '#b00020', fontSize: '0.85rem', marginTop: '0.25rem' } as const,
   button: {
     width: '100%',
-    padding: '0.65rem 1rem',
+    padding: '0.7rem 1rem',
     fontSize: '1rem',
     fontWeight: 600,
     background: '#111',
     color: '#fff',
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: '6px',
     cursor: 'pointer',
   } as const,
   backLink: {
@@ -248,14 +272,35 @@ const styles = {
     fontSize: '0.9rem',
     marginBottom: '1rem',
   } as const,
-  statBlock: { marginBottom: '1.25rem' } as const,
-  statLabel: { color: '#555', fontSize: '0.85rem', marginBottom: '0.15rem' } as const,
-  statValueHero: { fontSize: '2.25rem', fontWeight: 700, lineHeight: 1.2 } as const,
-  statValueSecondary: { fontSize: '1.15rem', fontWeight: 600 } as const,
-  statHint: { color: '#666', fontSize: '0.8rem', marginTop: '0.35rem', lineHeight: 1.4 } as const,
-  divider: { border: 'none', borderTop: '1px solid #ddd', margin: '0.25rem 0 1.25rem' } as const,
-  statusOk: { color: '#0d6b0d', margin: '1rem 0' } as const,
-  statusWarn: { color: '#9a6700', margin: '1rem 0', lineHeight: 1.45 } as const,
+  card: {
+    background: '#fafafa',
+    border: '1px solid #e8e8e8',
+    borderRadius: '10px',
+    padding: '1rem 1.1rem',
+    marginBottom: '0.85rem',
+  } as const,
+  cardHero: {
+    background: '#f4f6f8',
+    border: '1px solid #dde3ea',
+    borderRadius: '10px',
+    padding: '1.15rem 1.1rem',
+    marginBottom: '0.85rem',
+  } as const,
+  cardEmoji: { fontSize: '1.1rem', marginBottom: '0.35rem' } as const,
+  cardLabel: { color: '#555', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.2rem' } as const,
+  cardValueHero: { fontSize: 'clamp(1.75rem, 6vw, 2.25rem)', fontWeight: 700, lineHeight: 1.15 } as const,
+  cardValue: { fontSize: '1.2rem', fontWeight: 600 } as const,
+  cardHint: { color: '#666', fontSize: '0.8rem', marginTop: '0.4rem', lineHeight: 1.45 } as const,
+  cardFooter: {
+    background: '#fff',
+    border: '1px solid #e8e8e8',
+    borderRadius: '10px',
+    padding: '1rem 1.1rem',
+    marginTop: '0.25rem',
+    marginBottom: '1rem',
+  } as const,
+  statusOk: { color: '#0d6b0d', margin: '0 0 1rem', fontWeight: 500 } as const,
+  statusWarn: { color: '#9a6700', margin: '0 0 1rem', lineHeight: 1.45 } as const,
   sectionTitle: { fontSize: '1.15rem', fontWeight: 700, margin: '0 0 1rem' } as const,
   table: { width: '100%', borderCollapse: 'collapse' as const, fontSize: '0.9rem' } as const,
   th: {
@@ -265,6 +310,31 @@ const styles = {
   },
   td: { borderBottom: '1px solid #eee', padding: '0.4rem 0.25rem' } as const,
 };
+
+function DecisionCard({
+  emoji,
+  label,
+  value,
+  hint,
+  hero = false,
+}: {
+  emoji: string;
+  label: string;
+  value: string;
+  hint?: string;
+  hero?: boolean;
+}): JSX.Element {
+  return (
+    <section style={hero ? styles.cardHero : styles.card}>
+      <div style={styles.cardEmoji} aria-hidden="true">
+        {emoji}
+      </div>
+      <div style={styles.cardLabel}>{label}</div>
+      <div style={hero ? styles.cardValueHero : styles.cardValue}>{value}</div>
+      {hint !== undefined ? <p style={styles.cardHint}>{hint}</p> : null}
+    </section>
+  );
+}
 
 export function App(): JSX.Element {
   const [screen, setScreen] = useState<Screen>('form');
@@ -316,55 +386,46 @@ export function App(): JSX.Element {
           ← Sửa ý định
         </button>
 
-        <h2 style={styles.sectionTitle}>Kế hoạch đã tạo</h2>
-
-        <div style={styles.statBlock}>
-          <div style={styles.statLabel}>Vốn cần chuẩn bị</div>
-          <div style={styles.statValueHero}>
-            {formatAmount(statistics.requiredBankrollAmount)}
-          </div>
-          <p style={styles.statHint}>
-            Đây là mức vốn tối đa bạn cần có nếu chưa thắng vòng nào.
-          </p>
-        </div>
-
-        <hr style={styles.divider} />
+        <DecisionCard
+          emoji="💰"
+          label="Vốn cần chuẩn bị"
+          value={formatAmount(statistics.requiredBankrollAmount)}
+          hint="Đây là mức vốn tối đa bạn cần có nếu chưa thắng vòng nào."
+          hero
+        />
 
         {targetAmount !== null ? (
-          <div style={styles.statBlock}>
-            <div style={styles.statLabel}>Mục tiêu của bạn</div>
-            <div style={styles.statValueSecondary}>{formatAmount(targetAmount)}</div>
-          </div>
+          <DecisionCard emoji="🎯" label="Mục tiêu của bạn" value={formatAmount(targetAmount)} />
         ) : null}
 
-        <div style={styles.statBlock}>
-          <div style={styles.statLabel}>Lợi nhuận ước tính (nếu thắng)</div>
-          <div style={styles.statValueSecondary}>
-            {formatAmount(statistics.expectedProfitAmount)}
-          </div>
-        </div>
+        <DecisionCard
+          emoji="📈"
+          label="Lợi nhuận ước tính (nếu thắng)"
+          value={formatAmount(statistics.expectedProfitAmount)}
+        />
 
-        <div style={styles.statBlock}>
-          <div style={styles.statLabel}>Cược lớn nhất</div>
-          <div style={styles.statValueSecondary}>
-            {formatAmount(statistics.maximumBetAmount)}
-          </div>
-        </div>
+        <DecisionCard
+          emoji="📊"
+          label="Cược lớn nhất"
+          value={formatAmount(statistics.maximumBetAmount)}
+        />
 
-        {bankrollShort ? (
-          <p style={styles.statusWarn}>
-            ⚠ Vốn của bạn: {formatAmount(userBankroll)} — thấp hơn mức cần{' '}
-            {formatAmount(statistics.requiredBankrollAmount)}.
-            <br />
-            Kế hoạch đã tạo — hãy xem lại trước khi dùng.
-          </p>
-        ) : (
-          <p style={styles.statusOk}>✓ Kế hoạch cược của bạn đã sẵn sàng.</p>
-        )}
+        <section style={styles.cardFooter}>
+          {bankrollShort ? (
+            <p style={styles.statusWarn}>
+              ⚠ Vốn của bạn: {formatAmount(userBankroll)} — thấp hơn mức cần{' '}
+              {formatAmount(statistics.requiredBankrollAmount)}.
+              <br />
+              Kế hoạch đã tạo — hãy xem lại trước khi dùng.
+            </p>
+          ) : (
+            <p style={styles.statusOk}>✓ Kế hoạch cược của bạn đã sẵn sàng.</p>
+          )}
 
-        <button type="button" style={styles.button} onClick={() => setScreen('plan')}>
-          Xem kế hoạch cược
-        </button>
+          <button type="button" style={styles.button} onClick={() => setScreen('plan')}>
+            Xem kế hoạch cược
+          </button>
+        </section>
       </main>
     );
   }
@@ -380,24 +441,26 @@ export function App(): JSX.Element {
 
         <h2 style={styles.sectionTitle}>Kế hoạch — {strategy.rounds.length} vòng</h2>
 
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.th}>Vòng</th>
-              <th style={styles.th}>Cược</th>
-              <th style={styles.th}>Tích lũy chi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {strategy.rounds.map((round) => (
-              <tr key={round.index}>
-                <td style={styles.td}>{round.index}</td>
-                <td style={styles.td}>{formatAmount(round.betAmount)}</td>
-                <td style={styles.td}>{formatAmount(round.accumulatedSpent)}</td>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>Vòng</th>
+                <th style={styles.th}>Cược</th>
+                <th style={styles.th}>Tích lũy chi</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {strategy.rounds.map((round) => (
+                <tr key={round.index}>
+                  <td style={styles.td}>{round.index}</td>
+                  <td style={styles.td}>{formatAmount(round.betAmount)}</td>
+                  <td style={styles.td}>{formatAmount(round.accumulatedSpent)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
         <p style={{ marginTop: '1rem', fontWeight: 600 }}>
           Vốn cần: {formatAmount(statistics.requiredBankrollAmount)}
@@ -451,10 +514,12 @@ export function App(): JSX.Element {
           <input
             id="rewardMultiplier"
             style={styles.input}
-            inputMode="numeric"
+            inputMode="decimal"
+            placeholder="Ví dụ: 20, 19.6, 1.95"
             value={form.rewardMultiplier}
             onChange={(e) => updateField('rewardMultiplier', e.target.value)}
           />
+          <p style={styles.fieldHint}>Hỗ trợ tối đa 2 chữ số thập phân.</p>
           {fieldErrors.rewardMultiplier !== undefined ? (
             <div style={styles.error}>{fieldErrors.rewardMultiplier}</div>
           ) : null}

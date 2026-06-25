@@ -78,6 +78,8 @@ No optimize action until Feature 2.
 │ Lợi nhuận mục tiêu        [100,000] │
 │ Số vòng                   [     50] │
 │ Hệ số thưởng              [     20] │
+│   placeholder: Ví dụ: 20, 19.6, 1.95│
+│   helper: Hỗ trợ tối đa 2 chữ số thập phân. │
 │ Cược tối thiểu            [ 10,000] │
 │ Bước cược                 [  1,000] │
 │                                      │
@@ -200,6 +202,14 @@ Screen A (form)
 - [ ] **View Plan** opens round table; back navigation works
 - [ ] Product code imports **only** `@stake/constraint-engine`
 - [ ] Dogfood: no “ủa tiếp theo bấm gì?” after Generate
+
+---
+
+## Input copy
+
+| Field | Placeholder | Helper text | Notes |
+| ----- | ----------- | ----------- | ----- |
+| Hệ số thưởng | `Ví dụ: 20, 19.6, 1.95` | `Hỗ trợ tối đa 2 chữ số thập phân.` | Placeholder + helper có thể ship trước Lane A (copy only). Input thập phân hoạt động sau [Arithmetic Migration Brief](../design/arithmetic-migration-brief.md). SDK sẽ reject combo không tương thích (vd. `betStep` × `M` không ra reward nguyên). |
 
 ---
 
