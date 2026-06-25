@@ -1,15 +1,46 @@
 # Calculation Engine SDK
 
-**Constraint-based bankroll planning** — validate input, solve optimal bets, build strategy aggregates, derive statistics, and run deterministic simulations.
+**Constraint-based bankroll planning** — validate input, solve optimal bets, build strategy aggregates, derive statistics, optimize for budget, and run deterministic simulations.
 
 |                    |                                                                            |
 | ------------------ | -------------------------------------------------------------------------- |
-| **Status**         | Core SDK v1 feature complete — publish candidate in progress (Sprint 2.7C) |
+| **Status**         | Platform-ready — Core + Optimization on `optimization-v1`                  |
 | **Public API**     | [`src/public/index.ts`](src/public/index.ts)                               |
-| **Future package** | `@stake/constraint-engine`                                                 |
+| **Package**        | `@stake/constraint-engine`                                                 |
 | **License**        | [MIT](LICENSE)                                                             |
 
-> This repository also contains the **Stake Planner** UI (a consumer app). The SDK lives under `src/core/` and is exposed only via [`src/public/index.ts`](src/public/index.ts).
+> **New here?** Read the [SDK Cookbook](docs/cookbook/README.md) — 5-minute start, common workflows, error mapping.  
+> This repository also contains the **Stake Planner** UI (a consumer app). Import only from `@stake/constraint-engine`.
+
+---
+
+## How it fits together
+
+```mermaid
+sequenceDiagram
+  participant User
+  participant App
+  participant SDK as @stake/constraint-engine
+
+  User->>App: Input (multiplier, rounds, profit, …)
+  App->>SDK: validateCalculationRequest()
+  SDK-->>App: ValidatedCalculationRequest
+  App->>SDK: solve()
+  SDK-->>App: Strategy (rounds)
+  App->>SDK: buildStrategy() + buildStatistics()
+  SDK-->>App: requiredBankrollAmount
+
+  alt requiredBankroll > budget
+    App->>SDK: optimize()
+    SDK-->>App: Suggested plan + explanation
+  end
+
+  App->>SDK: simulateWinAtRound()
+  SDK-->>App: Scenario profit & trace
+  App->>User: Display / Export JSON
+```
+
+Runnable end-to-end example: `pnpm example:minimal-consumer` → [`examples/minimal-consumer/`](examples/minimal-consumer/index.ts)
 
 ---
 
@@ -34,7 +65,9 @@ Requires **Node.js ≥ 22**.
 
 ## Quick Start
 
-Full pipeline using the public API:
+See **[Getting Started (5 min)](docs/cookbook/README.md)** for the full product workflow.
+
+Minimal generate + simulate:
 
 ```typescript
 import {
@@ -78,7 +111,18 @@ if (simulation.kind === 'success') {
 
 ## Capabilities
 
-Five public functions — use cases, not internal layers.
+Six public functions — use cases, not internal layers.
+
+| Function | Recipe |
+| -------- | ------ |
+| `validateCalculationRequest` | [Generate a plan](docs/cookbook/generate-plan.md) |
+| `solve` | [Generate a plan](docs/cookbook/generate-plan.md) |
+| `buildStrategy` | [Generate a plan](docs/cookbook/generate-plan.md) |
+| `buildStatistics` | [Generate a plan](docs/cookbook/generate-plan.md) |
+| `optimize` | [Optimize for bankroll](docs/cookbook/optimize-for-bankroll.md) |
+| `simulateWinAtRound` | [Run simulation](docs/cookbook/run-simulation.md) |
+
+Error mapping: [Error Cookbook](docs/cookbook/error-codes.md)
 
 ### 1. `validateCalculationRequest`
 
@@ -148,10 +192,32 @@ if (result.kind === 'success') {
 
 ---
 
+### 6. `optimize`
+
+Find a feasible plan under a bankroll limit. Returns suggested `CalculationRequest` + structured `explanation`.
+
+```typescript
+import { optimize, OptimizationReasons } from '@stake/constraint-engine';
+
+const result = optimize({
+  intent: request,
+  bankrollLimit: 1_000_000,
+  allowRoundReduction: true,
+  profitGranularity: 5_000,
+});
+
+if (result.kind === 'success' && result.explanation.reason === OptimizationReasons.PROFIT_REDUCED) {
+  console.log(result.request, result.explanation.profitReducedBy);
+}
+```
+
+---
+
 ## API Reference
 
 | Document                                                       | Purpose                          |
 | -------------------------------------------------------------- | -------------------------------- |
+| [`docs/cookbook/`](docs/cookbook/README.md)                    | **SDK user guide** — start here  |
 | [`PUBLIC_API.md`](PUBLIC_API.md)                               | Supported symbols + stable since |
 | [`RELEASE_MANIFEST.md`](RELEASE_MANIFEST.md)                   | Pre-flight checklist + RC gate   |
 | [`API_FREEZE.md`](API_FREEZE.md)                               | Frozen capabilities (v1)         |
@@ -176,6 +242,7 @@ pnpm verify
 | `pnpm test:property`    | property tests (nightly profile)                    |
 | `pnpm benchmark`        | latency baseline → `benchmarks/results/latest.json` |
 | `pnpm benchmark:record` | refresh committed `baseline.json` (maintainer)      |
+| `pnpm example:minimal-consumer` | Full public API workflow (dist)           |
 
 ---
 
