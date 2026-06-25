@@ -3,7 +3,7 @@
 **Purpose:** Maintainer dashboard — current state at a glance.  
 **Not** a technical spec. For depth, see `ROADMAP.md`, `CORE-STABILITY.md`, `API_FREEZE.md`.
 
-**Last updated:** 2025-06-25
+**Last updated:** 2026-06-25
 
 ---
 
@@ -26,21 +26,18 @@
 ## Current version
 
 ```text
-Core SDK: v1.0.0-rc.1   (target after release — see RELEASE_MANIFEST.md)
+Core SDK: v1.0.0-rc.1
 ```
 
-Package version bumps on release commit B. Until then, `package.json` may still show a pre-RC version.
+Tags: `core-sdk-v1-freeze`, `v1.0.0-rc.1`
 
 ---
 
 ## Next milestone
 
 ```text
-Sprint 3 — OptimizationEngine
+Optimization — branch optimization-v1 (RFC in progress; not on main)
 ```
-
-**Branch:** `optimization-v1` (after RC tags on `main`)  
-**Gate:** `docs/design/sprint-3-gate.md`
 
 ---
 
@@ -64,9 +61,9 @@ Sprint 3 — OptimizationEngine
 
 ## Quick links
 
-| Topic           | Document                                                  |
-| --------------- | --------------------------------------------------------- |
-| Release steps   | `RELEASE_MANIFEST.md`                                     |
-| Module gates    | `docs/CORE-STABILITY.md`                                  |
-| Public contract | `API_FREEZE.md`, `PUBLIC_API.md`                          |
-| Sprint 3        | `docs/design/sprint-3-gate.md`, `specs/007-optimization/` |
+| Topic           | Document                                      |
+| --------------- | --------------------------------------------- |
+| Release steps   | `RELEASE_MANIFEST.md`                         |
+| Module gates    | `docs/CORE-STABILITY.md`                      |
+| Public contract | `API_FREEZE.md`, `PUBLIC_API.md`              |
+| Sprint 3        | Branch `optimization-v1` only — not on `main` |

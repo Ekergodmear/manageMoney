@@ -2,8 +2,8 @@
 
 **Product:** Stake Planner (UI app)  
 **Engine:** Calculation Engine SDK — future package `constraint-engine` (ADR-030)  
-**Last Updated:** 2025-06-25  
-**Current Sprint:** 2.7C — SDK Publish Candidate  
+**Last Updated:** 2026-06-25  
+**Current Sprint:** Core SDK v1 released — Optimization on `optimization-v1`  
 **Status dashboard:** `docs/PROJECT-STATUS.md`
 
 ---
@@ -24,15 +24,14 @@
 
 See `docs/design/sprint-2.7c-spec.md`.
 
-| Phase      | Deliverable                         | Status      |
-| ---------- | ----------------------------------- | ----------- |
-| **2.7C.1** | README + LICENSE + CONTRIBUTING     | ✅          |
-| **2.7C.2** | Benchmark baseline (public API)     | ✅          |
-| **2.7C.3** | Packaging + `pnpm pack`             | ✅          |
-| **2.7C.4** | `v1.0.0-rc.1` → tags + manifest     | ⏳          |
-| —          | Tag `core-sdk-v1-freeze` (internal) | ⏳ end 2.7C |
+| Phase      | Deliverable                     | Status |
+| ---------- | ------------------------------- | ------ |
+| **2.7C.1** | README + LICENSE + CONTRIBUTING | ✅     |
+| **2.7C.2** | Benchmark baseline (public API) | ✅     |
+| **2.7C.3** | Packaging + `pnpm pack`         | ✅     |
+| **2.7C.4** | `v1.0.0-rc.1` → tags + manifest | ✅     |
 
-**Sprint 3 gate:** See `docs/design/sprint-3-gate.md` — branch `optimization-v1`, SDK-client review.
+**Sprint 3:** Optimization RFC + implementation — branch `optimization-v1` only. Not merged to `main` until RFC approved.
 
 ---
 
