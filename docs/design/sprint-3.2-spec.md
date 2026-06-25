@@ -121,26 +121,16 @@ NO_FEASIBLE_SOLUTION
 
 **Backlog (before 3.2C.2):** extract `createProfitCandidate(intent, profit)` — candidate construction must not live inline in `optimize()`. Policy decides the next value; a single helper owns `CalculationRequest` shaping.
 
-### 3.2C.1 — Profit search freeze + Monotonic Budget
+### 3.2C.1 — Profit search freeze + Monotonic Budget ✅
 
-Profit search is complete. Add property:
+Profit search is complete. Property tests (no new features):
 
-```text
-If budget₁ < budget₂
-Then optimizedProfit(result₁) ≤ optimizedProfit(result₂)
-```
+| Property | Test file |
+| -------- | --------- |
+| Monotonic Budget | `optimize-profit-properties.test.ts` |
+| Prefix Stability + First Feasible Wins | `optimize-profit-properties.test.ts` |
 
-Property-based test. **Freeze** profit search semantics after sign-off.
-
-**Prefix Stability** (property test):
-
-```text
-profitGranularity = 5k
-
-100 → 95 → 90   must be a prefix of   100 → 95 → 90 → 85 → 80 → ...
-```
-
-Search must not emit different candidate sequences depending on `bankrollLimit`. Enables future cache/heuristic without semantic drift.
+**Frozen:** profit search semantics — no changes until 3.2C.2 ships.
 
 ### 3.2C.2 — Round reduction
 
@@ -191,8 +181,8 @@ Heuristics later → separate RFC + benchmarks.
 - [x] No search state in `OptimizationResult`
 - [x] `src/public/index.ts` unchanged
 - [x] Architecture isolation test still passes
-- [ ] Monotonic budget property tested in 3.2C.1
-- [ ] Prefix Stability tested in 3.2C.1
+- [x] Monotonic budget property tested in 3.2C.1
+- [x] Prefix Stability tested in 3.2C.1
 - [ ] Round reduction in 3.2C.2 (separate commit)
 
 ---

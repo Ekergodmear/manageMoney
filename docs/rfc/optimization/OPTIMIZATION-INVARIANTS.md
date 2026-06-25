@@ -2,7 +2,7 @@
 
 **Status:** Locked — regression if broken  
 **Branch:** `optimization-v1`  
-**Sprint 3.1:** Identity proven. **Sprint 3.2A:** SearchPolicy locked. **Sprint 3.2B:** Profit search + First Feasible Wins.
+**Sprint 3.1:** Identity proven. **Sprint 3.2A:** SearchPolicy locked. **Sprint 3.2B:** Profit search + First Feasible Wins. **Sprint 3.2C.1:** Profit search frozen (Monotonic Budget + Prefix Stability).
 
 ---
 
@@ -106,7 +106,9 @@ If budget₁ < budget₂
 Then optimizedProfit(result₁) ≤ optimizedProfit(result₂)
 ```
 
-Property-based test in Sprint 3.2C.1 — freeze profit search semantics first.
+Property-based test in Sprint 3.2C.1 — **verified, profit search frozen**.
+
+Tests: `tests/unit/optimization/optimize-profit-properties.test.ts`
 
 ---
 
@@ -119,7 +121,9 @@ profitGranularity = 5k
 100 → 95 → 90   is always a prefix of   100 → 95 → 90 → 85 → 80 → ...
 ```
 
-Search must not branch differently per budget. Property test in 3.2C.1.
+Search must not branch differently per budget. Property test in 3.2C.1 — **verified**.
+
+Tests: `tests/unit/optimization/optimize-profit-properties.test.ts`
 
 ---
 
