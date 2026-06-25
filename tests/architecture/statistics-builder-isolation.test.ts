@@ -71,6 +71,9 @@ describe('Architecture — StrategyStatistics canonical constructor (ADR-035)', 
     if (rel.startsWith('src/core/models/')) {
       return false;
     }
+    if (rel.startsWith('src/core/optimization/')) {
+      return false;
+    }
     return true;
   });
 

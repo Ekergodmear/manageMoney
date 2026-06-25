@@ -89,8 +89,8 @@ describe('Architecture — OptimizationEngine isolation', () => {
       expect(optimizeContent).not.toMatch(/targetProfit\.amount\s*-/);
     });
 
-    it('optimize.ts does not inline round decrement before 3.2C', () => {
-      expect(optimizeContent).not.toMatch(/policy\.nextRoundCount/);
+    it('optimize.ts does not inline round decrement', () => {
+      expect(optimizeContent).toMatch(/policy\.nextRoundCount/);
       expect(optimizeContent).not.toMatch(/roundCount\s*-\s*1/);
       expect(optimizeContent).not.toMatch(/currentRoundCount\s*-/);
     });
