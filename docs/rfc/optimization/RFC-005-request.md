@@ -1,14 +1,14 @@
 # RFC-005 — Optimization Request & Result
 
-**Status:** Draft — **last in review order**  
-**Prerequisite:** RFC-002, RFC-003, RFC-004 accepted  
-**Note:** Request types are a **projection** of domain + assumptions — not the source of truth.
+**Status:** Draft — **ready for maintainer review** (RFC-003 accepted)  
+**Prerequisite:** RFC-002 ✅, RFC-003 ✅, RFC-004 (review)  
+**Note:** Types project domain rules — not the source of truth.
 
 ---
 
 ## Purpose
 
-Sketch the OptimizationEngine module contract (not Core SDK export) before implementation.
+Module-level contract for OptimizationEngine (not Core SDK export).
 
 ---
 
@@ -18,31 +18,75 @@ Sketch the OptimizationEngine module contract (not Core SDK export) before imple
 // Not implemented — not frozen
 
 interface OptimizationRequest {
-  base: CalculationRequest;
+  /** Original request — user intent (RFC-003) */
+  intent: CalculationRequest;
+
+  /** Hard constraints — e.g. bankroll ceiling */
   constraints: OptimizationConstraints;
-  objective: OptimizationObjective;
-  /** Must match RFC-002 accepted knobs only */
+
+  /** Which knobs may change (RFC-002) */
   searchSpace: OptimizationSearchSpace;
+}
+
+interface OptimizationConstraints {
+  /** Primary v1 constraint */
+  bankrollLimit: number;
+}
+
+interface OptimizationSearchSpace {
+  /** Round reduction allowed (RFC-002 A4) */
+  allowRoundReduction?: boolean;
+  /** Profit may decrease (RFC-002 A5) — default true when optimizing */
 }
 ```
 
-`searchSpace` flags must mirror RFC-002 assumption IDs (e.g. allow profit reduction iff A6 accepted).
+No `objective` enum for v1 — objective is fixed: **closest feasible to intent** (RFC-003).
 
 ---
 
 ## OptimizationResult (illustrative)
 
 ```typescript
-type OptimizationResult =
-  | { kind: 'success'; recommendation: RecommendedPlan; alternatives?: RecommendedPlan[] }
-  | { kind: 'partial'; bestEffort: RecommendedPlan; reason: string }
-  | { kind: 'failure'; error: OptimizationError };
+type OptimizationResult = OptimizationSuccess | OptimizationFailure;
 
-interface RecommendedPlan {
+interface OptimizationSuccess {
+  kind: 'success';
   request: CalculationRequest;
+  strategy: Strategy;
   statistics: StrategyStatistics;
-  rationale?: string;
+  explanation: OptimizationExplanation;
 }
+
+interface OptimizationFailure {
+  kind: 'failure';
+  code: 'NO_FEASIBLE_SOLUTION';
+  explanation: OptimizationExplanation;
+}
+
+interface OptimizationExplanation {
+  /** Human-readable — required for UI (RFC-003) */
+  summary: string;
+  /** Optional structured detail */
+  details?: string[];
+}
+```
+
+**Rejected for v1:** `alternatives[]`, `partial`, ranked lists, Pareto sets.
+
+---
+
+## Example explanation (success)
+
+```text
+Unable to satisfy 100k profit with 500k bankroll.
+Target profit reduced to 31k while preserving 50 rounds.
+```
+
+## Example explanation (failure)
+
+```text
+No feasible plan found within search limits.
+100 rounds and 100M profit cannot be satisfied with 20k bankroll.
 ```
 
 ---
@@ -51,19 +95,21 @@ interface RecommendedPlan {
 
 ```text
 OptimizationRequest
-  → candidate CalculationRequest(s) ∈ N(I₀, S)
-  → public Core SDK pipeline per candidate
-  → rank / select per RFC-004
-  → OptimizationResult
+  → generate candidates ∈ N(intent, searchSpace) monotonically
+  → Core public API per candidate
+  → filter by constraints.bankrollLimit
+  → select I* by lexicographic distance (RFC-004)
+  → build explanation
+  → OptimizationResult (one answer or failure)
 ```
 
 ---
 
 ## Open questions
 
-- [ ] One-shot vs iterative suggestions?
-- [ ] Error codes separate from `ValidationCodes`?
-- [ ] Module path: `src/optimization/` in monorepo?
+- [ ] Error code catalog beyond `NO_FEASIBLE_SOLUTION`?
+- [ ] Module path: `src/optimization/`?
+- [ ] SemVer for Optimization module vs Core?
 
 ---
 

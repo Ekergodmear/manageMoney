@@ -13,7 +13,7 @@ Core SDK release line (`main`) stays frozen at `v1.0.0-rc.1`. Optimization propo
 | ----------------------------------------------------- | ------------------------ | ----------- | ------------ |
 | [RFC-001](optimization/RFC-001-why-optimization.md)   | Why Optimization         | Draft       | 1            |
 | [RFC-002](optimization/RFC-002-assumptions.md)        | Optimization Assumptions | ✅ Accepted | 2            |
-| [RFC-003](optimization/RFC-003-domain.md)             | Optimization Domain      | Draft       | 3            |
+| [RFC-003](optimization/RFC-003-domain.md)             | Optimization Domain      | ✅ Accepted | 3            |
 | [RFC-004](optimization/RFC-004-mathematical-model.md) | Mathematical Model       | Draft       | 4            |
 | [RFC-005](optimization/RFC-005-request.md)            | Request & Result         | Draft       | 5            |
 
