@@ -5,6 +5,9 @@
 
 export { optimize } from './optimize';
 
+export type { SearchPolicy } from './search-policy';
+export { defaultSearchPolicy } from './search-policy';
+
 export type { OptimizationRequest } from './models/optimization-request';
 export type {
   OptimizationResult,

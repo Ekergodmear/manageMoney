@@ -64,12 +64,12 @@ describe('Architecture — OptimizationEngine isolation', () => {
     }
   });
 
-  it('models/ contain no runtime public API imports', () => {
-    const modelFiles = files.filter((file) => file.includes('optimization/models'));
-    for (const file of modelFiles) {
+  it('search-policy/ contains no runtime public API imports', () => {
+    const policyFiles = files.filter((file) => file.includes('search-policy'));
+    for (const file of policyFiles) {
       const content = readFileSync(file, 'utf-8');
       expect(content).not.toMatch(
-        /validateCalculationRequest|solve\(|buildStrategy|buildStatistics/,
+        /validateCalculationRequest|solve\(|buildStrategy|buildStatistics|from '@\/public'/,
       );
     }
   });

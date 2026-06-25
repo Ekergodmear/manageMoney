@@ -55,22 +55,20 @@ Each step evaluates candidates via **public API pipeline only**.
 Separate policy from engine — RFC-004 defines math; policy defines steps.
 
 ```typescript
-// Illustrative — Sprint 3.2A deliverable
+// Single v1 implementation — not a Strategy Pattern plugin point
 
 interface SearchPolicy {
-  /** Next profit candidate at fixed round count; null when exhausted */
   nextProfit(
     intent: CalculationRequest,
     currentProfit: ProfitAmount,
     profitGranularity: ProfitAmount,
   ): ProfitAmount | null;
 
-  /** Next round count; null when exhausted or not allowed */
-  nextRounds(intent: CalculationRequest, currentRounds: RoundCount): RoundCount | null;
+  nextRoundCount(intent: CalculationRequest, currentRoundCount: RoundCount): RoundCount | null;
 }
 ```
 
-Not for multiple implementations in v1 — for **RFC → Policy → Engine** clarity.
+Pure · deterministic · minimal-step. Policy does not import Core SDK.
 
 Search engine **consumes** `SearchPolicy`; it does not embed granularity rules.
 
@@ -78,11 +76,13 @@ Search engine **consumes** `SearchPolicy`; it does not embed granularity rules.
 
 ## Sprint 3.2 phases
 
-### 3.2A — Search Policy (spec + tests)
+### 3.2A — Search Policy (spec + tests) ✅
 
-- `SearchPolicy` interface + default v1 implementation
-- Unit tests for `nextProfit` / `nextRounds` sequencing
-- **No** `optimize()` search loop yet
+- `SearchPolicy` — policy object, **not** plugin point (single `defaultSearchPolicy`)
+- Pure, deterministic, minimal-step — gate before 3.2B
+- `search-policy/` must not import Core SDK
+
+**Gate (maintainer):** Pure · Deterministic · Minimal-step — enforced by tests
 
 ### 3.2B — Profit search only
 
