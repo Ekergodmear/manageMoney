@@ -12,10 +12,10 @@
 | --- | --- |
 | **Package** | `@stake/constraint-engine` |
 | **Version** | `v1.0.0-rc.1` |
-| **Status** | **Stable** — publishable, public API frozen |
-| **Proof** | 380+ tests, property + differential verification, minimal consumer, cookbook |
+| **Status** | **Stable** — decimal multiplier shipped (`28d5800`) |
+| **Proof** | 380+ tests, property + differential, regression M=20, arithmetic migration brief |
 
-Platform work is **complete**. Changes require SemVer and maintainer gate — see [`PUBLIC_API.md`](../PUBLIC_API.md).
+Platform work is **complete** for current product needs. Further changes require SemVer gate — see [`PUBLIC_API.md`](../PUBLIC_API.md).
 
 ---
 
@@ -24,51 +24,39 @@ Platform work is **complete**. Changes require SemVer and maintainer gate — se
 | | |
 | --- | --- |
 | **Name** | Stake Planner |
-| **Status** | **In development** |
-| **Spec** | RFC-101 (problem), RFC-102 (journey) — [`docs/rfc/product/`](rfc/product/README.md) |
-| **Next** | Product Reset ✅ → CLI dogfooding → Feature 1 (Generate Plan) |
+| **Status** | **Feature 1 — awaiting user evidence** |
+| **Spec** | [feature-1-generate-plan.md](product/feature-1-generate-plan.md) |
+| **App** | `src/App.tsx` — decimal input + decision cards (`d6c6153`) |
 
 ---
 
 ## Current focus
 
-**Feature 1 — Generate Plan** — [`docs/product/feature-1-generate-plan.md`](product/feature-1-generate-plan.md)
+**#018 — Stranger usability test** — comprehension + user expectation — [`feature-1-dogfood-notes.md`](product/feature-1-dogfood-notes.md) §#018
 
-> User enters parameters and gets a plan with required bankroll.
+> Script: *500.000đ, lời 100.000, 50 vòng.* 3 câu hỏi / màn. Ghi **User expectation**. Quay màn hình nếu đồng ý.
 
-Brief + wireframe ✅ · **Implemented** in `src/App.tsx` — dogfood next.
+**Freeze khi:** insight lặp — không còn phát hiện mới từ Feature 1.
 
-Success: complete in **< 30 seconds** without reading docs.
+**Không viết code** cho đến khi freeze hoặc có blocker rõ ràng.
 
 ---
 
-## Product roadmap
+## Roadmap (chốt)
 
 ```text
-Feature 1  Generate Plan
+⏳  #018 stranger test
     ↓
-Feature 2  Improve Plan
+✅  Freeze Feature 1 (Released)
     ↓
-Feature 3  Understand Plan
+📝  Feature 2 brief — Improve Plan
     ↓
-Feature 4  Keep Plan
+🚀  Feature 2 implement
     ↓
-Feature 5  Trust Plan
-    ↓
-v1.0.0
+✨  UX Polish Sprint (animation, a11y, dark mode — sau F2)
 ```
 
 Full roadmap: [`ROADMAP.md`](../ROADMAP.md)
-
----
-
-## Before product features
-
-| Step | Status | Notes |
-| ---- | ------ | ----- |
-| Product Reset (docs identity) | ✅ Done | README, status, roadmap, contributing |
-| `stake-planner` CLI (dogfooding) | Planned | `generate` + `optimize` — not a second product |
-| React app shell | After CLI dogfood | Feature 1 in UI |
 
 ---
 
@@ -76,11 +64,11 @@ Full roadmap: [`ROADMAP.md`](../ROADMAP.md)
 
 | Topic | Document |
 | ----- | -------- |
+| Feature 1 dogfood + #018 script | [`product/feature-1-dogfood-notes.md`](product/feature-1-dogfood-notes.md) |
+| Arithmetic migration | [`design/arithmetic-migration-brief.md`](design/arithmetic-migration-brief.md) |
 | Product problem | [`rfc/product/RFC-101-user-problem.md`](rfc/product/RFC-101-user-problem.md) |
 | User journey | [`rfc/product/RFC-102-user-journey.md`](rfc/product/RFC-102-user-journey.md) |
 | SDK cookbook | [`cookbook/README.md`](cookbook/README.md) |
-| Platform stability | [`CORE-STABILITY.md`](CORE-STABILITY.md) |
-| Optimization RFCs | [`rfc/README.md`](rfc/README.md) |
 
 ---
 
