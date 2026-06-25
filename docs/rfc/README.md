@@ -1,49 +1,58 @@
-# Optimization RFC Process
+# RFC Process
 
-**Branch:** `optimization-v1` only — **not** on `main`  
-**Meaning:** Branch = specification development line for Optimization product.
-
-Core SDK release line (`main`) stays frozen at `v1.0.0-rc.1`. Optimization proposals live here until RFCs are approved and Sprint 3 implementation begins.
+**Branch:** `optimization-v1` — specification + product line  
+**Core SDK (`main`):** frozen at `v1.0.0-rc.1`
 
 ---
 
-## RFC index
+## Optimization RFCs (engine)
 
-| RFC                                                   | Title                    | Status      | Review order |
-| ----------------------------------------------------- | ------------------------ | ----------- | ------------ |
-| [RFC-001](optimization/RFC-001-why-optimization.md)   | Why Optimization         | ✅ Accepted | 1            |
-| [RFC-002](optimization/RFC-002-assumptions.md)        | Optimization Assumptions | ✅ Accepted | 2            |
-| [RFC-003](optimization/RFC-003-domain.md)             | Optimization Domain      | ✅ Accepted | 3            |
-| [RFC-004](optimization/RFC-004-mathematical-model.md) | Mathematical Model       | ✅ Accepted | 4            |
-| [RFC-005](optimization/RFC-005-request.md)            | Request & Result         | ✅ Accepted | 5            |
+| RFC                                                   | Title                    | Status      |
+| ----------------------------------------------------- | ------------------------ | ----------- |
+| [RFC-001](optimization/RFC-001-why-optimization.md)   | Why Optimization         | ✅ Accepted |
+| [RFC-002](optimization/RFC-002-assumptions.md)        | Optimization Assumptions | ✅ Accepted |
+| [RFC-003](optimization/RFC-003-domain.md)             | Optimization Domain      | ✅ Accepted |
+| [RFC-004](optimization/RFC-004-mathematical-model.md) | Mathematical Model       | ✅ Accepted |
+| [RFC-005](optimization/RFC-005-request.md)            | Request & Result         | ✅ Accepted |
 
-**RFC stack:** ✅ Complete — Sprint 3 implementation gate **open** on `optimization-v1`.  
-**After approval:** RFCs may merge to `main` as historical record, or stay on branch — maintainer decision at Sprint 3 start.
-
----
-
-## Future versions
-
-Optimization v2+ uses new RFC numbers (e.g. RFC-010) without rewriting Sprint history.
+**Stack:** ✅ Complete — Optimization Engine Production Ready (Sprint 3.3).
 
 ---
 
-## Implementation phases (after RFC approval)
+## Product RFCs (Stake Planner)
+
+**Index:** [`docs/rfc/product/README.md`](product/README.md)
+
+| RFC | Title | Status |
+| --- | ----- | ------ |
+| [RFC-101](product/RFC-101-user-problem.md) | User Problem | ✅ Accepted |
+| [RFC-102](product/RFC-102-user-journey.md) | User Journey | ✅ Accepted |
+
+Sprint **3.5** — product specification, **no code**.
+
+---
+
+## Implementation phases
+
+### Engine (`optimization-v1`)
 
 ```text
-Sprint 3.1A  Contracts                    ✅
-Sprint 3.1B  Identity (optimize)          ✅ maintainer sign-off
-Sprint 3.2A  SearchPolicy                 planned
-Sprint 3.2B  Profit search                planned
-Sprint 3.2C  Nested search                planned
-Sprint 3.3   Verification                 planned
+Sprint 3.1–3.3  Contracts → Search → Verification  ✅ frozen
 ```
 
-See `docs/design/sprint-3.2-spec.md`, `docs/rfc/optimization/OPTIMIZATION-INVARIANTS.md`.
+### Product (after RFC-101/102)
+
+```text
+RFC-101  User Problem     ✅
+RFC-102  User Journey     ✅
+Demo CLI                 ← next (generate + optimize)
+Sprint 4+                Product (React)
+```
 
 ---
 
 ## References
 
-- `docs/design/sprint-3-gate.md` — SDK client, review criteria
-- `specs/007-optimization/` — legacy index
+- `docs/PROJECT-STATUS.md`
+- `docs/design/optimization-formal-verification.md`
+- `docs/rfc/optimization/OPTIMIZATION-INVARIANTS.md`
