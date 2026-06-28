@@ -133,7 +133,7 @@ export function AppLayout({
         )}
       </div>
 
-      <nav className="flex flex-1 flex-col gap-0.5 overflow-hidden">
+      <nav className="scrollbar-none flex flex-1 flex-col gap-0.5 overflow-y-auto">
         {NAV_ITEMS.map((item) => (
           <div key={item.id}>{renderNavButton(item, activeNav === item.id, compact)}</div>
         ))}
@@ -202,13 +202,13 @@ export function AppLayout({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.15 }}
-              className="min-h-0 min-w-0 flex-1 overflow-hidden p-3 sm:p-4 lg:p-5"
+              className="scrollbar-none min-h-0 min-w-0 flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5"
             >
               {main}
             </motion.main>
 
             {showRightPanel ? (
-              <aside className="hidden min-h-0 w-72 shrink-0 overflow-hidden border-l border-border bg-muted/30 p-4 lg:block xl:w-80">
+              <aside className="scrollbar-none hidden min-h-0 w-72 shrink-0 overflow-y-auto border-l border-border bg-muted/30 p-4 lg:block xl:w-80">
                 <div className="flex flex-col gap-2">{rightPanel}</div>
               </aside>
             ) : null}
