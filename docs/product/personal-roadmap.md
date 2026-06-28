@@ -89,11 +89,20 @@ Session Management · Improve · Game Designer · Session aggregate · Capital P
 - Quick forks · Promote → Session / Preset
 - Recent 5 trong `sessionStorage`
 
-## Giai đoạn 7 — Insights
+## Giai đoạn 7 — Session 2.0 (hiện tại)
+
+Polish workspace Session — không thêm module mới.
+
+- **Session Cockpit** — overview thành cockpit: progress, plan, bet, spent, target, actions
+- **Playing** — hero round card, shortcuts (B/Enter, W, Z), animation, auto-scroll
+- **Timeline** dọc với giờ (HH:mm)
+- **Notes** + **Statistics** — panel cố định, không popup
+
+## Giai đoạn 8 — Library 2.0
 
 Capital Usage · Planned vs Played vs Released · Efficiency
 
-## Giai đoạn 8 — Account Planner
+## Giai đoạn 9 — Insights 2.0
 
 ## Giai đoạn 9+
 

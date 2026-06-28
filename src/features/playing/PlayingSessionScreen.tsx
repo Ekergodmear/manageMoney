@@ -15,11 +15,14 @@ import { formatAmount } from '@/lib/money-format';
 import { cn } from '@/lib/utils';
 
 interface PlayingSessionScreenProps {
+  readonly sessionTitle?: string;
   readonly generated: GenerateResult;
   readonly sessionNumber: number;
   readonly completedThroughRound: number;
   readonly timeline: readonly SessionTimelineEvent[];
   readonly sessionStatus: 'playing' | 'won' | 'lost';
+  readonly focusRoundIndex?: number | null;
+  readonly onFocusRoundHandled?: () => void;
   readonly onPlaceBet: (roundIndex: number) => void;
   readonly onUndoBet: () => void;
   readonly onWin: (roundIndex: number) => void;
@@ -46,11 +49,14 @@ function continuePresets(totalRounds: number, maxRounds: number): number[] {
 }
 
 export function PlayingSessionScreen({
+  sessionTitle,
   generated,
   sessionNumber,
   completedThroughRound,
   timeline,
   sessionStatus,
+  focusRoundIndex = null,
+  onFocusRoundHandled,
   onPlaceBet,
   onUndoBet,
   onWin,
@@ -65,15 +71,14 @@ export function PlayingSessionScreen({
   const [viewMode, setViewMode] = useState<'focus' | 'table'>('focus');
   const [continueTarget, setContinueTarget] = useState<string>('');
   const [selectedContinue, setSelectedContinue] = useState<number | null>(null);
-  const listRef = useRef<HTMLDivElement>(null);
+  const [betPulse, setBetPulse] = useState(false);
+  const heroRef = useRef<HTMLDivElement>(null);
 
   const accumulated = accumulatedAtRound(strategy.rounds, completedThroughRound);
   const currentRoundIndex = completedThroughRound + 1;
   const currentRound = strategy.rounds[currentRoundIndex - 1];
-  const nextBet =
-    completedThroughRound > 0
-      ? (strategy.rounds[completedThroughRound - 1]?.betAmount ?? 0)
-      : 0;
+  const currentBet = currentRound?.betAmount ?? 0;
+  const nextBet = strategy.rounds[currentRoundIndex]?.betAmount ?? 0;
   const allRoundsDone = completedThroughRound >= totalRounds && sessionStatus === 'playing';
   const presetTargets = continuePresets(totalRounds, continueMaxRounds);
   const progressPct =
@@ -98,14 +103,50 @@ export function PlayingSessionScreen({
   }, [strategy.rounds, completedThroughRound, totalRounds, currentRoundIndex]);
 
   useEffect(() => {
-    if (viewMode !== 'focus') {
+    if (focusRoundIndex !== null && focusRoundIndex > 0) {
+      heroRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      onFocusRoundHandled?.();
+    }
+  }, [focusRoundIndex, onFocusRoundHandled]);
+
+  useEffect(() => {
+    if (sessionStatus !== 'playing' || viewMode !== 'focus') {
       return;
     }
-    listRef.current?.querySelector('[data-current="true"]')?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center',
-    });
-  }, [completedThroughRound, viewMode]);
+    heroRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [completedThroughRound, viewMode, sessionStatus]);
+
+  useEffect(() => {
+    if (sessionStatus !== 'playing' || currentRound === undefined) {
+      return;
+    }
+    function onKeyDown(e: KeyboardEvent): void {
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') {
+        return;
+      }
+      if (e.key === 'Enter' || e.key === 'b' || e.key === 'B') {
+        e.preventDefault();
+        onPlaceBet(currentRoundIndex);
+        setBetPulse(true);
+        setTimeout(() => setBetPulse(false), 300);
+      }
+      if (e.key === 'w' || e.key === 'W') {
+        e.preventDefault();
+        onWin(currentRoundIndex);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        onUndoBet();
+      }
+      if (e.key === 'z' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        onUndoBet();
+      }
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [sessionStatus, currentRound, currentRoundIndex, onPlaceBet, onWin, onUndoBet]);
 
   if (viewMode === 'table') {
     return (
@@ -137,65 +178,94 @@ export function PlayingSessionScreen({
   }
 
   return (
-    <div className="w-full space-y-5">
+    <div className="w-full max-w-lg space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Phiên #{String(sessionNumber)}</h2>
+          <h2 className="text-xl font-bold tracking-tight">
+            {sessionTitle ?? `Phiên #${String(sessionNumber)}`}
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Đã chơi <strong className="text-foreground">{completedThroughRound}</strong> /{' '}
-            {totalRounds} · Đã chi {formatAmount(accumulated)} đ
+            {completedThroughRound} / {totalRounds} · {progressPct}%
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           {sessionStatus === 'playing' && completedThroughRound > 0 ? (
-            <Button variant="outline" size="sm" onClick={onUndoBet}>
+            <Button variant="outline" size="sm" onClick={onUndoBet} title="Phím Z">
               <RotateCcw className="h-4 w-4" />
               Hoàn tác
             </Button>
           ) : null}
           <Button variant="outline" size="sm" onClick={() => setViewMode('table')}>
             <Table2 className="h-4 w-4" />
-            Xem bảng
-          </Button>
-          <Button variant="outline" size="sm" onClick={onEdit}>
-            Sửa ý định
+            Bảng
           </Button>
           {onImprove !== undefined ? (
             <Button variant="outline" size="sm" onClick={onImprove}>
               <Sparkles className="h-4 w-4" />
-              Capital Planner
+              Cải thiện
             </Button>
           ) : null}
         </div>
       </div>
-
-      <Card className="border-dashed">
-        <CardContent className="p-4">
-          <p className="mb-2 text-xs font-medium text-muted-foreground">Timeline phiên</p>
-          <SessionTimeline events={timeline} compact />
-        </CardContent>
-      </Card>
 
       {sessionStatus === 'won' ? (
         <Card className="border-success bg-success/10">
           <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
             <PartyPopper className="h-10 w-10 text-success" />
             <p className="text-lg font-bold">Chúc mừng — bạn đã thắng!</p>
-            <p className="text-sm text-muted-foreground">
-              Phiên #{String(sessionNumber)} đã kết thúc. Xem lại trong Lịch sử.
-            </p>
           </CardContent>
         </Card>
       ) : null}
 
-      {sessionStatus === 'playing' ? (
+      {sessionStatus === 'playing' && currentRound !== undefined ? (
         <>
+          <motion.div
+            ref={heroRef}
+            animate={betPulse ? { scale: [1, 1.02, 1] } : { scale: 1 }}
+            transition={{ duration: 0.25 }}
+          >
+            <Card className="border-primary shadow-xl ring-2 ring-primary/25">
+              <CardContent className="space-y-6 p-8 text-center sm:p-10">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    Vòng
+                  </p>
+                  <p className="mt-1 text-5xl font-bold tabular-nums tracking-tight">
+                    {currentRoundIndex}
+                  </p>
+                </div>
+                <div className="border-t border-border pt-6">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    Cược
+                  </p>
+                  <p className="mt-2 text-4xl font-bold tabular-nums tracking-tight text-primary sm:text-5xl">
+                    {formatAmount(currentBet)} đ
+                  </p>
+                </div>
+                <div className="flex flex-wrap justify-center gap-3 pt-2">
+                  <Button size="lg" className="min-h-12 min-w-[140px] text-base" onClick={() => onPlaceBet(currentRoundIndex)}>
+                    <Check className="h-5 w-5" />
+                    Đã cược
+                  </Button>
+                  <Button size="lg" variant="outline" className="min-h-12 min-w-[140px] text-base" onClick={() => onWin(currentRoundIndex)}>
+                    <Trophy className="h-5 w-5" />
+                    Thắng
+                  </Button>
+                </div>
+                {nextBet > 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Tiếp theo: <strong className="text-foreground">{formatAmount(nextBet)} đ</strong>
+                  </p>
+                ) : null}
+                <p className="text-xs text-muted-foreground">
+                  Enter / B · cược · W · thắng · Z · hoàn tác
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
           <div className="space-y-1">
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Tiến độ</span>
-              <span>{progressPct}%</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-muted">
+            <div className="h-1.5 overflow-hidden rounded-full bg-muted">
               <motion.div
                 className="h-full rounded-full bg-primary"
                 initial={false}
@@ -203,88 +273,50 @@ export function PlayingSessionScreen({
                 transition={{ type: 'spring', stiffness: 120, damping: 20 }}
               />
             </div>
+            <p className="text-center text-xs text-muted-foreground">
+              Đã chi {formatAmount(accumulated)} đ
+            </p>
           </div>
 
-          <div ref={listRef} className="space-y-3">
+          <div className="space-y-2">
             <AnimatePresence mode="popLayout">
-              {focusRounds.map((round) => (
+              {focusRounds.slice(1).map((round) => (
                 <motion.div
                   key={round.index}
                   layout
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: round.isDone ? 0.45 : 1, y: 0 }}
-                  exit={{ opacity: 0, x: -40, height: 0, marginBottom: 0 }}
-                  transition={{ duration: 0.25 }}
-                  data-current={round.isCurrent ? 'true' : undefined}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: round.isDone ? 0.4 : 0.85, y: 0 }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <Card
+                  <div
                     className={cn(
-                      'overflow-hidden transition-shadow',
-                      round.isCurrent && 'border-primary shadow-md ring-2 ring-primary/20',
-                      round.isDone && 'bg-muted/40',
+                      'flex items-center justify-between rounded-lg border px-3 py-2 text-sm',
+                      round.isDone && 'bg-muted/30',
                     )}
                   >
-                    <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={cn(
-                            'flex h-9 w-9 items-center justify-center rounded-full border',
-                            round.isDone
-                              ? 'border-success bg-success/20 text-success'
-                              : 'border-border bg-card',
-                          )}
-                        >
-                          {round.isDone ? <Check className="h-4 w-4" /> : '□'}
-                        </div>
-                        <div>
-                          <p className="font-semibold">Vòng {round.index}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {formatAmount(round.betAmount)} đ
-                          </p>
-                        </div>
-                        {round.isCurrent ? (
-                          <Badge variant="default" className="ml-1">
-                            Lần cược tiếp
-                          </Badge>
-                        ) : null}
-                      </div>
-
-                      {round.isCurrent && currentRound !== undefined ? (
-                        <div className="flex flex-wrap gap-2">
-                          <Button
-                            onClick={() => onPlaceBet(round.index)}
-                            className="min-w-[100px]"
-                          >
-                            <Check className="h-4 w-4" />
-                            Đã cược
-                          </Button>
-                          <Button variant="outline" onClick={() => onWin(round.index)}>
-                            <Trophy className="h-4 w-4" />
-                            Thắng
-                          </Button>
-                        </div>
-                      ) : null}
-                    </CardContent>
-                  </Card>
+                    <span className="text-muted-foreground">Vòng {round.index}</span>
+                    <span className="font-mono tabular-nums">{formatAmount(round.betAmount)} đ</span>
+                  </div>
                 </motion.div>
               ))}
             </AnimatePresence>
           </div>
-
-          {completedThroughRound > 0 && nextBet > 0 ? (
-            <p className="text-center text-xs text-muted-foreground">
-              Lần cược gần nhất: {formatAmount(nextBet)} đ
-            </p>
-          ) : null}
         </>
       ) : null}
+
+      <Card className="border-dashed">
+        <CardContent className="p-4">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">Timeline</p>
+          <SessionTimeline events={timeline} compact variant="horizontal" onNavigate={undefined} />
+        </CardContent>
+      </Card>
 
       {allRoundsDone ? (
         <Card className="border-dashed">
           <CardContent className="space-y-4 p-5">
-            <p className="font-medium">Bạn đã hoàn thành kế hoạch.</p>
-            <p className="text-sm text-muted-foreground">Không có lượt thắng.</p>
-            <p className="text-sm font-medium">Session Planner — continue until</p>
+            <p className="font-medium">Hết vòng — chưa thắng.</p>
+            <p className="text-sm text-muted-foreground">Continue until</p>
             <div className="flex flex-wrap gap-2">
               {presetTargets.map((n) => (
                 <Button
@@ -330,13 +362,13 @@ export function PlayingSessionScreen({
                 }
               }}
             >
-              Tạo phần tiếp theo
+              Continue
             </Button>
           </CardContent>
         </Card>
       ) : null}
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-center text-xs text-muted-foreground">
         Vốn cần {formatAmount(statistics.requiredBankrollAmount)} đ
       </p>
     </div>

@@ -382,10 +382,12 @@ export function addPlanFromImprove(session: Session, option: ImproveOption): Ses
 }
 
 export function updateSessionNotes(session: Session, notes: string): Session {
+  if (session.notes === notes) {
+    return session;
+  }
   return {
     ...session,
     notes,
-    timeline: addEvent(session.timeline, { type: 'note-updated', label: 'Notes' }),
     updatedAt: nowIso(),
   };
 }
@@ -412,9 +414,32 @@ export function planOriginLabel(origin: PlanOrigin): string {
     case 'generate':
       return 'Generate';
     case 'improve':
-      return 'Improve';
+      return 'Cải thiện';
     case 'continue':
       return 'Continue';
+  }
+}
+
+export function planStatusBadge(
+  plan: Plan,
+  isCurrent: boolean,
+): { readonly text: string; readonly variant: 'default' | 'outline' | 'secondary' | 'destructive' } {
+  if (isCurrent && (plan.status === 'playing' || plan.status === 'ready')) {
+    return { text: 'Hiện tại', variant: 'default' };
+  }
+  switch (plan.status) {
+    case 'won':
+      return { text: '✓ Thắng', variant: 'outline' };
+    case 'lost':
+      return { text: 'Thua', variant: 'destructive' };
+    case 'superseded':
+      return { text: 'Thay thế', variant: 'secondary' };
+    case 'ready':
+      return { text: 'Sẵn sàng', variant: 'outline' };
+    case 'playing':
+      return { text: 'Đang chơi', variant: 'outline' };
+    default:
+      return { text: plan.status, variant: 'outline' };
   }
 }
 
