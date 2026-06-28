@@ -36,6 +36,12 @@ Session
         │
         ▼
 Playing
+        │
+        ▼
+Session Library
+        │
+        ▼
+Insights (đọc từ Library)
 ```
 
 Planning chỉ khởi tạo session thủ công khi cần.
@@ -54,16 +60,16 @@ Planning Strategy Engine ✅
 Capital Planner ✅
         │
         ▼
-Session ✅
-        │
-        ▼
-Playing ✅
-        │
-        ▼
 Scenario Planner ✅
         │
         ▼
-Insights
+Session 2.0 ✅
+        │
+        ▼
+Library 2.0 ✅
+        │
+        ▼
+Insights 2.0
         │
         ▼
 Account Planner
@@ -89,7 +95,7 @@ Session Management · Improve · Game Designer · Session aggregate · Capital P
 - Quick forks · Promote → Session / Preset
 - Recent 5 trong `sessionStorage`
 
-## Giai đoạn 7 — Session 2.0 (hiện tại)
+## Giai đoạn 7 — Session 2.0 ✅
 
 Polish workspace Session — không thêm module mới.
 
@@ -98,11 +104,18 @@ Polish workspace Session — không thêm module mới.
 - **Timeline** dọc với giờ (HH:mm)
 - **Notes** + **Statistics** — panel cố định, không popup
 
-## Giai đoạn 8 — Library 2.0
+## Giai đoạn 8 — Library 2.0 ✅
 
-Capital Usage · Planned vs Played vs Released · Efficiency
+Library = bộ não kinh nghiệm chơi — Insights đọc từ đây sau này. **Đóng băng** trừ bug.
 
-## Giai đoạn 9 — Insights 2.0
+- **Header stats** — Active, Completed, Won, Lost
+- **4 khu vực** — Active (ghim ĐANG CHƠI), Recent (nhóm thời gian), Collections (folder), Archive
+- **Search + filter** — game, status, continue ≥N, max bet, tag
+- **Session card** — thumbnail trạng thái, metrics, export menu ⋮
+- **Favorite** ☆/★ + animation · **Duplicate** thông minh `(2)(3)` + đổi tên lần đầu
+- **Compare** drawer bên phải + cột Δ · **Tags** + **Collections**
+
+## Giai đoạn 9 — Insights 2.0 (tiếp theo)
 
 ## Giai đoạn 9+
 

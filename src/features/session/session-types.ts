@@ -1,4 +1,5 @@
 import type { CapitalPlannerSnapshot } from '@/features/capital/capital-planner-types';
+import type { LibraryCollection } from '@/features/library/library-types';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
 import type { Session } from '@/features/session/session-domain';
 
@@ -11,6 +12,7 @@ export interface PersistedAppState {
   readonly customGamePresets: readonly GamePolicyPreset[];
   readonly activePresetId: string;
   readonly capitalPlanner: CapitalPlannerSnapshot | null;
+  readonly libraryCollections: readonly LibraryCollection[];
 }
 
 export const EMPTY_PERSISTED_STATE: PersistedAppState = {
@@ -22,6 +24,7 @@ export const EMPTY_PERSISTED_STATE: PersistedAppState = {
   customGamePresets: [],
   activePresetId: 'bingo-120',
   capitalPlanner: null,
+  libraryCollections: [],
 };
 
 // Legacy types kept for migration only

@@ -16,7 +16,14 @@ import {
   findPreset,
   mergePresets,
 } from '@/features/game-designer/preset-utils';
-import { SessionLibraryScreen } from '@/features/history/HistoryScreen';
+import {
+  duplicateSession,
+  toggleSessionArchived,
+  toggleSessionFavorite,
+  updateSessionTags,
+} from '@/features/library/library-actions';
+import type { LibraryCollection } from '@/features/library/library-types';
+import { SessionLibraryScreen } from '@/features/library/SessionLibraryScreen';
 import type { ImproveOption } from '@/features/improve/improve-service';
 import { GeneratePlanScreen } from '@/features/planner/GeneratePlanScreen';
 import {
@@ -37,11 +44,12 @@ import {
   stopSession,
   undoBetOnPlan,
   updateSessionNotes,
+  updateSessionTitle,
   winCurrentPlan,
   type Session,
   type SessionView,
 } from '@/features/session/session-domain';
-import { exportFullSessionJson, exportLibraryJson } from '@/features/session/session-export';
+import { exportFullSessionJson, exportLibraryJson, exportSessionPrint } from '@/features/session/session-export';
 import { loadPersistedState, savePersistedState } from '@/features/session/session-persistence';
 import { SessionPlannerScreen } from '@/features/session/SessionPlannerScreen';
 import type { PersistedAppState } from '@/features/session/session-types';
@@ -310,6 +318,14 @@ export function App(): JSX.Element {
     updateSession(id, (s) => updateSessionNotes(s, notes));
   }
 
+  function handleTitleChange(title: string): void {
+    const id = viewingSessionId ?? persisted.activeSessionId;
+    if (id === null) {
+      return;
+    }
+    updateSession(id, (s) => updateSessionTitle(s, title));
+  }
+
   function handleCreateSessionFromCapital(rec: CapitalSessionRecommendation): void {
     let sessions = [...persisted.sessions];
     if (persisted.activeSessionId !== null) {
@@ -438,6 +454,7 @@ export function App(): JSX.Element {
         onContinue={isReadOnly ? () => undefined : handleContinue}
         onApplyImprove={isReadOnly ? () => undefined : applyImprove}
         onNotesChange={handleNotesChange}
+        onTitleChange={handleTitleChange}
         onExport={handleExportSession}
         onStopSession={isReadOnly ? () => undefined : handleStopSession}
         readOnly={isReadOnly}
@@ -560,10 +577,64 @@ export function App(): JSX.Element {
           <SessionLibraryScreen
             sessions={persisted.sessions}
             activeSessionId={persisted.activeSessionId}
+            presets={allPresets}
+            collections={persisted.libraryCollections}
             onOpenSession={(id) => {
               setViewingSessionId(id);
               setSessionView('overview');
               setActiveWorkspace('session');
+            }}
+            onToggleFavorite={(id) => {
+              updateSession(id, (s) => toggleSessionFavorite(s));
+            }}
+            onToggleArchive={(id) => {
+              updateSession(id, (s) => toggleSessionArchived(s));
+            }}
+            onDuplicate={(id) => {
+              const source = findSession(persisted.sessions, id);
+              if (source === null) {
+                return;
+              }
+              const copy = duplicateSession(
+                source,
+                persisted.nextSessionNumber,
+                persisted.sessions,
+              );
+              persist({
+                ...persisted,
+                nextSessionNumber: persisted.nextSessionNumber + 1,
+                sessions: upsertSession(persisted.sessions, copy),
+              });
+              setViewingSessionId(copy.id);
+              setSessionView('overview');
+              setActiveWorkspace('session');
+              showToast('Đặt tên session mới');
+            }}
+            onExportJson={(id) => {
+              const session = findSession(persisted.sessions, id);
+              if (session !== null) {
+                exportFullSessionJson(session);
+              }
+            }}
+            onExportPrint={(id) => {
+              const session = findSession(persisted.sessions, id);
+              if (session === null) {
+                return;
+              }
+              const preset = findPreset(allPresets, session.presetId);
+              exportSessionPrint(session, preset?.name ?? session.presetId);
+            }}
+            onTagAdd={(id, tag) => {
+              updateSession(id, (s) =>
+                s.tags.includes(tag) ? s : updateSessionTags(s, [...s.tags, tag]),
+              );
+            }}
+            onAddCollection={(collection: LibraryCollection) => {
+              persist({
+                ...persisted,
+                libraryCollections: [...persisted.libraryCollections, collection],
+              });
+              showToast(`Collection "${collection.name}" đã thêm`);
             }}
           />
         );

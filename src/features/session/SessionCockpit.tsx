@@ -5,11 +5,12 @@ import {
   Sparkles,
   Square,
 } from 'lucide-react';
-import { useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
 import { accumulatedAtRound } from '@/features/planner/plan-display';
 import type { Plan, Session, SessionStatistics } from '@/features/session/session-domain';
@@ -47,6 +48,7 @@ interface SessionCockpitProps {
   readonly onExport: () => void;
   readonly onStopSession: () => void;
   readonly onNotesChange: (notes: string) => void;
+  readonly onTitleChange?: (title: string) => void;
 }
 
 function sessionStatusLabel(status: Session['status']): string {
@@ -101,8 +103,16 @@ export function SessionCockpit({
   onExport,
   onStopSession,
   onNotesChange,
+  onTitleChange,
 }: SessionCockpitProps): ReactNode {
   const planRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [renameValue, setRenameValue] = useState(session.title);
+  const renameRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setRenameValue(session.title);
+  }, [session.title, session.id]);
+
   const currentPlan = getCurrentPlan(session);
   const currentExhausted = currentPlan !== null && isPlanExhausted(currentPlan);
   const canPlay =
@@ -141,8 +151,27 @@ export function SessionCockpit({
       <Card className="border-primary/15 shadow-sm">
         <CardContent className="space-y-5 p-5 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h2 className="text-xl font-bold tracking-tight sm:text-2xl">{session.title}</h2>
+            <div className="min-w-0 flex-1">
+              {session.pendingRename && onTitleChange !== undefined ? (
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-primary">Đặt tên session mới</p>
+                  <Input
+                    ref={renameRef}
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    className="text-lg font-bold"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        onTitleChange(renameValue);
+                      }
+                    }}
+                    onBlur={() => onTitleChange(renameValue)}
+                  />
+                </div>
+              ) : (
+                <h2 className="text-xl font-bold tracking-tight sm:text-2xl">{session.title}</h2>
+              )}
               <p className="mt-1 text-sm text-muted-foreground">
                 {sessionPresetName(preset)}
                 {session.startedAt !== null ? ` · ${formatSessionTime(session.startedAt)}` : ''}

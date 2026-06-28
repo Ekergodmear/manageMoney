@@ -1,5 +1,6 @@
 import type { ActiveSession, HistorySession, PersistedAppState } from '@/features/session/session-types';
 import type { Session, SessionTimelineEvent } from '@/features/session/session-domain';
+import { normalizeSessionLibraryFields } from '@/features/library/library-actions';
 
 function mapLegacyTimeline(
   events: readonly { at: string; type: string; label?: string; roundIndex?: number; betAmount?: number }[],
@@ -56,6 +57,9 @@ function activeToSession(active: ActiveSession, presetId: string): Session {
     notes: '',
     startedAt: active.status === 'playing' || active.status === 'won' ? active.createdAt : null,
     profitAmount: null,
+    favorite: false,
+    archived: false,
+    tags: [],
     createdAt: active.createdAt,
     updatedAt: active.updatedAt,
   };
@@ -92,6 +96,9 @@ function historyToSession(item: HistorySession, presetId: string): Session {
     startedAt: item.finishedAt,
     finishedAt: item.finishedAt,
     profitAmount: item.profitAmount,
+    favorite: false,
+    archived: false,
+    tags: [],
     createdAt: item.finishedAt,
     updatedAt: item.finishedAt,
   };
@@ -108,6 +115,7 @@ export function migratePersistedState(raw: unknown): PersistedAppState {
       customGamePresets: [],
       activePresetId: 'bingo-120',
       capitalPlanner: null,
+      libraryCollections: [],
     };
   }
 
@@ -121,6 +129,8 @@ export function migratePersistedState(raw: unknown): PersistedAppState {
     return {
       ...state,
       capitalPlanner: state.capitalPlanner ?? null,
+      libraryCollections: state.libraryCollections ?? [],
+      sessions: (state.sessions ?? []).map(normalizeSessionLibraryFields),
     };
   }
 
@@ -143,6 +153,7 @@ export function migratePersistedState(raw: unknown): PersistedAppState {
       customGamePresets: state.customGamePresets,
       activePresetId: state.activePresetId,
       capitalPlanner: null,
+      libraryCollections: [],
     };
   }
 
@@ -155,5 +166,6 @@ export function migratePersistedState(raw: unknown): PersistedAppState {
     customGamePresets: [],
     activePresetId: 'bingo-120',
     capitalPlanner: null,
+    libraryCollections: [],
   };
 }

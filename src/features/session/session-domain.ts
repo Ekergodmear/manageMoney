@@ -69,6 +69,10 @@ export interface Session {
   readonly startedAt: string | null;
   readonly finishedAt?: string;
   readonly profitAmount: number | null;
+  readonly favorite: boolean;
+  readonly archived: boolean;
+  readonly tags: readonly string[];
+  readonly pendingRename?: boolean;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -167,6 +171,9 @@ export function createSessionFromGenerate(
     notes: '',
     startedAt: null,
     profitAmount: null,
+    favorite: false,
+    archived: false,
+    tags: [],
     createdAt: at,
     updatedAt: at,
   };
@@ -388,6 +395,19 @@ export function updateSessionNotes(session: Session, notes: string): Session {
   return {
     ...session,
     notes,
+    updatedAt: nowIso(),
+  };
+}
+
+export function updateSessionTitle(session: Session, title: string): Session {
+  const trimmed = title.trim();
+  if (trimmed === '' || trimmed === session.title) {
+    return { ...session, pendingRename: false, updatedAt: nowIso() };
+  }
+  return {
+    ...session,
+    title: trimmed,
+    pendingRename: false,
     updatedAt: nowIso(),
   };
 }

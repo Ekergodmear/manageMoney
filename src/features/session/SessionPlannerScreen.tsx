@@ -29,6 +29,7 @@ interface SessionPlannerScreenProps {
   readonly onExport: () => void;
   readonly onStopSession: () => void;
   readonly readOnly?: boolean;
+  readonly onTitleChange?: (title: string) => void;
 }
 
 export function SessionPlannerScreen({
@@ -47,6 +48,7 @@ export function SessionPlannerScreen({
   onExport,
   onStopSession,
   readOnly = false,
+  onTitleChange,
 }: SessionPlannerScreenProps): ReactNode {
   const currentPlan = getCurrentPlan(session);
   const stats = computeSessionStatistics(session);
@@ -141,6 +143,7 @@ export function SessionPlannerScreen({
       onExport={onExport}
       onStopSession={onStopSession}
       onNotesChange={onNotesChange}
+      onTitleChange={onTitleChange}
     />
   );
 }
