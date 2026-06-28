@@ -47,6 +47,8 @@ import { SessionPlannerScreen } from '@/features/session/SessionPlannerScreen';
 import type { PersistedAppState } from '@/features/session/session-types';
 import { EMPTY_PERSISTED_STATE } from '@/features/session/session-types';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
+import { ScenarioPlannerScreen } from '@/features/scenario/ScenarioPlannerScreen';
+import type { ScenarioExperiment } from '@/features/scenario/scenario-types';
 import { AppLayout } from '@/layout/AppLayout';
 
 interface ToastState {
@@ -337,6 +339,40 @@ export function App(): JSX.Element {
     showToast(`Session từ ${rec.label} — Plan A sẵn sàng`);
   }
 
+  function handlePromoteScenarioSession(experiment: ScenarioExperiment): void {
+    if (experiment.result === null) {
+      return;
+    }
+    let sessions = [...persisted.sessions];
+    if (persisted.activeSessionId !== null) {
+      const current = findSession(sessions, persisted.activeSessionId);
+      if (current !== null && current.status === 'playing') {
+        sessions = upsertSession(sessions, stopSession(current));
+      }
+    }
+
+    const presetId = experiment.formValues.presetId || persisted.activePresetId;
+    const session = createSessionFromGenerate(
+      experiment.formValues,
+      experiment.result,
+      presetId,
+      persisted.nextSessionNumber,
+    );
+
+    persist({
+      ...persisted,
+      nextSessionNumber: persisted.nextSessionNumber + 1,
+      activeSessionId: session.id,
+      sessions: upsertSession(sessions, session),
+      activePresetId: presetId,
+    });
+    setLiveForm(experiment.formValues);
+    setViewingSessionId(null);
+    setSessionView('overview');
+    setActiveWorkspace('session');
+    showToast(`Session từ experiment "${experiment.label}" — Plan A sẵn sàng`);
+  }
+
   function handleStopSession(): void {
     if (persisted.activeSessionId === null) {
       return;
@@ -448,6 +484,16 @@ export function App(): JSX.Element {
                 handlePresetSelect(preset);
               }
             }}
+          />
+        );
+      case 'scenario':
+        return (
+          <ScenarioPlannerScreen
+            presets={allPresets}
+            activePresetId={persisted.activePresetId}
+            onPresetSelect={handlePresetSelect}
+            onPromoteSession={handlePromoteScenarioSession}
+            onPromotePreset={handleSaveGamePreset}
           />
         );
       case 'capital':

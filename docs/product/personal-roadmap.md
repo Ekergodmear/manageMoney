@@ -10,6 +10,7 @@
 |-----------------|--------------|
 | Generate | **Planning** |
 | Improve | **Improve** (trong Session — sửa plan có sẵn) |
+| Scenario Planner | **Scenario Planner** (Lab — sandbox what-if) |
 | Capital Planner | **Capital Planner** (workspace — quyết định trước khi chơi) |
 | Continue | **Session Planner** |
 | Allocation | **Account Planner** |
@@ -19,10 +20,13 @@
 
 ---
 
-## Kiến trúc 3 tầng
+## Kiến trúc sản phẩm
 
 ```
 Game Designer
+        │
+        ▼
+Scenario Planner (Lab)
         │
         ▼
 Capital Planner
@@ -34,14 +38,17 @@ Session
 Playing
 ```
 
-Planning không còn là trung tâm — chỉ khởi tạo session thủ công khi cần.
+Planning chỉ khởi tạo session thủ công khi cần.
 
 ---
 
-## Roadmap 5 năm
+## Roadmap
 
 ```
 Game Designer ✅
+        │
+        ▼
+Planning Strategy Engine ✅
         │
         ▼
 Capital Planner ✅
@@ -50,81 +57,51 @@ Capital Planner ✅
 Session ✅
         │
         ▼
-Improve (trong Session) ✅
+Playing ✅
         │
         ▼
-Scenario Planner (sandbox what-if)
-        │
-        ▼
-Simulation
-        │
-        ▼
-Account Planner
+Scenario Planner ✅
         │
         ▼
 Insights
         │
         ▼
-Session Library ✅
+Account Planner
         │
         ▼
-Resume (khi cần đa session / đa thiết bị)
-        │
-        ▼
-Backup / Restore / Cloud
+Resume · Backup · Cloud
 ```
 
 ---
 
-## Giai đoạn 1 — Session Management ✅
+## Giai đoạn 1–5 ✅
 
-Dashboard · Planning · Playing · Session Planner (continue) · Session Library · Insights (slider) · Export · IndexedDB
+Session Management · Improve · Game Designer · Session aggregate · Capital Planner
 
-## Giai đoạn 2 — Improve ✅
+(xem commit history cho chi tiết)
 
-5 mode optimize · UI Improve trong Session (plan đã có → làm khả thi hơn)
+## Giai đoạn 6 — Scenario Planner ✅
 
-## Giai đoạn 3 — Game Designer + Presets ✅
+- Workspace **Scenario Planner** — Lab sandbox, không persist IndexedDB
+- **Experiments** (không dùng "branch") — Baseline + Experiment A/B/C
+- **Compare** với cột Δ so với Baseline (vốn, max bet, profit, ROI…)
+- **Duplicate** experiment · **Notes** trên từng experiment
+- Quick forks · Promote → Session / Preset
+- Recent 5 trong `sessionStorage`
 
-- **Game Designer** workspace — rules, reward policy, continue policy
-- Builtin: Bingo ×120, ×20, Crash 1.95, Dice, Custom
-- Save custom preset → IndexedDB
-- **Planning** — preset picker auto-fill form
-- `maximumBet` lưu trong preset (solver wire Phase 2 platform)
+## Giai đoạn 7 — Insights
 
-## Giai đoạn 4 — Session (aggregate root) ✅
+Capital Usage · Planned vs Played vs Released · Efficiency
 
-- **Session** = aggregate root (plans[], timeline, notes, statistics)
-- **Plan** tree: Generate → Improve → Continue với `parentPlanId`
-- Workspace **Session** = trang làm việc chính (80% thời gian)
-- **Session Library** thay history đơn lẻ
-- Export full session JSON (policy, plans, timeline, notes, stats)
+## Giai đoạn 8 — Account Planner
 
-## Giai đoạn 5 — Capital Planner ✅ (hiện tại)
+## Giai đoạn 9+
 
-- Workspace **Capital Planner** — vốn + game + mục tiêu + rủi ro → engine tự quyết profit/rounds
-- Không nhập profit/rounds thủ công
-- Multi-session split qua **Strategy Profile** → `CapitalAllocationPolicy` (không hardcode trong service)
-- **Planning Strategy Engine** — Capital Planner không gọi `optimize()` trực tiếp
-- **Generate Session** → tạo Session aggregate từ khuyến nghị
-- Dashboard: Capital / Allocated / Available
-- Tách rõ **Improve** (sửa plan) vs **Capital Planner** (chiến lược từ vốn)
+Calendar · Notes · Search · Resume · Backup/Restore · PWA · Cloud
 
-## Giai đoạn 6 — Scenario Planner
+---
 
-Sandbox what-if: vốn khác, multiplier đổi, tax đổi — không sửa session thật
-
-## Giai đoạn 7 — Account Planner
-
-Chia plan trên session, không chỉ strategy đơn
-
-## Giai đoạn 8+
-
-Insights sâu · Calendar · Notes · Search · Resume · Backup/Restore · Shortcuts · PWA · AI
-
-## Backend
-
-Chỉ khi cần sync đa thiết bị — local-first trước.
+*Nguyên tắc từ đây: không thêm workspace mới trừ khi mở năng lực mới. Đào sâu chất lượng module hiện có.*
 
 ---
 
