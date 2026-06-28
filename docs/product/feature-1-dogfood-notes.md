@@ -1,7 +1,8 @@
 # Feature 1 — Dogfood Notes & Usability Protocol
 
 **Feature:** Generate Plan  
-**App:** `pnpm dev` → http://localhost:5173  
+**App (local):** `pnpm dev` → http://localhost:5173  
+**App (#018):** _[Vercel production URL — điền sau deploy]_  
 **Brief:** [feature-1-generate-plan.md](feature-1-generate-plan.md)  
 **Commits:** `28d5800` (decimal SDK) · `d6c6153` (decimal input + card layout)  
 **Tester:** Automated + browser session (2026-06-25)  
@@ -344,7 +345,8 @@ User: "Improve Plan đâu?"
 | --- | --- |
 | **Số người** | 2–3 người chưa biết dự án, không biết SDK |
 | **Thời lượng** | ~5 phút / người |
-| **Thiết bị** | Ưu tiên mobile (~375px) cho ít nhất 1 người |
+| **Thiết bị** | Ưu tiên mobile (~375px) cho ít nhất 1 người — dùng **URL production** (Vercel), không localhost |
+| **URL** | Gửi link Vercel cho tester — điện thoại / máy khác / người lạ |
 | **Vai trò của bạn** | Chỉ đọc script — **không giải thích, không chỉ tay** |
 | **Ghi hình** | Quay màn hình (OBS / Xbox Game Bar) **nếu người tham gia đồng ý** |
 
