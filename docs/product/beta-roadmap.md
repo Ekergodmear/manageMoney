@@ -1,5 +1,7 @@
 # Beta Roadmap
 
+Xem kiến trúc đầy đủ: [product-architecture.md](./product-architecture.md)
+
 Thay vì nhảy thẳng "Feature 2", mỗi beta có **một mục tiêu rõ** — học từ người dùng trước khi code tiếp.
 
 ## Positioning (10 giây đầu)

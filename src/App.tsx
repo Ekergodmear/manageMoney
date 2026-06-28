@@ -1,7 +1,11 @@
 import { useEffect, useState, type JSX } from 'react';
 
-import { DecisionScreen } from '@/features/planner/DecisionScreen';
+import { AnalysisScreen } from '@/features/analysis/AnalysisScreen';
+import { AllocationScreen } from '@/features/allocation/AllocationScreen';
+import { DashboardScreen } from '@/features/dashboard/DashboardScreen';
+import { HistoryScreen } from '@/features/history/HistoryScreen';
 import { GeneratePlanScreen } from '@/features/planner/GeneratePlanScreen';
+import { PlanReadyScreen } from '@/features/planner/PlanReadyScreen';
 import { PlanTableScreen } from '@/features/planner/PlanTableScreen';
 import {
   DEFAULT_PLANNER_FORM,
@@ -10,49 +14,33 @@ import {
   type PlannerFormValues,
   type PlannerField,
 } from '@/features/planner/plan-service';
-import { FormRightPanel, PlanRightPanel } from '@/features/planner/RightPanel';
-import { type NavItemId } from '@/features/navigation/sidebar-config';
-import {
-  FeaturePlaceholder,
-  GuidePreviewScreen,
-} from '@/features/placeholders/FeaturePlaceholder';
+import { FormRightPanel, PlanRightPanel, PlayingProgressPanel } from '@/features/planner/RightPanel';
+import type { WorkspaceId } from '@/features/navigation/workspace-nav';
+import type { PlanRecord } from '@/features/session/plan-records';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
-import { CurrentSessionScreen } from '@/features/session/CurrentSessionScreen';
-import { SessionCard } from '@/features/session/SessionCard';
 import { AppLayout } from '@/layout/AppLayout';
 import { ComingSoonToast } from '@/components/ui/coming-soon-toast';
 
-type CreatePhase = 'form' | 'decision' | 'plan';
+type PlanningPhase = 'form' | 'ready';
 
 export function App(): JSX.Element {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [activeNav, setActiveNav] = useState<NavItemId>('create');
-  const [createPhase, setCreatePhase] = useState<CreatePhase>('form');
+  const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceId>('dashboard');
+  const [planningPhase, setPlanningPhase] = useState<PlanningPhase>('form');
   const [formValues, setFormValues] = useState<PlannerFormValues>(DEFAULT_PLANNER_FORM);
   const [liveForm, setLiveForm] = useState<PlannerFormValues>(DEFAULT_PLANNER_FORM);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<PlannerField, string>>>({});
   const [generated, setGenerated] = useState<GenerateResult | null>(null);
   const [completedThroughRound, setCompletedThroughRound] = useState(0);
   const [sessionNumber, setSessionNumber] = useState(1);
-  const [sessionStartedAt, setSessionStartedAt] = useState<Date>(() => new Date());
-  const [comingSoon, setComingSoon] = useState<string | null>(null);
-
-  const hasActivePlan = generated !== null;
+  const [sessionStarted, setSessionStarted] = useState(false);
+  const [recentPlans, setRecentPlans] = useState<PlanRecord[]>([]);
+  const [activePlanId, setActivePlanId] = useState<number | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     document.querySelector('main')?.scrollTo({ top: 0, behavior: 'instant' });
-  }, [activeNav, createPhase]);
-
-  function handleNavSelect(id: NavItemId): void {
-    if (id === 'create') {
-      setActiveNav('create');
-      if (generated !== null && createPhase === 'form') {
-        setCreatePhase('plan');
-      }
-      return;
-    }
-    setActiveNav(id);
-  }
+  }, [activeWorkspace, planningPhase]);
 
   function handleGenerate(values: PlannerFormValues): void {
     setFormValues(values);
@@ -66,38 +54,44 @@ export function App(): JSX.Element {
     }
     setFieldErrors({});
     setCompletedThroughRound(0);
+    setSessionStarted(false);
     setGenerated(outcome.result);
+    const id = Date.now();
+    const record: PlanRecord = {
+      id,
+      label: `Kế hoạch ${values.roundCount} vòng`,
+      roundCount: Number(values.roundCount),
+      status: 'ready',
+      createdAt: new Date(),
+    };
+    setActivePlanId(id);
+    setRecentPlans((prev) => [record, ...prev].slice(0, 8));
     setSessionNumber((n) => (generated === null ? 1 : n + 1));
-    setSessionStartedAt(new Date());
-    setCreatePhase('decision');
-    setActiveNav('create');
+    setPlanningPhase('ready');
+    setActiveWorkspace('planning');
   }
 
-  function handleNewPlan(): void {
-    setCreatePhase('form');
-    setActiveNav('create');
+  function startSession(): void {
+    setSessionStarted(true);
+    setRecentPlans((prev) =>
+      prev.map((p) => (p.id === activePlanId ? { ...p, status: 'playing' as const } : p)),
+    );
+    setActiveWorkspace('playing');
   }
 
-  function renderCreateFlow(): JSX.Element {
-    if (createPhase === 'decision' && generated !== null) {
+  function renderPlanning(): JSX.Element {
+    if (planningPhase === 'ready' && generated !== null) {
       return (
-        <DecisionScreen
+        <PlanReadyScreen
           generated={generated}
-          onEdit={() => setCreatePhase('form')}
-          onViewPlan={() => setCreatePhase('plan')}
-        />
-      );
-    }
-    if (createPhase === 'plan' && generated !== null) {
-      return (
-        <PlanTableScreen
-          generated={generated}
-          completedThroughRound={completedThroughRound}
-          onToggleRound={(roundIndex, checked) =>
-            setCompletedThroughRound(checked ? roundIndex : roundIndex - 1)
-          }
-          onResetProgress={() => setCompletedThroughRound(0)}
-          onEdit={() => setCreatePhase('form')}
+          onEdit={() => setPlanningPhase('form')}
+          onStart={startSession}
+          onViewTable={() => {
+            setSessionStarted(true);
+            setActiveWorkspace('playing');
+          }}
+          onSimulate={() => setActiveWorkspace('analysis')}
+          onExport={() => setToast('Xuất file — sắp có trong Settings.')}
         />
       );
     }
@@ -112,112 +106,81 @@ export function App(): JSX.Element {
   }
 
   function renderMain(): JSX.Element {
-    switch (activeNav) {
-      case 'create':
-        return renderCreateFlow();
-      case 'session':
-        return generated !== null ? (
-          <CurrentSessionScreen
-            sessionNumber={sessionNumber}
+    switch (activeWorkspace) {
+      case 'dashboard':
+        return (
+          <DashboardScreen
             generated={generated}
+            sessionNumber={sessionNumber}
+            sessionStarted={sessionStarted}
             completedThroughRound={completedThroughRound}
-            startedAt={sessionStartedAt}
-            onContinuePlan={() => {
-              setActiveNav('create');
-              setCreatePhase('plan');
+            recentPlans={recentPlans}
+            onContinueSession={() => setActiveWorkspace('playing')}
+            onNewPlan={() => {
+              setPlanningPhase('form');
+              setActiveWorkspace('planning');
             }}
-            onNewPlan={handleNewPlan}
-            onComingSoon={setComingSoon}
+            onOpenPlan={() => {
+              if (generated !== null) {
+                setActiveWorkspace(sessionStarted ? 'playing' : 'planning');
+                if (!sessionStarted) {
+                  setPlanningPhase('ready');
+                }
+              }
+            }}
+          />
+        );
+      case 'planning':
+        return renderPlanning();
+      case 'playing':
+        return generated !== null ? (
+          <PlanTableScreen
+            generated={generated}
+            sessionNumber={sessionNumber}
+            completedThroughRound={completedThroughRound}
+            onToggleRound={(roundIndex, checked) =>
+              setCompletedThroughRound(checked ? roundIndex : roundIndex - 1)
+            }
+            onResetProgress={() => setCompletedThroughRound(0)}
+            onEdit={() => {
+              setPlanningPhase('form');
+              setActiveWorkspace('planning');
+            }}
           />
         ) : (
-          <FeaturePlaceholder
-            title="Phiên đang chơi"
-            description="Đây là trung tâm theo dõi phiên — nơi bạn tiếp tục, hoàn thành hoặc xuất kết quả."
-            body="Tạo kế hoạch trước để bắt đầu phiên đầu tiên."
-            comingLabel="Bắt đầu từ Tạo kế hoạch."
-          />
+          renderPlanning()
         );
-      case 'improve':
-        return (
-          <FeaturePlaceholder
-            title="Cải thiện kế hoạch"
-            description="Bạn chỉ có 500.000?"
-            body="Tính năng này sẽ tự tìm kế hoạch gần nhất phù hợp với vốn hiện có — giảm mục tiêu hoặc điều chỉnh số vòng thay vì bắt bạn nhập lại từ đầu."
-            comingLabel="Coming soon."
-          />
-        );
-      case 'continue':
-        return (
-          <FeaturePlaceholder
-            title="Tiếp tục phiên"
-            description="Đã chơi hết 50 vòng?"
-            body="Tiếp tục lên 100 hoặc 150 vòng mà không cần tạo lại từ đầu. Vốn bổ sung và tổng vốn sau mở rộng sẽ được tính tự động."
-            comingLabel="Coming soon."
-          />
-        );
-      case 'simulation':
-        return (
-          <FeaturePlaceholder
-            title="Mô phỏng"
-            description="Nếu thắng ở vòng 37 thì chuyện gì xảy ra?"
-            body="Kéo slider chọn vòng thắng — bảng và số liệu cập nhật realtime. Hiểu plan, không phải tạo plan mới."
-            comingLabel="Beta preview — coming soon."
-          />
-        );
+      case 'analysis':
+        return <AnalysisScreen />;
       case 'allocation':
-        return (
-          <FeaturePlaceholder
-            title="Phân bổ tài khoản"
-            description="Tự động chia kế hoạch cho nhiều tài khoản."
-            body="Hữu ích khi game có thuế hoặc giới hạn — đề xuất 1 hoặc nhiều account và gán plan cho từng tài khoản."
-            comingLabel="Coming soon."
-          />
-        );
-      case 'game':
-        return (
-          <FeaturePlaceholder
-            title="Game"
-            description="Chọn luật game — Bingo ×20, ×120, Crash 1.95 hoặc Custom."
-            body="Mỗi game tự điền minimum bet, step, reward và thuế. Bạn không phải nhập lại thủ công."
-            comingLabel="Coming soon."
-          />
-        );
-      case 'guide':
-        return <GuidePreviewScreen />;
+        return <AllocationScreen />;
+      case 'history':
+        return <HistoryScreen />;
       case 'settings':
         return <SettingsScreen theme={theme} onThemeChange={(dark) => setTheme(dark ? 'dark' : 'light')} />;
-      case 'history':
-        return (
-          <FeaturePlaceholder
-            title="Lịch sử"
-            description="Xem lại các phiên chơi trước đây."
-            body="Lọc Won / Lost / Cancelled, tìm theo ngày hoặc lợi nhuận, mở lại session cũ."
-            comingLabel="Coming in Feature 5."
-          />
-        );
       default:
-        return renderCreateFlow();
+        return renderPlanning();
     }
   }
 
-  const showSessionCard =
-    hasActivePlan && (activeNav === 'create' || activeNav === 'session');
-
   const showRightPanel =
-    activeNav === 'create' ||
-    activeNav === 'session' ||
-    activeNav === 'improve' ||
-    activeNav === 'simulation';
+    activeWorkspace === 'planning' ||
+    activeWorkspace === 'playing' ||
+    activeWorkspace === 'analysis';
 
   const rightPanel =
-    activeNav === 'create' && createPhase === 'form' ? (
+    activeWorkspace === 'planning' && planningPhase === 'form' ? (
       <FormRightPanel form={liveForm} />
-    ) : hasActivePlan &&
-      (activeNav === 'create' ||
-        activeNav === 'session' ||
-        activeNav === 'improve' ||
-        activeNav === 'simulation') ? (
-      <PlanRightPanel generated={generated!} completedThroughRound={completedThroughRound} />
+    ) : generated !== null && activeWorkspace === 'playing' ? (
+      <>
+        <PlayingProgressPanel
+          completedThroughRound={completedThroughRound}
+          totalRounds={generated.strategy.rounds.length}
+        />
+        <PlanRightPanel generated={generated} completedThroughRound={completedThroughRound} />
+      </>
+    ) : generated !== null && (activeWorkspace === 'planning' || activeWorkspace === 'analysis') ? (
+      <PlanRightPanel generated={generated} completedThroughRound={completedThroughRound} />
     ) : (
       <FormRightPanel form={formValues} />
     );
@@ -225,30 +188,15 @@ export function App(): JSX.Element {
   return (
     <>
       <AppLayout
-        activeNav={activeNav}
-        onNavSelect={handleNavSelect}
-        hasActivePlan={hasActivePlan}
+        activeWorkspace={activeWorkspace}
+        onWorkspaceSelect={setActiveWorkspace}
         theme={theme}
         onThemeChange={(dark) => setTheme(dark ? 'dark' : 'light')}
         showRightPanel={showRightPanel}
-        main={
-          <div className="space-y-4">
-            {showSessionCard && generated !== null ? (
-              <SessionCard
-                sessionNumber={sessionNumber}
-                generated={generated}
-                completedThroughRound={completedThroughRound}
-                startedAt={sessionStartedAt}
-              />
-            ) : null}
-            {renderMain()}
-          </div>
-        }
+        main={renderMain()}
         rightPanel={rightPanel}
       />
-      {comingSoon !== null ? (
-        <ComingSoonToast message={comingSoon} onClose={() => setComingSoon(null)} />
-      ) : null}
+      {toast !== null ? <ComingSoonToast message={toast} onClose={() => setToast(null)} /> : null}
     </>
   );
 }

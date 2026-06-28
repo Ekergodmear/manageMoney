@@ -7,14 +7,11 @@ import {
 } from '@tanstack/react-table';
 import {
   ArrowUp,
-  BarChart3,
   ChevronLeft,
   ChevronRight,
   Filter,
   RefreshCw,
   Search,
-  Target,
-  Wallet,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -26,8 +23,6 @@ import { Input } from '@/components/ui/input';
 import type { GenerateResult } from '@/features/planner/plan-service';
 import {
   accumulatedAtRound,
-  computeTargetWinRatePercent,
-  formatPercent,
 } from '@/features/planner/plan-display';
 import type { Round } from '@stake/constraint-engine';
 import { formatAmount } from '@/lib/money-format';
@@ -48,50 +43,35 @@ const PAGE_SIZES = [15, 30, 50] as const;
 interface PlanTableScreenProps {
   readonly generated: GenerateResult;
   readonly completedThroughRound: number;
+  readonly sessionNumber?: number;
   readonly onToggleRound: (roundIndex: number, checked: boolean) => void;
   readonly onResetProgress: () => void;
   readonly onEdit: () => void;
 }
 
-function MetricCard({
-  icon,
-  label,
-  value,
-  hint,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  hint: string;
-}): React.ReactNode {
-  return (
-    <Card className="shadow-sm">
-      <CardContent className="p-4">
-        <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-primary">
-          {icon}
-        </div>
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="mt-1 text-xl font-bold tracking-tight">{value}</p>
-        <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>
-      </CardContent>
-    </Card>
-  );
-}
-
 export function PlanTableScreen({
   generated,
   completedThroughRound,
+  sessionNumber = 1,
   onToggleRound,
   onResetProgress,
   onEdit,
 }: PlanTableScreenProps): React.ReactNode {
-  const { strategy, statistics, request } = generated;
+  const { strategy, statistics } = generated;
   const [roundFilter, setRoundFilter] = useState<RoundFilter>('all');
   const [search, setSearch] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   const accumulated = accumulatedAtRound(strategy.rounds, completedThroughRound);
-  const targetWinRate = computeTargetWinRatePercent(statistics);
+  const lastBet =
+    completedThroughRound > 0
+      ? (strategy.rounds[completedThroughRound - 1]?.betAmount ?? 0)
+      : 0;
+  const allRoundsDone = completedThroughRound >= strategy.rounds.length;
+  const progressPct =
+    strategy.rounds.length > 0
+      ? Math.round((completedThroughRound / strategy.rounds.length) * 100)
+      : 0;
 
   useEffect(() => {
     const main = document.querySelector('main');
@@ -191,13 +171,11 @@ export function PlanTableScreen({
     <div className="w-full space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">
-            Kế hoạch — {strategy.rounds.length} vòng
-          </h2>
+          <h2 className="text-xl font-bold tracking-tight">Phiên #{String(sessionNumber)}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Đã cược: <strong className="text-foreground">{completedThroughRound}</strong> /{' '}
-            {strategy.rounds.length} vòng
-            {completedThroughRound > 0 ? ` · Tích lũy: ${formatAmount(accumulated)}` : ''}
+            Đã chơi <strong className="text-foreground">{completedThroughRound}</strong> /{' '}
+            {strategy.rounds.length} · Đã chi {formatAmount(accumulated)} đ
+            {lastBet > 0 ? ` · Cược gần nhất ${formatAmount(lastBet)} đ` : ''}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -209,33 +187,6 @@ export function PlanTableScreen({
             Đặt lại
           </Button>
         </div>
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
-          icon={<Wallet className="h-4 w-4" />}
-          label="Vốn cần"
-          value={`${formatAmount(statistics.requiredBankrollAmount)} đ`}
-          hint="Tổng vốn để hoàn thành kế hoạch"
-        />
-        <MetricCard
-          icon={<Target className="h-4 w-4" />}
-          label="Cược tối thiểu"
-          value={`${formatAmount(statistics.minimumBetAmount)} đ`}
-          hint={`Bước cược: ${formatAmount(request.betStep)} đ`}
-        />
-        <MetricCard
-          icon={<BarChart3 className="h-4 w-4" />}
-          label="Cược cao nhất"
-          value={`${formatAmount(statistics.maximumBetAmount)} đ`}
-          hint="Ở vòng cuối cùng"
-        />
-        <MetricCard
-          icon={<Target className="h-4 w-4" />}
-          label="Tỷ lệ thắng mục tiêu"
-          value={`${formatPercent(targetWinRate)}%`}
-          hint="Theo công thức tối ưu"
-        />
       </div>
 
       <Card className="shadow-sm">
@@ -388,6 +339,32 @@ export function PlanTableScreen({
           </div>
         </CardContent>
       </Card>
+
+      {allRoundsDone ? (
+        <Card className="border-dashed">
+          <CardContent className="space-y-4 p-5">
+            <p className="font-medium">Bạn đã hoàn thành {strategy.rounds.length} vòng. Không trúng.</p>
+            <p className="text-sm text-muted-foreground">Tiếp tục đến:</p>
+            <div className="flex flex-wrap gap-2">
+              {[600, 700, 800, 1000].map((n) => (
+                <Button key={n} variant="outline" size="sm" type="button" disabled>
+                  {n}
+                </Button>
+              ))}
+              <Button variant="outline" size="sm" type="button" disabled>
+                Custom
+              </Button>
+            </div>
+            <Button type="button" disabled>
+              Tạo tiếp
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      <p className="text-xs text-muted-foreground">
+        Progress {progressPct}% · Vốn cần {formatAmount(statistics.requiredBankrollAmount)} đ
+      </p>
 
       {showScrollTop ? (
         <Button

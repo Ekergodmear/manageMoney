@@ -72,6 +72,32 @@ export function FormRightPanel({ form }: { form: PlannerFormValues }): ReactNode
   );
 }
 
+export function PlayingProgressPanel({
+  completedThroughRound,
+  totalRounds,
+}: {
+  completedThroughRound: number;
+  totalRounds: number;
+}): ReactNode {
+  const pct = totalRounds > 0 ? Math.round((completedThroughRound / totalRounds) * 100) : 0;
+  return (
+    <Card className="shadow-none">
+      <CardHeader className="p-3 pb-1">
+        <CardTitle className="text-sm">Progress</CardTitle>
+      </CardHeader>
+      <CardContent className="p-3 pt-0">
+        <div className="h-2 overflow-hidden rounded-full bg-muted">
+          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${String(pct)}%` }} />
+        </div>
+        <p className="mt-2 text-center text-lg font-bold">{pct}%</p>
+        <p className="text-center text-xs text-muted-foreground">
+          {completedThroughRound} / {totalRounds} vòng
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function PlanRightPanel({
   generated,
   completedThroughRound,
