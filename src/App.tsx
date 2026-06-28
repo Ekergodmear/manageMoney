@@ -1,6 +1,5 @@
 import { useEffect, useState, type JSX } from 'react';
 
-import { DecisionScreen } from '@/features/planner/DecisionScreen';
 import { GeneratePlanScreen } from '@/features/planner/GeneratePlanScreen';
 import { PlanTableScreen } from '@/features/planner/PlanTableScreen';
 import {
@@ -10,11 +9,11 @@ import {
   type PlannerFormValues,
   type PlannerField,
 } from '@/features/planner/plan-service';
-import { FormRightPanel, ResultRightPanel } from '@/features/planner/RightPanel';
+import { FormRightPanel, PlanRightPanel } from '@/features/planner/RightPanel';
 import { AppLayout, type NavItemId } from '@/layout/AppLayout';
 import { ComingSoonToast } from '@/components/ui/coming-soon-toast';
 
-type Screen = 'form' | 'decision' | 'plan';
+type Screen = 'form' | 'plan';
 
 export function App(): JSX.Element {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -27,7 +26,7 @@ export function App(): JSX.Element {
   const [comingSoon, setComingSoon] = useState<string | null>(null);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    document.querySelector('main')?.scrollTo({ top: 0, behavior: 'instant' });
   }, [screen]);
 
   function handleNavSelect(id: NavItemId): void {
@@ -51,17 +50,11 @@ export function App(): JSX.Element {
     setFieldErrors({});
     setCompletedThroughRound(0);
     setGenerated(outcome.result);
-    setScreen('decision');
+    setScreen('plan');
   }
 
   const main =
-    screen === 'decision' && generated !== null ? (
-      <DecisionScreen
-        generated={generated}
-        onEdit={() => setScreen('form')}
-        onViewPlan={() => setScreen('plan')}
-      />
-    ) : screen === 'plan' && generated !== null ? (
+    screen === 'plan' && generated !== null ? (
       <PlanTableScreen
         generated={generated}
         completedThroughRound={completedThroughRound}
@@ -69,7 +62,6 @@ export function App(): JSX.Element {
           setCompletedThroughRound(checked ? roundIndex : roundIndex - 1)
         }
         onResetProgress={() => setCompletedThroughRound(0)}
-        onBackToDecision={() => setScreen('decision')}
         onEdit={() => setScreen('form')}
       />
     ) : (
@@ -85,7 +77,7 @@ export function App(): JSX.Element {
     screen === 'form' ? (
       <FormRightPanel form={liveForm} />
     ) : generated !== null ? (
-      <ResultRightPanel generated={generated} completedThroughRound={completedThroughRound} />
+      <PlanRightPanel generated={generated} completedThroughRound={completedThroughRound} />
     ) : (
       <FormRightPanel form={formValues} />
     );

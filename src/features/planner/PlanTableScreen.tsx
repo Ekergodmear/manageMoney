@@ -2,15 +2,33 @@ import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
+  getPaginationRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { ArrowLeft, ArrowUp } from 'lucide-react';
+import {
+  ArrowUp,
+  BarChart3,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  RefreshCw,
+  Search,
+  Target,
+  Wallet,
+} from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import type { GenerateResult } from '@/features/planner/plan-service';
+import {
+  accumulatedAtRound,
+  computeTargetWinRatePercent,
+  formatPercent,
+} from '@/features/planner/plan-display';
 import type { Round } from '@stake/constraint-engine';
 import { formatAmount } from '@/lib/money-format';
 import { cn } from '@/lib/utils';
@@ -22,15 +40,42 @@ interface PlanRow {
   completed: boolean;
 }
 
+type RoundFilter = 'all' | 'selected' | 'unselected';
+
 const columnHelper = createColumnHelper<PlanRow>();
+const PAGE_SIZES = [15, 30, 50] as const;
 
 interface PlanTableScreenProps {
   readonly generated: GenerateResult;
   readonly completedThroughRound: number;
   readonly onToggleRound: (roundIndex: number, checked: boolean) => void;
   readonly onResetProgress: () => void;
-  readonly onBackToDecision: () => void;
   readonly onEdit: () => void;
+}
+
+function MetricCard({
+  icon,
+  label,
+  value,
+  hint,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  hint: string;
+}): React.ReactNode {
+  return (
+    <Card className="shadow-sm">
+      <CardContent className="p-4">
+        <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-primary">
+          {icon}
+        </div>
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="mt-1 text-xl font-bold tracking-tight">{value}</p>
+        <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>
+      </CardContent>
+    </Card>
+  );
 }
 
 export function PlanTableScreen({
@@ -38,19 +83,27 @@ export function PlanTableScreen({
   completedThroughRound,
   onToggleRound,
   onResetProgress,
-  onBackToDecision,
   onEdit,
 }: PlanTableScreenProps): React.ReactNode {
-  const { strategy, statistics } = generated;
+  const { strategy, statistics, request } = generated;
+  const [roundFilter, setRoundFilter] = useState<RoundFilter>('all');
+  const [search, setSearch] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
 
+  const accumulated = accumulatedAtRound(strategy.rounds, completedThroughRound);
+  const targetWinRate = computeTargetWinRatePercent(statistics);
+
   useEffect(() => {
+    const main = document.querySelector('main');
+    if (main === null) {
+      return;
+    }
     function onScroll(): void {
-      setShowScrollTop(window.scrollY > 200);
+      setShowScrollTop(main.scrollTop > 200);
     }
     onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    main.addEventListener('scroll', onScroll, { passive: true });
+    return () => main.removeEventListener('scroll', onScroll);
   }, []);
 
   const data = useMemo<PlanRow[]>(
@@ -64,11 +117,25 @@ export function PlanTableScreen({
     [strategy.rounds, completedThroughRound],
   );
 
+  const filteredData = useMemo(() => {
+    let rows = data;
+    if (roundFilter === 'selected') {
+      rows = rows.filter((row) => row.completed);
+    } else if (roundFilter === 'unselected') {
+      rows = rows.filter((row) => !row.completed);
+    }
+    const query = search.trim();
+    if (query !== '') {
+      rows = rows.filter((row) => String(row.index).includes(query));
+    }
+    return rows;
+  }, [data, roundFilter, search]);
+
   const columns = useMemo(
     () => [
       columnHelper.display({
         id: 'done',
-        header: '✓',
+        header: '',
         cell: ({ row }) => (
           <Checkbox
             checked={row.original.completed}
@@ -79,101 +146,257 @@ export function PlanTableScreen({
       }),
       columnHelper.accessor('index', { header: 'Vòng' }),
       columnHelper.accessor('betAmount', {
-        header: 'Cược',
+        header: 'Cược (đ)',
         cell: (info) => formatAmount(info.getValue()),
       }),
       columnHelper.accessor('accumulatedSpent', {
-        header: 'Tích lũy chi',
+        header: 'Tích lũy chi (đ)',
         cell: (info) => formatAmount(info.getValue()),
+      }),
+      columnHelper.display({
+        id: 'status',
+        header: 'Trạng thái',
+        cell: ({ row }) =>
+          row.original.completed ? (
+            <Badge variant="success">Đã chọn</Badge>
+          ) : (
+            <Badge variant="muted">Chưa chọn</Badge>
+          ),
       }),
     ],
     [onToggleRound],
   );
 
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: { pagination: { pageSize: 15 } },
   });
 
-  return (
-    <div className="mx-auto max-w-5xl space-y-4">
-      <div className="sticky top-0 z-10 flex flex-wrap items-center gap-2 bg-background/95 py-2 backdrop-blur">
-        <Button variant="outline" size="sm" onClick={onBackToDecision}>
-          <ArrowLeft className="h-4 w-4" />
-          Kết quả
-        </Button>
-        <Button variant="outline" size="sm" onClick={onEdit}>
-          Sửa ý định
-        </Button>
-      </div>
+  const { pageIndex, pageSize } = table.getState().pagination;
+  const pageCount = table.getPageCount();
+  const totalRows = filteredData.length;
+  const rangeStart = totalRows === 0 ? 0 : pageIndex * pageSize + 1;
+  const rangeEnd = Math.min(totalRows, (pageIndex + 1) * pageSize);
 
-      <div>
-        <h2 className="text-2xl font-bold">Kế hoạch — {strategy.rounds.length} vòng</h2>
-        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-          <span>
+  const filterTabs: { id: RoundFilter; label: string }[] = [
+    { id: 'all', label: 'Tất cả' },
+    { id: 'selected', label: `Đã chọn (${String(completedThroughRound)})` },
+    { id: 'unselected', label: 'Chưa chọn' },
+  ];
+
+  return (
+    <div className="w-full space-y-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight">
+            Kế hoạch — {strategy.rounds.length} vòng
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             Đã cược: <strong className="text-foreground">{completedThroughRound}</strong> /{' '}
-            {strategy.rounds.length}
-            {completedThroughRound > 0
-              ? ` · Tích lũy: ${formatAmount(strategy.rounds[completedThroughRound - 1]?.accumulatedSpent ?? 0)} đ`
-              : ''}
-          </span>
-          {completedThroughRound > 0 ? (
-            <Button variant="outline" size="sm" onClick={onResetProgress}>
-              Đặt lại
-            </Button>
-          ) : null}
+            {strategy.rounds.length} vòng
+            {completedThroughRound > 0 ? ` · Tích lũy: ${formatAmount(accumulated)}` : ''}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={onEdit}>
+            Sửa ý định
+          </Button>
+          <Button variant="outline" size="sm" onClick={onResetProgress}>
+            <RefreshCw className="h-4 w-4" />
+            Đặt lại
+          </Button>
         </div>
       </div>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Bảng cược chi tiết</CardTitle>
-        </CardHeader>
-        <CardContent className="overflow-x-auto p-0 sm:p-0">
-          <table className="w-full min-w-[320px] text-sm">
-            <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="border-b border-border text-left text-muted-foreground">
-                  {headerGroup.headers.map((header) => (
-                    <th key={header.id} className="px-4 py-3 font-medium">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard
+          icon={<Wallet className="h-4 w-4" />}
+          label="Vốn cần"
+          value={`${formatAmount(statistics.requiredBankrollAmount)} đ`}
+          hint="Tổng vốn để hoàn thành kế hoạch"
+        />
+        <MetricCard
+          icon={<Target className="h-4 w-4" />}
+          label="Cược tối thiểu"
+          value={`${formatAmount(statistics.minimumBetAmount)} đ`}
+          hint={`Bước cược: ${formatAmount(request.betStep)} đ`}
+        />
+        <MetricCard
+          icon={<BarChart3 className="h-4 w-4" />}
+          label="Cược cao nhất"
+          value={`${formatAmount(statistics.maximumBetAmount)} đ`}
+          hint="Ở vòng cuối cùng"
+        />
+        <MetricCard
+          icon={<Target className="h-4 w-4" />}
+          label="Tỷ lệ thắng mục tiêu"
+          value={`${formatPercent(targetWinRate)}%`}
+          hint="Theo công thức tối ưu"
+        />
+      </div>
+
+      <Card className="shadow-sm">
+        <CardContent className="space-y-4 p-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap gap-1 rounded-lg bg-muted p-1">
+              {filterTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => {
+                    setRoundFilter(tab.id);
+                    table.setPageIndex(0);
+                  }}
                   className={cn(
-                    'border-b border-border/70 transition-colors',
-                    row.original.completed && 'bg-success/40',
+                    'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                    roundFilter === tab.id
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-2.5">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
+                  {tab.label}
+                </button>
               ))}
-            </tbody>
-          </table>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative min-w-[180px] flex-1 sm:w-48 sm:flex-none">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="h-9 pl-9"
+                  placeholder="Tìm vòng..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    table.setPageIndex(0);
+                  }}
+                />
+              </div>
+              <Button variant="outline" size="sm" className="h-9" type="button" disabled>
+                <Filter className="h-4 w-4" />
+                Bộ lọc
+              </Button>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto rounded-lg border border-border">
+            <table className="w-full min-w-[560px] text-sm">
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id} className="border-b border-border bg-muted/40 text-left">
+                    {headerGroup.headers.map((header) => (
+                      <th key={header.id} className="px-4 py-3 font-medium text-muted-foreground">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className={cn(
+                      'border-b border-border/70 transition-colors',
+                      row.original.completed && 'bg-success/30',
+                    )}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-4 py-2.5">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex flex-col gap-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2">
+              <span>Hiển thị</span>
+              <select
+                className="h-8 rounded-md border border-border bg-card px-2 text-foreground"
+                value={pageSize}
+                onChange={(e) => table.setPageSize(Number(e.target.value))}
+              >
+                {PAGE_SIZES.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+              <span>/ trang</span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                disabled={!table.getCanPreviousPage()}
+                onClick={() => table.previousPage()}
+                aria-label="Trang trước"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              {Array.from({ length: Math.min(pageCount, 5) }, (_, i) => {
+                let page = i;
+                if (pageCount > 5) {
+                  if (pageIndex < 3) {
+                    page = i;
+                  } else if (pageIndex > pageCount - 4) {
+                    page = pageCount - 5 + i;
+                  } else {
+                    page = pageIndex - 2 + i;
+                  }
+                }
+                return (
+                  <Button
+                    key={page}
+                    variant={pageIndex === page ? 'default' : 'outline'}
+                    size="sm"
+                    className="h-8 min-w-8 px-2"
+                    onClick={() => table.setPageIndex(page)}
+                  >
+                    {page + 1}
+                  </Button>
+                );
+              })}
+              {pageCount > 5 && pageIndex < pageCount - 3 ? (
+                <span className="px-1">…</span>
+              ) : null}
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                disabled={!table.getCanNextPage()}
+                onClick={() => table.nextPage()}
+                aria-label="Trang sau"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <span>
+              {rangeStart} – {rangeEnd} của {totalRows}
+            </span>
+          </div>
         </CardContent>
       </Card>
-
-      <p className="font-semibold">Vốn cần: {formatAmount(statistics.requiredBankrollAmount)} đ</p>
 
       {showScrollTop ? (
         <Button
           size="icon"
-          className="fixed bottom-6 right-6 z-20 rounded-full shadow-lg"
+          className="fixed bottom-6 right-[calc(18rem+1.5rem)] z-20 h-10 w-10 rounded-full shadow-lg xl:right-[calc(20rem+1.5rem)]"
           aria-label="Lên đầu trang"
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          onClick={() => {
+            document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
         >
           <ArrowUp className="h-4 w-4" />
         </Button>
