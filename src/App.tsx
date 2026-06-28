@@ -45,29 +45,60 @@ interface GenerateResult {
 }
 
 const DEFAULT_FORM: FormValues = {
-  targetProfit: '100000',
+  targetProfit: '100.000',
   roundCount: '50',
   rewardMultiplier: '20',
-  minimumBet: '10000',
-  betStep: '1000',
+  minimumBet: '10.000',
+  betStep: '1.000',
   userBankroll: '',
   winTaxEnabled: true,
-  winTaxThreshold: '10000000',
+  winTaxThreshold: '10.000.000',
   winTaxRatePercent: '10',
 };
 
 const MULTIPLIER_DECIMAL_PLACES = 2;
 
+type MoneyFormField = 'targetProfit' | 'minimumBet' | 'betStep' | 'winTaxThreshold' | 'userBankroll';
+
 function normalizeNumericInput(raw: string): string {
   return raw.trim().replace(/,/g, '').replace(/\s/g, '');
+}
+
+/** Strip thousand separators — money fields are integers only (vi-VN dots). */
+function normalizeMoneyInput(raw: string): string {
+  return raw.trim().replace(/\./g, '').replace(/,/g, '').replace(/\s/g, '');
 }
 
 function formatAmount(amount: number): string {
   return amount.toLocaleString('vi-VN');
 }
 
+function sanitizeMoneyInput(raw: string): string {
+  const digits = raw.replace(/\D/g, '');
+  if (digits === '') {
+    return '';
+  }
+  const value = Number(digits);
+  if (!Number.isFinite(value)) {
+    return '';
+  }
+  return formatAmount(value);
+}
+
 function parsePositiveInt(raw: string): number | null {
   const normalized = normalizeNumericInput(raw);
+  if (normalized === '') {
+    return null;
+  }
+  const value = Number(normalized);
+  if (!Number.isFinite(value) || !Number.isInteger(value)) {
+    return null;
+  }
+  return value;
+}
+
+function parseMoneyPositiveInt(raw: string): number | null {
+  const normalized = normalizeMoneyInput(raw);
   if (normalized === '') {
     return null;
   }
@@ -124,6 +155,12 @@ function clientIntegerFieldError(raw: string): string {
     : 'Vui lòng nhập số nguyên.';
 }
 
+function clientMoneyFieldError(raw: string): string {
+  return normalizeMoneyInput(raw) === ''
+    ? 'Vui lòng nhập số.'
+    : 'Vui lòng nhập số nguyên.';
+}
+
 function clientMultiplierFieldError(raw: string): string {
   return normalizeNumericInput(raw) === ''
     ? 'Vui lòng nhập số.'
@@ -154,9 +191,9 @@ function buildRequest(
 ): { request: CalculationRequest } | { fieldErrors: Partial<Record<FormField, string>> } {
   const fieldErrors: Partial<Record<FormField, string>> = {};
 
-  const targetProfit = parsePositiveInt(values.targetProfit);
+  const targetProfit = parseMoneyPositiveInt(values.targetProfit);
   if (targetProfit === null) {
-    fieldErrors.targetProfit = clientIntegerFieldError(values.targetProfit);
+    fieldErrors.targetProfit = clientMoneyFieldError(values.targetProfit);
   }
 
   const roundCount = parsePositiveInt(values.roundCount);
@@ -169,22 +206,22 @@ function buildRequest(
     fieldErrors.rewardMultiplier = clientMultiplierFieldError(values.rewardMultiplier);
   }
 
-  const minimumBet = parsePositiveInt(values.minimumBet);
+  const minimumBet = parseMoneyPositiveInt(values.minimumBet);
   if (minimumBet === null) {
-    fieldErrors.minimumBet = clientIntegerFieldError(values.minimumBet);
+    fieldErrors.minimumBet = clientMoneyFieldError(values.minimumBet);
   }
 
-  const betStep = parsePositiveInt(values.betStep);
+  const betStep = parseMoneyPositiveInt(values.betStep);
   if (betStep === null) {
-    fieldErrors.betStep = clientIntegerFieldError(values.betStep);
+    fieldErrors.betStep = clientMoneyFieldError(values.betStep);
   }
 
   let winTaxThreshold: number | null = null;
   let winTaxRatePercent: number | null = null;
   if (values.winTaxEnabled) {
-    winTaxThreshold = parsePositiveInt(values.winTaxThreshold);
+    winTaxThreshold = parseMoneyPositiveInt(values.winTaxThreshold);
     if (winTaxThreshold === null) {
-      fieldErrors.winTaxThreshold = clientIntegerFieldError(values.winTaxThreshold);
+      fieldErrors.winTaxThreshold = clientMoneyFieldError(values.winTaxThreshold);
     }
     winTaxRatePercent = parsePositiveInt(values.winTaxRatePercent);
     if (winTaxRatePercent === null) {
@@ -253,7 +290,7 @@ function generatePlan(values: FormValues): {
   const strategy = buildStrategy(solved.value.rounds);
   const statistics = buildStatistics(strategy);
   const bankrollRaw = values.userBankroll.trim();
-  const userBankroll = bankrollRaw === '' ? null : parsePositiveInt(bankrollRaw);
+  const userBankroll = bankrollRaw === '' ? null : parseMoneyPositiveInt(bankrollRaw);
 
   return {
     result: {
@@ -508,16 +545,20 @@ export function App(): JSX.Element {
     setForm((prev) => ({ ...prev, [key]: value }));
     setFieldErrors((prev) => {
       const next = { ...prev };
-      delete next[key];
+      delete next[key as FormField];
       delete next.request;
       return next;
     });
   }
 
+  function updateMoneyField(key: MoneyFormField, value: string): void {
+    updateField(key, sanitizeMoneyInput(value));
+  }
+
   function handleGenerate(event: FormEvent): void {
     event.preventDefault();
 
-    if (form.userBankroll.trim() !== '' && parsePositiveInt(form.userBankroll) === null) {
+    if (form.userBankroll.trim() !== '' && parseMoneyPositiveInt(form.userBankroll) === null) {
       setFieldErrors({ userBankroll: 'Vui lòng nhập số nguyên.' });
       return;
     }
@@ -697,7 +738,7 @@ export function App(): JSX.Element {
             style={styles.input}
             inputMode="numeric"
             value={form.targetProfit}
-            onChange={(e) => updateField('targetProfit', e.target.value)}
+            onChange={(e) => updateMoneyField('targetProfit', e.target.value)}
           />
           {fieldErrors.targetProfit !== undefined ? (
             <div style={styles.error}>{fieldErrors.targetProfit}</div>
@@ -747,7 +788,7 @@ export function App(): JSX.Element {
             style={styles.input}
             inputMode="numeric"
             value={form.minimumBet}
-            onChange={(e) => updateField('minimumBet', e.target.value)}
+            onChange={(e) => updateMoneyField('minimumBet', e.target.value)}
           />
           {fieldErrors.minimumBet !== undefined ? (
             <div style={styles.error}>{fieldErrors.minimumBet}</div>
@@ -763,7 +804,7 @@ export function App(): JSX.Element {
             style={styles.input}
             inputMode="numeric"
             value={form.betStep}
-            onChange={(e) => updateField('betStep', e.target.value)}
+            onChange={(e) => updateMoneyField('betStep', e.target.value)}
           />
           {fieldErrors.betStep !== undefined ? (
             <div style={styles.error}>{fieldErrors.betStep}</div>
@@ -804,7 +845,7 @@ export function App(): JSX.Element {
                 style={styles.input}
                 inputMode="numeric"
                 value={form.winTaxThreshold}
-                onChange={(e) => updateField('winTaxThreshold', e.target.value)}
+                onChange={(e) => updateMoneyField('winTaxThreshold', e.target.value)}
               />
               {fieldErrors.winTaxThreshold !== undefined ? (
                 <div style={styles.error}>{fieldErrors.winTaxThreshold}</div>
@@ -838,7 +879,7 @@ export function App(): JSX.Element {
             style={styles.input}
             inputMode="numeric"
             value={form.userBankroll}
-            onChange={(e) => updateField('userBankroll', e.target.value)}
+            onChange={(e) => updateMoneyField('userBankroll', e.target.value)}
           />
           {fieldErrors.userBankroll !== undefined ? (
             <div style={styles.error}>{fieldErrors.userBankroll}</div>
