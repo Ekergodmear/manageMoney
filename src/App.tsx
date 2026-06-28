@@ -352,8 +352,27 @@ const styles = {
   progressSummary: {
     color: '#444',
     fontSize: '0.9rem',
-    margin: '0 0 0.75rem',
+    margin: 0,
     fontWeight: 500,
+    flex: 1,
+  } as const,
+  progressRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    marginBottom: '0.75rem',
+    flexWrap: 'wrap' as const,
+  },
+  resetProgressButton: {
+    background: '#fff',
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+    padding: '0.4rem 0.7rem',
+    color: '#555',
+    cursor: 'pointer',
+    fontSize: '0.85rem',
+    fontWeight: 600,
+    whiteSpace: 'nowrap' as const,
   } as const,
   stickyNav: {
     position: 'sticky' as const,
@@ -521,6 +540,10 @@ export function App(): JSX.Element {
     setCompletedThroughRound(checked ? roundIndex : roundIndex - 1);
   }
 
+  function resetRoundProgress(): void {
+    setCompletedThroughRound(0);
+  }
+
   if (screen === 'decision' && generated !== null) {
     const { statistics, userBankroll, request } = generated;
     const bankrollShort =
@@ -592,12 +615,23 @@ export function App(): JSX.Element {
 
         <h2 style={styles.sectionTitle}>Kế hoạch — {strategy.rounds.length} vòng</h2>
 
-        <p style={styles.progressSummary}>
-          Đã cược: {completedThroughRound} / {strategy.rounds.length} vòng
-          {completedThroughRound > 0
-            ? ` · Tích lũy: ${formatAmount(strategy.rounds[completedThroughRound - 1]?.accumulatedSpent ?? 0)}`
-            : ''}
-        </p>
+        <div style={styles.progressRow}>
+          <p style={styles.progressSummary}>
+            Đã cược: {completedThroughRound} / {strategy.rounds.length} vòng
+            {completedThroughRound > 0
+              ? ` · Tích lũy: ${formatAmount(strategy.rounds[completedThroughRound - 1]?.accumulatedSpent ?? 0)}`
+              : ''}
+          </p>
+          {completedThroughRound > 0 ? (
+            <button
+              type="button"
+              style={styles.resetProgressButton}
+              onClick={resetRoundProgress}
+            >
+              Đặt lại
+            </button>
+          ) : null}
+        </div>
 
         <div style={{ overflowX: 'auto' }}>
           <table style={styles.table}>
