@@ -1,65 +1,151 @@
-import type { ReactNode } from 'react';
+import { simulateWinAtRound } from '@stake/constraint-engine';
+import { useMemo, useState, type ReactNode } from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { accumulatedAtRound } from '@/features/planner/plan-display';
+import type { GenerateResult } from '@/features/planner/plan-service';
+import type { HistorySession } from '@/features/session/session-types';
+import { formatAmount } from '@/lib/money-format';
 
-export function AnalysisScreen(): ReactNode {
+interface AnalysisScreenProps {
+  readonly generated: GenerateResult | null;
+  readonly completedThroughRound: number;
+  readonly history: readonly HistorySession[];
+}
+
+export function AnalysisScreen({
+  generated,
+  completedThroughRound,
+  history,
+}: AnalysisScreenProps): ReactNode {
+  const totalRounds = generated?.strategy.rounds.length ?? 1;
+  const [winRound, setWinRound] = useState(
+    Math.max(1, Math.min(completedThroughRound || 1, totalRounds)),
+  );
+
+  const simulation = useMemo(() => {
+    if (generated === null) {
+      return null;
+    }
+    const result = simulateWinAtRound(generated.strategy, winRound);
+    if (result.kind === 'failure') {
+      return null;
+    }
+    return result.value;
+  }, [generated, winRound]);
+
+  const stats = useMemo(() => {
+    const sessions = history.length;
+    const wins = history.filter((h) => h.outcome === 'won').length;
+    const losses = history.filter((h) => h.outcome === 'lost').length;
+    const totalBet = history.reduce((sum, h) => sum + h.totalSpent, 0);
+    const totalProfit = history.reduce((sum, h) => sum + (h.profitAmount ?? 0), 0);
+    const roi = totalBet > 0 ? (totalProfit / totalBet) * 100 : 0;
+    return { sessions, wins, losses, totalBet, roi };
+  }, [history]);
+
   return (
     <div className="w-full space-y-6">
       <div>
         <h2 className="text-xl font-bold tracking-tight">Phân tích</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Mô phỏng, cải thiện kế hoạch và thống kê phiên.
+          Mô phỏng nếu thắng ở vòng X và thống kê phiên đã chơi.
         </p>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      {generated !== null ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Mô phỏng</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
-            <p>Nếu thắng vòng 30 → lời 100.000 · ROI …</p>
-            <p>Nếu thắng vòng 200 → …</p>
-            <p>Nếu thắng vòng 500 → …</p>
-            <div className="rounded-lg border border-dashed border-border p-4 text-center text-xs">
-              Slider chọn vòng thắng — cập nhật realtime
+          <CardContent className="space-y-5">
+            <div>
+              <div className="mb-2 flex justify-between text-sm">
+                <span className="text-muted-foreground">Nếu thắng ở vòng</span>
+                <span className="font-bold">{winRound}</span>
+              </div>
+              <input
+                type="range"
+                min={1}
+                max={totalRounds}
+                value={winRound}
+                onChange={(e) => setWinRound(Number(e.target.value))}
+                className="w-full accent-primary"
+              />
+              <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+                <span>1</span>
+                <span>{totalRounds}</span>
+              </div>
             </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Cải thiện kế hoạch</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <p className="text-muted-foreground">Thiếu vốn 25 triệu? Chọn phương án phù hợp:</p>
-            <div className="rounded-lg border border-border p-3">
-              <p className="font-medium">Phương án A — 400 vòng</p>
-              <p className="text-muted-foreground">Cần ~31 triệu</p>
-            </div>
-            <div className="rounded-lg border border-border p-3">
-              <p className="font-medium">Phương án B — 350 vòng</p>
-              <p className="text-muted-foreground">Cần ~27 triệu</p>
-            </div>
-            <div className="rounded-lg border border-border p-3">
-              <p className="font-medium">Phương án C — 300 vòng</p>
-              <p className="text-muted-foreground">Cần ~22 triệu</p>
-            </div>
+            {simulation !== null ? (
+              <div className="grid gap-3 rounded-lg border border-border bg-muted/30 p-4 text-sm sm:grid-cols-3">
+                <div>
+                  <p className="text-muted-foreground">Lời</p>
+                  <p className="text-lg font-bold text-success">
+                    +{formatAmount(simulation.profitAmount)} đ
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Đã chi</p>
+                  <p className="text-lg font-bold">
+                    {formatAmount(simulation.requiredBankrollAmount)} đ
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">ROI</p>
+                  <p className="text-lg font-bold">
+                    {simulation.requiredBankrollAmount > 0
+                      ? `${((simulation.profitAmount / simulation.requiredBankrollAmount) * 100).toFixed(1)}%`
+                      : '—'}
+                  </p>
+                </div>
+              </div>
+            ) : null}
+
+            {completedThroughRound > 0 ? (
+              <p className="text-xs text-muted-foreground">
+                Tiến độ hiện tại: đã chi{' '}
+                {formatAmount(accumulatedAtRound(generated.strategy.rounds, completedThroughRound))} đ
+              </p>
+            ) : null}
           </CardContent>
         </Card>
-      </div>
+      ) : (
+        <Card className="border-dashed">
+          <CardContent className="p-6 text-center text-sm text-muted-foreground">
+            Tạo kế hoạch trước để mô phỏng.
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Thống kê tổng quan</CardTitle>
+          <CardTitle className="text-base">Thống kê</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-4 text-sm">
-          <div><p className="text-muted-foreground">Tổng phiên</p><p className="text-xl font-bold">—</p></div>
-          <div><p className="text-muted-foreground">Thắng</p><p className="text-xl font-bold">—</p></div>
-          <div><p className="text-muted-foreground">Thua</p><p className="text-xl font-bold">—</p></div>
-          <div><p className="text-muted-foreground">ROI</p><p className="text-xl font-bold">—</p></div>
+        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <StatCard label="Phiên" value={String(stats.sessions)} />
+          <StatCard label="Thắng" value={String(stats.wins)} />
+          <StatCard label="Thua" value={String(stats.losses)} />
+          <StatCard
+            label="ROI"
+            value={stats.sessions > 0 ? `${stats.roi.toFixed(1)}%` : '—'}
+          />
+          <StatCard
+            label="Tổng cược"
+            value={stats.totalBet > 0 ? `${formatAmount(stats.totalBet)} đ` : '—'}
+          />
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: string }): ReactNode {
+  return (
+    <div className="rounded-lg border border-border p-3">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-xl font-bold">{value}</p>
     </div>
   );
 }

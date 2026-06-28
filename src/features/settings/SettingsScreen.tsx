@@ -7,9 +7,10 @@ import { Label } from '@/components/ui/label';
 interface SettingsScreenProps {
   readonly theme: 'light' | 'dark';
   readonly onThemeChange: (dark: boolean) => void;
+  readonly onExportHistory?: () => void;
 }
 
-export function SettingsScreen({ theme, onThemeChange }: SettingsScreenProps): ReactNode {
+export function SettingsScreen({ theme, onThemeChange, onExportHistory }: SettingsScreenProps): ReactNode {
   const isDark = theme === 'dark';
 
   return (
@@ -44,12 +45,28 @@ export function SettingsScreen({ theme, onThemeChange }: SettingsScreenProps): R
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Dữ liệu</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Phiên được lưu tự động trên trình duyệt (IndexedDB). F5 không mất tiến độ.
+          </p>
+          {onExportHistory !== undefined ? (
+            <Button variant="outline" size="sm" onClick={onExportHistory}>
+              Xuất lịch sử JSON
+            </Button>
+          ) : null}
+        </CardContent>
+      </Card>
+
       <Card className="border-dashed opacity-80">
         <CardHeader className="pb-2">
           <CardTitle className="text-base text-muted-foreground">Sắp có</CardTitle>
         </CardHeader>
         <CardContent className="space-y-1 text-sm text-muted-foreground">
-          <p>Ngôn ngữ · Định dạng số · Xuất JSON / CSV / Excel</p>
+          <p>Ngôn ngữ · Định dạng số · PDF · Excel</p>
         </CardContent>
       </Card>
     </div>

@@ -44,18 +44,24 @@ interface PlanTableScreenProps {
   readonly generated: GenerateResult;
   readonly completedThroughRound: number;
   readonly sessionNumber?: number;
+  readonly sessionStatus?: 'playing' | 'won' | 'lost';
   readonly onToggleRound: (roundIndex: number, checked: boolean) => void;
   readonly onResetProgress: () => void;
   readonly onEdit: () => void;
+  readonly onContinue?: (targetRoundCount: number) => void;
+  readonly hideContinue?: boolean;
 }
 
 export function PlanTableScreen({
   generated,
   completedThroughRound,
   sessionNumber = 1,
+  sessionStatus = 'playing',
   onToggleRound,
   onResetProgress,
   onEdit,
+  onContinue,
+  hideContinue = false,
 }: PlanTableScreenProps): React.ReactNode {
   const { strategy, statistics } = generated;
   const [roundFilter, setRoundFilter] = useState<RoundFilter>('all');
@@ -67,7 +73,10 @@ export function PlanTableScreen({
     completedThroughRound > 0
       ? (strategy.rounds[completedThroughRound - 1]?.betAmount ?? 0)
       : 0;
-  const allRoundsDone = completedThroughRound >= strategy.rounds.length;
+  const allRoundsDone =
+    completedThroughRound >= strategy.rounds.length && sessionStatus === 'playing';
+  const [continueTarget, setContinueTarget] = useState('');
+  const [selectedContinue, setSelectedContinue] = useState<number | null>(null);
   const progressPct =
     strategy.rounds.length > 0
       ? Math.round((completedThroughRound / strategy.rounds.length) * 100)
@@ -340,23 +349,61 @@ export function PlanTableScreen({
         </CardContent>
       </Card>
 
-      {allRoundsDone ? (
+      {allRoundsDone && !hideContinue ? (
         <Card className="border-dashed">
           <CardContent className="space-y-4 p-5">
-            <p className="font-medium">Bạn đã hoàn thành {strategy.rounds.length} vòng. Không trúng.</p>
-            <p className="text-sm text-muted-foreground">Tiếp tục đến:</p>
+            <p className="font-medium">Bạn đã hoàn thành kế hoạch.</p>
+            <p className="text-sm text-muted-foreground">Không có lượt thắng.</p>
+            <p className="text-sm font-medium">Continue to</p>
             <div className="flex flex-wrap gap-2">
-              {[600, 700, 800, 1000].map((n) => (
-                <Button key={n} variant="outline" size="sm" type="button" disabled>
-                  {n}
-                </Button>
-              ))}
-              <Button variant="outline" size="sm" type="button" disabled>
+              {[600, 700, 800, 1000]
+                .filter((n) => n > strategy.rounds.length)
+                .map((n) => (
+                  <Button
+                    key={n}
+                    variant={selectedContinue === n ? 'default' : 'outline'}
+                    size="sm"
+                    type="button"
+                    onClick={() => {
+                      setSelectedContinue(n);
+                      setContinueTarget(String(n));
+                    }}
+                  >
+                    {n}
+                  </Button>
+                ))}
+              <Button
+                variant={selectedContinue === -1 ? 'default' : 'outline'}
+                size="sm"
+                type="button"
+                onClick={() => setSelectedContinue(-1)}
+              >
                 Custom
               </Button>
             </div>
-            <Button type="button" disabled>
-              Tạo tiếp
+            {selectedContinue === -1 ? (
+              <Input
+                type="number"
+                min={strategy.rounds.length + 1}
+                placeholder={`Ví dụ: ${String(strategy.rounds.length + 100)}`}
+                value={continueTarget}
+                onChange={(e) => setContinueTarget(e.target.value)}
+              />
+            ) : null}
+            <Button
+              type="button"
+              disabled={onContinue === undefined}
+              onClick={() => {
+                const target =
+                  selectedContinue === -1
+                    ? Number(continueTarget)
+                    : (selectedContinue ?? strategy.rounds.length + 100);
+                if (Number.isFinite(target) && target > strategy.rounds.length) {
+                  onContinue?.(target);
+                }
+              }}
+            >
+              Tạo phần tiếp theo
             </Button>
           </CardContent>
         </Card>

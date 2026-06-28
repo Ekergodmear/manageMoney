@@ -41,10 +41,11 @@ Dashboard → Tạo kế hoạch → Kế hoạch sẵn sàng → Bắt đầu c
 
 ## Roadmap triển khai
 
-1. **Shell** — 7 workspace + Dashboard + luồng Planning → Ready → Playing *(hiện tại)*
-2. **Planning** — Improve, Continue tích hợp engine
-3. **Analysis** — Simulation timeline + slider
-4. **Allocation** — chia account A/B
-5. **History** — persist localStorage / export
-6. **Settings** — preset game, export PDF/Excel
-7. **v1.0** — polish, mobile, analytics sâu
+1. **Shell** — 7 workspace + Dashboard + luồng Planning → Ready → Playing ✅
+2. **Session hoàn chỉnh** — Playing UX, Undo, Win, Continue, Timeline, IndexedDB autosave *(hiện tại)* ✅
+3. **Planning** — Improve tích hợp engine
+4. **History + Analytics** — persist, filter, stats cards ✅ (cơ bản)
+5. **Simulation** — slider realtime ✅ (cơ bản)
+6. **Export** — JSON + Print ✅ · PDF/Excel sau
+7. **Allocation** — cuối cùng
+8. **v1.0** — polish, mobile

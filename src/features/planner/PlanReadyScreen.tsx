@@ -14,6 +14,7 @@ interface PlanReadyScreenProps {
   readonly onViewTable: () => void;
   readonly onSimulate: () => void;
   readonly onExport: () => void;
+  readonly onPrint?: () => void;
 }
 
 export function PlanReadyScreen({
@@ -23,6 +24,7 @@ export function PlanReadyScreen({
   onViewTable,
   onSimulate,
   onExport,
+  onPrint,
 }: PlanReadyScreenProps): ReactNode {
   const { statistics, request, userBankroll } = generated;
   const targetAmount =
@@ -85,8 +87,13 @@ export function PlanReadyScreen({
           </Button>
           <Button variant="outline" onClick={onExport}>
             <Download className="h-4 w-4" />
-            Xuất file
+            JSON
           </Button>
+          {onPrint !== undefined ? (
+            <Button variant="outline" onClick={onPrint}>
+              In
+            </Button>
+          ) : null}
           <Button variant="ghost" size="sm" onClick={onEdit}>
             Sửa thông số
           </Button>

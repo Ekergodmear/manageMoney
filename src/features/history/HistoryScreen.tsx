@@ -1,49 +1,101 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { HistorySession } from '@/features/session/session-types';
+import { formatAmount } from '@/lib/money-format';
+import { cn } from '@/lib/utils';
 
-export function HistoryScreen(): ReactNode {
-  const items = [
-    { label: '500 vòng', status: 'Thắng', period: 'Tháng này' },
-    { label: '100 vòng', status: 'Thua', period: 'Tháng này' },
-    { label: '200 vòng', status: 'Đã hủy', period: 'Tháng trước' },
-  ] as const;
+type HistoryFilter = 'all' | 'won' | 'lost' | 'cancelled';
+
+interface HistoryScreenProps {
+  readonly history: readonly HistorySession[];
+  readonly onOpenSession: (id: string) => void;
+}
+
+export function HistoryScreen({ history, onOpenSession }: HistoryScreenProps): ReactNode {
+  const [filter, setFilter] = useState<HistoryFilter>('all');
+
+  const filtered = history.filter((item) => filter === 'all' || item.outcome === filter);
+
+  const filters: { id: HistoryFilter; label: string }[] = [
+    { id: 'all', label: 'Tất cả' },
+    { id: 'won', label: 'Thắng' },
+    { id: 'lost', label: 'Thua' },
+    { id: 'cancelled', label: 'Đã hủy' },
+  ];
 
   return (
     <div className="w-full space-y-6">
       <div>
         <h2 className="text-xl font-bold tracking-tight">Lịch sử</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Xem lại phiên đã chơi — lọc theo kết quả, mở lại hoặc xuất.
+          Các phiên đã chơi — bấm để xem lại.
         </p>
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {['Tất cả', 'Thắng', 'Thua', 'Đã hủy'].map((f) => (
-          <Badge key={f} variant={f === 'Tất cả' ? 'default' : 'outline'} className="cursor-pointer">
-            {f}
-          </Badge>
+        {filters.map((f) => (
+          <button key={f.id} type="button" onClick={() => setFilter(f.id)}>
+            <Badge
+              variant={filter === f.id ? 'default' : 'outline'}
+              className="cursor-pointer"
+            >
+              {f.label}
+            </Badge>
+          </button>
         ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Tháng này</CardTitle>
-        </CardHeader>
-        <CardContent className="divide-y divide-border">
-          {items.map((item) => (
+      {filtered.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Chưa có phiên nào trong mục này.</p>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {filtered.map((item) => (
             <button
-              key={item.label}
+              key={item.id}
               type="button"
-              className="flex w-full items-center justify-between py-3 text-left text-sm hover:bg-muted/30"
+              onClick={() => onOpenSession(item.id)}
+              className={cn(
+                'rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/50',
+              )}
             >
-              <span className="font-medium">{item.label}</span>
-              <Badge variant="outline">{item.status}</Badge>
+              <div className="flex items-start justify-between gap-2">
+                <p className="font-semibold">Phiên #{String(item.sessionNumber)}</p>
+                <OutcomeBadge outcome={item.outcome} />
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {item.roundCount} vòng · {item.completedRounds} đã chơi
+              </p>
+              {item.outcome === 'won' && item.profitAmount !== null ? (
+                <p className="mt-2 text-sm font-medium text-success">
+                  +{formatAmount(item.profitAmount)} đ
+                </p>
+              ) : (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Đã chi {formatAmount(item.totalSpent)} đ
+                </p>
+              )}
+              <p className="mt-2 text-xs text-muted-foreground">
+                {new Date(item.finishedAt).toLocaleDateString('vi-VN', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })}
+              </p>
             </button>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      )}
     </div>
   );
+}
+
+function OutcomeBadge({ outcome }: { outcome: HistorySession['outcome'] }): ReactNode {
+  const map = {
+    won: { label: 'Thắng', variant: 'success' as const },
+    lost: { label: 'Thua', variant: 'muted' as const },
+    cancelled: { label: 'Đã hủy', variant: 'outline' as const },
+  };
+  const item = map[outcome];
+  return <Badge variant={item.variant}>{item.label}</Badge>;
 }

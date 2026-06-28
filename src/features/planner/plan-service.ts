@@ -191,6 +191,24 @@ export function buildRequest(
   };
 }
 
+export function continuePlan(
+  formValues: PlannerFormValues,
+  targetRoundCount: number,
+): {
+  result?: GenerateResult;
+  fieldErrors?: Partial<Record<PlannerField, string>>;
+} {
+  const currentRounds = Number(formValues.roundCount);
+  if (!Number.isFinite(currentRounds) || targetRoundCount <= currentRounds) {
+    return {
+      fieldErrors: {
+        roundCount: `Số vòng mới phải lớn hơn ${String(currentRounds)}.`,
+      },
+    };
+  }
+  return generatePlan({ ...formValues, roundCount: String(targetRoundCount) });
+}
+
 export function generatePlan(values: PlannerFormValues): {
   result?: GenerateResult;
   fieldErrors?: Partial<Record<PlannerField, string>>;
