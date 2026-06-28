@@ -15,6 +15,7 @@ interface PlanReadyScreenProps {
   readonly onSimulate: () => void;
   readonly onExport: () => void;
   readonly onPrint?: () => void;
+  readonly onImprove?: () => void;
 }
 
 export function PlanReadyScreen({
@@ -25,6 +26,7 @@ export function PlanReadyScreen({
   onSimulate,
   onExport,
   onPrint,
+  onImprove,
 }: PlanReadyScreenProps): ReactNode {
   const { statistics, request, userBankroll } = generated;
   const targetAmount =
@@ -64,9 +66,26 @@ export function PlanReadyScreen({
       </Card>
 
       {bankrollShort ? (
-        <p className="text-sm text-warning-foreground">
-          Vốn hiện có thấp hơn mức cần — xem Phân tích → Cải thiện kế hoạch khi module sẵn sàng.
-        </p>
+        <Card className="border-warning/50 bg-warning/10">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+            <p className="text-sm">
+              Thiếu{' '}
+              <strong>
+                {formatAmount(statistics.requiredBankrollAmount - (userBankroll ?? 0))} đ
+              </strong>{' '}
+              so với vốn hiện có.
+            </p>
+            {onImprove !== undefined ? (
+              <Button variant="outline" size="sm" onClick={onImprove}>
+                Cải thiện kế hoạch
+              </Button>
+            ) : null}
+          </CardContent>
+        </Card>
+      ) : onImprove !== undefined ? (
+        <Button variant="outline" size="sm" onClick={onImprove}>
+          Cải thiện / tối ưu thêm
+        </Button>
       ) : null}
 
       <Card>

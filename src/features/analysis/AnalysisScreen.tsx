@@ -1,6 +1,7 @@
 import { simulateWinAtRound } from '@stake/constraint-engine';
 import { useMemo, useState, type ReactNode } from 'react';
 
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { accumulatedAtRound } from '@/features/planner/plan-display';
 import type { GenerateResult } from '@/features/planner/plan-service';
@@ -11,12 +12,14 @@ interface AnalysisScreenProps {
   readonly generated: GenerateResult | null;
   readonly completedThroughRound: number;
   readonly history: readonly HistorySession[];
+  readonly onOpenImprove?: () => void;
 }
 
 export function AnalysisScreen({
   generated,
   completedThroughRound,
   history,
+  onOpenImprove,
 }: AnalysisScreenProps): ReactNode {
   const totalRounds = generated?.strategy.rounds.length ?? 1;
   const [winRound, setWinRound] = useState(
@@ -118,6 +121,19 @@ export function AnalysisScreen({
           </CardContent>
         </Card>
       )}
+
+      {onOpenImprove !== undefined ? (
+        <Card>
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+            <p className="text-sm text-muted-foreground">
+              Thiếu vốn hoặc muốn giảm cược max? Dùng Improve Engine.
+            </p>
+            <Button variant="outline" size="sm" onClick={onOpenImprove}>
+              Mở Cải thiện
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>

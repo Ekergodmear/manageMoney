@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { Check, PartyPopper, RotateCcw, Table2, Trophy } from 'lucide-react';
+import { Check, PartyPopper, RotateCcw, Sparkles, Table2, Trophy } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -26,9 +26,21 @@ interface PlayingSessionScreenProps {
   readonly onContinue: (targetRoundCount: number) => void;
   readonly onResetProgress: () => void;
   readonly onEdit: () => void;
+  readonly onImprove?: () => void;
 }
 
-const CONTINUE_PRESETS = [600, 700, 800, 1000] as const;
+function continuePresets(totalRounds: number): number[] {
+  const candidates = [
+    totalRounds + 100,
+    totalRounds + 200,
+    totalRounds + 500,
+    1000,
+    1500,
+    2000,
+    5000,
+  ];
+  return [...new Set(candidates.filter((n) => n > totalRounds))].sort((a, b) => a - b);
+}
 
 export function PlayingSessionScreen({
   generated,
@@ -42,6 +54,7 @@ export function PlayingSessionScreen({
   onContinue,
   onResetProgress,
   onEdit,
+  onImprove,
 }: PlayingSessionScreenProps): React.ReactNode {
   const { strategy, statistics } = generated;
   const totalRounds = strategy.rounds.length;
@@ -58,6 +71,7 @@ export function PlayingSessionScreen({
       ? (strategy.rounds[completedThroughRound - 1]?.betAmount ?? 0)
       : 0;
   const allRoundsDone = completedThroughRound >= totalRounds && sessionStatus === 'playing';
+  const presetTargets = continuePresets(totalRounds);
   const progressPct =
     totalRounds > 0 ? Math.round((completedThroughRound / totalRounds) * 100) : 0;
 
@@ -142,6 +156,12 @@ export function PlayingSessionScreen({
           <Button variant="outline" size="sm" onClick={onEdit}>
             Sửa ý định
           </Button>
+          {onImprove !== undefined ? (
+            <Button variant="outline" size="sm" onClick={onImprove}>
+              <Sparkles className="h-4 w-4" />
+              Cải thiện
+            </Button>
+          ) : null}
         </div>
       </div>
 
@@ -260,9 +280,9 @@ export function PlayingSessionScreen({
           <CardContent className="space-y-4 p-5">
             <p className="font-medium">Bạn đã hoàn thành kế hoạch.</p>
             <p className="text-sm text-muted-foreground">Không có lượt thắng.</p>
-            <p className="text-sm font-medium">Continue to</p>
+            <p className="text-sm font-medium">Continue until</p>
             <div className="flex flex-wrap gap-2">
-              {CONTINUE_PRESETS.filter((n) => n > totalRounds).map((n) => (
+              {presetTargets.map((n) => (
                 <Button
                   key={n}
                   variant={selectedContinue === n ? 'default' : 'outline'}

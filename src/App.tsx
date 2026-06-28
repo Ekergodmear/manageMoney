@@ -6,7 +6,8 @@ import { AnalysisScreen } from '@/features/analysis/AnalysisScreen';
 import { AllocationScreen } from '@/features/allocation/AllocationScreen';
 import { DashboardScreen } from '@/features/dashboard/DashboardScreen';
 import { HistoryScreen } from '@/features/history/HistoryScreen';
-import { GeneratePlanScreen } from '@/features/planner/GeneratePlanScreen';
+import { applyImproveOption, type ImproveOption } from '@/features/improve/improve-service';
+import { ImproveScreen } from '@/features/improve/ImproveScreen';
 import { PlanReadyScreen } from '@/features/planner/PlanReadyScreen';
 import {
   DEFAULT_PLANNER_FORM,
@@ -31,7 +32,7 @@ import { SettingsScreen } from '@/features/settings/SettingsScreen';
 import { AppLayout } from '@/layout/AppLayout';
 import { accumulatedAtRound } from '@/features/planner/plan-display';
 
-type PlanningPhase = 'form' | 'ready';
+type PlanningPhase = 'form' | 'ready' | 'improve';
 
 interface ToastState {
   readonly message: string;
@@ -295,6 +296,34 @@ export function App(): JSX.Element {
     }));
   }
 
+  function applyImprove(option: ImproveOption): void {
+    if (activeSession === null) {
+      return;
+    }
+    const newFormValues = applyImproveOption(activeSession.formValues, option);
+    const newRoundCount = option.result.strategy.rounds.length;
+    const cappedCompleted = Math.min(activeSession.completedThroughRound, newRoundCount);
+    updateActiveSession((s) => ({
+      ...s,
+      formValues: newFormValues,
+      generated: option.result,
+      completedThroughRound: cappedCompleted,
+      timeline: addTimelineEvent(s.timeline, {
+        type: 'continued',
+        label: `Improve: ${option.label}`,
+      }),
+      updatedAt: nowIso(),
+    }));
+    setPlanningPhase('ready');
+    setActiveWorkspace('planning');
+    showToast('Đã áp dụng phương án cải thiện');
+  }
+
+  function openImprove(): void {
+    setPlanningPhase('improve');
+    setActiveWorkspace('planning');
+  }
+
   function handleExport(): void {
     if (activeSession === null) {
       return;
@@ -314,6 +343,26 @@ export function App(): JSX.Element {
   }
 
   function renderPlanning(): JSX.Element {
+    if (planningPhase === 'improve' && generated !== null) {
+      return (
+        <ImproveScreen
+          formValues={formValues}
+          generated={generated}
+          completedThroughRound={completedThroughRound}
+          onApply={applyImprove}
+          onBack={() => {
+            if (activeSession?.status === 'playing') {
+              setPlanningPhase('ready');
+              setActiveWorkspace('playing');
+            } else if (generated !== null) {
+              setPlanningPhase('ready');
+            } else {
+              setPlanningPhase('form');
+            }
+          }}
+        />
+      );
+    }
     if (planningPhase === 'ready' && generated !== null) {
       return (
         <PlanReadyScreen
@@ -326,6 +375,7 @@ export function App(): JSX.Element {
           onSimulate={() => setActiveWorkspace('analysis')}
           onExport={handleExport}
           onPrint={handlePrint}
+          onImprove={openImprove}
         />
       );
     }
@@ -376,6 +426,7 @@ export function App(): JSX.Element {
           setPlanningPhase('form');
           setActiveWorkspace('planning');
         }}
+        onImprove={openImprove}
       />
     );
   }
@@ -420,6 +471,7 @@ export function App(): JSX.Element {
             generated={generated}
             completedThroughRound={completedThroughRound}
             history={persisted.history}
+            onOpenImprove={generated !== null ? openImprove : undefined}
           />
         );
       case 'allocation':
@@ -456,7 +508,7 @@ export function App(): JSX.Element {
   }
 
   const showRightPanel =
-    activeWorkspace === 'planning' ||
+    (activeWorkspace === 'planning' && planningPhase !== 'improve') ||
     activeWorkspace === 'playing' ||
     activeWorkspace === 'analysis';
 
