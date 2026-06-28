@@ -31,8 +31,8 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1">
-      <Label htmlFor={id} className="text-xs text-muted-foreground">
+    <div className="space-y-1.5">
+      <Label htmlFor={id} className="text-sm">
         {label}
       </Label>
       {children}
@@ -80,18 +80,25 @@ export function GeneratePlanScreen({
     };
   }
 
-  const inputClass = 'h-9 rounded-lg text-sm';
+  const inputClass = 'h-10 rounded-lg text-sm';
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <Card className="shadow-sm">
-        <CardHeader className="space-y-0 p-4 pb-2">
-          <CardTitle className="text-base">Tạo kế hoạch</CardTitle>
+    <div className="w-full space-y-4">
+      <div>
+        <h2 className="text-xl font-bold tracking-tight">Tạo kế hoạch</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Nhập thông tin để tạo kế hoạch cược tối ưu
+        </p>
+      </div>
+
+      <Card className="w-full shadow-md">
+        <CardHeader className="space-y-0 p-5 pb-3">
+          <CardTitle className="text-lg">Thông tin kế hoạch</CardTitle>
         </CardHeader>
-        <CardContent className="p-4 pt-0">
-          <form onSubmit={handleSubmit((data) => onSubmit(data as PlannerFormValues))} className="space-y-3">
+        <CardContent className="p-5 pt-0">
+          <form onSubmit={handleSubmit((data) => onSubmit(data as PlannerFormValues))} className="space-y-5">
             <FormSection title="Mục tiêu">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <Field id="targetProfit" label="Lợi nhuận (đ)" error={errors.targetProfit?.message}>
                   <Input id="targetProfit" className={inputClass} inputMode="numeric" {...bindMoney('targetProfit')} />
                 </Field>
@@ -102,7 +109,7 @@ export function GeneratePlanScreen({
             </FormSection>
 
             <FormSection title="Thông số">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <Field id="rewardMultiplier" label="Hệ số (×)" error={errors.rewardMultiplier?.message}>
                   <Input id="rewardMultiplier" className={inputClass} inputMode="decimal" {...register('rewardMultiplier')} />
                 </Field>
@@ -129,7 +136,7 @@ export function GeneratePlanScreen({
                 </Label>
               </div>
               {winTaxEnabled ? (
-                <div className="mt-2 grid grid-cols-2 gap-2">
+                <div className="mt-3 grid gap-4 sm:grid-cols-2">
                   <Field id="winTaxThreshold" label="Ngưỡng (đ)" error={errors.winTaxThreshold?.message}>
                     <Input id="winTaxThreshold" className={inputClass} inputMode="numeric" {...bindMoney('winTaxThreshold')} />
                   </Field>
@@ -148,11 +155,11 @@ export function GeneratePlanScreen({
               <p className="text-xs text-destructive">{serverError}</p>
             ) : null}
 
-            <Button type="submit" className="h-9 w-full">
+            <Button type="submit" className="h-11 w-full">
               Tạo kế hoạch
             </Button>
 
-            <p className="text-center text-[11px] text-muted-foreground">
+            <p className="text-center text-xs text-muted-foreground">
               Dữ liệu xử lý trên trình duyệt — không lưu server.
             </p>
           </form>

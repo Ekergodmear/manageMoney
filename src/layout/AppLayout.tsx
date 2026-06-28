@@ -72,7 +72,7 @@ export function AppLayout({
       return true;
     }
     const stored = window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
-    return stored === null ? true : stored === '1';
+    return stored === '1';
   });
   const isDark = theme === 'dark';
 
@@ -180,8 +180,8 @@ export function AppLayout({
 
           <aside
             className={cn(
-              'hidden shrink-0 flex-col border-r border-border bg-card p-2 lg:flex',
-              collapsed ? 'w-12' : 'w-44',
+              'hidden shrink-0 flex-col border-r border-border bg-card p-3 lg:flex',
+              collapsed ? 'w-14' : 'w-56',
             )}
           >
             {sidebarInner(collapsed)}
@@ -202,13 +202,13 @@ export function AppLayout({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.15 }}
-              className="min-h-0 min-w-0 flex-1 overflow-y-auto p-3"
+              className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6"
             >
               {main}
             </motion.main>
 
             {showRightPanel ? (
-              <aside className="hidden min-h-0 w-56 shrink-0 overflow-y-auto border-l border-border bg-muted/30 p-3 lg:block xl:w-60">
+              <aside className="hidden min-h-0 w-72 shrink-0 overflow-y-auto border-l border-border bg-muted/30 p-4 lg:block xl:w-80">
                 <div className="flex flex-col gap-2">{rightPanel}</div>
               </aside>
             ) : null}
@@ -228,9 +228,7 @@ export function FormSection({
 }): ReactNode {
   return (
     <div>
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        {title}
-      </p>
+      <p className="mb-3 text-sm font-semibold text-foreground">{title}</p>
       {children}
     </div>
   );
