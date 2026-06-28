@@ -26,7 +26,7 @@ Platform work is **complete** for current product needs. Further changes require
 | **Name** | Stake Planner |
 | **Status** | **Feature 1 — awaiting user evidence** |
 | **Spec** | [feature-1-generate-plan.md](product/feature-1-generate-plan.md) |
-| **App** | `src/App.tsx` — decimal input + decision cards (`d6c6153`) |
+| **App** | [`stake-planner.vercel.app`](https://stake-planner.vercel.app) · local `pnpm dev` |
 
 ---
 

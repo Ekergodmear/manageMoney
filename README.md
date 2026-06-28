@@ -6,7 +6,7 @@ Help users create a plan, adjust it when bankroll is tight, understand why it wo
 
 | | |
 | --- | --- |
-| **Product** | Stake Planner — in development |
+| **Product** | Stake Planner — in development · [stake-planner.vercel.app](https://stake-planner.vercel.app) |
 | **Platform** | `@stake/constraint-engine` v1.0.0-rc.1 — stable |
 | **License** | [MIT](LICENSE) |
 

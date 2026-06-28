@@ -2,7 +2,8 @@
 
 **Feature:** Generate Plan  
 **App (local):** `pnpm dev` → http://localhost:5173  
-**App (#018):** _[Vercel production URL — điền sau deploy]_  
+**App (#018):** **https://stake-planner.vercel.app**  
+**Deploy (nhánh `optimization-v1`):** https://manage-money-git-optimization-v1-just-me-yess.vercel.app  
 **Brief:** [feature-1-generate-plan.md](feature-1-generate-plan.md)  
 **Commits:** `28d5800` (decimal SDK) · `d6c6153` (decimal input + card layout)  
 **Tester:** Automated + browser session (2026-06-25)  
@@ -345,14 +346,16 @@ User: "Improve Plan đâu?"
 | --- | --- |
 | **Số người** | 2–3 người chưa biết dự án, không biết SDK |
 | **Thời lượng** | ~5 phút / người |
-| **Thiết bị** | Ưu tiên mobile (~375px) cho ít nhất 1 người — dùng **URL production** (Vercel), không localhost |
-| **URL** | Gửi link Vercel cho tester — điện thoại / máy khác / người lạ |
+| **URL** | Gửi tester: **https://stake-planner.vercel.app** (ngắn, dễ nhớ). Dự phòng: [manage-money-git-optimization-v1…](https://manage-money-git-optimization-v1-just-me-yess.vercel.app) |
+| **Thiết bị** | Ưu tiên mobile (~375px) — **URL production**, không localhost |
 | **Vai trò của bạn** | Chỉ đọc script — **không giải thích, không chỉ tay** |
 | **Ghi hình** | Quay màn hình (OBS / Xbox Game Bar) **nếu người tham gia đồng ý** |
 
 **Vì sao quay video:** 5 phút video thường giá trị hơn nhiều dòng ghi chú — rê chuột ở đâu, dừng bao lâu, đọc dòng nào, bỏ qua dòng nào, có cuộn không.
 
 Lưu file: `docs/product/sessions/#018-session-N.mp4` (hoặc thư mục riêng ngoài repo).
+
+**URL dễ nhớ (`stake-planner.vercel.app`):** Vercel → project **manage-money** → **Settings → Domains** → Add `stake-planner.vercel.app` → trỏ Production. (Hoặc đổi Project Name thành `stake-planner`.) Tắt **Deployment Protection** trước #018 nếu tester không có tài khoản Vercel.
 
 ---
 
