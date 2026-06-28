@@ -47,4 +47,5 @@ export const PUBLIC_TYPE_EXPORTS = [
   'ValidationError',
   'ValidationLayer',
   'ValidationResult',
+  'WinTax',
 ] as const;

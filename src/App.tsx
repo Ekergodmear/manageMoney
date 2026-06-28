@@ -21,6 +21,8 @@ type FormField =
   | 'minimumBet'
   | 'betStep'
   | 'userBankroll'
+  | 'winTaxThreshold'
+  | 'winTaxRatePercent'
   | 'request';
 
 interface FormValues {
@@ -30,6 +32,9 @@ interface FormValues {
   minimumBet: string;
   betStep: string;
   userBankroll: string;
+  winTaxEnabled: boolean;
+  winTaxThreshold: string;
+  winTaxRatePercent: string;
 }
 
 interface GenerateResult {
@@ -46,6 +51,9 @@ const DEFAULT_FORM: FormValues = {
   minimumBet: '10000',
   betStep: '1000',
   userBankroll: '',
+  winTaxEnabled: true,
+  winTaxThreshold: '10000000',
+  winTaxRatePercent: '10',
 };
 
 const MULTIPLIER_DECIMAL_PLACES = 2;
@@ -100,6 +108,10 @@ const VALIDATION_MESSAGE_VI: Record<string, string> = {
   'betStep must be at least 1': 'Bước cược phải từ 1 trở lên.',
   'targetProfit.amount must be non-negative': 'Lợi nhuận mục tiêu không được âm.',
   'targetProfit.amount must be an integer': 'Lợi nhuận mục tiêu phải là số nguyên.',
+  'winTax.threshold must be at least 1': 'Ngưỡng thuế phải từ 1 trở lên.',
+  'winTax.ratePercent must be between 1 and 99': 'Thuế phải từ 1% đến 99%.',
+  'winTax.threshold must be a finite integer': 'Ngưỡng thuế phải là số nguyên.',
+  'winTax.ratePercent must be a finite integer': 'Thuế phải là số nguyên.',
 };
 
 function userFacingValidationMessage(message: string): string {
@@ -126,9 +138,13 @@ function mapValidationPath(path: string): FormField {
     path === 'rewardMultiplier' ||
     path === 'roundCount' ||
     path === 'minimumBet' ||
-    path === 'betStep'
+    path === 'betStep' ||
+    path === 'winTax.threshold'
   ) {
-    return path;
+    return path === 'winTax.threshold' ? 'winTaxThreshold' : path;
+  }
+  if (path === 'winTax.ratePercent') {
+    return 'winTaxRatePercent';
   }
   return 'request';
 }
@@ -163,6 +179,21 @@ function buildRequest(
     fieldErrors.betStep = clientIntegerFieldError(values.betStep);
   }
 
+  let winTaxThreshold: number | null = null;
+  let winTaxRatePercent: number | null = null;
+  if (values.winTaxEnabled) {
+    winTaxThreshold = parsePositiveInt(values.winTaxThreshold);
+    if (winTaxThreshold === null) {
+      fieldErrors.winTaxThreshold = clientIntegerFieldError(values.winTaxThreshold);
+    }
+    winTaxRatePercent = parsePositiveInt(values.winTaxRatePercent);
+    if (winTaxRatePercent === null) {
+      fieldErrors.winTaxRatePercent = clientIntegerFieldError(values.winTaxRatePercent);
+    } else if (winTaxRatePercent < 1 || winTaxRatePercent > 99) {
+      fieldErrors.winTaxRatePercent = 'Thuế phải từ 1% đến 99%.';
+    }
+  }
+
   if (Object.keys(fieldErrors).length > 0) {
     return { fieldErrors };
   }
@@ -184,6 +215,11 @@ function buildRequest(
       minimumBet,
       betStep,
       targetProfit: { mode: 'fixedAmount', amount: targetProfit },
+      ...(values.winTaxEnabled &&
+      winTaxThreshold !== null &&
+      winTaxRatePercent !== null
+        ? { winTax: { threshold: winTaxThreshold, ratePercent: winTaxRatePercent } }
+        : {}),
     },
   };
 }
@@ -556,6 +592,65 @@ export function App(): JSX.Element {
             <div style={styles.error}>{fieldErrors.betStep}</div>
           ) : null}
         </div>
+
+        <div style={styles.field}>
+          <label style={{ ...styles.label, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <input
+              type="checkbox"
+              checked={form.winTaxEnabled}
+              onChange={(e) => {
+                setForm((prev) => ({ ...prev, winTaxEnabled: e.target.checked }));
+                setFieldErrors((prev) => {
+                  const next = { ...prev };
+                  delete next.winTaxThreshold;
+                  delete next.winTaxRatePercent;
+                  delete next.request;
+                  return next;
+                });
+              }}
+            />
+            Áp dụng thuế khi thắng lớn
+          </label>
+          <p style={styles.fieldHint}>
+            Thuế tính trên tổng tiền thắng khi đạt ngưỡng (mặc định: 10% từ 10 triệu).
+          </p>
+        </div>
+
+        {form.winTaxEnabled ? (
+          <>
+            <div style={styles.field}>
+              <label style={styles.label} htmlFor="winTaxThreshold">
+                Ngưỡng thuế (tiền thắng)
+              </label>
+              <input
+                id="winTaxThreshold"
+                style={styles.input}
+                inputMode="numeric"
+                value={form.winTaxThreshold}
+                onChange={(e) => updateField('winTaxThreshold', e.target.value)}
+              />
+              {fieldErrors.winTaxThreshold !== undefined ? (
+                <div style={styles.error}>{fieldErrors.winTaxThreshold}</div>
+              ) : null}
+            </div>
+
+            <div style={styles.field}>
+              <label style={styles.label} htmlFor="winTaxRatePercent">
+                Thuế (%)
+              </label>
+              <input
+                id="winTaxRatePercent"
+                style={styles.input}
+                inputMode="numeric"
+                value={form.winTaxRatePercent}
+                onChange={(e) => updateField('winTaxRatePercent', e.target.value)}
+              />
+              {fieldErrors.winTaxRatePercent !== undefined ? (
+                <div style={styles.error}>{fieldErrors.winTaxRatePercent}</div>
+              ) : null}
+            </div>
+          </>
+        ) : null}
 
         <div style={styles.field}>
           <label style={styles.label} htmlFor="userBankroll">

@@ -89,4 +89,28 @@ export const businessRules: ValidationPhase = [
       return request.targetProfit.percentage <= MAX_PERCENTAGE;
     },
   },
+  {
+    code: ValidationCodes.B009_WIN_TAX_THRESHOLD_TOO_LOW,
+    path: 'winTax.threshold',
+    layer: 'business',
+    message: 'winTax.threshold must be at least 1',
+    isValid: (request) => {
+      if (request.winTax === undefined) {
+        return true;
+      }
+      return request.winTax.threshold >= 1;
+    },
+  },
+  {
+    code: ValidationCodes.B010_WIN_TAX_RATE_OUT_OF_RANGE,
+    path: 'winTax.ratePercent',
+    layer: 'business',
+    message: 'winTax.ratePercent must be between 1 and 99',
+    isValid: (request) => {
+      if (request.winTax === undefined) {
+        return true;
+      }
+      return request.winTax.ratePercent >= 1 && request.winTax.ratePercent <= 99;
+    },
+  },
 ];

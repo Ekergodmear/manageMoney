@@ -6,6 +6,7 @@
 
 import type { BetStep, MinimumBet, RewardMultiplier, RoundCount } from './request-types';
 import type { TargetProfit } from './target-profit';
+import type { WinTax } from './win-tax';
 
 export interface CalculationRequest {
   readonly rewardMultiplier: RewardMultiplier;
@@ -13,4 +14,6 @@ export interface CalculationRequest {
   readonly minimumBet: MinimumBet;
   readonly betStep: BetStep;
   readonly targetProfit: TargetProfit;
+  /** When set, net reward applies tier tax on gross win ≥ threshold. */
+  readonly winTax?: WinTax;
 }

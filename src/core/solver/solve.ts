@@ -10,8 +10,8 @@ import { success } from '@/core/contracts';
 import type { Round, Strategy } from '@/core/models';
 import {
   encodeRewardMultiplier,
-  rewardFromBet,
 } from '@/core/monetary/reward-multiplier-encoding';
+import { netRewardFromBet } from '@/core/monetary/net-reward';
 
 import { resolveTarget } from './resolve-target';
 import { solveMinimalFeasibleBet } from './solve-minimal-feasible-bet';
@@ -23,6 +23,7 @@ export function solve(validated: ValidatedCalculationRequest): Result<Strategy, 
   const betStep = validated.betStep;
   const roundCount = validated.roundCount;
   const targetProfit = validated.targetProfit;
+  const winTax = validated.winTax;
 
   let accumulatedSpent = 0;
   const rounds: Round[] = [];
@@ -36,8 +37,9 @@ export function solve(validated: ValidatedCalculationRequest): Result<Strategy, 
       encodedRewardMultiplier,
       minimumBet,
       betStep,
+      winTax,
     );
-    const reward = rewardFromBet(bet, encodedRewardMultiplier);
+    const reward = netRewardFromBet(bet, encodedRewardMultiplier, winTax);
     const accumulatedSpentAfter = accumulatedSpentBefore + bet;
     accumulatedSpent = accumulatedSpentAfter;
 
