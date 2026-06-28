@@ -44,6 +44,7 @@
     "build": "pnpm build:lib",
     "build:lib": "vite build --config vite.lib.config.ts",
     "build:app": "vite build",
+    "vercel-build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
