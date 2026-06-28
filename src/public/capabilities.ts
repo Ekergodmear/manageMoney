@@ -20,6 +20,7 @@ export type {
   RoundCount,
   MinimumBet,
   BetStep,
+  WinTax,
   Strategy,
   Round,
   StrategyStatistics,
