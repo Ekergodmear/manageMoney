@@ -2,7 +2,7 @@ import { simulateWinAtRound } from '@stake/constraint-engine';
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 
 import { ActionToast } from '@/components/ui/action-toast';
-import { AnalysisScreen } from '@/features/analysis/AnalysisScreen';
+import { InsightsScreen } from '@/features/insights/InsightsScreen';
 import { AllocationScreen } from '@/features/allocation/AllocationScreen';
 import { computeCapitalOverview } from '@/features/capital/capital-overview';
 import { CapitalPlannerScreen } from '@/features/capital/CapitalPlannerScreen';
@@ -560,13 +560,15 @@ export function App(): JSX.Element {
         );
       case 'analysis':
         return (
-          <AnalysisScreen
-            generated={currentPlan?.generated ?? null}
-            completedThroughRound={currentPlan?.completedThroughRound ?? 0}
-            history={persisted.sessions.filter((s) => s.status === 'won' || s.status === 'lost')}
-            onOpenImprove={() => {
+          <InsightsScreen
+            sessions={persisted.sessions}
+            presets={allPresets}
+            capitalPlanner={persisted.capitalPlanner}
+            onNavigate={(ws) => setActiveWorkspace(ws)}
+            onOpenSession={(id) => {
+              setViewingSessionId(id);
+              setSessionView('overview');
               setActiveWorkspace('session');
-              setSessionView('improve');
             }}
           />
         );
@@ -658,8 +660,7 @@ export function App(): JSX.Element {
 
   const showRightPanel =
     activeWorkspace === 'planning' ||
-    (activeWorkspace === 'session' && sessionView === 'playing') ||
-    activeWorkspace === 'analysis';
+    (activeWorkspace === 'session' && sessionView === 'playing');
 
   const rightPanel =
     activeWorkspace === 'planning' ? (
@@ -675,11 +676,6 @@ export function App(): JSX.Element {
           completedThroughRound={currentPlan.completedThroughRound}
         />
       </>
-    ) : currentPlan !== null && activeWorkspace === 'analysis' ? (
-      <PlanRightPanel
-        generated={currentPlan.generated}
-        completedThroughRound={currentPlan.completedThroughRound}
-      />
     ) : (
       <FormRightPanel form={liveForm} />
     );
