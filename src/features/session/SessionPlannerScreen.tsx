@@ -252,7 +252,7 @@ export function SessionPlannerScreen({
           <>
             <Button variant="outline" onClick={() => onViewChange('improve')}>
               <Sparkles className="h-4 w-4" />
-              Capital Planner
+              Improve
             </Button>
             <Button variant="outline" onClick={() => onViewChange('simulate')}>
               <LineChart className="h-4 w-4" />
@@ -292,7 +292,7 @@ export function SessionPlannerScreen({
           <CardContent className="p-4 text-sm">
             <p className="font-medium">{currentPlan.label} — hết vòng, chưa thắng.</p>
             <p className="mt-1 text-muted-foreground">
-              Dùng Session Planner → Continue hoặc Capital Planner để tạo plan tiếp theo.
+              Dùng Session Planner → Continue hoặc Improve để tạo plan tiếp theo.
             </p>
             <Button className="mt-3" size="sm" onClick={() => onViewChange('playing')}>
               Mở Session Planner (Continue)

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 export type WorkspaceId =
   | 'dashboard'
   | 'game-designer'
+  | 'capital'
   | 'session'
   | 'planning'
   | 'analysis'
@@ -19,6 +20,7 @@ export interface WorkspaceItem {
 export const WORKSPACE_LABELS: Record<WorkspaceId, string> = {
   dashboard: 'Dashboard',
   'game-designer': 'Game Designer',
+  capital: 'Capital Planner',
   session: 'Session',
   planning: 'Planning',
   analysis: 'Insights',

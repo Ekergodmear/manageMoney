@@ -72,9 +72,9 @@ export function ImproveScreen({
     <div className="w-full max-w-3xl space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Capital Planner</h2>
+          <h2 className="text-xl font-bold tracking-tight">Improve</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Engine tìm phương án khả thi trong giới hạn vốn của bạn.
+            Có plan sẵn — engine tìm phương án khả thi trong giới hạn vốn.
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={onBack}>

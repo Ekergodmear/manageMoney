@@ -9,12 +9,32 @@
 | Module kỹ thuật | Tên sản phẩm |
 |-----------------|--------------|
 | Generate | **Planning** |
-| Improve | **Capital Planner** |
+| Improve | **Improve** (trong Session — sửa plan có sẵn) |
+| Capital Planner | **Capital Planner** (workspace — quyết định trước khi chơi) |
 | Continue | **Session Planner** |
 | Allocation | **Account Planner** |
 | Rule Editor | **Game Designer** |
 | History | **Session Library** |
 | Analytics | **Insights** |
+
+---
+
+## Kiến trúc 3 tầng
+
+```
+Game Designer
+        │
+        ▼
+Capital Planner
+        │
+        ▼
+Session
+        │
+        ▼
+Playing
+```
+
+Planning không còn là trung tâm — chỉ khởi tạo session thủ công khi cần.
 
 ---
 
@@ -24,13 +44,19 @@
 Game Designer ✅
         │
         ▼
-Planning (+ presets) ✅
-        │
-        ▼
-Session Planner ✅
-        │
-        ▼
 Capital Planner ✅
+        │
+        ▼
+Session ✅
+        │
+        ▼
+Improve (trong Session) ✅
+        │
+        ▼
+Scenario Planner (sandbox what-if)
+        │
+        ▼
+Simulation
         │
         ▼
 Account Planner
@@ -42,7 +68,10 @@ Insights
 Session Library ✅
         │
         ▼
-Backup / Restore
+Resume (khi cần đa session / đa thiết bị)
+        │
+        ▼
+Backup / Restore / Cloud
 ```
 
 ---
@@ -51,11 +80,11 @@ Backup / Restore
 
 Dashboard · Planning · Playing · Session Planner (continue) · Session Library · Insights (slider) · Export · IndexedDB
 
-## Giai đoạn 2 — Capital Planner ✅
+## Giai đoạn 2 — Improve ✅
 
-5 mode optimize · UI Capital Planner
+5 mode optimize · UI Improve trong Session (plan đã có → làm khả thi hơn)
 
-## Giai đoạn 3 — Game Designer + Presets ✅ (hiện tại)
+## Giai đoạn 3 — Game Designer + Presets ✅
 
 - **Game Designer** workspace — rules, reward policy, continue policy
 - Builtin: Bingo ×120, ×20, Crash 1.95, Dice, Custom
@@ -63,26 +92,35 @@ Dashboard · Planning · Playing · Session Planner (continue) · Session Librar
 - **Planning** — preset picker auto-fill form
 - `maximumBet` lưu trong preset (solver wire Phase 2 platform)
 
-## Giai đoạn 4 — Session Planner (aggregate root) ✅ (hiện tại)
+## Giai đoạn 4 — Session (aggregate root) ✅
 
 - **Session** = aggregate root (plans[], timeline, notes, statistics)
 - **Plan** tree: Generate → Improve → Continue với `parentPlanId`
 - Workspace **Session** = trang làm việc chính (80% thời gian)
-- **Planning** chỉ khởi tạo session mới
 - **Session Library** thay history đơn lẻ
 - Export full session JSON (policy, plans, timeline, notes, stats)
 
-## Giai đoạn 5 — Account Planner
+## Giai đoạn 5 — Capital Planner ✅ (hiện tại)
+
+- Workspace **Capital Planner** — vốn + game + mục tiêu + rủi ro → engine tự quyết profit/rounds
+- Không nhập profit/rounds thủ công
+- Multi-session split qua **Strategy Profile** → `CapitalAllocationPolicy` (không hardcode trong service)
+- **Planning Strategy Engine** — Capital Planner không gọi `optimize()` trực tiếp
+- **Generate Session** → tạo Session aggregate từ khuyến nghị
+- Dashboard: Capital / Allocated / Available
+- Tách rõ **Improve** (sửa plan) vs **Capital Planner** (chiến lược từ vốn)
+
+## Giai đoạn 6 — Scenario Planner
+
+Sandbox what-if: vốn khác, multiplier đổi, tax đổi — không sửa session thật
+
+## Giai đoạn 7 — Account Planner
 
 Chia plan trên session, không chỉ strategy đơn
 
-## Giai đoạn 6+ 
+## Giai đoạn 8+
 
-Insights sâu · Calendar · Notes · Search · Backup/Restore · Shortcuts · PWA · AI
-
-## Capital Planner (tương lai)
-
-Quản lý vốn: 30M → bao nhiêu vòng/ngày, bao nhiêu session song song.
+Insights sâu · Calendar · Notes · Search · Resume · Backup/Restore · Shortcuts · PWA · AI
 
 ## Backend
 

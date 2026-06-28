@@ -4,6 +4,7 @@ import {
   ChevronRight,
   Gamepad2,
   History,
+  Landmark,
   LayoutDashboard,
   LineChart,
   Moon,
@@ -32,6 +33,7 @@ const SIDEBAR_COLLAPSED_KEY = 'stake-planner-sidebar-collapsed';
 const WORKSPACE_ICONS: Record<WorkspaceId, ReactNode> = {
   dashboard: <LayoutDashboard className="h-4 w-4" />,
   'game-designer': <SlidersHorizontal className="h-4 w-4" />,
+  capital: <Landmark className="h-4 w-4" />,
   session: <Gamepad2 className="h-4 w-4" />,
   planning: <Target className="h-4 w-4" />,
   analysis: <LineChart className="h-4 w-4" />,

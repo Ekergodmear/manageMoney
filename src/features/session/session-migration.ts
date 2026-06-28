@@ -99,7 +99,16 @@ function historyToSession(item: HistorySession, presetId: string): Session {
 
 export function migratePersistedState(raw: unknown): PersistedAppState {
   if (raw === null || raw === undefined || typeof raw !== 'object') {
-    return { version: 3, theme: 'light', nextSessionNumber: 1, activeSessionId: null, sessions: [], customGamePresets: [], activePresetId: 'bingo-120' };
+    return {
+      version: 3,
+      theme: 'light',
+      nextSessionNumber: 1,
+      activeSessionId: null,
+      sessions: [],
+      customGamePresets: [],
+      activePresetId: 'bingo-120',
+      capitalPlanner: null,
+    };
   }
 
   const state = raw as PersistedAppState & {
@@ -109,7 +118,10 @@ export function migratePersistedState(raw: unknown): PersistedAppState {
   };
 
   if (state.version === 3) {
-    return state;
+    return {
+      ...state,
+      capitalPlanner: state.capitalPlanner ?? null,
+    };
   }
 
   if (state.version === 2) {
@@ -130,8 +142,18 @@ export function migratePersistedState(raw: unknown): PersistedAppState {
       sessions,
       customGamePresets: state.customGamePresets,
       activePresetId: state.activePresetId,
+      capitalPlanner: null,
     };
   }
 
-  return { version: 3, theme: 'light', nextSessionNumber: 1, activeSessionId: null, sessions: [], customGamePresets: [], activePresetId: 'bingo-120' };
+  return {
+    version: 3,
+    theme: 'light',
+    nextSessionNumber: 1,
+    activeSessionId: null,
+    sessions: [],
+    customGamePresets: [],
+    activePresetId: 'bingo-120',
+    capitalPlanner: null,
+  };
 }

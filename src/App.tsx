@@ -4,6 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'rea
 import { ActionToast } from '@/components/ui/action-toast';
 import { AnalysisScreen } from '@/features/analysis/AnalysisScreen';
 import { AllocationScreen } from '@/features/allocation/AllocationScreen';
+import { computeCapitalOverview } from '@/features/capital/capital-overview';
+import { CapitalPlannerScreen } from '@/features/capital/CapitalPlannerScreen';
+import type { CapitalSessionRecommendation } from '@/features/capital/capital-planner-types';
 import { DashboardScreen } from '@/features/dashboard/DashboardScreen';
 import { DEFAULT_PRESET_ID } from '@/features/game-designer/builtin-presets';
 import { GameDesignerScreen } from '@/features/game-designer/GameDesignerScreen';
@@ -88,6 +91,7 @@ export function App(): JSX.Element {
   const activePreset = findPreset(allPresets, persisted.activePresetId);
   const continueMaxRounds = activePreset?.continuePolicy.maximumRounds ?? 5000;
   const currentPlan = activeSession !== null ? getCurrentPlan(activeSession) : null;
+  const capitalOverview = useMemo(() => computeCapitalOverview(persisted), [persisted]);
   const readOnlySession = viewingSessionId !== null && viewingSessionId !== persisted.activeSessionId;
 
   useEffect(() => {
@@ -292,7 +296,7 @@ export function App(): JSX.Element {
       return;
     }
     updateSession(persisted.activeSessionId, (s) => addPlanFromImprove(s, option));
-    showToast('Capital Planner — plan mới đã áp dụng');
+    showToast('Improve — plan mới đã áp dụng');
     setSessionView('overview');
   }
 
@@ -302,6 +306,35 @@ export function App(): JSX.Element {
       return;
     }
     updateSession(id, (s) => updateSessionNotes(s, notes));
+  }
+
+  function handleCreateSessionFromCapital(rec: CapitalSessionRecommendation): void {
+    let sessions = [...persisted.sessions];
+    if (persisted.activeSessionId !== null) {
+      const current = findSession(sessions, persisted.activeSessionId);
+      if (current !== null && current.status === 'playing') {
+        sessions = upsertSession(sessions, stopSession(current));
+      }
+    }
+
+    const session = createSessionFromGenerate(
+      rec.formValues,
+      rec.result,
+      persisted.capitalPlanner?.presetId ?? persisted.activePresetId,
+      persisted.nextSessionNumber,
+    );
+
+    persist({
+      ...persisted,
+      nextSessionNumber: persisted.nextSessionNumber + 1,
+      activeSessionId: session.id,
+      sessions: upsertSession(sessions, session),
+      activePresetId: persisted.capitalPlanner?.presetId ?? persisted.activePresetId,
+    });
+    setViewingSessionId(null);
+    setSessionView('overview');
+    setActiveWorkspace('session');
+    showToast(`Session từ ${rec.label} — Plan A sẵn sàng`);
   }
 
   function handleStopSession(): void {
@@ -338,13 +371,13 @@ export function App(): JSX.Element {
     if (displayedSession === null) {
       return (
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">Chưa có session. Tạo từ Planning.</p>
+          <p className="text-sm text-muted-foreground">Chưa có session. Tạo từ Capital Planner.</p>
           <button
             type="button"
             className="text-sm font-medium text-primary underline"
-            onClick={() => setActiveWorkspace('planning')}
+            onClick={() => setActiveWorkspace('capital')}
           >
-            Mở Planning
+            Mở Capital Planner
           </button>
         </div>
       );
@@ -390,14 +423,16 @@ export function App(): JSX.Element {
         return (
           <DashboardScreen
             activeSession={activeSession}
+            capitalOverview={capitalOverview}
             onOpenSession={() => {
               setViewingSessionId(null);
               setActiveWorkspace('session');
             }}
             onNewSession={() => {
               setViewingSessionId(null);
-              setActiveWorkspace('planning');
+              setActiveWorkspace('capital');
             }}
+            onOpenCapitalPlanner={() => setActiveWorkspace('capital')}
           />
         );
       case 'game-designer':
@@ -413,6 +448,37 @@ export function App(): JSX.Element {
                 handlePresetSelect(preset);
               }
             }}
+          />
+        );
+      case 'capital':
+        return (
+          <CapitalPlannerScreen
+            presets={allPresets}
+            activePresetId={persisted.activePresetId}
+            initialBankroll={
+              persisted.capitalPlanner?.totalBankroll !== undefined
+                ? persisted.capitalPlanner.totalBankroll.toLocaleString('vi-VN')
+                : liveForm.userBankroll
+            }
+            initialStrategy={persisted.capitalPlanner?.strategy ?? 'balanced'}
+            initialRisk={persisted.capitalPlanner?.risk ?? 'normal'}
+            lastResult={persisted.capitalPlanner?.result ?? null}
+            onPresetSelect={handlePresetSelect}
+            onGenerate={({ bankroll, strategy, risk, presetId, result }) => {
+              persist({
+                ...persisted,
+                activePresetId: presetId,
+                capitalPlanner: {
+                  totalBankroll: bankroll,
+                  strategy,
+                  risk,
+                  presetId,
+                  result,
+                  generatedAt: new Date().toISOString(),
+                },
+              });
+            }}
+            onCreateSession={handleCreateSessionFromCapital}
           />
         );
       case 'session':
