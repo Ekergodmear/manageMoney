@@ -1,0 +1,46 @@
+name: Beta Feedback
+description: Góp ý từ người dùng thử Stake Planner Beta
+title: "[Beta] "
+labels:
+  - beta-feedback
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Cảm ơn bạn đã dùng thử **Stake Planner Beta**!
+        Không cần viết dài — vài dòng là đủ.
+
+  - type: input
+    id: confused
+    attributes:
+      label: Bạn không hiểu chỗ nào?
+      placeholder: "Ví dụ: Tại sao vốn cần lại lớn vậy?"
+    validations:
+      required: false
+
+  - type: textarea
+    id: need
+    attributes:
+      label: Bạn muốn làm gì tiếp sau khi tạo kế hoạch?
+      placeholder: "Ví dụ: Nếu chỉ có 30 triệu thì sao? / Tính tiếp 50 vòng nữa"
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Mong muốn thêm gì?
+      placeholder: Tùy chọn
+    validations:
+      required: false
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: Thiết bị
+      options:
+        - Desktop
+        - Mobile
+        - Tablet
+    validations:
+      required: false

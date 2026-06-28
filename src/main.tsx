@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react';
 import { createRoot } from 'react-dom/client';
 
 import { App } from './App';
@@ -9,4 +10,9 @@ if (rootElement === null) {
   throw new Error('Root element #root not found');
 }
 
-createRoot(rootElement).render(<App />);
+createRoot(rootElement).render(
+  <>
+    <App />
+    <Analytics />
+  </>,
+);

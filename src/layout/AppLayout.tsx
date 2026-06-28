@@ -19,6 +19,7 @@ import {
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { FeedbackButton } from '@/components/FeedbackButton';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipProvider } from '@/components/ui/tooltip';
 import { NavBadgePill } from '@/features/placeholders/FeaturePlaceholder';
@@ -217,19 +218,22 @@ export function AppLayout({
   return (
     <TooltipProvider>
       <div className={cn('flex h-screen flex-col overflow-hidden bg-background', isDark && 'dark')}>
-        <header className="flex h-11 shrink-0 items-center border-b border-border bg-card px-3 sm:px-4 lg:hidden">
-          <button
-            type="button"
-            className="rounded-md border border-border px-1.5 py-0.5 text-sm"
-            onClick={() => setMobileOpen(true)}
-            aria-label="Mở menu"
-          >
-            ☰
-          </button>
-          <h1 className="ml-2 flex items-center gap-2 text-sm font-semibold">
-            Stake Planner
-            <NavBadgePill badge="beta" />
-          </h1>
+        <header className="flex h-11 shrink-0 items-center justify-between border-b border-border bg-card px-3 sm:px-4 lg:hidden">
+          <div className="flex items-center">
+            <button
+              type="button"
+              className="rounded-md border border-border px-1.5 py-0.5 text-sm"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Mở menu"
+            >
+              ☰
+            </button>
+            <h1 className="ml-2 flex items-center gap-2 text-sm font-semibold">
+              Stake Planner
+              <NavBadgePill badge="beta" />
+            </h1>
+          </div>
+          <FeedbackButton />
         </header>
 
         <div className="flex min-h-0 flex-1 overflow-hidden">
@@ -260,7 +264,11 @@ export function AppLayout({
             />
           ) : null}
 
-          <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden lg:flex-row">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            <div className="hidden shrink-0 items-center justify-end border-b border-border bg-card/95 px-4 py-2 lg:flex">
+              <FeedbackButton />
+            </div>
+            <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden lg:flex-row">
             <motion.main
               key={`${activeNav}`}
               initial={{ opacity: 0 }}
@@ -276,6 +284,7 @@ export function AppLayout({
                 <div className="flex flex-col gap-2">{rightPanel}</div>
               </aside>
             ) : null}
+            </div>
           </div>
         </div>
       </div>

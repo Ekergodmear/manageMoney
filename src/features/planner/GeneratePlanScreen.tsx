@@ -93,7 +93,7 @@ export function GeneratePlanScreen({
       <div>
         <h2 className="text-lg font-bold tracking-tight">Tạo kế hoạch</h2>
         <p className="mt-0.5 text-sm text-muted-foreground">
-          Nhập thông tin để tạo kế hoạch cược tối ưu
+          Biết cần bao nhiêu vốn, khi nào nên dừng, và điều chỉnh kế hoạch nếu thiếu vốn.
         </p>
       </div>
 
