@@ -10,7 +10,15 @@ import type {
   Strategy,
   StrategyStatistics,
 } from '@stake/constraint-engine';
-import { useEffect, useState, type FormEvent, type JSX } from 'react';
+import { useEffect, useMemo, useState, type FormEvent, type JSX, type ReactNode } from 'react';
+
+import {
+  AppShell,
+  ComingSoonToast,
+  PanelCard,
+  type NavItemId,
+} from '@/shell/AppShell';
+import { palette, type ThemeMode } from '@/shell/theme';
 
 type Screen = 'form' | 'decision' | 'plan';
 
@@ -46,17 +54,18 @@ interface GenerateResult {
 
 const DEFAULT_FORM: FormValues = {
   targetProfit: '100.000',
-  roundCount: '50',
-  rewardMultiplier: '20',
+  roundCount: '500',
+  rewardMultiplier: '120',
   minimumBet: '10.000',
-  betStep: '1.000',
-  userBankroll: '',
+  betStep: '10.000',
+  userBankroll: '30.000.000',
   winTaxEnabled: true,
   winTaxThreshold: '10.000.000',
   winTaxRatePercent: '10',
 };
 
 const MULTIPLIER_DECIMAL_PLACES = 2;
+const SCROLL_TOP_THRESHOLD_PX = 200;
 
 type MoneyFormField = 'targetProfit' | 'minimumBet' | 'betStep' | 'winTaxThreshold' | 'userBankroll';
 
@@ -64,7 +73,6 @@ function normalizeNumericInput(raw: string): string {
   return raw.trim().replace(/,/g, '').replace(/\s/g, '');
 }
 
-/** Strip thousand separators — money fields are integers only (vi-VN dots). */
 function normalizeMoneyInput(raw: string): string {
   return raw.trim().replace(/\./g, '').replace(/,/g, '').replace(/\s/g, '');
 }
@@ -302,156 +310,6 @@ function generatePlan(values: FormValues): {
   };
 }
 
-const styles = {
-  page: {
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-    maxWidth: 'min(28rem, 100%)',
-    margin: '0 auto',
-    padding: 'clamp(1rem, 4vw, 1.75rem) clamp(1rem, 3vw, 1.25rem)',
-    color: '#111',
-    lineHeight: 1.5,
-  } as const,
-  title: { fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.25rem' } as const,
-  subtitle: { color: '#555', margin: '0 0 1.5rem', fontSize: '0.95rem' } as const,
-  label: { display: 'block', fontWeight: 600, marginBottom: '0.25rem', fontSize: '0.9rem' } as const,
-  input: {
-    width: '100%',
-    padding: '0.55rem 0.65rem',
-    fontSize: '1rem',
-    border: '1px solid #ccc',
-    borderRadius: '6px',
-    boxSizing: 'border-box' as const,
-  },
-  field: { marginBottom: '1rem' } as const,
-  fieldHint: { color: '#666', fontSize: '0.8rem', marginTop: '0.3rem', lineHeight: 1.4 } as const,
-  error: { color: '#b00020', fontSize: '0.85rem', marginTop: '0.25rem' } as const,
-  button: {
-    width: '100%',
-    padding: '0.7rem 1rem',
-    fontSize: '1rem',
-    fontWeight: 600,
-    background: '#111',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-  } as const,
-  card: {
-    background: '#fafafa',
-    border: '1px solid #e8e8e8',
-    borderRadius: '10px',
-    padding: '1rem 1.1rem',
-    marginBottom: '0.85rem',
-  } as const,
-  cardHero: {
-    background: '#f4f6f8',
-    border: '1px solid #dde3ea',
-    borderRadius: '10px',
-    padding: '1.15rem 1.1rem',
-    marginBottom: '0.85rem',
-  } as const,
-  cardEmoji: { fontSize: '1.1rem', marginBottom: '0.35rem' } as const,
-  cardLabel: { color: '#555', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.2rem' } as const,
-  cardValueHero: { fontSize: 'clamp(1.75rem, 6vw, 2.25rem)', fontWeight: 700, lineHeight: 1.15 } as const,
-  cardValue: { fontSize: '1.2rem', fontWeight: 600 } as const,
-  cardHint: { color: '#666', fontSize: '0.8rem', marginTop: '0.4rem', lineHeight: 1.45 } as const,
-  cardFooter: {
-    background: '#fff',
-    border: '1px solid #e8e8e8',
-    borderRadius: '10px',
-    padding: '1rem 1.1rem',
-    marginTop: '0.25rem',
-    marginBottom: '1rem',
-  } as const,
-  statusOk: { color: '#0d6b0d', margin: '0 0 1rem', fontWeight: 500 } as const,
-  statusWarn: { color: '#9a6700', margin: '0 0 1rem', lineHeight: 1.45 } as const,
-  sectionTitle: { fontSize: '1.15rem', fontWeight: 700, margin: '0 0 1rem' } as const,
-  table: { width: '100%', borderCollapse: 'collapse' as const, fontSize: '0.9rem' } as const,
-  th: {
-    textAlign: 'left' as const,
-    borderBottom: '2px solid #ddd',
-    padding: '0.4rem 0.25rem',
-  },
-  td: { borderBottom: '1px solid #eee', padding: '0.4rem 0.25rem' } as const,
-  thCheck: {
-    textAlign: 'center' as const,
-    borderBottom: '2px solid #ddd',
-    padding: '0.4rem 0.25rem',
-    width: '2.5rem',
-  },
-  tdCheck: {
-    borderBottom: '1px solid #eee',
-    padding: '0.4rem 0.25rem',
-    textAlign: 'center' as const,
-    verticalAlign: 'middle' as const,
-  },
-  rowCompleted: { background: '#f6faf6' } as const,
-  progressSummary: {
-    color: '#444',
-    fontSize: '0.9rem',
-    margin: 0,
-    fontWeight: 500,
-    flex: 1,
-  } as const,
-  progressRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    marginBottom: '0.75rem',
-    flexWrap: 'wrap' as const,
-  },
-  resetProgressButton: {
-    background: '#fff',
-    border: '1px solid #ccc',
-    borderRadius: '8px',
-    padding: '0.4rem 0.7rem',
-    color: '#555',
-    cursor: 'pointer',
-    fontSize: '0.85rem',
-    fontWeight: 600,
-    whiteSpace: 'nowrap' as const,
-  } as const,
-  stickyNav: {
-    position: 'sticky' as const,
-    top: 0,
-    zIndex: 10,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    padding: '0.5rem 0 0.75rem',
-    marginBottom: '0.5rem',
-    background: 'linear-gradient(to bottom, #fff 85%, transparent)',
-  },
-  backButton: {
-    background: '#f4f4f4',
-    border: '1px solid #ddd',
-    borderRadius: '8px',
-    padding: '0.45rem 0.75rem',
-    color: '#111',
-    cursor: 'pointer',
-    fontSize: '0.9rem',
-    fontWeight: 600,
-  } as const,
-  scrollTopButton: {
-    position: 'fixed' as const,
-    right: 'max(1rem, env(safe-area-inset-right))',
-    bottom: 'max(1.25rem, env(safe-area-inset-bottom))',
-    zIndex: 20,
-    width: '2.75rem',
-    height: '2.75rem',
-    borderRadius: '50%',
-    border: 'none',
-    background: '#111',
-    color: '#fff',
-    fontSize: '1.2rem',
-    lineHeight: 1,
-    cursor: 'pointer',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-  },
-};
-
-const SCROLL_TOP_THRESHOLD_PX = 200;
-
 function useShowScrollTop(): boolean {
   const [show, setShow] = useState(false);
 
@@ -468,34 +326,276 @@ function useShowScrollTop(): boolean {
   return show;
 }
 
-function ScrollToTopButton({ visible }: { visible: boolean }): JSX.Element | null {
-  if (!visible) {
-    return null;
-  }
+function createUi(theme: ThemeMode) {
+  const c = palette[theme];
+  return {
+    c,
+    pageTitle: { fontSize: '1.65rem', fontWeight: 700, margin: '0 0 0.35rem' } as const,
+    pageSubtitle: { color: c.textMuted, margin: '0 0 1.5rem', fontSize: '0.95rem' } as const,
+    formGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+      gap: '1rem 1.25rem',
+    } as const,
+    field: { marginBottom: 0 } as const,
+    labelRow: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.35rem',
+      fontWeight: 600,
+      marginBottom: '0.4rem',
+      fontSize: '0.85rem',
+      color: c.text,
+    } as const,
+    infoBtn: {
+      width: '1.1rem',
+      height: '1.1rem',
+      borderRadius: '50%',
+      border: `1px solid ${c.border}`,
+      background: c.surfaceMuted,
+      color: c.textMuted,
+      fontSize: '0.65rem',
+      fontWeight: 700,
+      cursor: 'help',
+      lineHeight: 1,
+      padding: 0,
+    } as const,
+    input: {
+      width: '100%',
+      padding: '0.65rem 0.75rem',
+      fontSize: '0.95rem',
+      border: `1px solid ${c.border}`,
+      borderRadius: '10px',
+      boxSizing: 'border-box' as const,
+      background: c.surface,
+      color: c.text,
+    },
+    inputWithIcon: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      border: `1px solid ${c.border}`,
+      borderRadius: '10px',
+      padding: '0 0.65rem',
+      background: c.surface,
+    },
+    fieldHint: { color: c.textMuted, fontSize: '0.78rem', marginTop: '0.35rem', lineHeight: 1.4 } as const,
+    error: { color: '#dc2626', fontSize: '0.82rem', marginTop: '0.3rem' } as const,
+    primaryBtn: {
+      width: '100%',
+      padding: '0.85rem 1rem',
+      fontSize: '1rem',
+      fontWeight: 600,
+      background: '#111',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '12px',
+      cursor: 'pointer',
+      marginTop: '1.25rem',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '0.5rem',
+    } as const,
+    secondaryBtn: {
+      background: c.surface,
+      border: `1px solid ${c.border}`,
+      borderRadius: '10px',
+      padding: '0.5rem 0.85rem',
+      color: c.text,
+      cursor: 'pointer',
+      fontSize: '0.88rem',
+      fontWeight: 600,
+    } as const,
+    privacyBanner: {
+      marginTop: '1.25rem',
+      background: c.okBg,
+      border: `1px solid ${c.okBorder}`,
+      color: c.okText,
+      borderRadius: '12px',
+      padding: '0.85rem 1rem',
+      fontSize: '0.85rem',
+      lineHeight: 1.45,
+    } as const,
+    card: {
+      background: c.surface,
+      border: `1px solid ${c.border}`,
+      borderRadius: '14px',
+      padding: '1.1rem',
+      marginBottom: '0.85rem',
+      boxShadow: c.shadow,
+    } as const,
+    cardHero: {
+      background: `linear-gradient(135deg, ${c.primarySoft}, ${c.surface})`,
+      border: `1px solid ${c.border}`,
+      borderRadius: '14px',
+      padding: '1.2rem',
+      marginBottom: '0.85rem',
+    } as const,
+    summaryRow: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: '0.5rem',
+      padding: '0.45rem 0',
+      fontSize: '0.88rem',
+      borderBottom: `1px solid ${c.border}`,
+    } as const,
+    warnBox: {
+      background: c.warnBg,
+      border: `1px solid ${c.warnBorder}`,
+      color: c.warnText,
+      borderRadius: '12px',
+      padding: '0.85rem',
+      fontSize: '0.85rem',
+      lineHeight: 1.5,
+    } as const,
+    upcomingList: {
+      margin: 0,
+      paddingLeft: '1.1rem',
+      color: c.textMuted,
+      fontSize: '0.85rem',
+      lineHeight: 1.6,
+    } as const,
+    table: { width: '100%', borderCollapse: 'collapse' as const, fontSize: '0.88rem' } as const,
+    th: {
+      textAlign: 'left' as const,
+      borderBottom: `2px solid ${c.border}`,
+      padding: '0.5rem 0.35rem',
+      color: c.textMuted,
+      fontWeight: 600,
+      fontSize: '0.8rem',
+    },
+    td: { borderBottom: `1px solid ${c.border}`, padding: '0.5rem 0.35rem' } as const,
+    thCheck: {
+      textAlign: 'center' as const,
+      borderBottom: `2px solid ${c.border}`,
+      padding: '0.5rem 0.35rem',
+      width: '2.5rem',
+    },
+    tdCheck: {
+      borderBottom: `1px solid ${c.border}`,
+      padding: '0.5rem 0.35rem',
+      textAlign: 'center' as const,
+    },
+    rowCompleted: { background: theme === 'light' ? '#f0fdf4' : '#052e16' } as const,
+    stickyNav: {
+      position: 'sticky' as const,
+      top: 0,
+      zIndex: 10,
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      flexWrap: 'wrap' as const,
+      padding: '0 0 1rem',
+      marginBottom: '0.5rem',
+      background: c.bg,
+    },
+    scrollTopButton: {
+      position: 'fixed' as const,
+      right: 'max(1rem, env(safe-area-inset-right))',
+      bottom: 'max(1.25rem, env(safe-area-inset-bottom))',
+      zIndex: 20,
+      width: '2.75rem',
+      height: '2.75rem',
+      borderRadius: '50%',
+      border: 'none',
+      background: c.primary,
+      color: '#fff',
+      fontSize: '1.2rem',
+      cursor: 'pointer',
+      boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+    },
+  };
+}
 
+function FieldLabel({
+  htmlFor,
+  icon,
+  label,
+  info,
+  ui,
+}: {
+  htmlFor: string;
+  icon: string;
+  label: string;
+  info?: string | undefined;
+  ui: ReturnType<typeof createUi>;
+}): JSX.Element {
   return (
-    <button
-      type="button"
-      style={styles.scrollTopButton}
-      aria-label="Cuộn lên đầu trang"
-      title="Lên đầu trang"
-      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-    >
-      ↑
-    </button>
+    <label htmlFor={htmlFor} style={ui.labelRow}>
+      <span aria-hidden>{icon}</span>
+      {label}
+      {info != null && info !== '' ? (
+        <button type="button" style={ui.infoBtn} title={info} aria-label={info}>
+          i
+        </button>
+      ) : null}
+    </label>
   );
 }
 
-function BackButton({
+function FormInputField({
+  id,
+  icon,
   label,
-  onClick,
+  info,
+  value,
+  onChange,
+  error,
+  inputMode,
+  ui,
+  fullWidth = false,
 }: {
+  id: string;
+  icon: string;
   label: string;
-  onClick: () => void;
+  info?: string | undefined;
+  value: string;
+  onChange: (v: string) => void;
+  error?: string | undefined;
+  inputMode?: 'numeric' | 'decimal' | 'text';
+  ui: ReturnType<typeof createUi>;
+  fullWidth?: boolean;
 }): JSX.Element {
   return (
-    <button type="button" style={styles.backButton} onClick={onClick}>
-      {label}
+    <div style={{ ...ui.field, ...(fullWidth ? { gridColumn: '1 / -1' } : {}) }}>
+      <FieldLabel htmlFor={id} icon={icon} label={label} info={info} ui={ui} />
+      <div style={ui.inputWithIcon}>
+        <span aria-hidden style={{ opacity: 0.7 }}>
+          {icon}
+        </span>
+        <input
+          id={id}
+          style={{ ...ui.input, border: 'none', padding: '0.65rem 0', background: 'transparent' }}
+          inputMode={inputMode}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </div>
+      {error != null && error !== '' ? <div style={ui.error}>{error}</div> : null}
+    </div>
+  );
+}
+
+function ScrollToTopButton({
+  visible,
+  ui,
+}: {
+  visible: boolean;
+  ui: ReturnType<typeof createUi>;
+}): JSX.Element | null {
+  if (!visible) {
+    return null;
+  }
+  return (
+    <button
+      type="button"
+      style={ui.scrollTopButton}
+      aria-label="Cuộn lên đầu trang"
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+    >
+      ↑
     </button>
   );
 }
@@ -505,33 +605,67 @@ function DecisionCard({
   label,
   value,
   hint,
-  hero = false,
+  hero,
+  ui,
 }: {
   emoji: string;
   label: string;
   value: string;
   hint?: string;
   hero?: boolean;
+  ui: ReturnType<typeof createUi>;
 }): JSX.Element {
   return (
-    <section style={hero ? styles.cardHero : styles.card}>
-      <div style={styles.cardEmoji} aria-hidden="true">
+    <section style={hero ? ui.cardHero : ui.card}>
+      <div style={{ fontSize: '1.25rem', marginBottom: '0.35rem' }} aria-hidden>
         {emoji}
       </div>
-      <div style={styles.cardLabel}>{label}</div>
-      <div style={hero ? styles.cardValueHero : styles.cardValue}>{value}</div>
-      {hint !== undefined ? <p style={styles.cardHint}>{hint}</p> : null}
+      <div style={{ color: ui.c.textMuted, fontSize: '0.85rem', fontWeight: 600 }}>{label}</div>
+      <div style={{ fontSize: hero ? 'clamp(1.5rem, 4vw, 2rem)' : '1.2rem', fontWeight: 700 }}>
+        {value}
+      </div>
+      {hint !== undefined ? (
+        <p style={{ color: ui.c.textMuted, fontSize: '0.82rem', marginTop: '0.4rem', marginBottom: 0 }}>
+          {hint}
+        </p>
+      ) : null}
     </section>
   );
 }
 
+function SummaryLine({
+  icon,
+  label,
+  value,
+  highlight,
+  ui,
+}: {
+  icon: string;
+  label: string;
+  value: string;
+  highlight?: boolean;
+  ui: ReturnType<typeof createUi>;
+}): JSX.Element {
+  return (
+    <div style={ui.summaryRow}>
+      <span style={{ color: ui.c.textMuted }}>
+        {icon} {label}
+      </span>
+      <strong style={{ color: highlight ? ui.c.primary : ui.c.text }}>{value}</strong>
+    </div>
+  );
+}
+
 export function App(): JSX.Element {
+  const [theme, setTheme] = useState<ThemeMode>('light');
   const [screen, setScreen] = useState<Screen>('form');
   const [form, setForm] = useState<FormValues>(DEFAULT_FORM);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FormField, string>>>({});
   const [generated, setGenerated] = useState<GenerateResult | null>(null);
   const [completedThroughRound, setCompletedThroughRound] = useState(0);
+  const [comingSoon, setComingSoon] = useState<string | null>(null);
   const showScrollTop = useShowScrollTop();
+  const ui = useMemo(() => createUi(theme), [theme]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -539,6 +673,14 @@ export function App(): JSX.Element {
 
   function goToScreen(next: Screen): void {
     setScreen(next);
+  }
+
+  function handleNavSelect(id: NavItemId): void {
+    if (id !== 'create') {
+      setComingSoon('Tính năng đang phát triển — sẽ có trong bản cập nhật tới.');
+      return;
+    }
+    goToScreen('form');
   }
 
   function updateField(key: keyof FormValues, value: string): void {
@@ -585,315 +727,426 @@ export function App(): JSX.Element {
     setCompletedThroughRound(0);
   }
 
-  if (screen === 'decision' && generated !== null) {
-    const { statistics, userBankroll, request } = generated;
-    const bankrollShort =
-      userBankroll !== null && userBankroll < statistics.requiredBankrollAmount;
-    const targetAmount =
-      request.targetProfit.mode === 'fixedAmount' ? request.targetProfit.amount : null;
+  function renderRightPanel(): ReactNode {
+    const bankrollDisplay =
+      form.userBankroll.trim() === '' ? '—' : `${form.userBankroll} đ`;
+
+    if (screen === 'decision' && generated !== null) {
+      const { statistics, userBankroll } = generated;
+      return (
+        <>
+          <PanelCard title="Kết quả kế hoạch" theme={theme}>
+            <SummaryLine
+              icon="💰"
+              label="Vốn cần"
+              value={`${formatAmount(statistics.requiredBankrollAmount)} đ`}
+              ui={ui}
+              highlight
+            />
+            <SummaryLine
+              icon="📈"
+              label="Lợi nhuận ước tính"
+              value={`${formatAmount(statistics.expectedProfitAmount)} đ`}
+              ui={ui}
+            />
+            <SummaryLine
+              icon="📊"
+              label="Cược lớn nhất"
+              value={`${formatAmount(statistics.maximumBetAmount)} đ`}
+              ui={ui}
+            />
+            {userBankroll !== null ? (
+              <SummaryLine
+                icon="🏦"
+                label="Vốn của bạn"
+                value={`${formatAmount(userBankroll)} đ`}
+                ui={ui}
+                highlight={userBankroll < statistics.requiredBankrollAmount}
+              />
+            ) : null}
+          </PanelCard>
+          {renderStaticPanels()}
+        </>
+      );
+    }
+
+    if (screen === 'plan' && generated !== null) {
+      const { strategy, statistics } = generated;
+      return (
+        <>
+          <PanelCard title="Tiến độ" theme={theme}>
+            <SummaryLine
+              icon="✓"
+              label="Đã cược"
+              value={`${String(completedThroughRound)} / ${String(strategy.rounds.length)}`}
+              ui={ui}
+              highlight
+            />
+            <SummaryLine
+              icon="💰"
+              label="Vốn cần"
+              value={`${formatAmount(statistics.requiredBankrollAmount)} đ`}
+              ui={ui}
+            />
+          </PanelCard>
+          {renderStaticPanels()}
+        </>
+      );
+    }
 
     return (
-      <main style={styles.page}>
-        <nav style={styles.stickyNav} aria-label="Điều hướng">
-          <BackButton label="← Sửa ý định" onClick={() => goToScreen('form')} />
-        </nav>
-
-        <DecisionCard
-          emoji="💰"
-          label="Vốn cần chuẩn bị"
-          value={formatAmount(statistics.requiredBankrollAmount)}
-          hint="Đây là mức vốn tối đa bạn cần có nếu chưa thắng vòng nào."
-          hero
-        />
-
-        {targetAmount !== null ? (
-          <DecisionCard emoji="🎯" label="Mục tiêu của bạn" value={formatAmount(targetAmount)} />
-        ) : null}
-
-        <DecisionCard
-          emoji="📈"
-          label="Lợi nhuận ước tính (nếu thắng)"
-          value={formatAmount(statistics.expectedProfitAmount)}
-        />
-
-        <DecisionCard
-          emoji="📊"
-          label="Cược lớn nhất"
-          value={formatAmount(statistics.maximumBetAmount)}
-        />
-
-        <section style={styles.cardFooter}>
-          {bankrollShort ? (
-            <p style={styles.statusWarn}>
-              ⚠ Vốn của bạn: {formatAmount(userBankroll)} — thấp hơn mức cần{' '}
-              {formatAmount(statistics.requiredBankrollAmount)}.
-              <br />
-              Kế hoạch đã tạo — hãy xem lại trước khi dùng.
-            </p>
-          ) : (
-            <p style={styles.statusOk}>✓ Kế hoạch cược của bạn đã sẵn sàng.</p>
-          )}
-
-          <button type="button" style={styles.button} onClick={() => goToScreen('plan')}>
-            Xem kế hoạch cược
-          </button>
-        </section>
-
-        <ScrollToTopButton visible={showScrollTop} />
-      </main>
+      <>
+        <PanelCard title="Tóm tắt nhanh" theme={theme}>
+          <SummaryLine icon="🎯" label="Mục tiêu" value={`${form.targetProfit} đ`} ui={ui} />
+          <SummaryLine icon="🔢" label="Số vòng" value={form.roundCount} ui={ui} />
+          <SummaryLine icon="✖️" label="Hệ số" value={`×${form.rewardMultiplier}`} ui={ui} />
+          <SummaryLine icon="💵" label="Cược tối thiểu" value={`${form.minimumBet} đ`} ui={ui} />
+          <SummaryLine
+            icon="🏦"
+            label="Vốn của bạn"
+            value={bankrollDisplay}
+            ui={ui}
+            highlight={form.userBankroll.trim() !== ''}
+          />
+        </PanelCard>
+        {renderStaticPanels()}
+      </>
     );
   }
 
-  if (screen === 'plan' && generated !== null) {
-    const { strategy, statistics } = generated;
+  function renderStaticPanels(): ReactNode {
+    return (
+      <>
+        <PanelCard title="Lưu ý quan trọng" theme={theme}>
+          <div style={ui.warnBox}>
+            Kế hoạch dựa trên công thức tối ưu — không đảm bảo thắng. Hãy chơi có trách nhiệm và chỉ
+            dùng số vốn bạn chấp nhận mất.
+          </div>
+        </PanelCard>
+        <PanelCard title="Tính năng sắp tới" theme={theme}>
+          <ul style={ui.upcomingList}>
+            <li>Mô phỏng kịch bản</li>
+            <li>Tối ưu khi thiếu vốn</li>
+            <li>Tiếp tục kế hoạch</li>
+            <li>Phân bổ đa tài khoản</li>
+          </ul>
+        </PanelCard>
+      </>
+    );
+  }
+
+  function renderMain(): ReactNode {
+    if (screen === 'decision' && generated !== null) {
+      const { statistics, userBankroll, request } = generated;
+      const bankrollShort =
+        userBankroll !== null && userBankroll < statistics.requiredBankrollAmount;
+      const targetAmount =
+        request.targetProfit.mode === 'fixedAmount' ? request.targetProfit.amount : null;
+
+      return (
+        <>
+          <nav style={ui.stickyNav} aria-label="Điều hướng">
+            <button type="button" style={ui.secondaryBtn} onClick={() => goToScreen('form')}>
+              ← Sửa ý định
+            </button>
+          </nav>
+          <h1 style={ui.pageTitle}>Kết quả kế hoạch</h1>
+          <p style={ui.pageSubtitle}>Xem tổng quan trước khi vào bảng chi tiết từng vòng.</p>
+
+          <DecisionCard
+            emoji="💰"
+            label="Vốn cần chuẩn bị"
+            value={`${formatAmount(statistics.requiredBankrollAmount)} đ`}
+            hint="Mức vốn tối đa nếu chưa thắng vòng nào."
+            hero
+            ui={ui}
+          />
+          {targetAmount !== null ? (
+            <DecisionCard
+              emoji="🎯"
+              label="Mục tiêu của bạn"
+              value={`${formatAmount(targetAmount)} đ`}
+              ui={ui}
+            />
+          ) : null}
+          <DecisionCard
+            emoji="📈"
+            label="Lợi nhuận ước tính (nếu thắng)"
+            value={`${formatAmount(statistics.expectedProfitAmount)} đ`}
+            ui={ui}
+          />
+          <DecisionCard
+            emoji="📊"
+            label="Cược lớn nhất"
+            value={`${formatAmount(statistics.maximumBetAmount)} đ`}
+            ui={ui}
+          />
+
+          <section style={ui.card}>
+            {bankrollShort ? (
+              <p style={{ color: ui.c.warnText, margin: '0 0 1rem', lineHeight: 1.45 }}>
+                ⚠ Vốn của bạn thấp hơn mức cần — hãy xem lại trước khi dùng.
+              </p>
+            ) : (
+              <p style={{ color: ui.c.okText, margin: '0 0 1rem', fontWeight: 600 }}>
+                ✓ Kế hoạch cược đã sẵn sàng.
+              </p>
+            )}
+            <button type="button" style={ui.primaryBtn} onClick={() => goToScreen('plan')}>
+              ✨ Xem kế hoạch cược
+            </button>
+          </section>
+          <ScrollToTopButton visible={showScrollTop} ui={ui} />
+        </>
+      );
+    }
+
+    if (screen === 'plan' && generated !== null) {
+      const { strategy, statistics } = generated;
+
+      return (
+        <>
+          <nav style={ui.stickyNav} aria-label="Điều hướng">
+            <button type="button" style={ui.secondaryBtn} onClick={() => goToScreen('decision')}>
+              ← Kết quả
+            </button>
+            <button type="button" style={ui.secondaryBtn} onClick={() => goToScreen('form')}>
+              ← Sửa ý định
+            </button>
+          </nav>
+          <h1 style={ui.pageTitle}>Kế hoạch — {strategy.rounds.length} vòng</h1>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              flexWrap: 'wrap',
+              marginBottom: '1rem',
+            }}
+          >
+            <span style={{ fontSize: '0.9rem', color: ui.c.textMuted }}>
+              Đã cược: <strong style={{ color: ui.c.text }}>{completedThroughRound}</strong> /{' '}
+              {strategy.rounds.length}
+              {completedThroughRound > 0
+                ? ` · Tích lũy: ${formatAmount(strategy.rounds[completedThroughRound - 1]?.accumulatedSpent ?? 0)} đ`
+                : ''}
+            </span>
+            {completedThroughRound > 0 ? (
+              <button type="button" style={ui.secondaryBtn} onClick={resetRoundProgress}>
+                Đặt lại
+              </button>
+            ) : null}
+          </div>
+
+          <div style={{ overflowX: 'auto', background: ui.c.surface, borderRadius: '14px', border: `1px solid ${ui.c.border}` }}>
+            <table style={ui.table}>
+              <thead>
+                <tr>
+                  <th style={ui.thCheck} scope="col" aria-label="Đã cược">
+                    ✓
+                  </th>
+                  <th style={ui.th}>Vòng</th>
+                  <th style={ui.th}>Cược</th>
+                  <th style={ui.th}>Tích lũy chi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {strategy.rounds.map((round) => {
+                  const isCompleted = round.index <= completedThroughRound;
+                  return (
+                    <tr key={round.index} style={isCompleted ? ui.rowCompleted : undefined}>
+                      <td style={ui.tdCheck}>
+                        <input
+                          type="checkbox"
+                          checked={isCompleted}
+                          aria-label={`Đánh dấu đã cược đến vòng ${String(round.index)}`}
+                          onChange={(e) =>
+                            handleRoundProgressToggle(round.index, e.target.checked)
+                          }
+                        />
+                      </td>
+                      <td style={ui.td}>{round.index}</td>
+                      <td style={ui.td}>{formatAmount(round.betAmount)}</td>
+                      <td style={ui.td}>{formatAmount(round.accumulatedSpent)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <p style={{ marginTop: '1rem', fontWeight: 600 }}>
+            Vốn cần: {formatAmount(statistics.requiredBankrollAmount)} đ
+          </p>
+          <ScrollToTopButton visible={showScrollTop} ui={ui} />
+        </>
+      );
+    }
 
     return (
-      <main style={styles.page}>
-        <nav style={styles.stickyNav} aria-label="Điều hướng">
-          <BackButton label="← Kết quả" onClick={() => goToScreen('decision')} />
-          <BackButton label="← Sửa ý định" onClick={() => goToScreen('form')} />
-        </nav>
-
-        <h2 style={styles.sectionTitle}>Kế hoạch — {strategy.rounds.length} vòng</h2>
-
-        <div style={styles.progressRow}>
-          <p style={styles.progressSummary}>
-            Đã cược: {completedThroughRound} / {strategy.rounds.length} vòng
-            {completedThroughRound > 0
-              ? ` · Tích lũy: ${formatAmount(strategy.rounds[completedThroughRound - 1]?.accumulatedSpent ?? 0)}`
-              : ''}
-          </p>
-          {completedThroughRound > 0 ? (
-            <button
-              type="button"
-              style={styles.resetProgressButton}
-              onClick={resetRoundProgress}
-            >
-              Đặt lại
-            </button>
-          ) : null}
-        </div>
-
-        <div style={{ overflowX: 'auto' }}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.thCheck} scope="col" aria-label="Đã cược">
-                  ✓
-                </th>
-                <th style={styles.th}>Vòng</th>
-                <th style={styles.th}>Cược</th>
-                <th style={styles.th}>Tích lũy chi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {strategy.rounds.map((round) => {
-                const isCompleted = round.index <= completedThroughRound;
-                return (
-                  <tr
-                    key={round.index}
-                    style={isCompleted ? styles.rowCompleted : undefined}
-                  >
-                    <td style={styles.tdCheck}>
-                      <input
-                        type="checkbox"
-                        checked={isCompleted}
-                        aria-label={`Đánh dấu đã cược đến vòng ${String(round.index)}`}
-                        onChange={(e) =>
-                          handleRoundProgressToggle(round.index, e.target.checked)
-                        }
-                      />
-                    </td>
-                    <td style={styles.td}>{round.index}</td>
-                    <td style={styles.td}>{formatAmount(round.betAmount)}</td>
-                    <td style={styles.td}>{formatAmount(round.accumulatedSpent)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        <p style={{ marginTop: '1rem', fontWeight: 600 }}>
-          Vốn cần: {formatAmount(statistics.requiredBankrollAmount)}
+      <>
+        <h1 style={ui.pageTitle}>Tạo kế hoạch</h1>
+        <p style={ui.pageSubtitle}>
+          Nhập thông tin bên dưới để tạo kế hoạch cược tối ưu
         </p>
 
-        <ScrollToTopButton visible={showScrollTop} />
-      </main>
+        <form onSubmit={handleGenerate}>
+          <div style={ui.formGrid}>
+            <FormInputField
+              id="targetProfit"
+              icon="🎯"
+              label="Lợi nhuận mục tiêu (đ)"
+              info="Số tiền lời bạn muốn đạt khi thắng"
+              value={form.targetProfit}
+              onChange={(v) => updateMoneyField('targetProfit', v)}
+              error={fieldErrors.targetProfit}
+              inputMode="numeric"
+              ui={ui}
+            />
+            <FormInputField
+              id="roundCount"
+              icon="🔢"
+              label="Số vòng"
+              info="Số vòng tối đa trước khi thắng"
+              value={form.roundCount}
+              onChange={(v) => updateField('roundCount', v)}
+              error={fieldErrors.roundCount}
+              inputMode="numeric"
+              ui={ui}
+            />
+            <FormInputField
+              id="rewardMultiplier"
+              icon="✖️"
+              label="Hệ số thưởng (×)"
+              info="Hệ số nhân tiền thắng (tối đa 2 chữ số thập phân)"
+              value={form.rewardMultiplier}
+              onChange={(v) => updateField('rewardMultiplier', v)}
+              error={fieldErrors.rewardMultiplier}
+              inputMode="decimal"
+              ui={ui}
+            />
+            <FormInputField
+              id="minimumBet"
+              icon="💵"
+              label="Cược tối thiểu (đ)"
+              value={form.minimumBet}
+              onChange={(v) => updateMoneyField('minimumBet', v)}
+              error={fieldErrors.minimumBet}
+              inputMode="numeric"
+              ui={ui}
+            />
+            <FormInputField
+              id="betStep"
+              icon="📏"
+              label="Bước cược (đ)"
+              value={form.betStep}
+              onChange={(v) => updateMoneyField('betStep', v)}
+              error={fieldErrors.betStep}
+              inputMode="numeric"
+              ui={ui}
+            />
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label
+                style={{
+                  ...ui.labelRow,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: 'pointer',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={form.winTaxEnabled}
+                  onChange={(e) => {
+                    setForm((prev) => ({ ...prev, winTaxEnabled: e.target.checked }));
+                    setFieldErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.winTaxThreshold;
+                      delete next.winTaxRatePercent;
+                      delete next.request;
+                      return next;
+                    });
+                  }}
+                />
+                Áp dụng thuế khi thắng lớn
+              </label>
+              <p style={ui.fieldHint}>
+                Thuế tính trên tổng tiền thắng khi đạt ngưỡng (mặc định: 10% từ 10 triệu).
+              </p>
+            </div>
+
+            {form.winTaxEnabled ? (
+              <>
+                <FormInputField
+                  id="winTaxThreshold"
+                  icon="🏛️"
+                  label="Ngưỡng thuế (tiền thắng) (đ)"
+                  value={form.winTaxThreshold}
+                  onChange={(v) => updateMoneyField('winTaxThreshold', v)}
+                  error={fieldErrors.winTaxThreshold}
+                  inputMode="numeric"
+                  ui={ui}
+                />
+                <FormInputField
+                  id="winTaxRatePercent"
+                  icon="％"
+                  label="Thuế (%)"
+                  value={form.winTaxRatePercent}
+                  onChange={(v) => updateField('winTaxRatePercent', v)}
+                  error={fieldErrors.winTaxRatePercent}
+                  inputMode="numeric"
+                  ui={ui}
+                />
+              </>
+            ) : null}
+
+            <FormInputField
+              id="userBankroll"
+              icon="🏦"
+              label="Vốn của bạn (tùy chọn) (đ)"
+              info="Để so sánh với vốn cần chuẩn bị"
+              value={form.userBankroll}
+              onChange={(v) => updateMoneyField('userBankroll', v)}
+              error={fieldErrors.userBankroll}
+              inputMode="numeric"
+              ui={ui}
+              fullWidth
+            />
+          </div>
+
+          {fieldErrors.request !== undefined ? (
+            <div style={{ ...ui.error, marginTop: '1rem' }}>{fieldErrors.request}</div>
+          ) : null}
+
+          <button type="submit" style={ui.primaryBtn}>
+            ✨ Tạo kế hoạch
+          </button>
+
+          <div style={ui.privacyBanner}>
+            🔒 Dữ liệu được xử lý hoàn toàn trên trình duyệt của bạn — không lưu trên server.
+          </div>
+        </form>
+      </>
     );
   }
 
   return (
-    <main style={styles.page}>
-      <h1 style={styles.title}>Stake Planner</h1>
-      <p style={styles.subtitle}>Lập kế hoạch — biết cần bao nhiêu vốn</p>
-
-      <form onSubmit={handleGenerate}>
-        <div style={styles.field}>
-          <label style={styles.label} htmlFor="targetProfit">
-            Lợi nhuận mục tiêu
-          </label>
-          <input
-            id="targetProfit"
-            style={styles.input}
-            inputMode="numeric"
-            value={form.targetProfit}
-            onChange={(e) => updateMoneyField('targetProfit', e.target.value)}
-          />
-          {fieldErrors.targetProfit !== undefined ? (
-            <div style={styles.error}>{fieldErrors.targetProfit}</div>
-          ) : null}
-        </div>
-
-        <div style={styles.field}>
-          <label style={styles.label} htmlFor="roundCount">
-            Số vòng
-          </label>
-          <input
-            id="roundCount"
-            style={styles.input}
-            inputMode="numeric"
-            value={form.roundCount}
-            onChange={(e) => updateField('roundCount', e.target.value)}
-          />
-          {fieldErrors.roundCount !== undefined ? (
-            <div style={styles.error}>{fieldErrors.roundCount}</div>
-          ) : null}
-        </div>
-
-        <div style={styles.field}>
-          <label style={styles.label} htmlFor="rewardMultiplier">
-            Hệ số thưởng
-          </label>
-          <input
-            id="rewardMultiplier"
-            style={styles.input}
-            inputMode="decimal"
-            placeholder="Ví dụ: 20, 19.6, 1.95"
-            value={form.rewardMultiplier}
-            onChange={(e) => updateField('rewardMultiplier', e.target.value)}
-          />
-          <p style={styles.fieldHint}>Hỗ trợ tối đa 2 chữ số thập phân.</p>
-          {fieldErrors.rewardMultiplier !== undefined ? (
-            <div style={styles.error}>{fieldErrors.rewardMultiplier}</div>
-          ) : null}
-        </div>
-
-        <div style={styles.field}>
-          <label style={styles.label} htmlFor="minimumBet">
-            Cược tối thiểu
-          </label>
-          <input
-            id="minimumBet"
-            style={styles.input}
-            inputMode="numeric"
-            value={form.minimumBet}
-            onChange={(e) => updateMoneyField('minimumBet', e.target.value)}
-          />
-          {fieldErrors.minimumBet !== undefined ? (
-            <div style={styles.error}>{fieldErrors.minimumBet}</div>
-          ) : null}
-        </div>
-
-        <div style={styles.field}>
-          <label style={styles.label} htmlFor="betStep">
-            Bước cược
-          </label>
-          <input
-            id="betStep"
-            style={styles.input}
-            inputMode="numeric"
-            value={form.betStep}
-            onChange={(e) => updateMoneyField('betStep', e.target.value)}
-          />
-          {fieldErrors.betStep !== undefined ? (
-            <div style={styles.error}>{fieldErrors.betStep}</div>
-          ) : null}
-        </div>
-
-        <div style={styles.field}>
-          <label style={{ ...styles.label, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <input
-              type="checkbox"
-              checked={form.winTaxEnabled}
-              onChange={(e) => {
-                setForm((prev) => ({ ...prev, winTaxEnabled: e.target.checked }));
-                setFieldErrors((prev) => {
-                  const next = { ...prev };
-                  delete next.winTaxThreshold;
-                  delete next.winTaxRatePercent;
-                  delete next.request;
-                  return next;
-                });
-              }}
-            />
-            Áp dụng thuế khi thắng lớn
-          </label>
-          <p style={styles.fieldHint}>
-            Thuế tính trên tổng tiền thắng khi đạt ngưỡng (mặc định: 10% từ 10 triệu).
-          </p>
-        </div>
-
-        {form.winTaxEnabled ? (
-          <>
-            <div style={styles.field}>
-              <label style={styles.label} htmlFor="winTaxThreshold">
-                Ngưỡng thuế (tiền thắng)
-              </label>
-              <input
-                id="winTaxThreshold"
-                style={styles.input}
-                inputMode="numeric"
-                value={form.winTaxThreshold}
-                onChange={(e) => updateMoneyField('winTaxThreshold', e.target.value)}
-              />
-              {fieldErrors.winTaxThreshold !== undefined ? (
-                <div style={styles.error}>{fieldErrors.winTaxThreshold}</div>
-              ) : null}
-            </div>
-
-            <div style={styles.field}>
-              <label style={styles.label} htmlFor="winTaxRatePercent">
-                Thuế (%)
-              </label>
-              <input
-                id="winTaxRatePercent"
-                style={styles.input}
-                inputMode="numeric"
-                value={form.winTaxRatePercent}
-                onChange={(e) => updateField('winTaxRatePercent', e.target.value)}
-              />
-              {fieldErrors.winTaxRatePercent !== undefined ? (
-                <div style={styles.error}>{fieldErrors.winTaxRatePercent}</div>
-              ) : null}
-            </div>
-          </>
-        ) : null}
-
-        <div style={styles.field}>
-          <label style={styles.label} htmlFor="userBankroll">
-            Vốn của bạn (tùy chọn)
-          </label>
-          <input
-            id="userBankroll"
-            style={styles.input}
-            inputMode="numeric"
-            value={form.userBankroll}
-            onChange={(e) => updateMoneyField('userBankroll', e.target.value)}
-          />
-          {fieldErrors.userBankroll !== undefined ? (
-            <div style={styles.error}>{fieldErrors.userBankroll}</div>
-          ) : null}
-        </div>
-
-        {fieldErrors.request !== undefined ? (
-          <div style={{ ...styles.error, marginBottom: '1rem' }}>{fieldErrors.request}</div>
-        ) : null}
-
-        <button type="submit" style={styles.button}>
-          Tạo kế hoạch
-        </button>
-      </form>
-    </main>
+    <>
+      <AppShell
+        activeNav="create"
+        onNavSelect={handleNavSelect}
+        theme={theme}
+        onThemeChange={setTheme}
+        main={renderMain()}
+        rightPanel={renderRightPanel()}
+        showRightPanel
+      />
+      {comingSoon !== null ? (
+        <ComingSoonToast message={comingSoon} onClose={() => setComingSoon(null)} theme={theme} />
+      ) : null}
+    </>
   );
 }
