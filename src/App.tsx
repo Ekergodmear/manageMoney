@@ -46,6 +46,7 @@ import { EMPTY_PERSISTED_STATE } from '@/features/session/session-types';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
 import { AppLayout } from '@/layout/AppLayout';
 
+interface ToastState {
   readonly message: string;
   readonly actionLabel?: string;
   readonly onAction?: () => void;
