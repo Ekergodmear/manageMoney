@@ -1,22 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { motion } from 'framer-motion';
-import {
-  CircleDollarSign,
-  Gamepad2,
-  Lock,
-  Percent,
-  Sparkles,
-  Target,
-} from 'lucide-react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { InfoTip, TooltipProvider } from '@/components/ui/tooltip';
 import { FormSection } from '@/layout/AppLayout';
 import type { PlannerFormValues } from '@/features/planner/plan-service';
 import { DEFAULT_PLANNER_FORM } from '@/features/planner/plan-service';
@@ -29,29 +19,24 @@ interface GeneratePlanScreenProps {
   readonly serverError?: string | undefined;
 }
 
-function FieldBlock({
+function Field({
   id,
   label,
-  info,
   error,
   children,
 }: {
   id: string;
   label: string;
-  info?: string;
   error?: string | undefined;
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-1.5">
-        <Label htmlFor={id}>{label}</Label>
-        {info != null && info !== '' ? <InfoTip content={info} /> : null}
-      </div>
+    <div className="space-y-1">
+      <Label htmlFor={id} className="text-xs text-muted-foreground">
+        {label}
+      </Label>
       {children}
-      {error != null && error !== '' ? (
-        <p className="text-xs text-destructive">{error}</p>
-      ) : null}
+      {error != null && error !== '' ? <p className="text-[11px] text-destructive">{error}</p> : null}
     </div>
   );
 }
@@ -95,151 +80,84 @@ export function GeneratePlanScreen({
     };
   }
 
+  const inputClass = 'h-9 rounded-lg text-sm';
+
   return (
-    <TooltipProvider>
-      <div className="mx-auto max-w-4xl space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Tạo kế hoạch</h2>
-          <p className="mt-1 text-muted-foreground">
-            Nhập thông tin bên dưới để tạo kế hoạch cược tối ưu
-          </p>
-        </div>
-
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Target className="h-5 w-5 text-primary" />
-              Thông tin kế hoạch
-            </CardTitle>
-            <CardDescription>Chia theo mục tiêu, thông số game, luật và ngân sách</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form
-              onSubmit={handleSubmit((data) => onSubmit(data as PlannerFormValues))}
-              className="space-y-6"
-            >
-              <FormSection icon={<Target className="h-4 w-4" />} title="Thông tin mục tiêu">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <FieldBlock
-                    id="targetProfit"
-                    label="Lợi nhuận mục tiêu (đ)"
-                    info="Số tiền lời bạn muốn đạt khi thắng"
-                    error={errors.targetProfit?.message}
-                  >
-                    <Input id="targetProfit" inputMode="numeric" {...bindMoney('targetProfit')} />
-                  </FieldBlock>
-                  <FieldBlock
-                    id="roundCount"
-                    label="Số vòng"
-                    info="Số vòng tối đa trước khi thắng"
-                    error={errors.roundCount?.message}
-                  >
-                    <Input id="roundCount" inputMode="numeric" {...register('roundCount')} />
-                  </FieldBlock>
-                </div>
-              </FormSection>
-
-              <FormSection icon={<Gamepad2 className="h-4 w-4" />} title="Thông số trò chơi">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <FieldBlock
-                    id="rewardMultiplier"
-                    label="Hệ số thưởng (×)"
-                    info="Hỗ trợ tối đa 2 chữ số thập phân"
-                    error={errors.rewardMultiplier?.message}
-                  >
-                    <Input id="rewardMultiplier" inputMode="decimal" {...register('rewardMultiplier')} />
-                  </FieldBlock>
-                  <FieldBlock
-                    id="minimumBet"
-                    label="Cược tối thiểu (đ)"
-                    error={errors.minimumBet?.message}
-                  >
-                    <Input id="minimumBet" inputMode="numeric" {...bindMoney('minimumBet')} />
-                  </FieldBlock>
-                  <FieldBlock id="betStep" label="Bước cược (đ)" error={errors.betStep?.message}>
-                    <Input id="betStep" inputMode="numeric" {...bindMoney('betStep')} />
-                  </FieldBlock>
-                </div>
-              </FormSection>
-
-              <FormSection icon={<Percent className="h-4 w-4" />} title="Luật trò chơi">
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-3">
-                    <Checkbox
-                      id="winTaxEnabled"
-                      checked={winTaxEnabled}
-                      onCheckedChange={(checked) =>
-                        setValue('winTaxEnabled', checked === true, { shouldValidate: true })
-                      }
-                    />
-                    <div className="space-y-1">
-                      <Label htmlFor="winTaxEnabled" className="cursor-pointer">
-                        Áp dụng thuế khi thắng lớn
-                      </Label>
-                      <p className="text-xs text-muted-foreground">
-                        Thuế trên tổng tiền thắng khi đạt ngưỡng (mặc định 10% từ 10 triệu)
-                      </p>
-                    </div>
-                  </div>
-                  {winTaxEnabled ? (
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <FieldBlock
-                        id="winTaxThreshold"
-                        label="Ngưỡng thuế (đ)"
-                        error={errors.winTaxThreshold?.message}
-                      >
-                        <Input
-                          id="winTaxThreshold"
-                          inputMode="numeric"
-                          {...bindMoney('winTaxThreshold')}
-                        />
-                      </FieldBlock>
-                      <FieldBlock
-                        id="winTaxRatePercent"
-                        label="Thuế (%)"
-                        error={errors.winTaxRatePercent?.message}
-                      >
-                        <Input
-                          id="winTaxRatePercent"
-                          inputMode="numeric"
-                          {...register('winTaxRatePercent')}
-                        />
-                      </FieldBlock>
-                    </div>
-                  ) : null}
-                </div>
-              </FormSection>
-
-              <FormSection icon={<CircleDollarSign className="h-4 w-4" />} title="Ngân sách">
-                <FieldBlock
-                  id="userBankroll"
-                  label="Vốn của bạn (tùy chọn) (đ)"
-                  info="Để so sánh với vốn cần chuẩn bị"
-                  error={errors.userBankroll?.message}
-                >
-                  <Input id="userBankroll" inputMode="numeric" {...bindMoney('userBankroll')} />
-                </FieldBlock>
-              </FormSection>
-
-              {serverError != null && serverError !== '' ? (
-                <p className="text-sm text-destructive">{serverError}</p>
-              ) : null}
-
-              <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-                <Button type="submit" size="lg" className="w-full">
-                  <Sparkles className="h-4 w-4" />
-                  Tạo kế hoạch
-                </Button>
-              </motion.div>
-
-              <div className="flex items-start gap-2 rounded-xl border border-success bg-success p-4 text-sm text-success-foreground">
-                <Lock className="mt-0.5 h-4 w-4 shrink-0" />
-                Dữ liệu được xử lý hoàn toàn trên trình duyệt — không lưu trên server.
+    <div className="mx-auto max-w-2xl">
+      <Card className="shadow-sm">
+        <CardHeader className="space-y-0 p-4 pb-2">
+          <CardTitle className="text-base">Tạo kế hoạch</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 pt-0">
+          <form onSubmit={handleSubmit((data) => onSubmit(data as PlannerFormValues))} className="space-y-3">
+            <FormSection title="Mục tiêu">
+              <div className="grid grid-cols-2 gap-2">
+                <Field id="targetProfit" label="Lợi nhuận (đ)" error={errors.targetProfit?.message}>
+                  <Input id="targetProfit" className={inputClass} inputMode="numeric" {...bindMoney('targetProfit')} />
+                </Field>
+                <Field id="roundCount" label="Số vòng" error={errors.roundCount?.message}>
+                  <Input id="roundCount" className={inputClass} inputMode="numeric" {...register('roundCount')} />
+                </Field>
               </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </TooltipProvider>
+            </FormSection>
+
+            <FormSection title="Thông số">
+              <div className="grid grid-cols-2 gap-2">
+                <Field id="rewardMultiplier" label="Hệ số (×)" error={errors.rewardMultiplier?.message}>
+                  <Input id="rewardMultiplier" className={inputClass} inputMode="decimal" {...register('rewardMultiplier')} />
+                </Field>
+                <Field id="minimumBet" label="Cược tối thiểu (đ)" error={errors.minimumBet?.message}>
+                  <Input id="minimumBet" className={inputClass} inputMode="numeric" {...bindMoney('minimumBet')} />
+                </Field>
+                <Field id="betStep" label="Bước cược (đ)" error={errors.betStep?.message}>
+                  <Input id="betStep" className={inputClass} inputMode="numeric" {...bindMoney('betStep')} />
+                </Field>
+              </div>
+            </FormSection>
+
+            <FormSection title="Thuế">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="winTaxEnabled"
+                  checked={winTaxEnabled}
+                  onCheckedChange={(checked) =>
+                    setValue('winTaxEnabled', checked === true, { shouldValidate: true })
+                  }
+                />
+                <Label htmlFor="winTaxEnabled" className="cursor-pointer text-xs font-normal">
+                  Thuế khi thắng lớn
+                </Label>
+              </div>
+              {winTaxEnabled ? (
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <Field id="winTaxThreshold" label="Ngưỡng (đ)" error={errors.winTaxThreshold?.message}>
+                    <Input id="winTaxThreshold" className={inputClass} inputMode="numeric" {...bindMoney('winTaxThreshold')} />
+                  </Field>
+                  <Field id="winTaxRatePercent" label="Thuế (%)" error={errors.winTaxRatePercent?.message}>
+                    <Input id="winTaxRatePercent" className={inputClass} inputMode="numeric" {...register('winTaxRatePercent')} />
+                  </Field>
+                </div>
+              ) : null}
+            </FormSection>
+
+            <Field id="userBankroll" label="Vốn của bạn (đ)" error={errors.userBankroll?.message}>
+              <Input id="userBankroll" className={inputClass} inputMode="numeric" {...bindMoney('userBankroll')} />
+            </Field>
+
+            {serverError != null && serverError !== '' ? (
+              <p className="text-xs text-destructive">{serverError}</p>
+            ) : null}
+
+            <Button type="submit" className="h-9 w-full">
+              Tạo kế hoạch
+            </Button>
+
+            <p className="text-center text-[11px] text-muted-foreground">
+              Dữ liệu xử lý trên trình duyệt — không lưu server.
+            </p>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

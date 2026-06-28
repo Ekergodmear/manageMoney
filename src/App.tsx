@@ -54,11 +54,6 @@ export function App(): JSX.Element {
     setScreen('decision');
   }
 
-  const headerBadge =
-    formValues.rewardMultiplier.trim() !== ''
-      ? `Game ×${formValues.rewardMultiplier}`
-      : 'Platform Ready';
-
   const main =
     screen === 'decision' && generated !== null ? (
       <DecisionScreen
@@ -102,7 +97,6 @@ export function App(): JSX.Element {
         onNavSelect={handleNavSelect}
         theme={theme}
         onThemeChange={(dark) => setTheme(dark ? 'dark' : 'light')}
-        headerBadge={headerBadge}
         main={main}
         rightPanel={rightPanel}
       />

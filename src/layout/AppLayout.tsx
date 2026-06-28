@@ -4,11 +4,9 @@ import {
   Briefcase,
   ChevronLeft,
   ChevronRight,
-  CircleHelp,
   Clock,
   Dices,
   FileText,
-  Lightbulb,
   Moon,
   Settings,
   Sparkles,
@@ -17,9 +15,7 @@ import {
 } from 'lucide-react';
 import { type ReactNode, useEffect, useState } from 'react';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
@@ -56,7 +52,6 @@ export interface AppLayoutProps {
   readonly onNavSelect: (id: NavItemId) => void;
   readonly theme: 'light' | 'dark';
   readonly onThemeChange: (dark: boolean) => void;
-  readonly headerBadge?: string;
   readonly main: ReactNode;
   readonly rightPanel: ReactNode;
   readonly showRightPanel?: boolean;
@@ -67,7 +62,6 @@ export function AppLayout({
   onNavSelect,
   theme,
   onThemeChange,
-  headerBadge = 'Platform Ready',
   main,
   rightPanel,
   showRightPanel = true,
@@ -75,9 +69,10 @@ export function AppLayout({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === 'undefined') {
-      return false;
+      return true;
     }
-    return window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1';
+    const stored = window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+    return stored === null ? true : stored === '1';
   });
   const isDark = theme === 'dark';
 
@@ -85,197 +80,108 @@ export function AppLayout({
     window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? '1' : '0');
   }, [collapsed]);
 
-  function toggleCollapsed(): void {
-    setCollapsed((prev) => !prev);
-  }
-
   function renderNavButton(item: NavItem, active: boolean, compact: boolean): ReactNode {
     const button = (
       <button
         type="button"
         disabled={!item.enabled && !active}
-        title={compact ? item.label : undefined}
         onClick={() => {
           setMobileOpen(false);
           onNavSelect(item.id);
         }}
         className={cn(
-          'flex w-full items-center rounded-xl text-sm font-medium transition-colors',
-          compact ? 'justify-center px-2 py-2.5' : 'gap-2 px-3 py-2.5',
+          'flex w-full items-center rounded-lg text-sm font-medium transition-colors',
+          compact ? 'justify-center p-2' : 'gap-2 px-2.5 py-2',
           active
             ? 'bg-accent text-accent-foreground'
             : item.enabled
               ? 'text-foreground hover:bg-muted'
-              : 'cursor-not-allowed text-muted-foreground opacity-60',
+              : 'cursor-not-allowed text-muted-foreground opacity-50',
         )}
       >
         {item.icon}
-        {!compact ? <span className="truncate">{item.label}</span> : null}
+        {!compact ? <span className="truncate text-xs">{item.label}</span> : null}
       </button>
     );
 
-    if (compact) {
-      return <Tooltip content={item.label}>{button}</Tooltip>;
-    }
-
-    return button;
+    return compact ? <Tooltip content={item.label}>{button}</Tooltip> : button;
   }
 
   const sidebarInner = (compact: boolean): ReactNode => (
     <>
-      <div
-        className={cn(
-          'mb-4 flex items-center',
-          compact ? 'justify-center' : 'justify-between gap-2 px-1',
-        )}
-      >
-        <div className={cn('flex items-center gap-2', compact && 'justify-center')}>
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <BarChart3 className="h-5 w-5" />
-          </div>
-          {!compact ? (
-            <div className="min-w-0">
-              <div className="truncate text-sm font-bold">Stake Planner</div>
-              <div className="text-xs text-muted-foreground">v1.0.0</div>
-            </div>
-          ) : null}
-        </div>
+      <div className={cn('mb-2 flex items-center', compact ? 'justify-center' : 'justify-between')}>
         {!compact ? (
           <Button
             variant="ghost"
             size="icon"
-            className="hidden h-8 w-8 shrink-0 lg:inline-flex"
+            className="hidden h-7 w-7 lg:inline-flex"
             aria-label="Thu gọn sidebar"
-            onClick={toggleCollapsed}
+            onClick={() => setCollapsed(true)}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-        ) : null}
-      </div>
-
-      {compact ? (
-        <div className="mb-2 hidden justify-center lg:flex">
+        ) : (
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-7 w-7"
             aria-label="Mở rộng sidebar"
-            onClick={toggleCollapsed}
+            onClick={() => setCollapsed(false)}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
-        </div>
-      ) : null}
+        )}
+      </div>
 
-      <nav className="flex flex-1 flex-col gap-1">
+      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto">
         {NAV_ITEMS.map((item) => (
           <div key={item.id}>{renderNavButton(item, activeNav === item.id, compact)}</div>
         ))}
       </nav>
-
-      {!compact ? (
-        <Card className="mt-4 border-accent/50 bg-accent/30 shadow-none">
-          <CardContent className="flex gap-2 p-3">
-            <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-            <div className="text-xs leading-relaxed text-muted-foreground">
-              <span className="font-semibold text-foreground">Mẹo sử dụng</span>
-              <br />
-              Điền đủ thông tin để nhận kế hoạch phù hợp nhất.
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <Tooltip content="Mẹo: điền đủ thông tin để có kế hoạch tốt nhất">
-          <div className="mt-4 hidden justify-center lg:flex">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/50 text-primary">
-              <Lightbulb className="h-4 w-4" />
-            </div>
-          </div>
-        </Tooltip>
-      )}
-
-      <div
-        className={cn(
-          'mt-4 border-t border-border pt-4 text-xs text-muted-foreground',
-          compact ? 'flex justify-center' : 'flex items-center justify-between',
-        )}
-      >
-        <Tooltip content={isDark ? 'Chế độ sáng' : 'Chế độ tối'}>
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded-full border border-border p-2"
-            onClick={() => onThemeChange(!isDark)}
-            aria-label="Đổi theme"
-          >
-            {isDark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
-          </button>
-        </Tooltip>
-        {!compact ? <span>© 2026</span> : null}
-      </div>
     </>
   );
 
   return (
     <TooltipProvider>
-      <div className={cn('flex min-h-screen flex-col bg-background', isDark && 'dark')}>
-        {/* Header — full width */}
-        <header className="sticky top-0 z-30 flex w-full items-center justify-between border-b border-border bg-card/95 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
-          <div className="flex min-w-0 items-center gap-3">
+      <div className={cn('flex h-screen flex-col overflow-hidden bg-background', isDark && 'dark')}>
+        <header className="flex h-11 shrink-0 items-center justify-between border-b border-border bg-card px-3 sm:px-4">
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              className="rounded-lg border border-border px-2 py-1 lg:hidden"
+              className="rounded-md border border-border px-1.5 py-0.5 text-sm lg:hidden"
               onClick={() => setMobileOpen(true)}
               aria-label="Mở menu"
             >
               ☰
             </button>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-lg font-bold sm:text-xl">Stake Planner</h1>
-                <Badge variant="secondary" className="hidden sm:inline-flex">
-                  {headerBadge}
-                </Badge>
-              </div>
-              <p className="hidden text-sm text-muted-foreground sm:block">
-                Lập kế hoạch đặt cược theo luật game
-              </p>
-            </div>
+            <BarChart3 className="hidden h-4 w-4 text-primary lg:block" />
+            <h1 className="text-sm font-semibold sm:text-base">Stake Planner</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" aria-label="Trợ giúp">
-              <CircleHelp className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Đổi theme"
-              className="hidden sm:inline-flex"
-              onClick={() => onThemeChange(!isDark)}
-            >
-              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
-            <div className="hidden h-9 w-9 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-foreground sm:flex">
-              SP
-            </div>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            aria-label="Đổi theme"
+            onClick={() => onThemeChange(!isDark)}
+          >
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
         </header>
 
-        <div className="flex min-h-0 flex-1">
-          {/* Mobile drawer sidebar */}
+        <div className="flex min-h-0 flex-1 overflow-hidden">
           <aside
             className={cn(
-              'fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col border-r border-border bg-card p-4 transition-transform lg:hidden',
+              'fixed inset-y-0 left-0 z-40 flex w-52 -translate-x-full flex-col border-r border-border bg-card p-2 pt-12 transition-transform lg:hidden',
               mobileOpen && 'translate-x-0',
             )}
           >
             {sidebarInner(false)}
           </aside>
 
-          {/* Desktop sidebar */}
           <aside
             className={cn(
-              'hidden shrink-0 flex-col border-r border-border bg-card p-3 transition-[width] duration-200 ease-in-out lg:flex',
-              collapsed ? 'w-[4.5rem]' : 'w-64',
+              'hidden shrink-0 flex-col border-r border-border bg-card p-2 lg:flex',
+              collapsed ? 'w-12' : 'w-44',
             )}
           >
             {sidebarInner(collapsed)}
@@ -290,21 +196,20 @@ export function AppLayout({
             />
           ) : null}
 
-          {/* Main + right */}
-          <div className="flex min-w-0 flex-1 flex-col xl:flex-row">
+          <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden lg:flex-row">
             <motion.main
               key={activeNav}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-              className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.15 }}
+              className="min-h-0 min-w-0 flex-1 overflow-y-auto p-3"
             >
               {main}
             </motion.main>
 
             {showRightPanel ? (
-              <aside className="w-full shrink-0 border-t border-border bg-muted/40 p-4 sm:p-6 xl:w-80 xl:border-l xl:border-t-0">
-                <div className="flex flex-col gap-4">{rightPanel}</div>
+              <aside className="hidden min-h-0 w-56 shrink-0 overflow-y-auto border-l border-border bg-muted/30 p-3 lg:block xl:w-60">
+                <div className="flex flex-col gap-2">{rightPanel}</div>
               </aside>
             ) : null}
           </div>
@@ -314,33 +219,18 @@ export function AppLayout({
   );
 }
 
-export function SectionTitle({
-  icon,
-  title,
-}: {
-  icon: ReactNode;
-  title: string;
-}): ReactNode {
-  return (
-    <div className="mb-4 flex items-center gap-2">
-      <div className="text-primary">{icon}</div>
-      <h4 className="text-sm font-semibold text-foreground">{title}</h4>
-    </div>
-  );
-}
-
 export function FormSection({
-  icon,
   title,
   children,
 }: {
-  icon: ReactNode;
   title: string;
   children: ReactNode;
 }): ReactNode {
   return (
-    <div className="rounded-xl border border-border/80 bg-muted/30 p-4 sm:p-5">
-      <SectionTitle icon={icon} title={title} />
+    <div>
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {title}
+      </p>
       {children}
     </div>
   );
