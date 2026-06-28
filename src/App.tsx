@@ -10,7 +10,7 @@ import type {
   Strategy,
   StrategyStatistics,
 } from '@stake/constraint-engine';
-import { useState, type FormEvent, type JSX } from 'react';
+import { useEffect, useState, type FormEvent, type JSX } from 'react';
 
 type Screen = 'form' | 'decision' | 'plan';
 
@@ -299,15 +299,6 @@ const styles = {
     borderRadius: '6px',
     cursor: 'pointer',
   } as const,
-  backLink: {
-    background: 'none',
-    border: 'none',
-    padding: 0,
-    color: '#555',
-    cursor: 'pointer',
-    fontSize: '0.9rem',
-    marginBottom: '1rem',
-  } as const,
   card: {
     background: '#fafafa',
     border: '1px solid #e8e8e8',
@@ -345,7 +336,113 @@ const styles = {
     padding: '0.4rem 0.25rem',
   },
   td: { borderBottom: '1px solid #eee', padding: '0.4rem 0.25rem' } as const,
+  thCheck: {
+    textAlign: 'center' as const,
+    borderBottom: '2px solid #ddd',
+    padding: '0.4rem 0.25rem',
+    width: '2.5rem',
+  },
+  tdCheck: {
+    borderBottom: '1px solid #eee',
+    padding: '0.4rem 0.25rem',
+    textAlign: 'center' as const,
+    verticalAlign: 'middle' as const,
+  },
+  rowCompleted: { background: '#f6faf6' } as const,
+  progressSummary: {
+    color: '#444',
+    fontSize: '0.9rem',
+    margin: '0 0 0.75rem',
+    fontWeight: 500,
+  } as const,
+  stickyNav: {
+    position: 'sticky' as const,
+    top: 0,
+    zIndex: 10,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.5rem 0 0.75rem',
+    marginBottom: '0.5rem',
+    background: 'linear-gradient(to bottom, #fff 85%, transparent)',
+  },
+  backButton: {
+    background: '#f4f4f4',
+    border: '1px solid #ddd',
+    borderRadius: '8px',
+    padding: '0.45rem 0.75rem',
+    color: '#111',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+    fontWeight: 600,
+  } as const,
+  scrollTopButton: {
+    position: 'fixed' as const,
+    right: 'max(1rem, env(safe-area-inset-right))',
+    bottom: 'max(1.25rem, env(safe-area-inset-bottom))',
+    zIndex: 20,
+    width: '2.75rem',
+    height: '2.75rem',
+    borderRadius: '50%',
+    border: 'none',
+    background: '#111',
+    color: '#fff',
+    fontSize: '1.2rem',
+    lineHeight: 1,
+    cursor: 'pointer',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+  },
 };
+
+const SCROLL_TOP_THRESHOLD_PX = 200;
+
+function useShowScrollTop(): boolean {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    function onScroll(): void {
+      setShow(window.scrollY > SCROLL_TOP_THRESHOLD_PX);
+    }
+
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  return show;
+}
+
+function ScrollToTopButton({ visible }: { visible: boolean }): JSX.Element | null {
+  if (!visible) {
+    return null;
+  }
+
+  return (
+    <button
+      type="button"
+      style={styles.scrollTopButton}
+      aria-label="Cuộn lên đầu trang"
+      title="Lên đầu trang"
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+    >
+      ↑
+    </button>
+  );
+}
+
+function BackButton({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick: () => void;
+}): JSX.Element {
+  return (
+    <button type="button" style={styles.backButton} onClick={onClick}>
+      {label}
+    </button>
+  );
+}
 
 function DecisionCard({
   emoji,
@@ -377,6 +474,16 @@ export function App(): JSX.Element {
   const [form, setForm] = useState<FormValues>(DEFAULT_FORM);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FormField, string>>>({});
   const [generated, setGenerated] = useState<GenerateResult | null>(null);
+  const [completedThroughRound, setCompletedThroughRound] = useState(0);
+  const showScrollTop = useShowScrollTop();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [screen]);
+
+  function goToScreen(next: Screen): void {
+    setScreen(next);
+  }
 
   function updateField(key: keyof FormValues, value: string): void {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -405,8 +512,13 @@ export function App(): JSX.Element {
       return;
     }
     setFieldErrors({});
+    setCompletedThroughRound(0);
     setGenerated(outcome.result);
-    setScreen('decision');
+    goToScreen('decision');
+  }
+
+  function handleRoundProgressToggle(roundIndex: number, checked: boolean): void {
+    setCompletedThroughRound(checked ? roundIndex : roundIndex - 1);
   }
 
   if (screen === 'decision' && generated !== null) {
@@ -418,9 +530,9 @@ export function App(): JSX.Element {
 
     return (
       <main style={styles.page}>
-        <button type="button" style={styles.backLink} onClick={() => setScreen('form')}>
-          ← Sửa ý định
-        </button>
+        <nav style={styles.stickyNav} aria-label="Điều hướng">
+          <BackButton label="← Sửa ý định" onClick={() => goToScreen('form')} />
+        </nav>
 
         <DecisionCard
           emoji="💰"
@@ -458,10 +570,12 @@ export function App(): JSX.Element {
             <p style={styles.statusOk}>✓ Kế hoạch cược của bạn đã sẵn sàng.</p>
           )}
 
-          <button type="button" style={styles.button} onClick={() => setScreen('plan')}>
+          <button type="button" style={styles.button} onClick={() => goToScreen('plan')}>
             Xem kế hoạch cược
           </button>
         </section>
+
+        <ScrollToTopButton visible={showScrollTop} />
       </main>
     );
   }
@@ -471,29 +585,56 @@ export function App(): JSX.Element {
 
     return (
       <main style={styles.page}>
-        <button type="button" style={styles.backLink} onClick={() => setScreen('decision')}>
-          ← Kết quả
-        </button>
+        <nav style={styles.stickyNav} aria-label="Điều hướng">
+          <BackButton label="← Kết quả" onClick={() => goToScreen('decision')} />
+          <BackButton label="← Sửa ý định" onClick={() => goToScreen('form')} />
+        </nav>
 
         <h2 style={styles.sectionTitle}>Kế hoạch — {strategy.rounds.length} vòng</h2>
+
+        <p style={styles.progressSummary}>
+          Đã cược: {completedThroughRound} / {strategy.rounds.length} vòng
+          {completedThroughRound > 0
+            ? ` · Tích lũy: ${formatAmount(strategy.rounds[completedThroughRound - 1]?.accumulatedSpent ?? 0)}`
+            : ''}
+        </p>
 
         <div style={{ overflowX: 'auto' }}>
           <table style={styles.table}>
             <thead>
               <tr>
+                <th style={styles.thCheck} scope="col" aria-label="Đã cược">
+                  ✓
+                </th>
                 <th style={styles.th}>Vòng</th>
                 <th style={styles.th}>Cược</th>
                 <th style={styles.th}>Tích lũy chi</th>
               </tr>
             </thead>
             <tbody>
-              {strategy.rounds.map((round) => (
-                <tr key={round.index}>
-                  <td style={styles.td}>{round.index}</td>
-                  <td style={styles.td}>{formatAmount(round.betAmount)}</td>
-                  <td style={styles.td}>{formatAmount(round.accumulatedSpent)}</td>
-                </tr>
-              ))}
+              {strategy.rounds.map((round) => {
+                const isCompleted = round.index <= completedThroughRound;
+                return (
+                  <tr
+                    key={round.index}
+                    style={isCompleted ? styles.rowCompleted : undefined}
+                  >
+                    <td style={styles.tdCheck}>
+                      <input
+                        type="checkbox"
+                        checked={isCompleted}
+                        aria-label={`Đánh dấu đã cược đến vòng ${String(round.index)}`}
+                        onChange={(e) =>
+                          handleRoundProgressToggle(round.index, e.target.checked)
+                        }
+                      />
+                    </td>
+                    <td style={styles.td}>{round.index}</td>
+                    <td style={styles.td}>{formatAmount(round.betAmount)}</td>
+                    <td style={styles.td}>{formatAmount(round.accumulatedSpent)}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -501,6 +642,8 @@ export function App(): JSX.Element {
         <p style={{ marginTop: '1rem', fontWeight: 600 }}>
           Vốn cần: {formatAmount(statistics.requiredBankrollAmount)}
         </p>
+
+        <ScrollToTopButton visible={showScrollTop} />
       </main>
     );
   }
