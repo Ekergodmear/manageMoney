@@ -50,7 +50,7 @@ export function AnalysisScreen({
   return (
     <div className="w-full space-y-6">
       <div>
-        <h2 className="text-xl font-bold tracking-tight">Phân tích</h2>
+        <h2 className="text-xl font-bold tracking-tight">Insights</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Mô phỏng nếu thắng ở vòng X và thống kê phiên đã chơi.
         </p>
@@ -129,7 +129,7 @@ export function AnalysisScreen({
               Thiếu vốn hoặc muốn giảm cược max? Dùng Improve Engine.
             </p>
             <Button variant="outline" size="sm" onClick={onOpenImprove}>
-              Mở Cải thiện
+              Mở Capital Planner
             </Button>
           </CardContent>
         </Card>

@@ -16,10 +16,12 @@ import { parseMoneyPositiveInt } from '@/lib/money-format';
 const MULTIPLIER_DECIMAL_PLACES = 2;
 
 export interface PlannerFormValues {
+  presetId: string;
   targetProfit: string;
   roundCount: string;
   rewardMultiplier: string;
   minimumBet: string;
+  maximumBet: string;
   betStep: string;
   userBankroll: string;
   winTaxEnabled: boolean;
@@ -251,10 +253,12 @@ export function generatePlan(values: PlannerFormValues): {
 }
 
 export const DEFAULT_PLANNER_FORM: PlannerFormValues = {
+  presetId: 'bingo-120',
   targetProfit: '100.000',
   roundCount: '500',
   rewardMultiplier: '120',
   minimumBet: '10.000',
+  maximumBet: '1.000.000',
   betStep: '10.000',
   userBankroll: '30.000.000',
   winTaxEnabled: true,

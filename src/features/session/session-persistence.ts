@@ -20,6 +20,25 @@ function openDb(): Promise<IDBDatabase> {
   });
 }
 
+function migratePersistedState(raw: unknown): PersistedAppState {
+  if (raw === null || raw === undefined || typeof raw !== 'object') {
+    return EMPTY_PERSISTED_STATE;
+  }
+  const state = raw as PersistedAppState & { version?: number };
+  if (state.version === 2) {
+    return state;
+  }
+  if (state.version === 1) {
+    return {
+      ...state,
+      version: 2,
+      customGamePresets: [],
+      activePresetId: 'bingo-120',
+    };
+  }
+  return EMPTY_PERSISTED_STATE;
+}
+
 export async function loadPersistedState(): Promise<PersistedAppState> {
   try {
     const db = await openDb();
@@ -28,12 +47,7 @@ export async function loadPersistedState(): Promise<PersistedAppState> {
       const get = tx.objectStore(STORE).get(STATE_KEY);
       get.onerror = () => reject(get.error ?? new Error('IndexedDB get failed'));
       get.onsuccess = () => {
-        const raw = get.result as PersistedAppState | undefined;
-        if (raw?.version === 1) {
-          resolve(raw);
-        } else {
-          resolve(EMPTY_PERSISTED_STATE);
-        }
+        resolve(migratePersistedState(get.result));
       };
       tx.oncomplete = () => db.close();
     });

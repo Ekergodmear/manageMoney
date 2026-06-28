@@ -51,7 +51,8 @@ export function SettingsScreen({ theme, onThemeChange, onExportHistory }: Settin
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            Phiên được lưu tự động trên trình duyệt (IndexedDB). F5 không mất tiến độ.
+            Phiên được lưu tự động trên trình duyệt (IndexedDB). Chỉnh luật game tại{' '}
+            <strong className="text-foreground">Game Designer</strong>.
           </p>
           {onExportHistory !== undefined ? (
             <Button variant="outline" size="sm" onClick={onExportHistory}>

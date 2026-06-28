@@ -8,12 +8,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { InfoTip } from '@/components/ui/tooltip';
+import { PresetPicker } from '@/features/game-designer/PresetPicker';
+import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
 import type { PlannerFormValues } from '@/features/planner/plan-service';
 import { DEFAULT_PLANNER_FORM } from '@/features/planner/plan-service';
 import { formatMoneyFieldValue, plannerFormSchema, type PlannerFormSchema } from '@/features/planner/schema';
 
 interface GeneratePlanScreenProps {
   readonly defaultValues?: PlannerFormValues;
+  readonly presets: readonly GamePolicyPreset[];
+  readonly activePresetId: string;
+  readonly onPresetSelect: (preset: GamePolicyPreset) => void;
   readonly onSubmit: (values: PlannerFormValues) => void;
   readonly onValuesChange?: (values: PlannerFormValues) => void;
   readonly serverError?: string | undefined;
@@ -48,6 +53,9 @@ function Field({
 
 export function GeneratePlanScreen({
   defaultValues = DEFAULT_PLANNER_FORM,
+  presets,
+  activePresetId,
+  onPresetSelect,
   onSubmit,
   onValuesChange,
   serverError,
@@ -57,12 +65,17 @@ export function GeneratePlanScreen({
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<PlannerFormSchema>({
     resolver: zodResolver(plannerFormSchema),
     defaultValues,
     mode: 'onChange',
   });
+
+  useEffect(() => {
+    reset(defaultValues);
+  }, [defaultValues, reset]);
 
   const winTaxEnabled = watch('winTaxEnabled');
 
@@ -90,11 +103,17 @@ export function GeneratePlanScreen({
   return (
     <div className="w-full space-y-4">
       <div>
-        <h2 className="text-xl font-bold tracking-tight">Kế hoạch</h2>
+        <h2 className="text-xl font-bold tracking-tight">Planning</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Biết cần bao nhiêu vốn, khi nào dừng, và điều chỉnh nếu thiếu vốn.
+          Chọn game preset, đặt mục tiêu, tạo kế hoạch.
         </p>
       </div>
+
+      <PresetPicker
+        presets={presets}
+        activePresetId={activePresetId}
+        onSelect={onPresetSelect}
+      />
 
       <form onSubmit={handleSubmit((data) => onSubmit(data as PlannerFormValues))} className="space-y-4">
         <Card className="shadow-sm">
@@ -110,6 +129,9 @@ export function GeneratePlanScreen({
             </Field>
             <Field id="betStep" label="Step (đ)" hint="Bước cược" error={errors.betStep?.message}>
               <Input id="betStep" className={inputClass} inputMode="numeric" {...bindMoney('betStep')} />
+            </Field>
+            <Field id="maximumBet" label="Maximum (đ)" hint="Giới hạn cược — từ Game Designer" error={errors.maximumBet?.message}>
+              <Input id="maximumBet" className={inputClass} inputMode="numeric" {...bindMoney('maximumBet')} readOnly />
             </Field>
           </CardContent>
         </Card>

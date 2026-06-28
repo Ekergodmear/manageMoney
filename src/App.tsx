@@ -1,13 +1,22 @@
 import { simulateWinAtRound } from '@stake/constraint-engine';
-import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 
 import { ActionToast } from '@/components/ui/action-toast';
 import { AnalysisScreen } from '@/features/analysis/AnalysisScreen';
 import { AllocationScreen } from '@/features/allocation/AllocationScreen';
 import { DashboardScreen } from '@/features/dashboard/DashboardScreen';
+import { DEFAULT_PRESET_ID } from '@/features/game-designer/builtin-presets';
+import { GameDesignerScreen } from '@/features/game-designer/GameDesignerScreen';
+import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
+import {
+  applyPresetToForm,
+  findPreset,
+  mergePresets,
+} from '@/features/game-designer/preset-utils';
 import { HistoryScreen } from '@/features/history/HistoryScreen';
 import { applyImproveOption, type ImproveOption } from '@/features/improve/improve-service';
 import { ImproveScreen } from '@/features/improve/ImproveScreen';
+import { GeneratePlanScreen } from '@/features/planner/GeneratePlanScreen';
 import { PlanReadyScreen } from '@/features/planner/PlanReadyScreen';
 import {
   DEFAULT_PLANNER_FORM,
@@ -87,7 +96,14 @@ export function App(): JSX.Element {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const activeSession = persisted.activeSession;
-  const formValues = activeSession?.formValues ?? DEFAULT_PLANNER_FORM;
+  const allPresets = useMemo(
+    () => mergePresets(persisted.customGamePresets),
+    [persisted.customGamePresets],
+  );
+  const activePreset = findPreset(allPresets, persisted.activePresetId);
+  const continueMaxRounds = activePreset?.continuePolicy.maximumRounds ?? 5000;
+  const planningForm = activeSession?.formValues ?? liveForm;
+  const formValues = planningForm;
   const generated = activeSession?.generated ?? null;
   const completedThroughRound = activeSession?.completedThroughRound ?? 0;
   const sessionStatus = activeSession?.status ?? 'ready';
@@ -96,7 +112,12 @@ export function App(): JSX.Element {
   useEffect(() => {
     void loadPersistedState().then((state) => {
       setPersisted(state);
-      setLiveForm(state.activeSession?.formValues ?? DEFAULT_PLANNER_FORM);
+      const presets = mergePresets(state.customGamePresets);
+      const preset = findPreset(presets, state.activePresetId);
+      const base = state.activeSession?.formValues ?? DEFAULT_PLANNER_FORM;
+      const initialForm =
+        preset !== undefined ? applyPresetToForm(base, preset) : base;
+      setLiveForm(initialForm);
       if (state.activeSession?.status === 'ready') {
         setPlanningPhase('ready');
       }
@@ -319,6 +340,39 @@ export function App(): JSX.Element {
     showToast('Đã áp dụng phương án cải thiện');
   }
 
+  function handlePresetSelect(preset: GamePolicyPreset): void {
+    const next = applyPresetToForm(planningForm, preset);
+    setLiveForm(next);
+    persist({ ...persisted, activePresetId: preset.id });
+    if (activeSession !== null) {
+      updateActiveSession((s) => ({ ...s, formValues: next, updatedAt: nowIso() }));
+    }
+  }
+
+  function handleSaveGamePreset(preset: GamePolicyPreset): void {
+    const without = persisted.customGamePresets.filter((p) => p.id !== preset.id);
+    const next = applyPresetToForm(planningForm, preset);
+    persist({
+      ...persisted,
+      customGamePresets: [...without, preset],
+      activePresetId: preset.id,
+    });
+    setLiveForm(next);
+    showToast(`Đã lưu preset "${preset.name}"`);
+  }
+
+  function handleDeleteGamePreset(id: string): void {
+    const filtered = persisted.customGamePresets.filter((p) => p.id !== id);
+    const nextPresetId =
+      persisted.activePresetId === id ? DEFAULT_PRESET_ID : persisted.activePresetId;
+    persist({
+      ...persisted,
+      customGamePresets: filtered,
+      activePresetId: nextPresetId,
+    });
+    showToast('Đã xóa preset');
+  }
+
   function openImprove(): void {
     setPlanningPhase('improve');
     setActiveWorkspace('planning');
@@ -381,7 +435,10 @@ export function App(): JSX.Element {
     }
     return (
       <GeneratePlanScreen
-        defaultValues={formValues}
+        defaultValues={planningForm}
+        presets={allPresets}
+        activePresetId={persisted.activePresetId}
+        onPresetSelect={handlePresetSelect}
         onValuesChange={setLiveForm}
         onSubmit={handleGenerate}
         {...(fieldErrors.request !== undefined ? { serverError: fieldErrors.request } : {})}
@@ -427,6 +484,7 @@ export function App(): JSX.Element {
           setActiveWorkspace('planning');
         }}
         onImprove={openImprove}
+        continueMaxRounds={continueMaxRounds}
       />
     );
   }
@@ -458,6 +516,21 @@ export function App(): JSX.Element {
               setViewingHistory(null);
               setPlanningPhase('form');
               setActiveWorkspace('planning');
+            }}
+          />
+        );
+      case 'game-designer':
+        return (
+          <GameDesignerScreen
+            customPresets={persisted.customGamePresets}
+            activePresetId={persisted.activePresetId}
+            onSavePreset={handleSaveGamePreset}
+            onDeletePreset={handleDeleteGamePreset}
+            onSelectPreset={(id) => {
+              const preset = findPreset(allPresets, id);
+              if (preset !== undefined) {
+                handlePresetSelect(preset);
+              }
             }}
           />
         );

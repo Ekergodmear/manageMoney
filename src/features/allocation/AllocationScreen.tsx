@@ -6,7 +6,7 @@ export function AllocationScreen(): ReactNode {
   return (
     <div className="w-full space-y-6">
       <div>
-        <h2 className="text-xl font-bold tracking-tight">Phân bổ tài khoản</h2>
+        <h2 className="text-xl font-bold tracking-tight">Account Planner</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Tự động chia kế hoạch cho nhiều tài khoản khi có thuế hoặc giới hạn.
         </p>

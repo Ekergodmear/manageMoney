@@ -27,7 +27,7 @@ export function HistoryScreen({ history, onOpenSession }: HistoryScreenProps): R
   return (
     <div className="w-full space-y-6">
       <div>
-        <h2 className="text-xl font-bold tracking-tight">Lịch sử</h2>
+        <h2 className="text-xl font-bold tracking-tight">Session Library</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Các phiên đã chơi — bấm để xem lại.
         </p>

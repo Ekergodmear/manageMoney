@@ -18,6 +18,7 @@ export const plannerFormSchema = z
       .refine((v) => /^\d+$/.test(v.trim()), 'Số vòng phải là số nguyên.'),
     rewardMultiplier: z.string().min(1, 'Vui lòng nhập hệ số thưởng.'),
     minimumBet: moneyField('cược tối thiểu'),
+    maximumBet: z.string(),
     betStep: moneyField('bước cược'),
     userBankroll: z.string(),
     winTaxEnabled: z.boolean(),
@@ -42,7 +43,9 @@ export const plannerFormSchema = z
 export type PlannerFormSchema = z.infer<typeof plannerFormSchema>;
 
 export function isMoneyField(name: string): boolean {
-  return ['targetProfit', 'minimumBet', 'betStep', 'winTaxThreshold', 'userBankroll'].includes(name);
+  return ['targetProfit', 'minimumBet', 'maximumBet', 'betStep', 'winTaxThreshold', 'userBankroll'].includes(
+    name,
+  );
 }
 
 export function formatMoneyFieldValue(name: string, raw: string): string {

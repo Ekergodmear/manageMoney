@@ -77,14 +77,14 @@ export function PlanReadyScreen({
             </p>
             {onImprove !== undefined ? (
               <Button variant="outline" size="sm" onClick={onImprove}>
-                Cải thiện kế hoạch
+                Capital Planner
               </Button>
             ) : null}
           </CardContent>
         </Card>
       ) : onImprove !== undefined ? (
         <Button variant="outline" size="sm" onClick={onImprove}>
-          Cải thiện / tối ưu thêm
+          Cải thiện / tối ưu (Capital Planner)
         </Button>
       ) : null}
 

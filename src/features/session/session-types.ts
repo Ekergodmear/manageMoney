@@ -1,3 +1,4 @@
+import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
 import type { GenerateResult, PlannerFormValues } from '@/features/planner/plan-service';
 
 export type SessionStatus = 'ready' | 'playing' | 'won' | 'lost';
@@ -48,17 +49,21 @@ export interface ActiveSession {
 }
 
 export interface PersistedAppState {
-  readonly version: 1;
+  readonly version: 2;
   readonly theme: 'light' | 'dark';
   readonly nextSessionNumber: number;
   readonly activeSession: ActiveSession | null;
   readonly history: readonly HistorySession[];
+  readonly customGamePresets: readonly GamePolicyPreset[];
+  readonly activePresetId: string;
 }
 
 export const EMPTY_PERSISTED_STATE: PersistedAppState = {
-  version: 1,
+  version: 2,
   theme: 'light',
   nextSessionNumber: 1,
   activeSession: null,
   history: [],
+  customGamePresets: [],
+  activePresetId: 'bingo-120',
 };

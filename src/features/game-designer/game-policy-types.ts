@@ -1,0 +1,29 @@
+export type RewardPolicyType = 'no-tax' | 'tier-tax';
+
+export interface RewardPolicyConfig {
+  readonly type: RewardPolicyType;
+  readonly threshold?: string;
+  readonly ratePercent?: string;
+}
+
+export interface ContinuePolicyConfig {
+  readonly maximumRounds: number;
+}
+
+export interface GamePolicyPreset {
+  readonly id: string;
+  readonly name: string;
+  readonly category: string;
+  readonly rewardMultiplier: string;
+  readonly minimumBet: string;
+  readonly maximumBet: string;
+  readonly betStep: string;
+  readonly rewardPolicy: RewardPolicyConfig;
+  readonly continuePolicy: ContinuePolicyConfig;
+  readonly builtin?: boolean;
+  readonly createdAt?: string;
+}
+
+export type GamePolicyDraft = Omit<GamePolicyPreset, 'id' | 'createdAt' | 'builtin'> & {
+  readonly id?: string;
+};

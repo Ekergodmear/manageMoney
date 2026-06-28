@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 export type WorkspaceId =
   | 'dashboard'
+  | 'game-designer'
   | 'planning'
   | 'playing'
   | 'analysis'
@@ -17,12 +18,13 @@ export interface WorkspaceItem {
 
 export const WORKSPACE_LABELS: Record<WorkspaceId, string> = {
   dashboard: 'Dashboard',
-  planning: 'Kế hoạch',
-  playing: 'Phiên chơi',
-  analysis: 'Phân tích',
-  allocation: 'Phân bổ tài khoản',
-  history: 'Lịch sử',
-  settings: 'Cài đặt',
+  'game-designer': 'Game Designer',
+  planning: 'Planning',
+  playing: 'Playing',
+  analysis: 'Insights',
+  allocation: 'Account Planner',
+  history: 'Session Library',
+  settings: 'Settings',
 };
 
 export function buildWorkspaces(icons: Record<WorkspaceId, ReactNode>): readonly WorkspaceItem[] {

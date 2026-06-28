@@ -1,70 +1,87 @@
 # Personal Roadmap — Stake Planner
 
-> Công cụ cho chính mình, dùng mỗi ngày trong 5 năm — không phải checklist release.
+> Công cụ cho chính mình, dùng mỗi ngày trong 5 năm.
+
+---
+
+## Ngôn ngữ sản phẩm
+
+| Module kỹ thuật | Tên sản phẩm |
+|-----------------|--------------|
+| Generate | **Planning** |
+| Improve | **Capital Planner** |
+| Continue | **Session Planner** |
+| Allocation | **Account Planner** |
+| Rule Editor | **Game Designer** |
+| History | **Session Library** |
+| Analytics | **Insights** |
+
+---
+
+## Roadmap 5 năm
+
+```
+Game Designer ✅
+        │
+        ▼
+Planning (+ presets) ✅
+        │
+        ▼
+Session Planner (multi-plan / phiên)  ← tiếp theo
+        │
+        ▼
+Capital Planner ✅
+        │
+        ▼
+Account Planner
+        │
+        ▼
+Insights
+        │
+        ▼
+Session Library ✅
+        │
+        ▼
+Backup / Restore
+```
 
 ---
 
 ## Giai đoạn 1 — Session Management ✅
 
-- Dashboard (action-first)
-- Generate
-- Playing (todo UX, undo, win)
-- Continue (+ until 1000/1500/2000/5000)
-- History (cards)
-- Simulation (slider)
-- Export (JSON + Print)
-- Autosave (IndexedDB)
+Dashboard · Planning · Playing · Session Planner (continue) · Session Library · Insights (slider) · Export · IndexedDB
 
-## Giai đoạn 2 — Improve Engine ✅ (cơ bản)
+## Giai đoạn 2 — Capital Planner ✅
 
-| Mode | Mô tả | Engine |
-|------|--------|--------|
-| Giữ profit | Giảm vòng | Round search |
-| Giữ rounds | Giảm profit | `optimize(allowRoundReduction: false)` |
-| Giảm cả hai | Nested search | `optimize(allowRoundReduction: true)` |
-| Vừa vốn | Tự tìm round + profit | `optimize` |
-| Giới hạn cược max | Max bet ≤ ngưỡng | Round + profit search (app layer) |
+5 mode optimize · UI Capital Planner
 
-**Tiếp theo:** Improve khi đang chơi (re-plan từ vòng hiện tại), Session Planner (nhiều plan/phiên).
+## Giai đoạn 3 — Game Designer + Presets ✅ (hiện tại)
 
-## Giai đoạn 3 — Game & Policy
+- **Game Designer** workspace — rules, reward policy, continue policy
+- Builtin: Bingo ×120, ×20, Crash 1.95, Dice, Custom
+- Save custom preset → IndexedDB
+- **Planning** — preset picker auto-fill form
+- `maximumBet` lưu trong preset (solver wire Phase 2 platform)
 
-- **Game Presets** — Bingo 120x, 20x, Custom → auto-fill multiplier/step/min/tax
-- **Reward Policy** — No tax, 10%, 15%, Tier, VIP
-- **Rule Editor (Game Designer)** — UI trên `GamePolicy`, Save as Preset
+## Giai đoạn 4 — Session Planner (multi-plan)
 
-## Giai đoạn 4 — Allocation & Session Planner
+Một session = Plan A → Lost → Plan B (Improve) → Continue → Win
 
-- Chia account A/B/C theo vòng hoặc thuế
-- Một session = chuỗi Plan → Continue → Improve → Win
+## Giai đoạn 5 — Account Planner
 
-## Giai đoạn 5 — Analytics sâu
+Chia plan trên session, không chỉ strategy đơn
 
-- Average bet, highest bet, capital growth
-- Win round trung bình, expected bankroll, capital efficiency
-- Calendar (session theo ngày)
+## Giai đoạn 6+ 
 
-## Giai đoạn 6 — Notes & Search
+Insights sâu · Calendar · Notes · Search · Backup/Restore · Shortcuts · PWA · AI
 
-- Ghi chú per session
-- Search: rounds, outcome, tháng
+## Capital Planner (tương lai)
 
-## Giai đoạn 7 — Backup / Restore / Shortcuts
+Quản lý vốn: 30M → bao nhiêu vòng/ngày, bao nhiêu session song song.
 
-- Backup → `session.json` · Restore
-- Space = tick · Ctrl+Z undo · Ctrl+S backup · Ctrl+F search
+## Backend
 
-## Giai đoạn 8 — PWA
-
-- Install → desktop app → offline
-
-## Giai đoạn 9 — AI Assistant
-
-- Gợi ý dựa trên lịch sử cá nhân (sau cùng)
-
-## Backend — chỉ khi cần
-
-Đăng nhập đa thiết bị, sync, share link, subscription — **không trước khi local-first đủ mạnh**.
+Chỉ khi cần sync đa thiết bị — local-first trước.
 
 ---
 

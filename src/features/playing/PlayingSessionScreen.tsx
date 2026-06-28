@@ -27,9 +27,10 @@ interface PlayingSessionScreenProps {
   readonly onResetProgress: () => void;
   readonly onEdit: () => void;
   readonly onImprove?: () => void;
+  readonly continueMaxRounds?: number;
 }
 
-function continuePresets(totalRounds: number): number[] {
+function continuePresets(totalRounds: number, maxRounds: number): number[] {
   const candidates = [
     totalRounds + 100,
     totalRounds + 200,
@@ -39,7 +40,9 @@ function continuePresets(totalRounds: number): number[] {
     2000,
     5000,
   ];
-  return [...new Set(candidates.filter((n) => n > totalRounds))].sort((a, b) => a - b);
+  return [...new Set(candidates.filter((n) => n > totalRounds && n <= maxRounds))].sort(
+    (a, b) => a - b,
+  );
 }
 
 export function PlayingSessionScreen({
@@ -55,6 +58,7 @@ export function PlayingSessionScreen({
   onResetProgress,
   onEdit,
   onImprove,
+  continueMaxRounds = 5000,
 }: PlayingSessionScreenProps): React.ReactNode {
   const { strategy, statistics } = generated;
   const totalRounds = strategy.rounds.length;
@@ -71,7 +75,7 @@ export function PlayingSessionScreen({
       ? (strategy.rounds[completedThroughRound - 1]?.betAmount ?? 0)
       : 0;
   const allRoundsDone = completedThroughRound >= totalRounds && sessionStatus === 'playing';
-  const presetTargets = continuePresets(totalRounds);
+  const presetTargets = continuePresets(totalRounds, continueMaxRounds);
   const progressPct =
     totalRounds > 0 ? Math.round((completedThroughRound / totalRounds) * 100) : 0;
 
@@ -159,7 +163,7 @@ export function PlayingSessionScreen({
           {onImprove !== undefined ? (
             <Button variant="outline" size="sm" onClick={onImprove}>
               <Sparkles className="h-4 w-4" />
-              Cải thiện
+              Capital Planner
             </Button>
           ) : null}
         </div>
@@ -280,7 +284,7 @@ export function PlayingSessionScreen({
           <CardContent className="space-y-4 p-5">
             <p className="font-medium">Bạn đã hoàn thành kế hoạch.</p>
             <p className="text-sm text-muted-foreground">Không có lượt thắng.</p>
-            <p className="text-sm font-medium">Continue until</p>
+            <p className="text-sm font-medium">Session Planner — continue until</p>
             <div className="flex flex-wrap gap-2">
               {presetTargets.map((n) => (
                 <Button
