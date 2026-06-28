@@ -97,7 +97,7 @@ export function PlanTableScreen({
   });
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4">
+    <div className="scrollbar-none mx-auto h-full min-h-0 max-w-5xl space-y-4 overflow-y-auto">
       <div className="sticky top-0 z-10 flex flex-wrap items-center gap-2 bg-background/95 py-2 backdrop-blur">
         <Button variant="outline" size="sm" onClick={onBackToDecision}>
           <ArrowLeft className="h-4 w-4" />

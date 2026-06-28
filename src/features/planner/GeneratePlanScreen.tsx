@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { InfoTip } from '@/components/ui/tooltip';
 import { FormSection } from '@/layout/AppLayout';
 import type { PlannerFormValues } from '@/features/planner/plan-service';
 import { DEFAULT_PLANNER_FORM } from '@/features/planner/plan-service';
@@ -22,19 +23,24 @@ interface GeneratePlanScreenProps {
 function Field({
   id,
   label,
+  hint,
   error,
   children,
 }: {
   id: string;
   label: string;
+  hint?: string;
   error?: string | undefined;
   children: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
-      <Label htmlFor={id} className="text-sm">
-        {label}
-      </Label>
+      <div className="flex items-center gap-1.5">
+        <Label htmlFor={id} className="text-sm">
+          {label}
+        </Label>
+        {hint != null && hint !== '' ? <InfoTip content={hint} /> : null}
+      </div>
       {children}
       {error != null && error !== '' ? <p className="text-[11px] text-destructive">{error}</p> : null}
     </div>
@@ -83,40 +89,65 @@ export function GeneratePlanScreen({
   const inputClass = 'h-10 rounded-lg text-sm';
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-3">
       <div>
-        <h2 className="text-xl font-bold tracking-tight">Tạo kế hoạch</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h2 className="text-lg font-bold tracking-tight">Tạo kế hoạch</h2>
+        <p className="mt-0.5 text-sm text-muted-foreground">
           Nhập thông tin để tạo kế hoạch cược tối ưu
         </p>
       </div>
 
       <Card className="w-full shadow-md">
-        <CardHeader className="space-y-0 p-5 pb-3">
-          <CardTitle className="text-lg">Thông tin kế hoạch</CardTitle>
+        <CardHeader className="space-y-0 p-4 pb-2">
+          <CardTitle className="text-base">Thông tin kế hoạch</CardTitle>
         </CardHeader>
-        <CardContent className="p-5 pt-0">
-          <form onSubmit={handleSubmit((data) => onSubmit(data as PlannerFormValues))} className="space-y-5">
+        <CardContent className="p-4 pt-0">
+          <form onSubmit={handleSubmit((data) => onSubmit(data as PlannerFormValues))} className="space-y-4">
             <FormSection title="Mục tiêu">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field id="targetProfit" label="Lợi nhuận (đ)" error={errors.targetProfit?.message}>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field
+                  id="targetProfit"
+                  label="Lợi nhuận (đ)"
+                  hint="Số tiền lời bạn muốn đạt khi thắng"
+                  error={errors.targetProfit?.message}
+                >
                   <Input id="targetProfit" className={inputClass} inputMode="numeric" {...bindMoney('targetProfit')} />
                 </Field>
-                <Field id="roundCount" label="Số vòng" error={errors.roundCount?.message}>
+                <Field
+                  id="roundCount"
+                  label="Số vòng"
+                  hint="Số vòng tối đa trước khi thắng"
+                  error={errors.roundCount?.message}
+                >
                   <Input id="roundCount" className={inputClass} inputMode="numeric" {...register('roundCount')} />
                 </Field>
               </div>
             </FormSection>
 
             <FormSection title="Thông số">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field id="rewardMultiplier" label="Hệ số (×)" error={errors.rewardMultiplier?.message}>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field
+                  id="rewardMultiplier"
+                  label="Hệ số (×)"
+                  hint="Hỗ trợ tối đa 2 chữ số thập phân"
+                  error={errors.rewardMultiplier?.message}
+                >
                   <Input id="rewardMultiplier" className={inputClass} inputMode="decimal" {...register('rewardMultiplier')} />
                 </Field>
-                <Field id="minimumBet" label="Cược tối thiểu (đ)" error={errors.minimumBet?.message}>
+                <Field
+                  id="minimumBet"
+                  label="Cược tối thiểu (đ)"
+                  hint="Mức cược nhỏ nhất game cho phép mỗi vòng"
+                  error={errors.minimumBet?.message}
+                >
                   <Input id="minimumBet" className={inputClass} inputMode="numeric" {...bindMoney('minimumBet')} />
                 </Field>
-                <Field id="betStep" label="Bước cược (đ)" error={errors.betStep?.message}>
+                <Field
+                  id="betStep"
+                  label="Bước cược (đ)"
+                  hint="Bước nhảy cược — số tiền cược phải chia hết cho giá trị này"
+                  error={errors.betStep?.message}
+                >
                   <Input id="betStep" className={inputClass} inputMode="numeric" {...bindMoney('betStep')} />
                 </Field>
               </div>
@@ -131,23 +162,39 @@ export function GeneratePlanScreen({
                     setValue('winTaxEnabled', checked === true, { shouldValidate: true })
                   }
                 />
-                <Label htmlFor="winTaxEnabled" className="cursor-pointer text-xs font-normal">
+                <Label htmlFor="winTaxEnabled" className="cursor-pointer text-sm font-normal">
                   Thuế khi thắng lớn
                 </Label>
+                <InfoTip content="Thuế trên tổng tiền thắng khi đạt ngưỡng (mặc định 10% từ 10 triệu)" />
               </div>
               {winTaxEnabled ? (
-                <div className="mt-3 grid gap-4 sm:grid-cols-2">
-                  <Field id="winTaxThreshold" label="Ngưỡng (đ)" error={errors.winTaxThreshold?.message}>
+                <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                  <Field
+                    id="winTaxThreshold"
+                    label="Ngưỡng (đ)"
+                    hint="Tổng tiền thắng từ mức này mới bị tính thuế"
+                    error={errors.winTaxThreshold?.message}
+                  >
                     <Input id="winTaxThreshold" className={inputClass} inputMode="numeric" {...bindMoney('winTaxThreshold')} />
                   </Field>
-                  <Field id="winTaxRatePercent" label="Thuế (%)" error={errors.winTaxRatePercent?.message}>
+                  <Field
+                    id="winTaxRatePercent"
+                    label="Thuế (%)"
+                    hint="Phần trăm thuế trên tổng tiền thắng (1–99%)"
+                    error={errors.winTaxRatePercent?.message}
+                  >
                     <Input id="winTaxRatePercent" className={inputClass} inputMode="numeric" {...register('winTaxRatePercent')} />
                   </Field>
                 </div>
               ) : null}
             </FormSection>
 
-            <Field id="userBankroll" label="Vốn của bạn (đ)" error={errors.userBankroll?.message}>
+            <Field
+              id="userBankroll"
+              label="Vốn của bạn (đ)"
+              hint="Để so sánh với vốn cần chuẩn bị (tùy chọn)"
+              error={errors.userBankroll?.message}
+            >
               <Input id="userBankroll" className={inputClass} inputMode="numeric" {...bindMoney('userBankroll')} />
             </Field>
 
@@ -155,7 +202,7 @@ export function GeneratePlanScreen({
               <p className="text-xs text-destructive">{serverError}</p>
             ) : null}
 
-            <Button type="submit" className="h-11 w-full">
+            <Button type="submit" className="h-10 w-full">
               Tạo kế hoạch
             </Button>
 
