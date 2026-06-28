@@ -32,13 +32,11 @@ Platform work is **complete** for current product needs. Further changes require
 
 ## Current focus
 
-**#018 — Stranger usability test** — comprehension + user expectation — [`feature-1-dogfood-notes.md`](product/feature-1-dogfood-notes.md) §#018
+**Lane Product:** **#018 — Feature 1 usability validation** — [`feature-1-dogfood-notes.md`](product/feature-1-dogfood-notes.md) §#018
 
-> Script: *500.000đ, lời 100.000, 50 vòng.* 3 câu hỏi / màn. Ghi **User expectation**. Quay màn hình nếu đồng ý.
+**Lane Platform (parallel, docs-first):** **Game Policy Brief** — [`design/game-policy-brief.md`](design/game-policy-brief.md) — **approved** (Translator + SolverConstraints); implementation after Phase 1 sign-off
 
-**Freeze khi:** insight lặp — không còn phát hiện mới từ Feature 1.
-
-**Không viết code** cho đến khi freeze hoặc có blocker rõ ràng.
+**Không viết code Platform** cho đến khi Game Policy brief sign-off. **Không viết code Product** cho đến khi #018 freeze — trừ blocker usability.
 
 ---
 
@@ -66,6 +64,7 @@ Full roadmap: [`ROADMAP.md`](../ROADMAP.md)
 | ----- | -------- |
 | Feature 1 dogfood + #018 script | [`product/feature-1-dogfood-notes.md`](product/feature-1-dogfood-notes.md) |
 | Arithmetic migration | [`design/arithmetic-migration-brief.md`](design/arithmetic-migration-brief.md) |
+| Game policy (Platform) | [`design/game-policy-brief.md`](design/game-policy-brief.md) |
 | Product problem | [`rfc/product/RFC-101-user-problem.md`](rfc/product/RFC-101-user-problem.md) |
 | User journey | [`rfc/product/RFC-102-user-journey.md`](rfc/product/RFC-102-user-journey.md) |
 | SDK cookbook | [`cookbook/README.md`](cookbook/README.md) |
