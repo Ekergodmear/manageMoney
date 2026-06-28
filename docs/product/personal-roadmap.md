@@ -27,7 +27,7 @@ Game Designer ✅
 Planning (+ presets) ✅
         │
         ▼
-Session Planner (multi-plan / phiên)  ← tiếp theo
+Session Planner ✅
         │
         ▼
 Capital Planner ✅
@@ -63,9 +63,14 @@ Dashboard · Planning · Playing · Session Planner (continue) · Session Librar
 - **Planning** — preset picker auto-fill form
 - `maximumBet` lưu trong preset (solver wire Phase 2 platform)
 
-## Giai đoạn 4 — Session Planner (multi-plan)
+## Giai đoạn 4 — Session Planner (aggregate root) ✅ (hiện tại)
 
-Một session = Plan A → Lost → Plan B (Improve) → Continue → Win
+- **Session** = aggregate root (plans[], timeline, notes, statistics)
+- **Plan** tree: Generate → Improve → Continue với `parentPlanId`
+- Workspace **Session** = trang làm việc chính (80% thời gian)
+- **Planning** chỉ khởi tạo session mới
+- **Session Library** thay history đơn lẻ
+- Export full session JSON (policy, plans, timeline, notes, stats)
 
 ## Giai đoạn 5 — Account Planner
 

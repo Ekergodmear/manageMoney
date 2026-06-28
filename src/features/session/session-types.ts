@@ -1,20 +1,31 @@
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
-import type { GenerateResult, PlannerFormValues } from '@/features/planner/plan-service';
+import type { Session } from '@/features/session/session-domain';
 
+export interface PersistedAppState {
+  readonly version: 3;
+  readonly theme: 'light' | 'dark';
+  readonly nextSessionNumber: number;
+  readonly activeSessionId: string | null;
+  readonly sessions: readonly Session[];
+  readonly customGamePresets: readonly GamePolicyPreset[];
+  readonly activePresetId: string;
+}
+
+export const EMPTY_PERSISTED_STATE: PersistedAppState = {
+  version: 3,
+  theme: 'light',
+  nextSessionNumber: 1,
+  activeSessionId: null,
+  sessions: [],
+  customGamePresets: [],
+  activePresetId: 'bingo-120',
+};
+
+// Legacy types kept for migration only
 export type SessionStatus = 'ready' | 'playing' | 'won' | 'lost';
 
-export type TimelineEventType =
-  | 'generated'
-  | 'started'
-  | 'bet'
-  | 'undo'
-  | 'won'
-  | 'lost'
-  | 'continued'
-  | 'finished';
-
 export interface SessionTimelineEvent {
-  readonly type: TimelineEventType;
+  readonly type: string;
   readonly at: string;
   readonly roundIndex?: number;
   readonly betAmount?: number;
@@ -31,8 +42,8 @@ export interface HistorySession {
   readonly profitAmount: number | null;
   readonly totalSpent: number;
   readonly finishedAt: string;
-  readonly formValues: PlannerFormValues;
-  readonly generated: GenerateResult;
+  readonly formValues: import('@/features/planner/plan-service').PlannerFormValues;
+  readonly generated: import('@/features/planner/plan-service').GenerateResult;
   readonly timeline: readonly SessionTimelineEvent[];
 }
 
@@ -40,30 +51,10 @@ export interface ActiveSession {
   readonly id: string;
   readonly sessionNumber: number;
   readonly status: SessionStatus;
-  readonly formValues: PlannerFormValues;
-  readonly generated: GenerateResult;
+  readonly formValues: import('@/features/planner/plan-service').PlannerFormValues;
+  readonly generated: import('@/features/planner/plan-service').GenerateResult;
   readonly completedThroughRound: number;
   readonly timeline: readonly SessionTimelineEvent[];
   readonly createdAt: string;
   readonly updatedAt: string;
 }
-
-export interface PersistedAppState {
-  readonly version: 2;
-  readonly theme: 'light' | 'dark';
-  readonly nextSessionNumber: number;
-  readonly activeSession: ActiveSession | null;
-  readonly history: readonly HistorySession[];
-  readonly customGamePresets: readonly GamePolicyPreset[];
-  readonly activePresetId: string;
-}
-
-export const EMPTY_PERSISTED_STATE: PersistedAppState = {
-  version: 2,
-  theme: 'light',
-  nextSessionNumber: 1,
-  activeSession: null,
-  history: [],
-  customGamePresets: [],
-  activePresetId: 'bingo-120',
-};

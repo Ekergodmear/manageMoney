@@ -1,46 +1,29 @@
-import { Check, Circle, Flag, Play, RotateCcw, Trophy } from 'lucide-react';
+import { Check, Circle, Flag, Play, RotateCcw, Sparkles, Trophy } from 'lucide-react';
 import type { ReactNode } from 'react';
 
-import type { SessionTimelineEvent } from '@/features/session/session-types';
+import type { SessionTimelineEvent } from '@/features/session/session-domain';
 import { cn } from '@/lib/utils';
 
-const ICONS: Record<SessionTimelineEvent['type'], ReactNode> = {
-  generated: <Circle className="h-3 w-3" />,
-  started: <Play className="h-3 w-3" />,
+const ICONS: Partial<Record<SessionTimelineEvent['type'], ReactNode>> = {
+  'session-created': <Circle className="h-3 w-3" />,
+  'plan-added': <Circle className="h-3 w-3" />,
+  'plan-started': <Play className="h-3 w-3" />,
   bet: <Check className="h-3 w-3" />,
   undo: <RotateCcw className="h-3 w-3" />,
-  won: <Trophy className="h-3 w-3" />,
-  lost: <Flag className="h-3 w-3" />,
-  continued: <Play className="h-3 w-3" />,
-  finished: <Flag className="h-3 w-3" />,
+  'plan-won': <Trophy className="h-3 w-3" />,
+  'session-won': <Trophy className="h-3 w-3" />,
+  'plan-lost': <Flag className="h-3 w-3" />,
+  'session-stopped': <Flag className="h-3 w-3" />,
+  improve: <Sparkles className="h-3 w-3" />,
+  continue: <Play className="h-3 w-3" />,
+  'note-updated': <Circle className="h-3 w-3" />,
 };
 
 function labelForEvent(event: SessionTimelineEvent): string {
   if (event.label !== undefined) {
     return event.label;
   }
-  switch (event.type) {
-    case 'generated':
-      return 'Đã tạo kế hoạch';
-    case 'started':
-      return 'Bắt đầu phiên';
-    case 'bet':
-      return event.roundIndex !== undefined && event.betAmount !== undefined
-        ? `Cược vòng ${String(event.roundIndex)} · ${event.betAmount.toLocaleString('vi-VN')} đ`
-        : 'Đã cược';
-    case 'undo':
-      return 'Hoàn tác cược';
-    case 'won':
-      return 'Thắng — kết thúc phiên';
-    case 'lost':
-      return 'Hết vòng — không trúng';
-    case 'continued':
-      return 'Tiếp tục kế hoạch';
-    case 'finished':
-      return 'Hoàn thành';
-    default:
-      return event.type;
-  }
+  return event.type.replace(/-/g, ' ');
 }
 
 interface SessionTimelineProps {
@@ -63,12 +46,18 @@ export function SessionTimeline({ events, compact = false }: SessionTimelineProp
             <div
               className={cn(
                 'flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs',
-                event.type === 'won' && 'border-success bg-success/20 text-success-foreground',
-                event.type === 'lost' && 'border-muted-foreground/30 bg-muted',
-                event.type !== 'won' && event.type !== 'lost' && 'border-border bg-card',
+                (event.type === 'session-won' || event.type === 'plan-won') &&
+                  'border-success bg-success/20 text-success-foreground',
+                (event.type === 'plan-lost' || event.type === 'session-stopped') &&
+                  'border-muted-foreground/30 bg-muted',
+                event.type !== 'session-won' &&
+                  event.type !== 'plan-won' &&
+                  event.type !== 'plan-lost' &&
+                  event.type !== 'session-stopped' &&
+                  'border-border bg-card',
               )}
             >
-              <span className="text-muted-foreground">{ICONS[event.type]}</span>
+              <span className="text-muted-foreground">{ICONS[event.type] ?? <Circle className="h-3 w-3" />}</span>
               <span className="whitespace-nowrap font-medium">{labelForEvent(event)}</span>
             </div>
             {index < visible.length - 1 ? (

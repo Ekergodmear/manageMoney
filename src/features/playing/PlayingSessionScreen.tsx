@@ -10,7 +10,7 @@ import { accumulatedAtRound } from '@/features/planner/plan-display';
 import type { GenerateResult } from '@/features/planner/plan-service';
 import { PlanTableScreen } from '@/features/planner/PlanTableScreen';
 import { SessionTimeline } from '@/features/session/SessionTimeline';
-import type { SessionTimelineEvent } from '@/features/session/session-types';
+import type { SessionTimelineEvent } from '@/features/session/session-domain';
 import { formatAmount } from '@/lib/money-format';
 import { cn } from '@/lib/utils';
 

@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { accumulatedAtRound } from '@/features/planner/plan-display';
 import type { GenerateResult } from '@/features/planner/plan-service';
-import type { HistorySession } from '@/features/session/session-types';
+import type { Session } from '@/features/session/session-domain';
+import { computeSessionStatistics } from '@/features/session/session-domain';
 import { formatAmount } from '@/lib/money-format';
 
 interface AnalysisScreenProps {
   readonly generated: GenerateResult | null;
   readonly completedThroughRound: number;
-  readonly history: readonly HistorySession[];
+  readonly history: readonly Session[];
   readonly onOpenImprove?: () => void;
 }
 
@@ -39,10 +40,15 @@ export function AnalysisScreen({
 
   const stats = useMemo(() => {
     const sessions = history.length;
-    const wins = history.filter((h) => h.outcome === 'won').length;
-    const losses = history.filter((h) => h.outcome === 'lost').length;
-    const totalBet = history.reduce((sum, h) => sum + h.totalSpent, 0);
-    const totalProfit = history.reduce((sum, h) => sum + (h.profitAmount ?? 0), 0);
+    const wins = history.filter((h) => h.status === 'won').length;
+    const losses = history.filter((h) => h.status === 'lost' || h.status === 'stopped').length;
+    let totalBet = 0;
+    let totalProfit = 0;
+    for (const s of history) {
+      const st = computeSessionStatistics(s);
+      totalBet += st.totalCapital;
+      totalProfit += s.profitAmount ?? 0;
+    }
     const roi = totalBet > 0 ? (totalProfit / totalBet) * 100 : 0;
     return { sessions, wins, losses, totalBet, roi };
   }, [history]);

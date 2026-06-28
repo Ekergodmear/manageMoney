@@ -1,27 +1,37 @@
-import { useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 
 import { Badge } from '@/components/ui/badge';
-import type { HistorySession } from '@/features/session/session-types';
+import type { Session } from '@/features/session/session-domain';
+import { computeSessionStatistics } from '@/features/session/session-domain';
 import { formatAmount } from '@/lib/money-format';
 import { cn } from '@/lib/utils';
 
-type HistoryFilter = 'all' | 'won' | 'lost' | 'cancelled';
+type LibraryFilter = 'all' | 'playing' | 'won' | 'lost' | 'stopped';
 
-interface HistoryScreenProps {
-  readonly history: readonly HistorySession[];
+interface SessionLibraryScreenProps {
+  readonly sessions: readonly Session[];
+  readonly activeSessionId: string | null;
   readonly onOpenSession: (id: string) => void;
 }
 
-export function HistoryScreen({ history, onOpenSession }: HistoryScreenProps): ReactNode {
-  const [filter, setFilter] = useState<HistoryFilter>('all');
+export function SessionLibraryScreen({
+  sessions,
+  activeSessionId,
+  onOpenSession,
+}: SessionLibraryScreenProps): ReactNode {
+  const [filter, setFilter] = useState<LibraryFilter>('all');
 
-  const filtered = history.filter((item) => filter === 'all' || item.outcome === filter);
+  const filtered = useMemo(() => {
+    const list = sessions.filter((s) => filter === 'all' || s.status === filter);
+    return [...list].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  }, [sessions, filter]);
 
-  const filters: { id: HistoryFilter; label: string }[] = [
+  const filters: { id: LibraryFilter; label: string }[] = [
     { id: 'all', label: 'Tất cả' },
-    { id: 'won', label: 'Thắng' },
-    { id: 'lost', label: 'Thua' },
-    { id: 'cancelled', label: 'Đã hủy' },
+    { id: 'playing', label: 'Playing' },
+    { id: 'won', label: 'Won' },
+    { id: 'lost', label: 'Lost' },
+    { id: 'stopped', label: 'Stopped' },
   ];
 
   return (
@@ -29,17 +39,14 @@ export function HistoryScreen({ history, onOpenSession }: HistoryScreenProps): R
       <div>
         <h2 className="text-xl font-bold tracking-tight">Session Library</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Các phiên đã chơi — bấm để xem lại.
+          Mở session — không mở plan riêng lẻ.
         </p>
       </div>
 
       <div className="flex flex-wrap gap-2">
         {filters.map((f) => (
           <button key={f.id} type="button" onClick={() => setFilter(f.id)}>
-            <Badge
-              variant={filter === f.id ? 'default' : 'outline'}
-              className="cursor-pointer"
-            >
+            <Badge variant={filter === f.id ? 'default' : 'outline'} className="cursor-pointer">
               {f.label}
             </Badge>
           </button>
@@ -47,55 +54,55 @@ export function HistoryScreen({ history, onOpenSession }: HistoryScreenProps): R
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Chưa có phiên nào trong mục này.</p>
+        <p className="text-sm text-muted-foreground">Chưa có session trong mục này.</p>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
-          {filtered.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onOpenSession(item.id)}
-              className={cn(
-                'rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/50',
-              )}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <p className="font-semibold">Phiên #{String(item.sessionNumber)}</p>
-                <OutcomeBadge outcome={item.outcome} />
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {item.roundCount} vòng · {item.completedRounds} đã chơi
-              </p>
-              {item.outcome === 'won' && item.profitAmount !== null ? (
-                <p className="mt-2 text-sm font-medium text-success">
-                  +{formatAmount(item.profitAmount)} đ
+          {filtered.map((session) => {
+            const stats = computeSessionStatistics(session);
+            const isActive = session.id === activeSessionId;
+            return (
+              <button
+                key={session.id}
+                type="button"
+                onClick={() => onOpenSession(session.id)}
+                className={cn(
+                  'rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/50',
+                  isActive && 'border-primary/40',
+                )}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <p className="font-semibold">{session.title}</p>
+                  <Badge variant={session.status === 'won' ? 'success' : 'outline'}>
+                    {session.status}
+                  </Badge>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {stats.planCount} plans · {stats.roundsPlayed} vòng
                 </p>
-              ) : (
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Đã chi {formatAmount(item.totalSpent)} đ
+                {session.profitAmount !== null && session.status === 'won' ? (
+                  <p className="mt-2 text-sm font-medium text-success">
+                    +{formatAmount(session.profitAmount)} đ
+                  </p>
+                ) : (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Capital {formatAmount(stats.totalCapital)} đ
+                  </p>
+                )}
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {new Date(session.updatedAt).toLocaleDateString('vi-VN', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
                 </p>
-              )}
-              <p className="mt-2 text-xs text-muted-foreground">
-                {new Date(item.finishedAt).toLocaleDateString('vi-VN', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric',
-                })}
-              </p>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
   );
 }
 
-function OutcomeBadge({ outcome }: { outcome: HistorySession['outcome'] }): ReactNode {
-  const map = {
-    won: { label: 'Thắng', variant: 'success' as const },
-    lost: { label: 'Thua', variant: 'muted' as const },
-    cancelled: { label: 'Đã hủy', variant: 'outline' as const },
-  };
-  const item = map[outcome];
-  return <Badge variant={item.variant}>{item.label}</Badge>;
-}
+// Re-export under old name for gradual migration
+export { SessionLibraryScreen as HistoryScreen };

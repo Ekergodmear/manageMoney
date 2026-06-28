@@ -1,5 +1,6 @@
 import type { PersistedAppState } from '@/features/session/session-types';
 import { EMPTY_PERSISTED_STATE } from '@/features/session/session-types';
+import { migratePersistedState } from '@/features/session/session-migration';
 
 const DB_NAME = 'stake-planner';
 const DB_VERSION = 1;
@@ -18,25 +19,6 @@ function openDb(): Promise<IDBDatabase> {
     };
     request.onsuccess = () => resolve(request.result);
   });
-}
-
-function migratePersistedState(raw: unknown): PersistedAppState {
-  if (raw === null || raw === undefined || typeof raw !== 'object') {
-    return EMPTY_PERSISTED_STATE;
-  }
-  const state = raw as PersistedAppState & { version?: number };
-  if (state.version === 2) {
-    return state;
-  }
-  if (state.version === 1) {
-    return {
-      ...state,
-      version: 2,
-      customGamePresets: [],
-      activePresetId: 'bingo-120',
-    };
-  }
-  return EMPTY_PERSISTED_STATE;
 }
 
 export async function loadPersistedState(): Promise<PersistedAppState> {
@@ -67,6 +49,6 @@ export async function savePersistedState(state: PersistedAppState): Promise<void
       tx.oncomplete = () => db.close();
     });
   } catch {
-    // Offline or private mode — app still works in memory
+    // Offline or private mode
   }
 }

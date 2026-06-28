@@ -13,114 +13,91 @@ import {
   findPreset,
   mergePresets,
 } from '@/features/game-designer/preset-utils';
-import { HistoryScreen } from '@/features/history/HistoryScreen';
-import { applyImproveOption, type ImproveOption } from '@/features/improve/improve-service';
-import { ImproveScreen } from '@/features/improve/ImproveScreen';
+import { SessionLibraryScreen } from '@/features/history/HistoryScreen';
+import type { ImproveOption } from '@/features/improve/improve-service';
 import { GeneratePlanScreen } from '@/features/planner/GeneratePlanScreen';
-import { PlanReadyScreen } from '@/features/planner/PlanReadyScreen';
 import {
   DEFAULT_PLANNER_FORM,
-  continuePlan,
   generatePlan,
   type PlannerField,
   type PlannerFormValues,
 } from '@/features/planner/plan-service';
 import { FormRightPanel, PlanRightPanel, PlayingProgressPanel } from '@/features/planner/RightPanel';
-import { PlayingSessionScreen } from '@/features/playing/PlayingSessionScreen';
 import type { WorkspaceId } from '@/features/navigation/workspace-nav';
-import { exportSessionJson, exportHistoryJson, printSession } from '@/features/session/session-export';
+import {
+  addPlanFromContinue,
+  addPlanFromImprove,
+  createSessionFromGenerate,
+  getCurrentPlan,
+  placeBetOnPlan,
+  startCurrentPlan,
+  stopSession,
+  undoBetOnPlan,
+  updateSessionNotes,
+  winCurrentPlan,
+  type Session,
+  type SessionView,
+} from '@/features/session/session-domain';
+import { exportFullSessionJson, exportLibraryJson } from '@/features/session/session-export';
 import { loadPersistedState, savePersistedState } from '@/features/session/session-persistence';
-import type {
-  ActiveSession,
-  HistorySession,
-  PersistedAppState,
-  SessionTimelineEvent,
-} from '@/features/session/session-types';
+import { SessionPlannerScreen } from '@/features/session/SessionPlannerScreen';
+import type { PersistedAppState } from '@/features/session/session-types';
 import { EMPTY_PERSISTED_STATE } from '@/features/session/session-types';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
 import { AppLayout } from '@/layout/AppLayout';
-import { accumulatedAtRound } from '@/features/planner/plan-display';
 
-type PlanningPhase = 'form' | 'ready' | 'improve';
-
-interface ToastState {
   readonly message: string;
   readonly actionLabel?: string;
   readonly onAction?: () => void;
 }
 
-function nowIso(): string {
-  return new Date().toISOString();
+function findSession(sessions: readonly Session[], id: string | null): Session | null {
+  if (id === null) {
+    return null;
+  }
+  return sessions.find((s) => s.id === id) ?? null;
 }
 
-function addTimelineEvent(
-  timeline: readonly SessionTimelineEvent[],
-  event: Omit<SessionTimelineEvent, 'at'>,
-): SessionTimelineEvent[] {
-  return [...timeline, { ...event, at: nowIso() }];
-}
-
-function sessionToHistory(
-  session: ActiveSession,
-  outcome: HistorySession['outcome'],
-  profitAmount: number | null,
-): HistorySession {
-  return {
-    id: session.id,
-    sessionNumber: session.sessionNumber,
-    label: `Phiên ${String(session.sessionNumber)}`,
-    roundCount: session.generated.strategy.rounds.length,
-    completedRounds: session.completedThroughRound,
-    outcome,
-    profitAmount,
-    totalSpent: accumulatedAtRound(
-      session.generated.strategy.rounds,
-      session.completedThroughRound,
-    ),
-    finishedAt: nowIso(),
-    formValues: session.formValues,
-    generated: session.generated,
-    timeline: session.timeline,
-  };
+function upsertSession(sessions: readonly Session[], session: Session): Session[] {
+  const index = sessions.findIndex((s) => s.id === session.id);
+  if (index < 0) {
+    return [session, ...sessions];
+  }
+  return sessions.map((s, i) => (i === index ? session : s));
 }
 
 export function App(): JSX.Element {
   const [hydrated, setHydrated] = useState(false);
   const [persisted, setPersisted] = useState<PersistedAppState>(EMPTY_PERSISTED_STATE);
   const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceId>('dashboard');
-  const [planningPhase, setPlanningPhase] = useState<PlanningPhase>('form');
+  const [sessionView, setSessionView] = useState<SessionView>('overview');
+  const [viewingSessionId, setViewingSessionId] = useState<string | null>(null);
   const [liveForm, setLiveForm] = useState<PlannerFormValues>(DEFAULT_PLANNER_FORM);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<PlannerField, string>>>({});
-  const [viewingHistory, setViewingHistory] = useState<HistorySession | null>(null);
   const [toast, setToast] = useState<ToastState | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const activeSession = persisted.activeSession;
+  const activeSession = findSession(persisted.sessions, persisted.activeSessionId);
+  const displayedSession =
+    findSession(persisted.sessions, viewingSessionId) ?? activeSession;
   const allPresets = useMemo(
     () => mergePresets(persisted.customGamePresets),
     [persisted.customGamePresets],
   );
   const activePreset = findPreset(allPresets, persisted.activePresetId);
   const continueMaxRounds = activePreset?.continuePolicy.maximumRounds ?? 5000;
-  const planningForm = activeSession?.formValues ?? liveForm;
-  const formValues = planningForm;
-  const generated = activeSession?.generated ?? null;
-  const completedThroughRound = activeSession?.completedThroughRound ?? 0;
-  const sessionStatus = activeSession?.status ?? 'ready';
-  const timeline = activeSession?.timeline ?? [];
+  const currentPlan = activeSession !== null ? getCurrentPlan(activeSession) : null;
+  const readOnlySession = viewingSessionId !== null && viewingSessionId !== persisted.activeSessionId;
 
   useEffect(() => {
     void loadPersistedState().then((state) => {
       setPersisted(state);
       const presets = mergePresets(state.customGamePresets);
       const preset = findPreset(presets, state.activePresetId);
-      const base = state.activeSession?.formValues ?? DEFAULT_PLANNER_FORM;
-      const initialForm =
-        preset !== undefined ? applyPresetToForm(base, preset) : base;
-      setLiveForm(initialForm);
-      if (state.activeSession?.status === 'ready') {
-        setPlanningPhase('ready');
-      }
+      const base = DEFAULT_PLANNER_FORM;
+      setLiveForm(preset !== undefined ? applyPresetToForm(base, preset) : base);
+      const hasActive = state.activeSessionId !== null;
+      setActiveWorkspace(hasActive ? 'session' : 'dashboard');
       setHydrated(true);
     });
   }, []);
@@ -139,34 +116,37 @@ export function App(): JSX.Element {
     }, 250);
   }, []);
 
-  const updateActiveSession = useCallback(
-    (updater: (session: ActiveSession) => ActiveSession) => {
-      setPersisted((prev) => {
-        if (prev.activeSession === null) {
-          return prev;
-        }
-        const next = {
-          ...prev,
-          activeSession: updater(prev.activeSession),
-        };
-        if (saveTimer.current !== null) {
-          clearTimeout(saveTimer.current);
-        }
-        saveTimer.current = setTimeout(() => {
-          void savePersistedState(next);
-        }, 250);
-        return next;
-      });
-    },
-    [],
-  );
+  const updateSession = useCallback((sessionId: string, updater: (s: Session) => Session) => {
+    setPersisted((prev) => {
+      const target = findSession(prev.sessions, sessionId);
+      if (target === null) {
+        return prev;
+      }
+      const updated = updater(target);
+      const next = {
+        ...prev,
+        sessions: upsertSession(prev.sessions, updated),
+      };
+      if (saveTimer.current !== null) {
+        clearTimeout(saveTimer.current);
+      }
+      saveTimer.current = setTimeout(() => {
+        void savePersistedState(next);
+      }, 250);
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     document.querySelector('main')?.scrollTo({ top: 0, behavior: 'instant' });
-  }, [activeWorkspace, planningPhase]);
+  }, [activeWorkspace, sessionView]);
 
   function showToast(message: string, actionLabel?: string, onAction?: () => void): void {
-    setToast({ message, ...(actionLabel !== undefined ? { actionLabel } : {}), ...(onAction !== undefined ? { onAction } : {}) });
+    setToast({
+      message,
+      ...(actionLabel !== undefined ? { actionLabel } : {}),
+      ...(onAction !== undefined ? { onAction } : {}),
+    });
     setTimeout(() => setToast(null), 4000);
   }
 
@@ -181,183 +161,46 @@ export function App(): JSX.Element {
     }
 
     setFieldErrors({});
-    const id = crypto.randomUUID();
-    const sessionNumber = persisted.nextSessionNumber;
-    const session: ActiveSession = {
-      id,
-      sessionNumber,
-      status: 'ready',
-      formValues: values,
-      generated: outcome.result,
-      completedThroughRound: 0,
-      timeline: addTimelineEvent([], { type: 'generated' }),
-      createdAt: nowIso(),
-      updatedAt: nowIso(),
-    };
+    let sessions = [...persisted.sessions];
+    if (persisted.activeSessionId !== null) {
+      const current = findSession(sessions, persisted.activeSessionId);
+      if (current !== null && current.status === 'playing') {
+        sessions = upsertSession(sessions, stopSession(current));
+      }
+    }
 
-    const archived =
-      persisted.activeSession !== null && persisted.activeSession.status === 'playing'
-        ? [
-            sessionToHistory(persisted.activeSession, 'cancelled', null),
-            ...persisted.history,
-          ]
-        : persisted.history;
+    const session = createSessionFromGenerate(
+      values,
+      outcome.result,
+      persisted.activePresetId,
+      persisted.nextSessionNumber,
+    );
 
     persist({
       ...persisted,
-      nextSessionNumber: sessionNumber + 1,
-      activeSession: session,
-      history: archived,
+      nextSessionNumber: persisted.nextSessionNumber + 1,
+      activeSessionId: session.id,
+      sessions: upsertSession(sessions, session),
     });
-    setPlanningPhase('ready');
-    setActiveWorkspace('planning');
-    setViewingHistory(null);
-  }
-
-  function startSession(): void {
-    updateActiveSession((s) => ({
-      ...s,
-      status: 'playing',
-      timeline: addTimelineEvent(s.timeline, { type: 'started' }),
-      updatedAt: nowIso(),
-    }));
-    setActiveWorkspace('playing');
-  }
-
-  function placeBet(roundIndex: number): void {
-    if (activeSession === null || sessionStatus !== 'playing') {
-      return;
-    }
-    const expected = activeSession.completedThroughRound + 1;
-    if (roundIndex !== expected) {
-      return;
-    }
-    const round = activeSession.generated.strategy.rounds[roundIndex - 1];
-    updateActiveSession((s) => ({
-      ...s,
-      completedThroughRound: roundIndex,
-      timeline: addTimelineEvent(s.timeline, {
-        type: 'bet',
-        roundIndex,
-        betAmount: round?.betAmount,
-      }),
-      updatedAt: nowIso(),
-    }));
-    showToast('Đã lưu cược', 'Hoàn tác', undoBet);
-  }
-
-  function undoBet(): void {
-    if (activeSession === null || activeSession.completedThroughRound <= 0) {
-      return;
-    }
-    updateActiveSession((s) => ({
-      ...s,
-      completedThroughRound: s.completedThroughRound - 1,
-      timeline: addTimelineEvent(s.timeline, { type: 'undo' }),
-      updatedAt: nowIso(),
-    }));
-    showToast('Đã hoàn tác cược');
-  }
-
-  function winAtRound(roundIndex: number): void {
-    setPersisted((prev) => {
-      if (prev.activeSession === null) {
-        return prev;
-      }
-      const sim = simulateWinAtRound(prev.activeSession.generated.strategy, roundIndex);
-      const profit = sim.kind === 'success' ? sim.value.profitAmount : null;
-      const completed = Math.max(prev.activeSession.completedThroughRound, roundIndex);
-      const finalSession: ActiveSession = {
-        ...prev.activeSession,
-        completedThroughRound: completed,
-        status: 'won',
-        timeline: addTimelineEvent(prev.activeSession.timeline, { type: 'won', roundIndex }),
-        updatedAt: nowIso(),
-      };
-      const historyEntry = sessionToHistory(finalSession, 'won', profit);
-      const next = {
-        ...prev,
-        activeSession: null,
-        history: [historyEntry, ...prev.history],
-      };
-      void savePersistedState(next);
-      return next;
-    });
-    showToast('Chúc mừng — phiên đã kết thúc!');
-    setActiveWorkspace('dashboard');
-  }
-
-  function handleContinue(targetRoundCount: number): void {
-    if (activeSession === null) {
-      return;
-    }
-    const outcome = continuePlan(activeSession.formValues, targetRoundCount);
-    if (outcome.fieldErrors !== undefined || outcome.result === undefined) {
-      showToast('Không tạo được phần tiếp theo — kiểm tra số vòng.');
-      return;
-    }
-    updateActiveSession((s) => ({
-      ...s,
-      generated: outcome.result!,
-      formValues: { ...s.formValues, roundCount: String(targetRoundCount) },
-      timeline: addTimelineEvent(s.timeline, {
-        type: 'continued',
-        label: `Mở rộng đến ${String(targetRoundCount)} vòng`,
-      }),
-      updatedAt: nowIso(),
-    }));
-    showToast(`Đã thêm vòng đến ${String(targetRoundCount)}`);
-  }
-
-  function resetProgress(): void {
-    updateActiveSession((s) => ({
-      ...s,
-      completedThroughRound: 0,
-      updatedAt: nowIso(),
-    }));
-  }
-
-  function applyImprove(option: ImproveOption): void {
-    if (activeSession === null) {
-      return;
-    }
-    const newFormValues = applyImproveOption(activeSession.formValues, option);
-    const newRoundCount = option.result.strategy.rounds.length;
-    const cappedCompleted = Math.min(activeSession.completedThroughRound, newRoundCount);
-    updateActiveSession((s) => ({
-      ...s,
-      formValues: newFormValues,
-      generated: option.result,
-      completedThroughRound: cappedCompleted,
-      timeline: addTimelineEvent(s.timeline, {
-        type: 'continued',
-        label: `Improve: ${option.label}`,
-      }),
-      updatedAt: nowIso(),
-    }));
-    setPlanningPhase('ready');
-    setActiveWorkspace('planning');
-    showToast('Đã áp dụng phương án cải thiện');
+    setViewingSessionId(null);
+    setSessionView('overview');
+    setActiveWorkspace('session');
+    showToast('Session mới đã tạo — Plan A sẵn sàng');
   }
 
   function handlePresetSelect(preset: GamePolicyPreset): void {
-    const next = applyPresetToForm(planningForm, preset);
+    const next = applyPresetToForm(liveForm, preset);
     setLiveForm(next);
     persist({ ...persisted, activePresetId: preset.id });
-    if (activeSession !== null) {
-      updateActiveSession((s) => ({ ...s, formValues: next, updatedAt: nowIso() }));
-    }
   }
 
   function handleSaveGamePreset(preset: GamePolicyPreset): void {
     const without = persisted.customGamePresets.filter((p) => p.id !== preset.id);
-    const next = applyPresetToForm(planningForm, preset);
     persist({
       ...persisted,
       customGamePresets: [...without, preset],
       activePresetId: preset.id,
     });
-    setLiveForm(next);
     showToast(`Đã lưu preset "${preset.name}"`);
   }
 
@@ -373,118 +216,161 @@ export function App(): JSX.Element {
     showToast('Đã xóa preset');
   }
 
-  function openImprove(): void {
-    setPlanningPhase('improve');
-    setActiveWorkspace('planning');
-  }
-
-  function handleExport(): void {
-    if (activeSession === null) {
+  function mutateActive(updater: (s: Session) => Session): void {
+    if (persisted.activeSessionId === null) {
       return;
     }
-    exportSessionJson(activeSession.generated, {
-      sessionNumber: activeSession.sessionNumber,
-      completedThroughRound: activeSession.completedThroughRound,
+    updateSession(persisted.activeSessionId, updater);
+  }
+
+  function startPlan(): void {
+    mutateActive((s) => startCurrentPlan(s));
+  }
+
+  function placeBet(roundIndex: number): void {
+    if (persisted.activeSessionId === null) {
+      return;
+    }
+    updateSession(persisted.activeSessionId, (s) => placeBetOnPlan(s, roundIndex) ?? s);
+    showToast('Đã lưu cược', 'Hoàn tác', () => undoBet());
+  }
+
+  function undoBet(): void {
+    if (persisted.activeSessionId === null) {
+      return;
+    }
+    updateSession(persisted.activeSessionId, (s) => undoBetOnPlan(s) ?? s);
+    showToast('Đã hoàn tác cược');
+  }
+
+  function winAtRound(roundIndex: number): void {
+    if (persisted.activeSessionId === null) {
+      return;
+    }
+    setPersisted((prev) => {
+      const session = findSession(prev.sessions, prev.activeSessionId);
+      if (session === null) {
+        return prev;
+      }
+      const plan = getCurrentPlan(session);
+      const sim =
+        plan !== null ? simulateWinAtRound(plan.generated.strategy, roundIndex) : null;
+      const profit = sim?.kind === 'success' ? sim.value.profitAmount : null;
+      const updated = winCurrentPlan(session, roundIndex, profit);
+      const next = {
+        ...prev,
+        activeSessionId: null,
+        sessions: upsertSession(prev.sessions, updated),
+      };
+      void savePersistedState(next);
+      return next;
     });
-    showToast('Đã xuất JSON');
+    showToast('Session kết thúc — thắng!');
+    setSessionView('overview');
+    setActiveWorkspace('session');
   }
 
-  function handlePrint(): void {
-    if (activeSession === null) {
+  function handleContinue(targetRoundCount: number): void {
+    if (persisted.activeSessionId === null) {
       return;
     }
-    printSession(activeSession, activeSession.completedThroughRound);
+    updateSession(persisted.activeSessionId, (s) => {
+      const result = addPlanFromContinue(s, targetRoundCount);
+      if (result.error !== undefined) {
+        showToast(result.error);
+        return s;
+      }
+      showToast(`Session Planner — plan mới đến ${String(targetRoundCount)} vòng`);
+      return result.session;
+    });
+    setSessionView('overview');
   }
 
-  function renderPlanning(): JSX.Element {
-    if (planningPhase === 'improve' && generated !== null) {
-      return (
-        <ImproveScreen
-          formValues={formValues}
-          generated={generated}
-          completedThroughRound={completedThroughRound}
-          onApply={applyImprove}
-          onBack={() => {
-            if (activeSession?.status === 'playing') {
-              setPlanningPhase('ready');
-              setActiveWorkspace('playing');
-            } else if (generated !== null) {
-              setPlanningPhase('ready');
-            } else {
-              setPlanningPhase('form');
-            }
-          }}
-        />
-      );
+  function applyImprove(option: ImproveOption): void {
+    if (persisted.activeSessionId === null) {
+      return;
     }
-    if (planningPhase === 'ready' && generated !== null) {
-      return (
-        <PlanReadyScreen
-          generated={generated}
-          onEdit={() => setPlanningPhase('form')}
-          onStart={startSession}
-          onViewTable={() => {
-            startSession();
-          }}
-          onSimulate={() => setActiveWorkspace('analysis')}
-          onExport={handleExport}
-          onPrint={handlePrint}
-          onImprove={openImprove}
-        />
-      );
-    }
-    return (
-      <GeneratePlanScreen
-        defaultValues={planningForm}
-        presets={allPresets}
-        activePresetId={persisted.activePresetId}
-        onPresetSelect={handlePresetSelect}
-        onValuesChange={setLiveForm}
-        onSubmit={handleGenerate}
-        {...(fieldErrors.request !== undefined ? { serverError: fieldErrors.request } : {})}
-      />
-    );
+    updateSession(persisted.activeSessionId, (s) => addPlanFromImprove(s, option));
+    showToast('Capital Planner — plan mới đã áp dụng');
+    setSessionView('overview');
   }
 
-  function renderPlaying(): JSX.Element {
-    if (viewingHistory !== null) {
+  function handleNotesChange(notes: string): void {
+    const id = viewingSessionId ?? persisted.activeSessionId;
+    if (id === null) {
+      return;
+    }
+    updateSession(id, (s) => updateSessionNotes(s, notes));
+  }
+
+  function handleStopSession(): void {
+    if (persisted.activeSessionId === null) {
+      return;
+    }
+    setPersisted((prev) => {
+      const session = findSession(prev.sessions, prev.activeSessionId);
+      if (session === null) {
+        return prev;
+      }
+      const updated = stopSession(session);
+      const next = {
+        ...prev,
+        activeSessionId: null,
+        sessions: upsertSession(prev.sessions, updated),
+      };
+      void savePersistedState(next);
+      return next;
+    });
+    showToast('Session đã dừng — xem trong Library');
+    setViewingSessionId(null);
+  }
+
+  function handleExportSession(): void {
+    if (displayedSession === null) {
+      return;
+    }
+    exportFullSessionJson(displayedSession);
+    showToast('Đã xuất session JSON');
+  }
+
+  function renderSessionWorkspace(): JSX.Element {
+    if (displayedSession === null) {
       return (
-        <PlayingSessionScreen
-          generated={viewingHistory.generated}
-          sessionNumber={viewingHistory.sessionNumber}
-          completedThroughRound={viewingHistory.completedRounds}
-          timeline={viewingHistory.timeline}
-          sessionStatus={viewingHistory.outcome === 'won' ? 'won' : 'lost'}
-          onPlaceBet={() => undefined}
-          onUndoBet={() => undefined}
-          onWin={() => undefined}
-          onContinue={() => undefined}
-          onResetProgress={() => undefined}
-          onEdit={() => undefined}
-        />
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">Chưa có session. Tạo từ Planning.</p>
+          <button
+            type="button"
+            className="text-sm font-medium text-primary underline"
+            onClick={() => setActiveWorkspace('planning')}
+          >
+            Mở Planning
+          </button>
+        </div>
       );
     }
-    if (generated === null || activeSession === null) {
-      return renderPlanning();
-    }
+
+    const preset = findPreset(allPresets, displayedSession.presetId);
+  const isReadOnly =
+      readOnlySession ||
+      (displayedSession.status !== 'playing' && displayedSession.status !== 'draft');
+
     return (
-      <PlayingSessionScreen
-        generated={generated}
-        sessionNumber={activeSession.sessionNumber}
-        completedThroughRound={completedThroughRound}
-        timeline={timeline}
-        sessionStatus={sessionStatus === 'ready' ? 'playing' : sessionStatus}
-        onPlaceBet={placeBet}
-        onUndoBet={undoBet}
-        onWin={winAtRound}
-        onContinue={handleContinue}
-        onResetProgress={resetProgress}
-        onEdit={() => {
-          setPlanningPhase('form');
-          setActiveWorkspace('planning');
-        }}
-        onImprove={openImprove}
+      <SessionPlannerScreen
+        session={displayedSession}
+        preset={preset}
+        view={sessionView}
         continueMaxRounds={continueMaxRounds}
+        onViewChange={setSessionView}
+        onStartPlan={isReadOnly ? () => undefined : startPlan}
+        onPlaceBet={isReadOnly ? () => undefined : placeBet}
+        onUndoBet={isReadOnly ? () => undefined : undoBet}
+        onWin={isReadOnly ? () => undefined : winAtRound}
+        onContinue={isReadOnly ? () => undefined : handleContinue}
+        onApplyImprove={isReadOnly ? () => undefined : applyImprove}
+        onNotesChange={handleNotesChange}
+        onExport={handleExportSession}
+        onStopSession={isReadOnly ? () => undefined : handleStopSession}
+        readOnly={isReadOnly}
       />
     );
   }
@@ -493,7 +379,7 @@ export function App(): JSX.Element {
     if (!hydrated) {
       return (
         <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
-          Đang tải phiên…
+          Đang tải…
         </div>
       );
     }
@@ -503,18 +389,12 @@ export function App(): JSX.Element {
         return (
           <DashboardScreen
             activeSession={activeSession}
-            onContinueSession={() => {
-              if (activeSession?.status === 'ready') {
-                setPlanningPhase('ready');
-                setActiveWorkspace('planning');
-              } else {
-                setViewingHistory(null);
-                setActiveWorkspace('playing');
-              }
+            onOpenSession={() => {
+              setViewingSessionId(null);
+              setActiveWorkspace('session');
             }}
-            onNewPlan={() => {
-              setViewingHistory(null);
-              setPlanningPhase('form');
+            onNewSession={() => {
+              setViewingSessionId(null);
               setActiveWorkspace('planning');
             }}
           />
@@ -534,31 +414,43 @@ export function App(): JSX.Element {
             }}
           />
         );
+      case 'session':
+        return renderSessionWorkspace();
       case 'planning':
-        return renderPlanning();
-      case 'playing':
-        return renderPlaying();
+        return (
+          <GeneratePlanScreen
+            defaultValues={liveForm}
+            presets={allPresets}
+            activePresetId={persisted.activePresetId}
+            onPresetSelect={handlePresetSelect}
+            onValuesChange={setLiveForm}
+            onSubmit={handleGenerate}
+            {...(fieldErrors.request !== undefined ? { serverError: fieldErrors.request } : {})}
+          />
+        );
       case 'analysis':
         return (
           <AnalysisScreen
-            generated={generated}
-            completedThroughRound={completedThroughRound}
-            history={persisted.history}
-            onOpenImprove={generated !== null ? openImprove : undefined}
+            generated={currentPlan?.generated ?? null}
+            completedThroughRound={currentPlan?.completedThroughRound ?? 0}
+            history={persisted.sessions.filter((s) => s.status === 'won' || s.status === 'lost')}
+            onOpenImprove={() => {
+              setActiveWorkspace('session');
+              setSessionView('improve');
+            }}
           />
         );
       case 'allocation':
         return <AllocationScreen />;
       case 'history':
         return (
-          <HistoryScreen
-            history={persisted.history}
+          <SessionLibraryScreen
+            sessions={persisted.sessions}
+            activeSessionId={persisted.activeSessionId}
             onOpenSession={(id) => {
-              const item = persisted.history.find((h) => h.id === id);
-              if (item !== undefined) {
-                setViewingHistory(item);
-                setActiveWorkspace('playing');
-              }
+              setViewingSessionId(id);
+              setSessionView('overview');
+              setActiveWorkspace('session');
             }}
           />
         );
@@ -570,34 +462,40 @@ export function App(): JSX.Element {
               persist({ ...persisted, theme: dark ? 'dark' : 'light' })
             }
             onExportHistory={() => {
-              exportHistoryJson(persisted.history);
-              showToast('Đã xuất lịch sử JSON');
+              exportLibraryJson(persisted.sessions);
+              showToast('Đã xuất Session Library JSON');
             }}
           />
         );
       default:
-        return renderPlanning();
+        return renderSessionWorkspace();
     }
   }
 
   const showRightPanel =
-    (activeWorkspace === 'planning' && planningPhase !== 'improve') ||
-    activeWorkspace === 'playing' ||
+    activeWorkspace === 'planning' ||
+    (activeWorkspace === 'session' && sessionView === 'playing') ||
     activeWorkspace === 'analysis';
 
   const rightPanel =
-    activeWorkspace === 'planning' && planningPhase === 'form' ? (
+    activeWorkspace === 'planning' ? (
       <FormRightPanel form={liveForm} />
-    ) : generated !== null && activeWorkspace === 'playing' ? (
+    ) : currentPlan !== null && activeWorkspace === 'session' && sessionView === 'playing' ? (
       <>
         <PlayingProgressPanel
-          completedThroughRound={completedThroughRound}
-          totalRounds={generated.strategy.rounds.length}
+          completedThroughRound={currentPlan.completedThroughRound}
+          totalRounds={currentPlan.generated.strategy.rounds.length}
         />
-        <PlanRightPanel generated={generated} completedThroughRound={completedThroughRound} />
+        <PlanRightPanel
+          generated={currentPlan.generated}
+          completedThroughRound={currentPlan.completedThroughRound}
+        />
       </>
-    ) : generated !== null && (activeWorkspace === 'planning' || activeWorkspace === 'analysis') ? (
-      <PlanRightPanel generated={generated} completedThroughRound={completedThroughRound} />
+    ) : currentPlan !== null && activeWorkspace === 'analysis' ? (
+      <PlanRightPanel
+        generated={currentPlan.generated}
+        completedThroughRound={currentPlan.completedThroughRound}
+      />
     ) : (
       <FormRightPanel form={liveForm} />
     );
@@ -607,7 +505,9 @@ export function App(): JSX.Element {
       <AppLayout
         activeWorkspace={activeWorkspace}
         onWorkspaceSelect={(ws) => {
-          setViewingHistory(null);
+          if (ws !== 'session') {
+            setViewingSessionId(null);
+          }
           setActiveWorkspace(ws);
         }}
         theme={persisted.theme}
