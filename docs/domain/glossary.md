@@ -16,6 +16,17 @@ Ngôn ngữ chung của dự án. Không phải tài liệu người dùng cuố
 | **ContinuationPolicy** | `maximumRounds` + `presets[]` (target total rounds, ví dụ 1000/1500) — cấu hình trong Game Designer. |
 | **Experiment** | Biến thể trong ExperimentLab (Baseline, Experiment A…) — domain; UI workspace vẫn gọi Scenario Planner. |
 | **ExperimentLab** | Tập experiments so sánh; promote qua RecommendationSet pipeline. |
+| **DrawResult** | Một kỳ quay thật (3 xúc xắc). Aggregate Game Data — có `rawPayload`, `gameId`, `publishedAt`. |
+| **Game Data** | Bounded context: Adapter · Collector · DrawStore · StatisticsAggregator · RoundSettlementEngine · AlertService. |
+| **DrawSourceAdapter** | `fetchLatest()` — Bingo18, Mock, Manual, Future. Collector không biết website cụ thể. |
+| **StatisticsSnapshot** | Thống kê đã tính — daily / monthly / quarterly / yearly. Dashboard không scan DrawStore. |
+| **RoundSettlementEngine** | `DrawResultSaved` → `SettlementResult` — match, prize, tax, profit. Session không tự settle. |
+| **SettlementResult** | Kết quả settle một vòng: `marketMatched`, prize, tax, netPrize, profit. |
+| **ApplySettlementUseCase** | Map `SettlementResult` → `PlayedRound` + Session. |
+| **PlayedRound** | Entity riêng trên Session — round, bet, market, draw, win, stake, prize, profit (replay). |
+| **AlertService** | Subscribe `SessionUpdated` → browser notification. Không `Session.notify()`. |
+| **CollectorHealth** | Running, last poll, last success, latency avg, failures. |
+| **MarketDefinition** | Cấu hình market trong `GamePolicy` (total, flower, small/tie/large). |
 
 ## Pipeline chuẩn
 
@@ -25,7 +36,14 @@ Improve:      Option → PlanCandidate → Review → Promote → Plan (append)
 Capital:      Search → Recommendation[] → Select → PlanCandidate → Promote → Session (mới)
 Scenario:     Experiment → RecommendationSet → PlanCandidate → Promote → Session (mới)
 Continue:     Session → ContinuePlanUseCase → ContinuationContext → Engine → PlanFactory.createContinuation → Plan (append, không Candidate)
+Game Data:    Adapter → Collector → DrawStore (append-only)
+              → Aggregator → Snapshot (daily|monthly|quarterly|yearly)
+              DrawResultSaved → RoundSettlementEngine → SettlementResult
+              → ApplySettlementUseCase → Session
+              SessionUpdated → AlertService
 ```
+
+Chi tiết Bingo18: [`bingo18-integration.md`](../architecture/bingo18-integration.md).
 
 ## Events (domain)
 
@@ -39,6 +57,10 @@ Continue:     Session → ContinuePlanUseCase → ContinuationContext → Engine
 | `PlanCandidateCreated` | Candidate persist (Improve hoặc Capital) |
 | `PlanPromoted` | Candidate → Plan trong Session, hoặc Continue append plan |
 | `ContinuationCreated` | ContinuePlanUseCase tạo plan mới từ session đang chơi |
+| `DrawResultCollected` | Collector append vào DrawStore (immutable) |
+| `StatisticsSnapshotUpdated` | Aggregator tạo snapshot (daily/monthly/…) |
+| `RoundSettled` | RoundSettlementEngine tạo SettlementResult |
+| `SettlementApplied` | Session nhận PlayedRound từ ApplySettlementUseCase |
 
 ## Timeline
 

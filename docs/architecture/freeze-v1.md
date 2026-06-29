@@ -171,3 +171,15 @@ Cloud Phase 2 → v1.0
 **Architecture v1 Frozen.** Domain client đủ chín. Cloud design khóa — implement sau Internal RC.
 
 Quyết định tiếp theo do **trải nghiệm sử dụng thật** (`daily-notes.md`), không do kiến trúc mới. Xem [`decisions.md`](decisions.md).
+
+---
+
+## Mở rộng sau v1 — Game Integration v1 (Bingo18)
+
+Bounded context **Game Data** — không unfreeze Session pipeline:
+
+- [`bingo18-integration.md`](bingo18-integration.md)
+- [`bingo18-roadmap.md`](../product/bingo18-roadmap.md)
+- ADR [`0006-game-data-bounded-context.md`](../adr/0006-game-data-bounded-context.md)
+
+Implement **sau Internal RC** + daily-notes chứng minh nhu cầu.

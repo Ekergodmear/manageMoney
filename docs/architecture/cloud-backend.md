@@ -324,6 +324,8 @@ Server **không** validate:
 
 **Hết Phase 1.** Không Share, Devices API, Realtime, Telemetry API, Logger API, AI, Solver API.
 
+**Sau Bingo18 (mở rộng):** Draw History + Collector API — xem [`bingo18-integration.md`](bingo18-integration.md). Session mirror vẫn opaque.
+
 ### Session routes
 
 ```text
