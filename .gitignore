@@ -24,9 +24,16 @@ npm-debug.log*
 .env
 .env.local
 
+# Environment
+.env
+.env.local
+
 # Personal usage journal (copy from daily-notes.template.md)
 docs/product/daily-notes.md
 docs/private/
+
+# Collector local database
+apps/collector/data/
 
 # OS / IDE
 .DS_Store

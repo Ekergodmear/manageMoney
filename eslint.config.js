@@ -16,6 +16,7 @@ export default tseslint.config(
       '.vite/',
       'scripts/',
       'tests/consumer/smoke.mjs',
+      'apps/collector/data/',
     ],
   },
   js.configs.recommended,

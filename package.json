@@ -62,7 +62,10 @@
     "example:minimal-consumer": "pnpm build:lib && tsx --tsconfig examples/minimal-consumer/tsconfig.json examples/minimal-consumer/index.ts",
     "docs:api": "typedoc",
     "verify": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm build:lib && pnpm test && pnpm build:app",
-    "check": "pnpm verify"
+    "check": "pnpm verify",
+    "collector:start": "pnpm --filter @stake/collector start",
+    "collector:dev": "pnpm --filter @stake/collector dev",
+    "collector:test": "pnpm --filter @stake/collector test"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

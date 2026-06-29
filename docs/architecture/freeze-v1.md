@@ -183,3 +183,5 @@ Bounded context **Game Data** — không unfreeze Session pipeline:
 - ADR [`0006-game-data-bounded-context.md`](../adr/0006-game-data-bounded-context.md)
 
 Implement **sau Internal RC** + daily-notes chứng minh nhu cầu.
+
+**Song song Internal RC:** [`apps/collector/`](../../apps/collector/) — draw acquisition service. Không tích hợp app.
