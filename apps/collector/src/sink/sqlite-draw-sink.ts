@@ -160,6 +160,16 @@ export class SqliteDrawSink implements DrawSink {
     return latest?.drawKey ?? null;
   }
 
+  async getTodayDrawRows(
+    datePrefix: string,
+  ): Promise<readonly { total: number; flower: string | null }[]> {
+    const like = `${datePrefix}%`;
+    const rows = this.db
+      .prepare(`SELECT total, flower FROM draw_results WHERE draw_at LIKE ? ORDER BY draw_at ASC`)
+      .all(like) as Array<{ total: number; flower: string | null }>;
+    return rows;
+  }
+
   async loadCollectorState(): Promise<CollectorState> {
     const row = this.db
       .prepare(

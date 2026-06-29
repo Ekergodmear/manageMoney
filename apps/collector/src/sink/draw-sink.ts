@@ -9,6 +9,7 @@ export interface DrawSink {
   findByDrawKey(drawKey: string): Promise<DrawResult | null>;
   count(): Promise<number>;
   getLastDrawKey(): Promise<string | null>;
+  getTodayDrawRows(datePrefix: string): Promise<readonly { total: number; flower: string | null }[]>;
   loadCollectorState(): Promise<CollectorState>;
   saveCollectorState(state: CollectorState): Promise<void>;
   close(): Promise<void>;

@@ -19,6 +19,25 @@ COLLECTOR_ADAPTER=bingo18 pnpm collector:start
 
 Env: xem `.env.example`.
 
+## Bingo18 + Dashboard Lite
+
+```bash
+COLLECTOR_ADAPTER=bingo18 pnpm collector:start
+```
+
+HTTP read API (Dashboard Lite):
+
+| Endpoint | Mô tả |
+|----------|--------|
+| `GET /dashboard` | **Game Monitor** — health + latest + today (1 request) |
+| `GET /health` | Collector health (debug) |
+| `GET /draws/latest` | Kỳ quay mới nhất (debug) |
+| `GET /stats/today` | Phân bố tổng + hoa hôm nay (debug) |
+
+Mặc định: `http://localhost:8788`
+
+Web app: `VITE_COLLECTOR_API_URL=http://localhost:8788` → sidebar **Game Monitor**.
+
 ## Bingo18 source
 
 Reverse-engineered từ `bingo18.top/script.js` → `GET /data/data.json`:

@@ -15,6 +15,7 @@ import { createPromoteCandidateToSessionUseCase } from '@/features/capital/promo
 import { createContinuePlanUseCase } from '@/features/continue/continue-plan-use-case';
 import type { CapitalPlannerInput } from '@/features/capital/capital-planner-types';
 import { DashboardScreen } from '@/features/dashboard/DashboardScreen';
+import { GameMonitorScreen } from '@/features/game-monitor/GameMonitorScreen';
 import { DEFAULT_PRESET_ID } from '@/features/game-designer/builtin-presets';
 import { GameDesignerScreen } from '@/features/game-designer/GameDesignerScreen';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
@@ -962,6 +963,8 @@ function AppRoot(): JSX.Element {
             onOpenCapitalPlanner={() => setActiveWorkspace('capital')}
           />
         );
+      case 'game-monitor':
+        return <GameMonitorScreen />;
       case 'game-designer':
         return (
           <GameDesignerScreen
