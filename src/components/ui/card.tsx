@@ -1,12 +1,44 @@
 import { forwardRef, type HTMLAttributes } from 'react';
 
+import { semanticBg, semanticBorder } from '@/design/tokens/colors';
+import { motionDuration } from '@/design/tokens/motion';
+import { radius } from '@/design/tokens/radius';
+import type { SpacingKey } from '@/design/tokens/spacing';
+import { spacingPadding } from '@/design/tokens/spacing';
+import type { ShadowKey } from '@/design/tokens/shadows';
+import { elevationShadow } from '@/design/tokens/shadows';
 import { cn } from '@/lib/utils';
 
-const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
+export type CardElevation = '0' | '1' | '2' | 'popup' | 'overlay';
+export type CardTone = 'default' | 'highlight' | 'accent' | 'warning' | 'danger' | 'dashed';
+
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  readonly elevation?: CardElevation;
+  readonly tone?: CardTone;
+}
+
+const toneClass: Record<CardTone, string> = {
+  default: cn(semanticBg.surface, semanticBorder.default),
+  highlight: cn('border-primary/20 bg-gradient-to-br from-primary/5 to-transparent'),
+  accent: cn('border-primary/20 bg-primary/5'),
+  warning: cn(semanticBorder.warning),
+  danger: cn(semanticBorder.danger),
+  dashed: 'border-dashed',
+};
+
+const Card = forwardRef<HTMLDivElement, CardProps>(
+  ({ className, elevation = '2', tone = 'default', ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('rounded-2xl border border-border bg-card text-card-foreground shadow-sm', className)}
+      className={cn(
+        radius.lg,
+        'border text-card-foreground',
+        toneClass[tone],
+        elevationShadow[elevation],
+        motionDuration.fast,
+        'transition-colors',
+        className,
+      )}
       {...props}
     />
   ),
@@ -34,11 +66,17 @@ const CardDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLPara
 );
 CardDescription.displayName = 'CardDescription';
 
-const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
-  ),
-);
+const CardContent = forwardRef<
+  HTMLDivElement,
+  HTMLAttributes<HTMLDivElement> & { readonly padding?: SpacingKey }
+>(({ className, padding, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(padding !== undefined ? spacingPadding[padding] : 'p-6 pt-0', className)}
+    {...props}
+  />
+));
 CardContent.displayName = 'CardContent';
 
 export { Card, CardHeader, CardTitle, CardDescription, CardContent };
+export type { ShadowKey };

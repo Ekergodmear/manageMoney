@@ -1,8 +1,17 @@
 import { accumulatedAtRound } from '@/features/planner/plan-display';
 import type { Plan } from '@/features/session/session-domain';
+import { computeSessionStatistics, type Session } from '@/features/session/session-domain';
 import { parseMoneyPositiveInt } from '@/lib/money-format';
 
 export type SessionHealth = 'safe' | 'tight' | 'risky';
+export type ExposureLevel = 'low' | 'medium' | 'high';
+
+export interface SessionHealthSummary {
+  readonly health: SessionHealth;
+  readonly continueCount: number;
+  readonly exposure: ExposureLevel;
+  readonly capitalUsagePercent: number | null;
+}
 
 export function computeSessionHealth(plan: Plan): SessionHealth {
   const required = plan.generated.statistics.requiredBankrollAmount;
@@ -52,3 +61,35 @@ export const HEALTH_EMOJI: Record<SessionHealth, string> = {
   tight: '🟡',
   risky: '🔴',
 };
+
+export const EXPOSURE_LABELS: Record<ExposureLevel, string> = {
+  low: 'Thấp',
+  medium: 'Trung bình',
+  high: 'Cao',
+};
+
+export function computeExposureLevel(plan: Plan): ExposureLevel {
+  const required = plan.generated.statistics.requiredBankrollAmount;
+  const maxBet = plan.generated.statistics.maximumBetAmount;
+  if (required <= 0) {
+    return 'medium';
+  }
+  const ratio = maxBet / required;
+  if (ratio <= 0.15) {
+    return 'low';
+  }
+  if (ratio <= 0.35) {
+    return 'medium';
+  }
+  return 'high';
+}
+
+export function buildSessionHealthSummary(session: Session, plan: Plan): SessionHealthSummary {
+  const stats = computeSessionStatistics(session);
+  return {
+    health: computeSessionHealth(plan),
+    continueCount: stats.continueCount,
+    exposure: computeExposureLevel(plan),
+    capitalUsagePercent: computeCapitalUsagePercent(plan),
+  };
+}

@@ -29,7 +29,7 @@ interface ImproveScreenProps {
   readonly formValues: PlannerFormValues;
   readonly generated: GenerateResult;
   readonly completedThroughRound?: number;
-  readonly onApply: (option: ImproveOption) => void;
+  readonly onSelectOption: (option: ImproveOption) => void;
   readonly onBack: () => void;
 }
 
@@ -37,7 +37,7 @@ export function ImproveScreen({
   formValues,
   generated,
   completedThroughRound = 0,
-  onApply,
+  onSelectOption,
   onBack,
 }: ImproveScreenProps): ReactNode {
   const [activeMode, setActiveMode] = useState<ImproveMode>('fit-bankroll');
@@ -140,7 +140,7 @@ export function ImproveScreen({
       ) : null}
 
       {modeOption !== null ? (
-        <OptionCard option={modeOption} highlighted onApply={() => onApply(modeOption)} />
+        <OptionCard option={modeOption} highlighted onSelect={() => onSelectOption(modeOption)} />
       ) : (
         <Card className="border-dashed">
           <CardContent className="p-5 text-sm text-muted-foreground">
@@ -161,7 +161,7 @@ export function ImproveScreen({
                 key={`${option.id}-${String(option.result.request.roundCount)}`}
                 option={option}
                 highlighted={false}
-                onApply={() => onApply(option)}
+                onSelect={() => onSelectOption(option)}
               />
             ))}
           </div>
@@ -174,11 +174,11 @@ export function ImproveScreen({
 function OptionCard({
   option,
   highlighted,
-  onApply,
+  onSelect,
 }: {
   option: ImproveOption;
   highlighted: boolean;
-  onApply: () => void;
+  onSelect: () => void;
 }): ReactNode {
   const { result, label, description, explanation } = option;
   return (
@@ -198,8 +198,8 @@ function OptionCard({
             <span>−{formatAmount(explanation.profitReducedBy)} đ lợi nhuận</span>
           ) : null}
         </div>
-        <Button size="sm" onClick={onApply}>
-          Áp dụng phương án này
+        <Button size="sm" onClick={onSelect}>
+          Chọn phương án
         </Button>
       </CardContent>
     </Card>

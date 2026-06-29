@@ -33,10 +33,10 @@ const ICONS: Partial<Record<SessionTimelineEvent['type'], ReactNode>> = {
 
 function labelForEvent(event: SessionTimelineEvent): string {
   if (event.label !== undefined && event.label !== '') {
-    if (event.type === 'bet' && event.roundIndex !== undefined) {
-      return `Vòng ${String(event.roundIndex)}`;
-    }
     return event.label;
+  }
+  if (event.type === 'plan-added' && event.origin === 'continue') {
+    return 'Continue';
   }
   if (event.type === 'bet' && event.roundIndex !== undefined) {
     return `Vòng ${String(event.roundIndex)}`;
@@ -147,7 +147,7 @@ export function SessionTimeline({
                 className={cn(
                   'flex h-7 w-7 shrink-0 items-center justify-center rounded-full border',
                   (event.type === 'session-won' || event.type === 'plan-won') &&
-                    'border-success bg-success/15 text-success',
+                    'border-success bg-success/15 text-success-foreground',
                   (event.type === 'plan-lost' || event.type === 'session-stopped') &&
                     'border-muted-foreground/30 bg-muted',
                   event.type !== 'session-won' &&

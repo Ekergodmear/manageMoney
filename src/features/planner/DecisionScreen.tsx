@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft, BarChart3, Sparkles, Target, TrendingUp, Wallet } from 'lucide-react';
+import { ArrowLeft, BarChart3, Play, Sparkles, Target, TrendingUp, Wallet } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ interface DecisionScreenProps {
   readonly generated: GenerateResult;
   readonly onEdit: () => void;
   readonly onViewPlan: () => void;
+  readonly onStartPlaying?: () => void;
 }
 
 function MetricCard({
@@ -41,7 +42,12 @@ function MetricCard({
   );
 }
 
-export function DecisionScreen({ generated, onEdit, onViewPlan }: DecisionScreenProps): React.ReactNode {
+export function DecisionScreen({
+  generated,
+  onEdit,
+  onViewPlan,
+  onStartPlaying,
+}: DecisionScreenProps): React.ReactNode {
   const { statistics, userBankroll, request } = generated;
   const bankrollShort =
     userBankroll !== null && userBankroll < statistics.requiredBankrollAmount;
@@ -102,10 +108,18 @@ export function DecisionScreen({ generated, onEdit, onViewPlan }: DecisionScreen
           ) : (
             <p className="text-sm font-medium text-success-foreground">✓ Kế hoạch đã sẵn sàng.</p>
           )}
-          <Button size="lg" className="w-full sm:w-auto" onClick={onViewPlan}>
-            <Sparkles className="h-4 w-4" />
-            Xem kế hoạch cược
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button size="lg" className="w-full sm:w-auto" onClick={onViewPlan}>
+              <Sparkles className="h-4 w-4" />
+              Xem kế hoạch cược
+            </Button>
+            {onStartPlaying !== undefined ? (
+              <Button size="lg" variant="secondary" className="w-full sm:w-auto" onClick={onStartPlaying}>
+                <Play className="h-4 w-4" />
+                Bắt đầu chơi
+              </Button>
+            ) : null}
+          </div>
         </CardContent>
       </Card>
     </div>

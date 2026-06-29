@@ -1,5 +1,8 @@
-import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
+import type { GamePolicyPreset, ContinuePolicyConfig } from '@/features/game-designer/game-policy-types';
 import type { ImproveOption } from '@/features/improve/improve-service';
+import { ImproveCandidateReviewScreen } from '@/features/improve/ImproveCandidateReviewScreen';
+import type { PlanCandidate } from '@/features/planning/plan-candidate-types';
+import { isAppendPlanCandidate } from '@/features/planning/plan-candidate-types';
 import type { Session, SessionView } from '@/features/session/session-domain';
 import {
   computeSessionStatistics,
@@ -17,38 +20,48 @@ interface SessionPlannerScreenProps {
   readonly session: Session;
   readonly preset: GamePolicyPreset | undefined;
   readonly view: SessionView;
-  readonly continueMaxRounds: number;
+  readonly continuePolicy: ContinuePolicyConfig;
+  readonly planCandidate: PlanCandidate | null;
   readonly onViewChange: (view: SessionView) => void;
   readonly onStartPlan: () => void;
   readonly onPlaceBet: (roundIndex: number) => void;
+  readonly onSetBetProgress: (targetRound: number) => void;
   readonly onUndoBet: () => void;
   readonly onWin: (roundIndex: number) => void;
   readonly onContinue: (targetRoundCount: number) => void;
-  readonly onApplyImprove: (option: ImproveOption) => void;
+  readonly onSelectImproveOption: (option: ImproveOption) => void;
+  readonly onPromoteCandidate: () => void;
+  readonly onDiscardCandidate: () => void;
   readonly onNotesChange: (notes: string) => void;
   readonly onExport: () => void;
   readonly onStopSession: () => void;
   readonly readOnly?: boolean;
   readonly onTitleChange?: (title: string) => void;
+  readonly minimalMode?: boolean;
 }
 
 export function SessionPlannerScreen({
   session,
   preset,
   view,
-  continueMaxRounds,
+  continuePolicy,
+  planCandidate,
   onViewChange,
   onStartPlan,
   onPlaceBet,
+  onSetBetProgress,
   onUndoBet,
   onWin,
   onContinue,
-  onApplyImprove,
+  onSelectImproveOption,
+  onPromoteCandidate,
+  onDiscardCandidate,
   onNotesChange,
   onExport,
   onStopSession,
   readOnly = false,
   onTitleChange,
+  minimalMode = false,
 }: SessionPlannerScreenProps): ReactNode {
   const currentPlan = getCurrentPlan(session);
   const stats = computeSessionStatistics(session);
@@ -82,13 +95,34 @@ export function SessionPlannerScreen({
           focusRoundIndex={focusRoundIndex}
           onFocusRoundHandled={() => setFocusRoundIndex(null)}
           onPlaceBet={onPlaceBet}
+          onSetBetProgress={onSetBetProgress}
           onUndoBet={onUndoBet}
           onWin={onWin}
           onContinue={onContinue}
           onResetProgress={() => undefined}
           onEdit={() => onViewChange('overview')}
           onImprove={() => onViewChange('improve')}
-          continueMaxRounds={continueMaxRounds}
+          hideContinue={minimalMode}
+          continuePolicy={continuePolicy}
+        />
+      </div>
+    );
+  }
+
+  if (
+    view === 'improve-review' &&
+    planCandidate !== null &&
+    isAppendPlanCandidate(planCandidate) &&
+    currentPlan !== null
+  ) {
+    return (
+      <div className="space-y-4">
+        <ImproveCandidateReviewScreen
+          candidate={planCandidate}
+          parentGenerated={currentPlan.generated}
+          onBack={() => onViewChange('improve')}
+          onPromote={onPromoteCandidate}
+          onDiscard={onDiscardCandidate}
         />
       </div>
     );
@@ -100,21 +134,23 @@ export function SessionPlannerScreen({
         <Button variant="ghost" size="sm" onClick={() => onViewChange('overview')}>
           ← Cockpit
         </Button>
+        {planCandidate !== null && isAppendPlanCandidate(planCandidate) ? (
+          <Button variant="secondary" size="sm" onClick={() => onViewChange('improve-review')}>
+            Xem lại phương án đang chờ
+          </Button>
+        ) : null}
         <ImproveScreen
           formValues={currentPlan.formValues}
           generated={currentPlan.generated}
           completedThroughRound={currentPlan.completedThroughRound}
-          onApply={(option) => {
-            onApplyImprove(option);
-            onViewChange('overview');
-          }}
+          onSelectOption={onSelectImproveOption}
           onBack={() => onViewChange('overview')}
         />
       </div>
     );
   }
 
-  if (view === 'simulate' && currentPlan !== null) {
+  if (!minimalMode && view === 'simulate' && currentPlan !== null) {
     return (
       <div className="space-y-4">
         <Button variant="ghost" size="sm" onClick={() => onViewChange('overview')}>
@@ -139,7 +175,8 @@ export function SessionPlannerScreen({
       onStartPlaying={() => goToPlaying()}
       onNavigateToRound={(roundIndex) => goToPlaying(roundIndex)}
       onImprove={() => onViewChange('improve')}
-      onSimulate={() => onViewChange('simulate')}
+      onSimulate={minimalMode ? undefined : () => onViewChange('simulate')}
+      minimalMode={minimalMode}
       onExport={onExport}
       onStopSession={onStopSession}
       onNotesChange={onNotesChange}

@@ -8,6 +8,8 @@ export interface RewardPolicyConfig {
 
 export interface ContinuePolicyConfig {
   readonly maximumRounds: number;
+  /** Target total rounds — ví dụ 1000, 1500 (không phải extendBy). */
+  readonly presets: readonly number[];
 }
 
 export interface GamePolicyPreset {

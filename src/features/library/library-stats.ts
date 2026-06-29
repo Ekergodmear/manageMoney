@@ -1,3 +1,4 @@
+import type { StatusTone } from '@/components/product/StatusChip';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
 import type { LibraryStats, RecencyGroup, SessionCardSummary } from '@/features/library/library-types';
 import { RECENCY_GROUP_LABELS } from '@/features/library/library-types';
@@ -78,21 +79,21 @@ export function buildSessionCardSummary(
 export function sessionStatusVisual(status: SessionStatus): {
   readonly emoji: string;
   readonly label: string;
-  readonly accentClass: string;
+  readonly tone: StatusTone;
 } {
   switch (status) {
     case 'won':
-      return { emoji: '🟢', label: 'WON', accentClass: 'text-emerald-600 dark:text-emerald-400' };
+      return { emoji: '🟢', label: 'WON', tone: 'success' };
     case 'playing':
-      return { emoji: '🟡', label: 'PLAYING', accentClass: 'text-amber-600 dark:text-amber-400' };
+      return { emoji: '🟡', label: 'PLAYING', tone: 'warning' };
     case 'lost':
-      return { emoji: '🔴', label: 'LOST', accentClass: 'text-red-600 dark:text-red-400' };
+      return { emoji: '🔴', label: 'LOST', tone: 'danger' };
     case 'draft':
-      return { emoji: '⚪', label: 'DRAFT', accentClass: 'text-muted-foreground' };
+      return { emoji: '⚪', label: 'DRAFT', tone: 'muted' };
     case 'stopped':
-      return { emoji: '⏹', label: 'STOPPED', accentClass: 'text-muted-foreground' };
+      return { emoji: '⏹', label: 'STOPPED', tone: 'muted' };
     default:
-      return { emoji: '⚪', label: status, accentClass: 'text-muted-foreground' };
+      return { emoji: '⚪', label: status, tone: 'muted' };
   }
 }
 

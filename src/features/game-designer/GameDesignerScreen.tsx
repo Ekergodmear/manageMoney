@@ -230,9 +230,27 @@ export function GameDesignerScreen({
                   value={draft.continuePolicy.maximumRounds}
                   onChange={(e) =>
                     updateDraft('continuePolicy', {
+                      ...draft.continuePolicy,
                       maximumRounds: Number(e.target.value) || 5000,
                     })
                   }
+                />
+              </Field>
+              <Field label="Continue presets (tổng số vòng mục tiêu)">
+                <Input
+                  className={inputClass}
+                  placeholder="1000, 1500, 2000, 5000"
+                  value={draft.continuePolicy.presets.join(', ')}
+                  onChange={(e) => {
+                    const presets = e.target.value
+                      .split(/[,;\s]+/)
+                      .map((part) => Number(part.trim()))
+                      .filter((n) => Number.isFinite(n) && n > 0);
+                    updateDraft('continuePolicy', {
+                      ...draft.continuePolicy,
+                      presets,
+                    });
+                  }}
                 />
               </Field>
             </CardContent>

@@ -1,6 +1,9 @@
 import type { CapitalPlannerSnapshot } from '@/features/capital/capital-planner-types';
 import type { LibraryCollection } from '@/features/library/library-types';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
+import type { PlanningDraft } from '@/features/planning/planning-types';
+import type { PlanCandidate } from '@/features/planning/plan-candidate-types';
+import type { RecommendationSet } from '@/features/recommendation/recommendation-set-types';
 import type { Session } from '@/features/session/session-domain';
 
 export interface PersistedAppState {
@@ -12,7 +15,10 @@ export interface PersistedAppState {
   readonly customGamePresets: readonly GamePolicyPreset[];
   readonly activePresetId: string;
   readonly capitalPlanner: CapitalPlannerSnapshot | null;
+  readonly recommendationSet: RecommendationSet | null;
   readonly libraryCollections: readonly LibraryCollection[];
+  readonly planningDraft: PlanningDraft | null;
+  readonly planCandidate: PlanCandidate | null;
 }
 
 export const EMPTY_PERSISTED_STATE: PersistedAppState = {
@@ -24,7 +30,10 @@ export const EMPTY_PERSISTED_STATE: PersistedAppState = {
   customGamePresets: [],
   activePresetId: 'bingo-120',
   capitalPlanner: null,
+  recommendationSet: null,
   libraryCollections: [],
+  planningDraft: null,
+  planCandidate: null,
 };
 
 // Legacy types kept for migration only

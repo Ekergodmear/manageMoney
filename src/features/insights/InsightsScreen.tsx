@@ -1,7 +1,18 @@
 import { useMemo, type ReactNode } from 'react';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import {
+  EmptyState,
+  HeroCard,
+  InfoPanel,
+  MetricCard,
+  Page,
+  PageSection,
+} from '@/components/product';
+import { Grid } from '@/components/ui/Grid';
+import { Stack } from '@/components/ui/Stack';
+import { Text } from '@/components/ui/Text';
+import type { StatusTone } from '@/components/product/StatusChip';
+import type { CardTone } from '@/components/ui/card';
 import type { CapitalPlannerSnapshot } from '@/features/capital/capital-planner-types';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
 import { generateInsights } from '@/features/insights/insight-engine';
@@ -16,7 +27,6 @@ import type {
 } from '@/features/insights/insight-types';
 import type { WorkspaceId } from '@/features/navigation/workspace-nav';
 import type { Session } from '@/features/session/session-domain';
-import { cn } from '@/lib/utils';
 
 interface InsightsScreenProps {
   readonly sessions: readonly Session[];
@@ -47,51 +57,44 @@ export function InsightsScreen({
 
   if (!snapshot.hasData) {
     return (
-      <div className="w-full space-y-4">
-        <InsightsHeader />
-        <Card className="border-dashed">
-          <CardContent className="p-8 text-center">
-            <p className="text-sm text-muted-foreground">
-              Chưa đủ dữ liệu từ Session Library.
-            </p>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Hoàn thành 3 phiên để bắt đầu nhận insight.
-            </p>
-            <Button className="mt-4" size="sm" onClick={() => onNavigate('history')}>
-              Mở Session Library
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <Page>
+        <InsightsPageHeader />
+        <EmptyState
+          title="Chưa đủ dữ liệu từ Session Library."
+          description="Hoàn thành 3 phiên để bắt đầu nhận insight."
+          actionLabel="Mở Session Library"
+          onAction={() => onNavigate('history')}
+        />
+      </Page>
     );
   }
 
   return (
-    <div className="w-full space-y-8">
-      <InsightsHeader updated={snapshot.updated} />
+    <Page>
+      <InsightsPageHeader updated={snapshot.updated} />
 
       {snapshot.reflection !== null ? (
-        <ReflectionBlock reflection={snapshot.reflection} />
+        <ReflectionSection reflection={snapshot.reflection} />
       ) : null}
 
-      <InsightSection title="Quick Insights">
-        <div className="space-y-3">
+      <PageSection title="Quick Insights">
+        <Stack spacing={12}>
           {snapshot.quick.map((card) => (
-            <InsightCardView
+            <InsightCardPanel
               key={card.id}
               card={card}
               onNavigate={onNavigate}
               onOpenSession={onOpenSession}
             />
           ))}
-        </div>
-      </InsightSection>
+        </Stack>
+      </PageSection>
 
       {snapshot.recommendations.length > 0 ? (
-        <InsightSection title="Khuyến nghị">
-          <div className="space-y-3">
+        <PageSection title="Khuyến nghị">
+          <Stack spacing={12}>
             {snapshot.recommendations.map((card) => (
-              <InsightCardView
+              <InsightCardPanel
                 key={card.id}
                 card={card}
                 onNavigate={onNavigate}
@@ -99,112 +102,74 @@ export function InsightsScreen({
                 emphasize
               />
             ))}
-          </div>
-        </InsightSection>
+          </Stack>
+        </PageSection>
       ) : null}
 
       {snapshot.outliers.length > 0 ? (
-        <InsightSection title="Outlier">
-          <div className="space-y-3">
+        <PageSection title="Outlier">
+          <Stack spacing={12}>
             {snapshot.outliers.map((card) => (
-              <InsightCardView
+              <InsightCardPanel
                 key={card.id}
                 card={card}
                 onNavigate={onNavigate}
                 onOpenSession={onOpenSession}
               />
             ))}
-          </div>
-        </InsightSection>
+          </Stack>
+        </PageSection>
       ) : null}
 
       {snapshot.trends.length > 0 ? (
-        <InsightSection title="Trends">
-          <div className="grid gap-3 sm:grid-cols-3">
-            {snapshot.trends.map((trend) => (
-              <TrendCard key={trend.id} trend={trend} />
-            ))}
-          </div>
-        </InsightSection>
+        <PageSection title="Trends">
+          <TrendGrid trends={snapshot.trends} />
+        </PageSection>
       ) : null}
 
       {snapshot.records.length > 0 ? (
-        <InsightSection title="Records">
-          <div className="grid gap-3 sm:grid-cols-2">
-            {snapshot.records.map((record) => (
-              <RecordCard
-                key={record.id}
-                record={record}
-                onOpenSession={onOpenSession}
-              />
-            ))}
-          </div>
-        </InsightSection>
+        <PageSection title="Records">
+          <RecordGrid records={snapshot.records} onOpenSession={onOpenSession} />
+        </PageSection>
       ) : null}
-    </div>
+    </Page>
   );
 }
 
-function InsightsHeader({ updated }: { updated?: InsightsUpdatedMeta }): ReactNode {
+function InsightsPageHeader({ updated }: { updated?: InsightsUpdatedMeta }): ReactNode {
   return (
-    <div>
-      <h2 className="text-xl font-bold tracking-tight">Insights</h2>
+    <Stack spacing={4}>
+      <Text variant="h1" as="h2">
+        Insights
+      </Text>
       {updated !== undefined && updated.sessionCount > 0 ? (
-        <p className="mt-1 text-xs text-muted-foreground">
-          Cập nhật{' '}
-          <span className="font-medium text-foreground">{updated.relativeLabel}</span>
+        <Text variant="small" muted>
+          Cập nhật <Text variant="small" emphasis as="span">{updated.relativeLabel}</Text>
           {' · '}
           sau {updated.sessionCount} phiên
-        </p>
+        </Text>
       ) : null}
-      <p className="mt-1 text-sm text-muted-foreground">
+      <Text variant="body" muted>
         Tôi nên làm gì tốt hơn? — đọc từ Session Library.
-      </p>
-    </div>
+      </Text>
+    </Stack>
   );
 }
 
-function ReflectionBlock({ reflection }: { reflection: InsightReflection }): ReactNode {
+function ReflectionSection({ reflection }: { reflection: InsightReflection }): ReactNode {
+  const { label, tone } = confidenceToStatus(reflection.confidence);
   return (
-    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-      <CardContent className="space-y-3 p-5">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-            {reflection.periodLabel}
-          </p>
-          <ConfidenceBadge confidence={reflection.confidence} />
-        </div>
-        <div className="space-y-2">
-          {reflection.lines.map((line) => (
-            <p key={line} className="text-sm leading-relaxed text-foreground">
-              {line}
-            </p>
-          ))}
-        </div>
-        <p className="border-t border-border/60 pt-3 text-sm font-medium text-foreground">
-          {reflection.closingLine}
-        </p>
-      </CardContent>
-    </Card>
+    <HeroCard
+      eyebrow={reflection.periodLabel}
+      lines={reflection.lines}
+      closingLine={reflection.closingLine}
+      statusLabel={label}
+      statusTone={tone}
+    />
   );
 }
 
-function InsightSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}): ReactNode {
-  return (
-    <section className="space-y-3">
-      <h3 className="text-sm font-semibold">{title}</h3>
-      {children}
-    </section>
-  );
-}
-
-function InsightCardView({
+function InsightCardPanel({
   card,
   onNavigate,
   onOpenSession,
@@ -226,100 +191,100 @@ function InsightCardView({
     onNavigate(ACTION_TARGET_WORKSPACE[card.action.target]);
   }
 
+  const tone = insightTone(card, emphasize);
+  const confidence =
+    card.confidence !== undefined ? confidenceToStatus(card.confidence) : undefined;
+
   return (
-    <Card
-      className={cn(
-        emphasize && 'border-primary/20 bg-primary/5',
-        card.severity === 'critical' && 'border-red-500/25',
-        card.severity === 'notable' && 'border-amber-500/25',
-      )}
-    >
-      <CardContent className="space-y-2 p-4">
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-semibold">
-            <span className="mr-1.5">{card.emoji}</span>
-            {card.title}
-          </p>
-          {card.confidence !== undefined ? (
-            <ConfidenceBadge confidence={card.confidence} />
-          ) : null}
-        </div>
-        <p className="text-sm leading-relaxed">{card.body}</p>
-        {card.conclusion !== undefined ? (
-          <p className="text-sm text-muted-foreground">{card.conclusion}</p>
-        ) : null}
-        {card.action !== undefined ? (
-          <Button variant="outline" size="sm" className="mt-1" onClick={handleAction}>
-            {card.action.label}
-          </Button>
-        ) : null}
-      </CardContent>
-    </Card>
+    <InfoPanel
+      emoji={card.emoji}
+      title={card.title}
+      body={card.body}
+      {...(card.conclusion !== undefined ? { conclusion: card.conclusion } : {})}
+      tone={tone}
+      {...(confidence !== undefined
+        ? { statusLabel: confidence.label, statusTone: confidence.tone }
+        : {})}
+      {...(card.action !== undefined
+        ? { actionLabel: card.action.label, onAction: handleAction }
+        : {})}
+    />
   );
 }
 
-function ConfidenceBadge({ confidence }: { confidence: InsightConfidence }): ReactNode {
+function TrendGrid({ trends }: { trends: readonly InsightTrend[] }): ReactNode {
   return (
-    <span
-      className={cn(
-        'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
-        confidence.level === 'low' && 'bg-muted text-muted-foreground',
-        confidence.level === 'medium' && 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
-        confidence.level === 'high' && 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
-        confidence.level === 'very-high' &&
-          'bg-emerald-600/20 text-emerald-800 dark:text-emerald-300',
-      )}
-      title={`${String(confidence.sampleSize)} phiên`}
-    >
-      {confidence.label}
-    </span>
+    <Grid spacing={12} columns={3}>
+      {trends.map((trend) => {
+        const confidence =
+          trend.confidence !== undefined ? confidenceToStatus(trend.confidence) : undefined;
+        return (
+          <MetricCard
+            key={trend.id}
+            label={trend.label}
+            value={<Text variant="mono" accent>{trend.sparkline}</Text>}
+            detail={trend.summary}
+            footer={`Gần nhất: ${trend.latestLabel}`}
+            {...(confidence !== undefined
+              ? { statusLabel: confidence.label, statusTone: confidence.tone }
+              : {})}
+          />
+        );
+      })}
+    </Grid>
   );
 }
 
-function TrendCard({ trend }: { trend: InsightTrend }): ReactNode {
-  return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-xs text-muted-foreground">{trend.label}</p>
-        {trend.confidence !== undefined ? (
-          <ConfidenceBadge confidence={trend.confidence} />
-        ) : null}
-      </div>
-      <p className="mt-2 font-mono text-2xl tracking-widest text-primary">{trend.sparkline}</p>
-      <p className="mt-2 text-xs text-foreground">{trend.summary}</p>
-      <p className="mt-1 text-[11px] text-muted-foreground/80">Gần nhất: {trend.latestLabel}</p>
-    </div>
-  );
-}
-
-function RecordCard({
-  record,
+function RecordGrid({
+  records,
   onOpenSession,
 }: {
-  record: InsightRecord;
+  records: readonly InsightRecord[];
   onOpenSession: (sessionId: string) => void;
 }): ReactNode {
   return (
-    <button
-      type="button"
-      className="rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/40"
-      onClick={() => {
-        if (record.sessionId !== undefined) {
-          onOpenSession(record.sessionId);
-        }
-      }}
-    >
-      <p className="text-sm font-medium">
-        <span className="mr-1.5">{record.emoji}</span>
-        {record.label}
-      </p>
-      <p className="mt-2 text-xl font-bold tabular-nums">{record.value}</p>
-      {record.detail !== undefined ? (
-        <p className="mt-1 truncate text-xs text-muted-foreground">{record.detail}</p>
-      ) : null}
-      {record.sessionId !== undefined ? (
-        <p className="mt-2 text-[11px] font-medium text-primary">Mở Session →</p>
-      ) : null}
-    </button>
+    <Grid spacing={12} columns={2}>
+      {records.map((record) => (
+        <MetricCard
+          key={record.id}
+          label={`${record.emoji} ${record.label}`}
+          value={record.value}
+          {...(record.detail !== undefined ? { detail: record.detail } : {})}
+          {...(record.sessionId !== undefined
+            ? {
+                footer: 'Mở Session →',
+                interactive: true,
+                onClick: () => onOpenSession(record.sessionId as string),
+              }
+            : {})}
+        />
+      ))}
+    </Grid>
   );
+}
+
+function confidenceToStatus(confidence: InsightConfidence): {
+  label: string;
+  tone: StatusTone;
+} {
+  const toneMap: Record<InsightConfidence['level'], StatusTone> = {
+    low: 'muted',
+    medium: 'warning',
+    high: 'success',
+    'very-high': 'success-strong',
+  };
+  return { label: confidence.label, tone: toneMap[confidence.level] };
+}
+
+function insightTone(card: InsightCard, emphasize: boolean): CardTone {
+  if (emphasize) {
+    return 'accent';
+  }
+  if (card.severity === 'critical') {
+    return 'danger';
+  }
+  if (card.severity === 'notable') {
+    return 'warning';
+  }
+  return 'default';
 }

@@ -91,7 +91,7 @@ export function AnalysisScreen({
               <div className="grid gap-3 rounded-lg border border-border bg-muted/30 p-4 text-sm sm:grid-cols-3">
                 <div>
                   <p className="text-muted-foreground">Lời</p>
-                  <p className="text-lg font-bold text-success">
+                  <p className="text-lg font-bold text-success-foreground">
                     +{formatAmount(simulation.profitAmount)} đ
                   </p>
                 </div>

@@ -23,7 +23,9 @@ import {
   sessionPresetName,
 } from '@/features/session/session-domain';
 import {
+  buildSessionHealthSummary,
   computeSessionHealth,
+  EXPOSURE_LABELS,
   HEALTH_EMOJI,
   HEALTH_LABELS,
 } from '@/features/session/session-health';
@@ -43,8 +45,9 @@ interface SessionCockpitProps {
   readonly readOnly?: boolean;
   readonly onStartPlaying: () => void;
   readonly onNavigateToRound: (roundIndex: number) => void;
-  readonly onImprove: () => void;
-  readonly onSimulate: () => void;
+  readonly onImprove?: () => void;
+  readonly onSimulate?: () => void;
+  readonly minimalMode?: boolean;
   readonly onExport: () => void;
   readonly onStopSession: () => void;
   readonly onNotesChange: (notes: string) => void;
@@ -100,6 +103,7 @@ export function SessionCockpit({
   onNavigateToRound,
   onImprove,
   onSimulate,
+  minimalMode = false,
   onExport,
   onStopSession,
   onNotesChange,
@@ -133,6 +137,8 @@ export function SessionCockpit({
         };
 
   const health = currentPlan !== null ? computeSessionHealth(currentPlan) : null;
+  const healthSummary =
+    currentPlan !== null ? buildSessionHealthSummary(session, currentPlan) : null;
   const barFilled = Math.max(0, Math.min(10, Math.round(ctx.progressPct / 10)));
 
   function handleTimelineNavigate(target: TimelineNavigateTarget): void {
@@ -199,6 +205,30 @@ export function SessionCockpit({
             </div>
           </div>
 
+          {healthSummary !== null && session.status === 'playing' ? (
+            <div className="grid gap-2 rounded-lg border border-border/60 bg-muted/20 p-3 text-xs sm:grid-cols-2">
+              <p className="flex items-center gap-1.5 font-medium">
+                <span>{HEALTH_EMOJI[healthSummary.health]}</span>
+                {HEALTH_LABELS[healthSummary.health]}
+              </p>
+              <p className="text-muted-foreground">
+                Continue: <span className="text-foreground">{healthSummary.continueCount}</span>
+              </p>
+              <p className="text-muted-foreground">
+                Exposure:{' '}
+                <span className="text-foreground">{EXPOSURE_LABELS[healthSummary.exposure]}</span>
+              </p>
+              <p className="text-muted-foreground">
+                Vốn đã dùng:{' '}
+                <span className="text-foreground">
+                  {healthSummary.capitalUsagePercent !== null
+                    ? `${String(healthSummary.capitalUsagePercent)}%`
+                    : '—'}
+                </span>
+              </p>
+            </div>
+          ) : null}
+
           {currentPlan !== null && session.status === 'playing' ? (
             <>
               <div>
@@ -260,14 +290,18 @@ export function SessionCockpit({
             ) : null}
             {currentPlan !== null && session.status !== 'won' && !readOnly ? (
               <>
-                <Button variant="outline" onClick={onImprove}>
-                  <Sparkles className="h-4 w-4" />
-                  Cải thiện
-                </Button>
-                <Button variant="outline" onClick={onSimulate}>
-                  <LineChart className="h-4 w-4" />
-                  Mô phỏng
-                </Button>
+                {onImprove !== undefined ? (
+                  <Button variant="outline" onClick={onImprove}>
+                    <Sparkles className="h-4 w-4" />
+                    Cải thiện
+                  </Button>
+                ) : null}
+                {!minimalMode && onSimulate !== undefined ? (
+                  <Button variant="outline" onClick={onSimulate}>
+                    <LineChart className="h-4 w-4" />
+                    Mô phỏng
+                  </Button>
+                ) : null}
               </>
             ) : null}
             <Button variant="outline" onClick={onExport}>
@@ -278,7 +312,7 @@ export function SessionCockpit({
         </CardContent>
       </Card>
 
-      {currentExhausted && currentPlan?.status === 'playing' ? (
+      {currentExhausted && currentPlan?.status === 'playing' && !minimalMode ? (
         <Card className="border-dashed border-amber-500/40 bg-amber-500/5">
           <CardContent className="p-4 text-sm">
             <p className="font-medium">{currentPlan.label} — hết vòng, chưa thắng.</p>
@@ -288,6 +322,20 @@ export function SessionCockpit({
             <Button className="mt-3" size="sm" onClick={onStartPlaying}>
               Tiếp tục chơi
             </Button>
+          </CardContent>
+        </Card>
+      ) : minimalMode && currentExhausted && currentPlan?.status === 'playing' ? (
+        <Card className="border-dashed border-amber-500/40 bg-amber-500/5">
+          <CardContent className="p-4 text-sm">
+            <p className="font-medium">{currentPlan.label} — hết vòng, chưa thắng.</p>
+            <p className="mt-1 text-muted-foreground">
+              Dùng Cải thiện để tạo plan tiếp theo.
+            </p>
+            {onImprove !== undefined ? (
+              <Button className="mt-3" size="sm" variant="outline" onClick={onImprove}>
+                Cải thiện
+              </Button>
+            ) : null}
           </CardContent>
         </Card>
       ) : null}

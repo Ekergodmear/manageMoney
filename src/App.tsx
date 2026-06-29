@@ -2,11 +2,18 @@ import { simulateWinAtRound } from '@stake/constraint-engine';
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 
 import { ActionToast } from '@/components/ui/action-toast';
+import { Button } from '@/components/ui/button';
+import { ThemeProvider } from '@/design/theme/provider';
+import { AppServicesProvider, useServices } from '@/services/registry/AppServicesProvider';
 import { InsightsScreen } from '@/features/insights/InsightsScreen';
 import { AllocationScreen } from '@/features/allocation/AllocationScreen';
 import { computeCapitalOverview } from '@/features/capital/capital-overview';
 import { CapitalPlannerScreen } from '@/features/capital/CapitalPlannerScreen';
-import type { CapitalSessionRecommendation } from '@/features/capital/capital-planner-types';
+import { createCandidateFromRecommendationUseCase } from '@/features/capital/create-candidate-from-recommendation-use-case';
+import { createGenerateCapitalRecommendationsUseCase } from '@/features/capital/generate-capital-recommendations-use-case';
+import { createPromoteCandidateToSessionUseCase } from '@/features/capital/promote-candidate-to-session-use-case';
+import { createContinuePlanUseCase } from '@/features/continue/continue-plan-use-case';
+import type { CapitalPlannerInput } from '@/features/capital/capital-planner-types';
 import { DashboardScreen } from '@/features/dashboard/DashboardScreen';
 import { DEFAULT_PRESET_ID } from '@/features/game-designer/builtin-presets';
 import { GameDesignerScreen } from '@/features/game-designer/GameDesignerScreen';
@@ -24,22 +31,34 @@ import {
 } from '@/features/library/library-actions';
 import type { LibraryCollection } from '@/features/library/library-types';
 import { SessionLibraryScreen } from '@/features/library/SessionLibraryScreen';
+import { ImproveCandidateReviewScreen } from '@/features/improve/ImproveCandidateReviewScreen';
+import { createImprovementCandidateUseCase } from '@/features/improve/create-improvement-candidate-use-case';
 import type { ImproveOption } from '@/features/improve/improve-service';
+import { createPromoteCandidateToPlanUseCase } from '@/features/improve/promote-candidate-to-plan-use-case';
 import { GeneratePlanScreen } from '@/features/planner/GeneratePlanScreen';
+import { DecisionScreen } from '@/features/planner/DecisionScreen';
+import { PlanTableScreen } from '@/features/planner/PlanTableScreen';
 import {
   DEFAULT_PLANNER_FORM,
-  generatePlan,
   type PlannerField,
   type PlannerFormValues,
 } from '@/features/planner/plan-service';
+import {
+  createGeneratePlanUseCase,
+  createPromotePlanningDraftUseCase,
+  type PlanningView,
+} from '@/features/planning';
+import { isNewSessionCandidate } from '@/features/planning/plan-candidate-types';
+import { PlanningDraftRepository } from '@/services/storage/repositories/planning-draft-repository';
+import { PlanCandidateRepository } from '@/services/storage/repositories/plan-candidate-repository';
+import { SessionRepository } from '@/services/storage/repositories/session-repository';
+import { RecommendationSetRepository } from '@/services/storage/repositories/recommendation-set-repository';
 import { FormRightPanel, PlanRightPanel, PlayingProgressPanel } from '@/features/planner/RightPanel';
 import type { WorkspaceId } from '@/features/navigation/workspace-nav';
 import {
-  addPlanFromContinue,
-  addPlanFromImprove,
-  createSessionFromGenerate,
   getCurrentPlan,
   placeBetOnPlan,
+  setBetProgressOnPlan,
   startCurrentPlan,
   stopSession,
   undoBetOnPlan,
@@ -55,8 +74,9 @@ import { SessionPlannerScreen } from '@/features/session/SessionPlannerScreen';
 import type { PersistedAppState } from '@/features/session/session-types';
 import { EMPTY_PERSISTED_STATE } from '@/features/session/session-types';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
-import { ScenarioPlannerScreen } from '@/features/scenario/ScenarioPlannerScreen';
-import type { ScenarioExperiment } from '@/features/scenario/scenario-types';
+import { createGenerateExperimentRecommendationsUseCase } from '@/features/experiment/generate-experiment-recommendations-use-case';
+import type { Experiment } from '@/features/experiment/experiment-types';
+import { ScenarioPlannerScreen } from '@/features/experiment/ScenarioPlannerScreen';
 import { AppLayout } from '@/layout/AppLayout';
 
 interface ToastState {
@@ -81,6 +101,135 @@ function upsertSession(sessions: readonly Session[], session: Session): Session[
 }
 
 export function App(): JSX.Element {
+  return (
+    <AppServicesProvider>
+      <AppRoot />
+    </AppServicesProvider>
+  );
+}
+
+function AppRoot(): JSX.Element {
+  const services = useServices();
+  const planningDraftRepository = useMemo(
+    () => new PlanningDraftRepository(services.storage),
+    [services.storage],
+  );
+  const sessionRepository = useMemo(
+    () => new SessionRepository(services.storage),
+    [services.storage],
+  );
+  const planCandidateRepository = useMemo(
+    () => new PlanCandidateRepository(services.storage),
+    [services.storage],
+  );
+  const recommendationSetRepository = useMemo(
+    () => new RecommendationSetRepository(services.storage),
+    [services.storage],
+  );
+  const generatePlanUseCase = useMemo(
+    () =>
+      createGeneratePlanUseCase({
+        planningDrafts: planningDraftRepository,
+        events: services.events,
+        clock: services.clock,
+      }),
+    [planningDraftRepository, services.events, services.clock],
+  );
+  const promotePlanningDraftUseCase = useMemo(
+    () =>
+      createPromotePlanningDraftUseCase({
+        planningDrafts: planningDraftRepository,
+        sessions: sessionRepository,
+        events: services.events,
+        clock: services.clock,
+      }),
+    [planningDraftRepository, sessionRepository, services.events, services.clock],
+  );
+  const createImprovementCandidate = useMemo(
+    () =>
+      createImprovementCandidateUseCase({
+        candidates: planCandidateRepository,
+        sessions: sessionRepository,
+        events: services.events,
+        clock: services.clock,
+      }),
+    [planCandidateRepository, sessionRepository, services.events, services.clock],
+  );
+  const promoteCandidateToPlan = useMemo(
+    () =>
+      createPromoteCandidateToPlanUseCase({
+        candidates: planCandidateRepository,
+        sessions: sessionRepository,
+        events: services.events,
+        clock: services.clock,
+      }),
+    [planCandidateRepository, sessionRepository, services.events, services.clock],
+  );
+  const generateCapitalRecommendations = useMemo(
+    () =>
+      createGenerateCapitalRecommendationsUseCase({
+        recommendationSets: recommendationSetRepository,
+        candidates: planCandidateRepository,
+        events: services.events,
+        clock: services.clock,
+      }),
+    [
+      recommendationSetRepository,
+      planCandidateRepository,
+      services.events,
+      services.clock,
+    ],
+  );
+  const createCandidateFromRecommendation = useMemo(
+    () =>
+      createCandidateFromRecommendationUseCase({
+        recommendationSets: recommendationSetRepository,
+        candidates: planCandidateRepository,
+        events: services.events,
+        clock: services.clock,
+      }),
+    [
+      recommendationSetRepository,
+      planCandidateRepository,
+      services.events,
+      services.clock,
+    ],
+  );
+  const promoteCandidateToSession = useMemo(
+    () =>
+      createPromoteCandidateToSessionUseCase({
+        candidates: planCandidateRepository,
+        sessions: sessionRepository,
+        events: services.events,
+        clock: services.clock,
+      }),
+    [planCandidateRepository, sessionRepository, services.events, services.clock],
+  );
+  const continuePlanUseCase = useMemo(
+    () =>
+      createContinuePlanUseCase({
+        sessions: sessionRepository,
+        events: services.events,
+        clock: services.clock,
+      }),
+    [sessionRepository, services.events, services.clock],
+  );
+  const generateExperimentRecommendations = useMemo(
+    () =>
+      createGenerateExperimentRecommendationsUseCase({
+        recommendationSets: recommendationSetRepository,
+        candidates: planCandidateRepository,
+        events: services.events,
+        clock: services.clock,
+      }),
+    [
+      recommendationSetRepository,
+      planCandidateRepository,
+      services.events,
+      services.clock,
+    ],
+  );
+
   const [hydrated, setHydrated] = useState(false);
   const [persisted, setPersisted] = useState<PersistedAppState>(EMPTY_PERSISTED_STATE);
   const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceId>('dashboard');
@@ -88,6 +237,9 @@ export function App(): JSX.Element {
   const [viewingSessionId, setViewingSessionId] = useState<string | null>(null);
   const [liveForm, setLiveForm] = useState<PlannerFormValues>(DEFAULT_PLANNER_FORM);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<PlannerField, string>>>({});
+  const [planningView, setPlanningView] = useState<PlanningView>('form');
+  const [capitalReviewOpen, setCapitalReviewOpen] = useState(false);
+  const [scenarioReviewOpen, setScenarioReviewOpen] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -99,7 +251,10 @@ export function App(): JSX.Element {
     [persisted.customGamePresets],
   );
   const activePreset = findPreset(allPresets, persisted.activePresetId);
-  const continueMaxRounds = activePreset?.continuePolicy.maximumRounds ?? 5000;
+  const continuePolicy =
+    activePreset !== undefined
+      ? activePreset.continuePolicy
+      : { maximumRounds: 5000, presets: [1000, 1500, 2000, 5000] };
   const currentPlan = activeSession !== null ? getCurrentPlan(activeSession) : null;
   const capitalOverview = useMemo(() => computeCapitalOverview(persisted), [persisted]);
   const readOnlySession = viewingSessionId !== null && viewingSessionId !== persisted.activeSessionId;
@@ -112,14 +267,30 @@ export function App(): JSX.Element {
       const base = DEFAULT_PLANNER_FORM;
       setLiveForm(preset !== undefined ? applyPresetToForm(base, preset) : base);
       const hasActive = state.activeSessionId !== null;
-      setActiveWorkspace(hasActive ? 'session' : 'dashboard');
+      const restoredSession = findSession(state.sessions, state.activeSessionId);
+      if (
+        state.planCandidate !== null &&
+        isNewSessionCandidate(state.planCandidate)
+      ) {
+        setActiveWorkspace('capital');
+        setCapitalReviewOpen(true);
+      } else {
+        setActiveWorkspace(hasActive ? 'session' : 'dashboard');
+        setCapitalReviewOpen(false);
+      }
+      if (
+        state.planCandidate !== null &&
+        state.planCandidate.target === 'append-plan' &&
+        state.activeSessionId === state.planCandidate.sessionId
+      ) {
+        setSessionView('improve-review');
+      } else {
+        setSessionView(restoredSession?.status === 'playing' ? 'playing' : 'overview');
+      }
+      setPlanningView(state.planningDraft !== null ? 'decision' : 'form');
       setHydrated(true);
     });
   }, []);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', persisted.theme === 'dark');
-  }, [persisted.theme]);
 
   const persist = useCallback((next: PersistedAppState) => {
     setPersisted(next);
@@ -165,42 +336,93 @@ export function App(): JSX.Element {
     setTimeout(() => setToast(null), 4000);
   }
 
-  function handleGenerate(values: PlannerFormValues): void {
-    const outcome = generatePlan(values);
-    if (outcome.fieldErrors !== undefined) {
-      setFieldErrors(outcome.fieldErrors);
-      return;
-    }
-    if (outcome.result === undefined) {
+  async function handlePromoteDraft(startPlaying: boolean): Promise<void> {
+    const result = await promotePlanningDraftUseCase.execute();
+    if (!result.ok) {
+      showToast('Không có bản nháp kế hoạch');
       return;
     }
 
-    setFieldErrors({});
-    let sessions = [...persisted.sessions];
-    if (persisted.activeSessionId !== null) {
-      const current = findSession(sessions, persisted.activeSessionId);
-      if (current !== null && current.status === 'playing') {
-        sessions = upsertSession(sessions, stopSession(current));
-      }
+    let session = result.session;
+    if (startPlaying) {
+      session = startCurrentPlan(session);
     }
 
-    const session = createSessionFromGenerate(
-      values,
-      outcome.result,
-      persisted.activePresetId,
-      persisted.nextSessionNumber,
-    );
-
-    persist({
-      ...persisted,
-      nextSessionNumber: persisted.nextSessionNumber + 1,
+    const nextState = {
+      ...result.nextState,
+      sessions: upsertSession(result.nextState.sessions, session),
       activeSessionId: session.id,
-      sessions: upsertSession(sessions, session),
-    });
+    };
+    persist(nextState);
+    setPlanningView('form');
     setViewingSessionId(null);
-    setSessionView('overview');
+    setSessionView(startPlaying ? 'playing' : 'overview');
     setActiveWorkspace('session');
-    showToast('Session mới đã tạo — Plan A sẵn sàng');
+    showToast(startPlaying ? 'Bắt đầu chơi' : 'Session đã tạo từ kế hoạch');
+  }
+
+  async function handlePlanningGenerate(values: PlannerFormValues): Promise<void> {
+    const result = await generatePlanUseCase.execute({
+      formValues: values,
+      presetId: persisted.activePresetId,
+    });
+    if (!result.ok) {
+      setFieldErrors(result.fieldErrors);
+      return;
+    }
+    setFieldErrors({});
+    setPersisted((prev) => ({ ...prev, planningDraft: result.draft }));
+    setPlanningView('decision');
+  }
+
+  function renderPlanningWorkspace(): JSX.Element {
+    const draft = persisted.planningDraft;
+    if (planningView === 'decision' && draft !== null) {
+      return (
+        <DecisionScreen
+          generated={draft.generated}
+          onEdit={() => setPlanningView('form')}
+          onViewPlan={() => setPlanningView('plan')}
+          onStartPlaying={() => {
+            void handlePromoteDraft(true);
+          }}
+        />
+      );
+    }
+    if (planningView === 'plan' && draft !== null) {
+      return (
+        <div className="space-y-4">
+          <Button variant="ghost" size="sm" onClick={() => setPlanningView('decision')}>
+            ← Kết quả
+          </Button>
+          <PlanTableScreen
+            generated={draft.generated}
+            completedThroughRound={0}
+            onToggleRound={() => undefined}
+            onResetProgress={() => undefined}
+            onEdit={() => setPlanningView('form')}
+            hideContinue
+          />
+          <Button size="lg" onClick={() => void handlePromoteDraft(true)}>
+            Bắt đầu chơi
+          </Button>
+        </div>
+      );
+    }
+    return (
+      <GeneratePlanScreen
+        key={persisted.activePresetId}
+        defaultValues={liveForm}
+        presets={allPresets}
+        activePresetId={persisted.activePresetId}
+        onPresetSelect={handlePresetSelect}
+        onValuesChange={setLiveForm}
+        onSubmit={(values) => {
+          void handlePlanningGenerate(values);
+        }}
+        {...(fieldErrors.request !== undefined ? { serverError: fieldErrors.request } : {})}
+      />
+    );
   }
 
   function handlePresetSelect(preset: GamePolicyPreset): void {
@@ -242,11 +464,47 @@ export function App(): JSX.Element {
     mutateActive((s) => startCurrentPlan(s));
   }
 
+  function setBetProgress(targetRound: number): void {
+    if (persisted.activeSessionId === null) {
+      return;
+    }
+    const session = findSession(persisted.sessions, persisted.activeSessionId);
+    if (session === null) {
+      return;
+    }
+    const plan = getCurrentPlan(session);
+    const readySession =
+      plan !== null && plan.status === 'ready' ? startCurrentPlan(session) : session;
+    const updated = setBetProgressOnPlan(readySession, targetRound);
+    if (updated === null) {
+      return;
+    }
+    updateSession(persisted.activeSessionId, () => updated);
+    const planAfter = getCurrentPlan(updated);
+    const at = planAfter?.completedThroughRound ?? targetRound;
+    if (at > 0) {
+      showToast(`Đã ghi đến vòng ${String(at)}`, 'Hoàn tác', () => undoBet());
+    } else {
+      showToast('Đã đặt lại tiến độ cược');
+    }
+  }
+
   function placeBet(roundIndex: number): void {
     if (persisted.activeSessionId === null) {
       return;
     }
-    updateSession(persisted.activeSessionId, (s) => placeBetOnPlan(s, roundIndex) ?? s);
+    const session = findSession(persisted.sessions, persisted.activeSessionId);
+    if (session === null) {
+      return;
+    }
+    const plan = getCurrentPlan(session);
+    const readySession =
+      plan !== null && plan.status === 'ready' ? startCurrentPlan(session) : session;
+    const updated = placeBetOnPlan(readySession, roundIndex);
+    if (updated === null) {
+      return;
+    }
+    updateSession(persisted.activeSessionId, () => updated);
     showToast('Đã lưu cược', 'Hoàn tác', () => undoBet());
   }
 
@@ -254,7 +512,15 @@ export function App(): JSX.Element {
     if (persisted.activeSessionId === null) {
       return;
     }
-    updateSession(persisted.activeSessionId, (s) => undoBetOnPlan(s) ?? s);
+    const session = findSession(persisted.sessions, persisted.activeSessionId);
+    if (session === null) {
+      return;
+    }
+    const updated = undoBetOnPlan(session);
+    if (updated === null) {
+      return;
+    }
+    updateSession(persisted.activeSessionId, () => updated);
     showToast('Đã hoàn tác cược');
   }
 
@@ -285,29 +551,193 @@ export function App(): JSX.Element {
     setActiveWorkspace('session');
   }
 
-  function handleContinue(targetRoundCount: number): void {
+  async function handleContinue(targetRoundCount: number): Promise<void> {
     if (persisted.activeSessionId === null) {
       return;
     }
-    updateSession(persisted.activeSessionId, (s) => {
-      const result = addPlanFromContinue(s, targetRoundCount);
-      if (result.error !== undefined) {
-        showToast(result.error);
-        return s;
-      }
-      showToast(`Session Planner — plan mới đến ${String(targetRoundCount)} vòng`);
-      return result.session;
+    const result = await continuePlanUseCase.execute({
+      sessionId: persisted.activeSessionId,
+      targetTotalRounds: targetRoundCount,
     });
-    setSessionView('overview');
+    if (!result.ok) {
+      showToast(result.message ?? 'Không tiếp tục được session');
+      return;
+    }
+    persist({
+      ...persisted,
+      sessions: upsertSession(persisted.sessions, result.session),
+      activeSessionId: result.session.id,
+    });
+    showToast(`Plan mới đến ${String(targetRoundCount)} vòng`);
+    setSessionView('playing');
   }
 
-  function applyImprove(option: ImproveOption): void {
+  async function handleSelectImproveOption(option: ImproveOption): Promise<void> {
     if (persisted.activeSessionId === null) {
       return;
     }
-    updateSession(persisted.activeSessionId, (s) => addPlanFromImprove(s, option));
-    showToast('Improve — plan mới đã áp dụng');
+    const result = await createImprovementCandidate.execute({
+      sessionId: persisted.activeSessionId,
+      option,
+    });
+    if (!result.ok) {
+      showToast('Không tạo được phương án cải thiện');
+      return;
+    }
+    persist({ ...persisted, planCandidate: result.candidate });
+    setSessionView('improve-review');
+  }
+
+  async function handlePromoteCandidate(): Promise<void> {
+    const candidate = persisted.planCandidate;
+    if (candidate !== null && isNewSessionCandidate(candidate)) {
+      await handlePromoteNewSessionCandidate();
+      return;
+    }
+
+    const result = await promoteCandidateToPlan.execute();
+    if (!result.ok) {
+      showToast('Không có phương án để thêm');
+      return;
+    }
+    persist({
+      ...persisted,
+      planCandidate: null,
+      sessions: upsertSession(persisted.sessions, result.session),
+      activeSessionId: result.session.id,
+    });
+    setSessionView(result.session.status === 'playing' ? 'playing' : 'overview');
+    showToast('Plan mới đã được thêm vào session');
+  }
+
+  async function handleDiscardCandidate(): Promise<void> {
+    const candidate = persisted.planCandidate;
+    const isCapital =
+      candidate !== null &&
+      isNewSessionCandidate(candidate) &&
+      candidate.source === 'capital';
+    const isScenario =
+      candidate !== null &&
+      isNewSessionCandidate(candidate) &&
+      candidate.source === 'scenario';
+    await planCandidateRepository.clear();
+    persist({ ...persisted, planCandidate: null });
+    if (isCapital) {
+      setCapitalReviewOpen(false);
+      setActiveWorkspace('capital');
+    } else if (isScenario) {
+      setScenarioReviewOpen(false);
+      setActiveWorkspace('scenario');
+    } else {
+      setSessionView('improve');
+    }
+    showToast('Đã hủy phương án');
+  }
+
+  async function handleUseCapitalRecommendation(recommendationId: string): Promise<void> {
+    const result = await createCandidateFromRecommendation.execute({ recommendationId });
+    if (!result.ok) {
+      showToast('Không chọn được phương án');
+      return;
+    }
+    const updatedSet = await recommendationSetRepository.get();
+    persist({
+      ...persisted,
+      planCandidate: result.candidate,
+      recommendationSet: updatedSet ?? persisted.recommendationSet,
+    });
+    setCapitalReviewOpen(true);
+  }
+
+  async function handleGenerateCapital(input: CapitalPlannerInput) {
+    const generated = await generateCapitalRecommendations.execute(input);
+    if (!generated.ok) {
+      return null;
+    }
+    setCapitalReviewOpen(false);
+    setPersisted((prev) => {
+      const next: PersistedAppState = {
+        ...prev,
+        activePresetId: input.presetId,
+        planCandidate: null,
+        recommendationSet: generated.recommendationSet,
+        capitalPlanner: {
+          totalBankroll: input.bankroll,
+          strategy: input.strategy,
+          risk: input.risk,
+          presetId: input.presetId,
+        },
+      };
+      if (saveTimer.current !== null) {
+        clearTimeout(saveTimer.current);
+      }
+      saveTimer.current = setTimeout(() => {
+        void savePersistedState(next);
+      }, 250);
+      return next;
+    });
+    return generated.recommendationSet;
+  }
+
+  async function handlePromoteNewSessionCandidate(): Promise<void> {
+    let baseState = persisted;
+    if (persisted.activeSessionId !== null) {
+      const current = findSession(persisted.sessions, persisted.activeSessionId);
+      if (current !== null && current.status === 'playing') {
+        baseState = {
+          ...persisted,
+          activeSessionId: null,
+          sessions: upsertSession(persisted.sessions, stopSession(current)),
+        };
+        await sessionRepository.saveState(baseState);
+        setPersisted(baseState);
+      }
+    }
+
+    const result = await promoteCandidateToSession.execute();
+    if (!result.ok) {
+      showToast('Không tạo được session');
+      return;
+    }
+
+    const label = baseState.planCandidate?.label ?? 'Session mới';
+    persist(result.nextState);
+    setCapitalReviewOpen(false);
+    setScenarioReviewOpen(false);
+    setViewingSessionId(null);
     setSessionView('overview');
+    setActiveWorkspace('session');
+    showToast(`Session từ ${label} — Plan A sẵn sàng`);
+  }
+
+  async function handleUseExperiment(
+    selected: Experiment,
+    allExperiments: readonly Experiment[],
+  ): Promise<void> {
+    const generated = await generateExperimentRecommendations.execute({
+      experiments: allExperiments,
+      presetId: persisted.activePresetId,
+    });
+    if (!generated.ok) {
+      showToast('Không có experiment hợp lệ để tạo khuyến nghị');
+      return;
+    }
+
+    const result = await createCandidateFromRecommendation.execute({
+      recommendationId: selected.id,
+    });
+    if (!result.ok) {
+      showToast('Không chọn được experiment');
+      return;
+    }
+
+    const updatedSet = await recommendationSetRepository.get();
+    persist({
+      ...persisted,
+      planCandidate: result.candidate,
+      recommendationSet: updatedSet ?? generated.recommendationSet,
+    });
+    setScenarioReviewOpen(true);
   }
 
   function handleNotesChange(notes: string): void {
@@ -326,67 +756,103 @@ export function App(): JSX.Element {
     updateSession(id, (s) => updateSessionTitle(s, title));
   }
 
-  function handleCreateSessionFromCapital(rec: CapitalSessionRecommendation): void {
-    let sessions = [...persisted.sessions];
-    if (persisted.activeSessionId !== null) {
-      const current = findSession(sessions, persisted.activeSessionId);
-      if (current !== null && current.status === 'playing') {
-        sessions = upsertSession(sessions, stopSession(current));
-      }
+  function renderCapitalWorkspace(): JSX.Element {
+    const capitalCandidate =
+      persisted.planCandidate !== null &&
+      isNewSessionCandidate(persisted.planCandidate) &&
+      persisted.planCandidate.source === 'capital'
+        ? persisted.planCandidate
+        : null;
+
+    if (capitalCandidate !== null && capitalReviewOpen) {
+      return (
+        <ImproveCandidateReviewScreen
+          candidate={capitalCandidate}
+          onBack={() => setCapitalReviewOpen(false)}
+          onPromote={() => void handlePromoteNewSessionCandidate()}
+          onDiscard={() => void handleDiscardCandidate()}
+          promoteLabel="Bắt đầu session"
+          backLabel="Quay lại khuyến nghị"
+          subtitle={`${capitalCandidate.label} — xác nhận trước khi tạo session`}
+        />
+      );
     }
 
-    const session = createSessionFromGenerate(
-      rec.formValues,
-      rec.result,
-      persisted.capitalPlanner?.presetId ?? persisted.activePresetId,
-      persisted.nextSessionNumber,
+    return (
+      <div className="space-y-4">
+        {capitalCandidate !== null ? (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
+            <span>Phương án Capital đang chờ xác nhận</span>
+            <Button size="sm" variant="outline" onClick={() => setCapitalReviewOpen(true)}>
+              Xem lại phương án
+            </Button>
+          </div>
+        ) : null}
+        <CapitalPlannerScreen
+          presets={allPresets}
+          activePresetId={persisted.activePresetId}
+          initialBankroll={(
+            persisted.recommendationSet?.totalBankroll ??
+            persisted.capitalPlanner?.totalBankroll
+          )?.toLocaleString('vi-VN') ?? liveForm.userBankroll}
+          initialStrategy={
+            persisted.recommendationSet?.strategy ??
+            persisted.capitalPlanner?.strategy ??
+            'balanced'
+          }
+          initialRisk={
+            persisted.recommendationSet?.risk ?? persisted.capitalPlanner?.risk ?? 'normal'
+          }
+          recommendationSet={persisted.recommendationSet}
+          onPresetSelect={handlePresetSelect}
+          onGenerate={handleGenerateCapital}
+          onUseRecommendation={(id) => void handleUseCapitalRecommendation(id)}
+        />
+      </div>
     );
-
-    persist({
-      ...persisted,
-      nextSessionNumber: persisted.nextSessionNumber + 1,
-      activeSessionId: session.id,
-      sessions: upsertSession(sessions, session),
-      activePresetId: persisted.capitalPlanner?.presetId ?? persisted.activePresetId,
-    });
-    setViewingSessionId(null);
-    setSessionView('overview');
-    setActiveWorkspace('session');
-    showToast(`Session từ ${rec.label} — Plan A sẵn sàng`);
   }
 
-  function handlePromoteScenarioSession(experiment: ScenarioExperiment): void {
-    if (experiment.result === null) {
-      return;
-    }
-    let sessions = [...persisted.sessions];
-    if (persisted.activeSessionId !== null) {
-      const current = findSession(sessions, persisted.activeSessionId);
-      if (current !== null && current.status === 'playing') {
-        sessions = upsertSession(sessions, stopSession(current));
-      }
+  function renderScenarioWorkspace(): JSX.Element {
+    const scenarioCandidate =
+      persisted.planCandidate !== null &&
+      isNewSessionCandidate(persisted.planCandidate) &&
+      persisted.planCandidate.source === 'scenario'
+        ? persisted.planCandidate
+        : null;
+
+    if (scenarioCandidate !== null && scenarioReviewOpen) {
+      return (
+        <ImproveCandidateReviewScreen
+          candidate={scenarioCandidate}
+          onBack={() => setScenarioReviewOpen(false)}
+          onPromote={() => void handlePromoteNewSessionCandidate()}
+          onDiscard={() => void handleDiscardCandidate()}
+          promoteLabel="Bắt đầu session"
+          backLabel="Quay lại Scenario Planner"
+          subtitle={`${scenarioCandidate.label} — xác nhận trước khi tạo session`}
+        />
+      );
     }
 
-    const presetId = experiment.formValues.presetId || persisted.activePresetId;
-    const session = createSessionFromGenerate(
-      experiment.formValues,
-      experiment.result,
-      presetId,
-      persisted.nextSessionNumber,
+    return (
+      <div className="space-y-4">
+        {scenarioCandidate !== null ? (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
+            <span>Experiment đang chờ xác nhận</span>
+            <Button size="sm" variant="outline" onClick={() => setScenarioReviewOpen(true)}>
+              Xem lại phương án
+            </Button>
+          </div>
+        ) : null}
+        <ScenarioPlannerScreen
+          presets={allPresets}
+          activePresetId={persisted.activePresetId}
+          onPresetSelect={handlePresetSelect}
+          onUseExperiment={(experiment, all) => void handleUseExperiment(experiment, all)}
+          onPromotePreset={handleSaveGamePreset}
+        />
+      </div>
     );
-
-    persist({
-      ...persisted,
-      nextSessionNumber: persisted.nextSessionNumber + 1,
-      activeSessionId: session.id,
-      sessions: upsertSession(sessions, session),
-      activePresetId: presetId,
-    });
-    setLiveForm(experiment.formValues);
-    setViewingSessionId(null);
-    setSessionView('overview');
-    setActiveWorkspace('session');
-    showToast(`Session từ experiment "${experiment.label}" — Plan A sẵn sàng`);
   }
 
   function handleStopSession(): void {
@@ -436,7 +902,8 @@ export function App(): JSX.Element {
     }
 
     const preset = findPreset(allPresets, displayedSession.presetId);
-  const isReadOnly =
+    const minimalSessionMode = displayedSession.originDraftId !== undefined;
+    const isReadOnly =
       readOnlySession ||
       (displayedSession.status !== 'playing' && displayedSession.status !== 'draft');
 
@@ -445,19 +912,26 @@ export function App(): JSX.Element {
         session={displayedSession}
         preset={preset}
         view={sessionView}
-        continueMaxRounds={continueMaxRounds}
+        continuePolicy={continuePolicy}
+        planCandidate={persisted.planCandidate}
         onViewChange={setSessionView}
         onStartPlan={isReadOnly ? () => undefined : startPlan}
         onPlaceBet={isReadOnly ? () => undefined : placeBet}
+        onSetBetProgress={isReadOnly ? () => undefined : setBetProgress}
         onUndoBet={isReadOnly ? () => undefined : undoBet}
         onWin={isReadOnly ? () => undefined : winAtRound}
-        onContinue={isReadOnly ? () => undefined : handleContinue}
-        onApplyImprove={isReadOnly ? () => undefined : applyImprove}
+        onContinue={isReadOnly ? () => undefined : (target) => void handleContinue(target)}
+        onSelectImproveOption={
+          isReadOnly ? () => undefined : (option) => void handleSelectImproveOption(option)
+        }
+        onPromoteCandidate={isReadOnly ? () => undefined : () => void handlePromoteCandidate()}
+        onDiscardCandidate={isReadOnly ? () => undefined : () => void handleDiscardCandidate()}
         onNotesChange={handleNotesChange}
         onTitleChange={handleTitleChange}
         onExport={handleExportSession}
         onStopSession={isReadOnly ? () => undefined : handleStopSession}
         readOnly={isReadOnly}
+        minimalMode={minimalSessionMode}
       />
     );
   }
@@ -504,60 +978,13 @@ export function App(): JSX.Element {
           />
         );
       case 'scenario':
-        return (
-          <ScenarioPlannerScreen
-            presets={allPresets}
-            activePresetId={persisted.activePresetId}
-            onPresetSelect={handlePresetSelect}
-            onPromoteSession={handlePromoteScenarioSession}
-            onPromotePreset={handleSaveGamePreset}
-          />
-        );
+        return renderScenarioWorkspace();
       case 'capital':
-        return (
-          <CapitalPlannerScreen
-            presets={allPresets}
-            activePresetId={persisted.activePresetId}
-            initialBankroll={
-              persisted.capitalPlanner?.totalBankroll !== undefined
-                ? persisted.capitalPlanner.totalBankroll.toLocaleString('vi-VN')
-                : liveForm.userBankroll
-            }
-            initialStrategy={persisted.capitalPlanner?.strategy ?? 'balanced'}
-            initialRisk={persisted.capitalPlanner?.risk ?? 'normal'}
-            lastResult={persisted.capitalPlanner?.result ?? null}
-            onPresetSelect={handlePresetSelect}
-            onGenerate={({ bankroll, strategy, risk, presetId, result }) => {
-              persist({
-                ...persisted,
-                activePresetId: presetId,
-                capitalPlanner: {
-                  totalBankroll: bankroll,
-                  strategy,
-                  risk,
-                  presetId,
-                  result,
-                  generatedAt: new Date().toISOString(),
-                },
-              });
-            }}
-            onCreateSession={handleCreateSessionFromCapital}
-          />
-        );
+        return renderCapitalWorkspace();
       case 'session':
         return renderSessionWorkspace();
       case 'planning':
-        return (
-          <GeneratePlanScreen
-            defaultValues={liveForm}
-            presets={allPresets}
-            activePresetId={persisted.activePresetId}
-            onPresetSelect={handlePresetSelect}
-            onValuesChange={setLiveForm}
-            onSubmit={handleGenerate}
-            {...(fieldErrors.request !== undefined ? { serverError: fieldErrors.request } : {})}
-          />
-        );
+        return renderPlanningWorkspace();
       case 'analysis':
         return (
           <InsightsScreen
@@ -681,7 +1108,7 @@ export function App(): JSX.Element {
     );
 
   return (
-    <>
+    <ThemeProvider mode={persisted.theme}>
       <AppLayout
         activeWorkspace={activeWorkspace}
         onWorkspaceSelect={(ws) => {
@@ -704,6 +1131,6 @@ export function App(): JSX.Element {
           onClose={() => setToast(null)}
         />
       ) : null}
-    </>
+    </ThemeProvider>
   );
 }

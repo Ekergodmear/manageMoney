@@ -1,11 +1,15 @@
 import { BUILTIN_GAME_PRESETS } from '@/features/game-designer/builtin-presets';
 import type { GamePolicyDraft, GamePolicyPreset } from '@/features/game-designer/game-policy-types';
+import { normalizeContinuePolicy } from '@/features/continue/continue-policy-utils';
 import type { PlannerFormValues } from '@/features/planner/plan-service';
 
 export function mergePresets(custom: readonly GamePolicyPreset[]): GamePolicyPreset[] {
   const overridden = new Set(custom.map((c) => c.id));
   const builtins = BUILTIN_GAME_PRESETS.filter((b) => !overridden.has(b.id));
-  return [...builtins, ...custom];
+  return [...builtins, ...custom].map((preset) => ({
+    ...preset,
+    continuePolicy: normalizeContinuePolicy(preset.continuePolicy),
+  }));
 }
 
 export function findPreset(
@@ -45,7 +49,7 @@ export function draftFromPreset(preset: GamePolicyPreset): GamePolicyDraft {
     maximumBet: preset.maximumBet,
     betStep: preset.betStep,
     rewardPolicy: preset.rewardPolicy,
-    continuePolicy: preset.continuePolicy,
+    continuePolicy: normalizeContinuePolicy(preset.continuePolicy),
   };
 }
 
@@ -63,7 +67,7 @@ export function presetFromDraft(
     maximumBet: draft.maximumBet,
     betStep: draft.betStep,
     rewardPolicy: draft.rewardPolicy,
-    continuePolicy: draft.continuePolicy,
+    continuePolicy: normalizeContinuePolicy(draft.continuePolicy),
     createdAt: new Date().toISOString(),
     ...(options?.builtin === true ? { builtin: true } : {}),
   };

@@ -46,6 +46,7 @@ interface PlanTableScreenProps {
   readonly sessionNumber?: number;
   readonly sessionStatus?: 'playing' | 'won' | 'lost';
   readonly onToggleRound: (roundIndex: number, checked: boolean) => void;
+  readonly onJumpToRound?: (roundIndex: number) => void;
   readonly onResetProgress: () => void;
   readonly onEdit: () => void;
   readonly onContinue?: (targetRoundCount: number) => void;
@@ -58,6 +59,7 @@ export function PlanTableScreen({
   sessionNumber = 1,
   sessionStatus = 'playing',
   onToggleRound,
+  onJumpToRound,
   onResetProgress,
   onEdit,
   onContinue,
@@ -77,6 +79,7 @@ export function PlanTableScreen({
     completedThroughRound >= strategy.rounds.length && sessionStatus === 'playing';
   const [continueTarget, setContinueTarget] = useState('');
   const [selectedContinue, setSelectedContinue] = useState<number | null>(null);
+  const [jumpRound, setJumpRound] = useState('');
   const progressPct =
     strategy.rounds.length > 0
       ? Math.round((completedThroughRound / strategy.rounds.length) * 100)
@@ -128,8 +131,11 @@ export function PlanTableScreen({
         cell: ({ row }) => (
           <Checkbox
             checked={row.original.completed}
-            aria-label={`Đánh dấu đã cược đến vòng ${String(row.original.index)}`}
-            onCheckedChange={(checked) => onToggleRound(row.original.index, checked === true)}
+            disabled={sessionStatus !== 'playing'}
+            aria-label={`Đã cược đến vòng ${String(row.original.index)}`}
+            onCheckedChange={(checked) =>
+              onToggleRound(row.original.index, checked === true)
+            }
           />
         ),
       }),
@@ -153,7 +159,7 @@ export function PlanTableScreen({
           ),
       }),
     ],
-    [onToggleRound],
+    [onToggleRound, sessionStatus],
   );
 
   const table = useReactTable({
@@ -185,6 +191,12 @@ export function PlanTableScreen({
             Đã chơi <strong className="text-foreground">{completedThroughRound}</strong> /{' '}
             {strategy.rounds.length} · Đã chi {formatAmount(accumulated)} đ
             {lastBet > 0 ? ` · Cược gần nhất ${formatAmount(lastBet)} đ` : ''}
+            {sessionStatus === 'playing' ? (
+              <>
+                {' '}
+                · Tick vòng <strong className="text-foreground">N</strong> = đã cược đến vòng N
+              </>
+            ) : null}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -222,6 +234,39 @@ export function PlanTableScreen({
               ))}
             </div>
             <div className="flex flex-wrap items-center gap-2">
+              {onJumpToRound !== undefined && sessionStatus === 'playing' ? (
+                <div className="flex items-center gap-1.5">
+                  <Input
+                    className="h-9 w-20"
+                    inputMode="numeric"
+                    placeholder="Vòng"
+                    value={jumpRound}
+                    onChange={(e) => setJumpRound(e.target.value.replace(/\D/g, ''))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const n = Number(jumpRound);
+                        if (n >= 1 && n <= strategy.rounds.length) {
+                          onJumpToRound(n);
+                        }
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-9"
+                    onClick={() => {
+                      const n = Number(jumpRound);
+                      if (n >= 1 && n <= strategy.rounds.length) {
+                        onJumpToRound(n);
+                      }
+                    }}
+                  >
+                    Đến vòng
+                  </Button>
+                </div>
+              ) : null}
               <div className="relative min-w-[180px] flex-1 sm:w-48 sm:flex-none">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -257,12 +302,18 @@ export function PlanTableScreen({
                 ))}
               </thead>
               <tbody>
-                {table.getRowModel().rows.map((row) => (
+                {table.getRowModel().rows.map((row) => {
+                  const isCurrent =
+                    sessionStatus === 'playing' &&
+                    row.original.index === completedThroughRound &&
+                    completedThroughRound > 0;
+                  return (
                   <tr
                     key={row.id}
                     className={cn(
                       'border-b border-border/70 transition-colors',
                       row.original.completed && 'bg-success/30',
+                      isCurrent && 'ring-1 ring-inset ring-primary/40',
                     )}
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -271,7 +322,8 @@ export function PlanTableScreen({
                       </td>
                     ))}
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

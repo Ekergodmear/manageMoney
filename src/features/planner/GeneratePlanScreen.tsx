@@ -65,17 +65,12 @@ export function GeneratePlanScreen({
     handleSubmit,
     watch,
     setValue,
-    reset,
     formState: { errors },
   } = useForm<PlannerFormSchema>({
     resolver: zodResolver(plannerFormSchema),
     defaultValues,
     mode: 'onChange',
   });
-
-  useEffect(() => {
-    reset(defaultValues);
-  }, [defaultValues, reset]);
 
   const winTaxEnabled = watch('winTaxEnabled');
 

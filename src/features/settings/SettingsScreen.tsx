@@ -1,8 +1,10 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { DesignPlayground } from '@/design/playground/DesignPlayground';
+import { useServices } from '@/services/registry/AppServicesProvider';
 
 interface SettingsScreenProps {
   readonly theme: 'light' | 'dark';
@@ -11,7 +13,20 @@ interface SettingsScreenProps {
 }
 
 export function SettingsScreen({ theme, onThemeChange, onExportHistory }: SettingsScreenProps): ReactNode {
+  const { config } = useServices();
   const isDark = theme === 'dark';
+  const [showPlayground, setShowPlayground] = useState(false);
+
+  if (showPlayground) {
+    return (
+      <div className="w-full">
+        <Button variant="ghost" size="sm" className="mb-4" onClick={() => setShowPlayground(false)}>
+          ← Cài đặt
+        </Button>
+        <DesignPlayground />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-lg space-y-4">
@@ -62,6 +77,22 @@ export function SettingsScreen({ theme, onThemeChange, onExportHistory }: Settin
         </CardContent>
       </Card>
 
+      {config.developer.showDesignPlayground ? (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Design System</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Xem nhanh component và token trước khi rollout workspace mới.
+            </p>
+            <Button variant="outline" size="sm" onClick={() => setShowPlayground(true)}>
+              Mở Design Playground
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <Card className="border-dashed opacity-80">
         <CardHeader className="pb-2">
           <CardTitle className="text-base text-muted-foreground">Sắp có</CardTitle>
@@ -70,6 +101,11 @@ export function SettingsScreen({ theme, onThemeChange, onExportHistory }: Settin
           <p>Ngôn ngữ · Định dạng số · PDF · Excel</p>
         </CardContent>
       </Card>
+
+      <p className="text-center text-xs text-muted-foreground">
+        Stake Planner v{config.build.buildVersion} · {config.build.commitHash.slice(0, 7)} · Built{' '}
+        {config.build.buildDate}
+      </p>
     </div>
   );
 }

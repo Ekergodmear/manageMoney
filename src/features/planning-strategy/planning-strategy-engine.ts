@@ -107,7 +107,32 @@ function candidateFromResult(
   };
 }
 
-export function generateStrategyCandidate(intent: StrategySearchIntent): StrategyCandidate | null {
+function solveStrategyCandidate(intent: StrategySearchIntent): StrategyCandidate | null {
+  const formValues = formFromIntent(
+    intent.baseForm,
+    intent.roundCount,
+    intent.targetProfit,
+    intent.bankrollLimit,
+  );
+
+  const built = buildRequest(formValues);
+  if ('fieldErrors' in built) {
+    return null;
+  }
+
+  const result = generatePlanFromRequest(built.request, intent.bankrollLimit);
+  if (result === null) {
+    return null;
+  }
+
+  if (result.statistics.requiredBankrollAmount > intent.bankrollLimit) {
+    return null;
+  }
+
+  return candidateFromResult(built.request, formValues, result, intent.targetProfit);
+}
+
+function fitStrategyCandidate(intent: StrategySearchIntent): StrategyCandidate | null {
   const formValues = formFromIntent(
     intent.baseForm,
     intent.roundCount,
@@ -144,12 +169,52 @@ export function generateStrategyCandidate(intent: StrategySearchIntent): Strateg
     return candidateFromResult(request, fittedForm, result, intent.targetProfit);
   }
 
-  const required = result.statistics.requiredBankrollAmount;
-  if (required > intent.bankrollLimit) {
-    return null;
-  }
-
   return candidateFromResult(request, formValues, result, intent.targetProfit);
+}
+
+/** Solve + optional optimize fit — dùng khi cần một candidate cụ thể. */
+export function generateStrategyCandidate(intent: StrategySearchIntent): StrategyCandidate | null {
+  return solveStrategyCandidate(intent) ?? fitStrategyCandidate(intent);
+}
+
+function dedupeCandidates(candidates: StrategyCandidate[]): StrategyCandidate[] {
+  const seen = new Set<string>();
+  const unique: StrategyCandidate[] = [];
+  for (const candidate of candidates) {
+    const key = `${String(candidate.rounds)}-${String(candidate.profit)}-${String(candidate.requiredBankroll)}`;
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    unique.push(candidate);
+  }
+  return unique;
+}
+
+function fallbackFitIntents(
+  baseForm: PlannerFormValues,
+  bankrollLimit: number,
+  roundCounts: readonly number[],
+  targetProfits: readonly number[],
+): StrategySearchIntent[] {
+  const midRound = roundCounts[Math.floor(roundCounts.length / 2)] ?? roundCounts[0];
+  const midProfit = targetProfits[Math.floor(targetProfits.length / 2)] ?? targetProfits[0];
+  if (midRound === undefined || midProfit === undefined) {
+    return [];
+  }
+  const seeds: StrategySearchIntent[] = [
+    { baseForm, roundCount: midRound, targetProfit: midProfit, bankrollLimit },
+  ];
+  const firstRound = roundCounts[0];
+  const lastRound = roundCounts[roundCounts.length - 1];
+  const firstProfit = targetProfits[0];
+  if (firstRound !== undefined && firstProfit !== undefined) {
+    seeds.push({ baseForm, roundCount: firstRound, targetProfit: firstProfit, bankrollLimit });
+  }
+  if (lastRound !== undefined && lastRound !== midRound) {
+    seeds.push({ baseForm, roundCount: lastRound, targetProfit: midProfit, bankrollLimit });
+  }
+  return seeds;
 }
 
 export function searchStrategyCandidates(
@@ -158,28 +223,33 @@ export function searchStrategyCandidates(
   roundCounts: readonly number[],
   targetProfits: readonly number[],
 ): StrategyCandidate[] {
-  const seen = new Set<string>();
   const candidates: StrategyCandidate[] = [];
 
   for (const roundCount of roundCounts) {
     for (const targetProfit of targetProfits) {
-      const candidate = generateStrategyCandidate({
+      const candidate = solveStrategyCandidate({
         baseForm,
         roundCount,
         targetProfit,
         bankrollLimit,
       });
-      if (candidate === null) {
-        continue;
+      if (candidate !== null) {
+        candidates.push(candidate);
       }
-      const key = `${String(candidate.rounds)}-${String(candidate.profit)}-${String(candidate.requiredBankroll)}`;
-      if (seen.has(key)) {
-        continue;
-      }
-      seen.add(key);
-      candidates.push(candidate);
     }
   }
 
-  return candidates;
+  const solved = dedupeCandidates(candidates);
+  if (solved.length > 0) {
+    return solved;
+  }
+
+  const fitted: StrategyCandidate[] = [];
+  for (const intent of fallbackFitIntents(baseForm, bankrollLimit, roundCounts, targetProfits)) {
+    const candidate = fitStrategyCandidate(intent);
+    if (candidate !== null) {
+      fitted.push(candidate);
+    }
+  }
+  return dedupeCandidates(fitted);
 }

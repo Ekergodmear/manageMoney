@@ -1,23 +1,27 @@
 import { Landmark, Sparkles } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { planCapitalStrategy } from '@/features/capital/capital-planner-service';
+import type {
+  CapitalGoal,
+  CapitalPlannerInput,
+  RiskProfile,
+} from '@/features/capital/capital-planner-types';
 import {
   CAPITAL_GOAL_LABELS,
   RISK_LABELS,
-  type CapitalGoal,
-  type CapitalPlannerResult,
-  type CapitalSessionRecommendation,
-  type RiskProfile,
 } from '@/features/capital/capital-planner-types';
 import { PresetPicker } from '@/features/game-designer/PresetPicker';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
 import { applyPresetToForm } from '@/features/game-designer/preset-utils';
+import type {
+  RecommendationSet,
+  StrategyRecommendation,
+} from '@/features/recommendation/recommendation-set-types';
 import { DEFAULT_PLANNER_FORM } from '@/features/planner/plan-service';
 import { formatMoneyFieldValue } from '@/features/planner/schema';
 import { formatAmount, parseMoneyPositiveInt } from '@/lib/money-format';
@@ -38,16 +42,10 @@ interface CapitalPlannerScreenProps {
   readonly initialBankroll?: string;
   readonly initialStrategy?: CapitalGoal;
   readonly initialRisk?: RiskProfile;
-  readonly lastResult?: CapitalPlannerResult | null;
+  readonly recommendationSet: RecommendationSet | null;
   readonly onPresetSelect: (preset: GamePolicyPreset) => void;
-  readonly onGenerate: (input: {
-    bankroll: number;
-    strategy: CapitalGoal;
-    risk: RiskProfile;
-    presetId: string;
-    result: CapitalPlannerResult;
-  }) => void;
-  readonly onCreateSession: (recommendation: CapitalSessionRecommendation) => void;
+  readonly onGenerate: (input: CapitalPlannerInput) => Promise<RecommendationSet | null>;
+  readonly onUseRecommendation: (recommendationId: string) => void;
 }
 
 function RadioGroup<T extends string>({
@@ -98,16 +96,22 @@ export function CapitalPlannerScreen({
   initialBankroll = '30.000.000',
   initialStrategy = 'balanced',
   initialRisk = 'normal',
-  lastResult = null,
+  recommendationSet,
   onPresetSelect,
   onGenerate,
-  onCreateSession,
+  onUseRecommendation,
 }: CapitalPlannerScreenProps): ReactNode {
   const [bankrollInput, setBankrollInput] = useState(initialBankroll);
   const [strategy, setStrategy] = useState<CapitalGoal>(initialStrategy);
   const [risk, setRisk] = useState<RiskProfile>(initialRisk);
-  const [result, setResult] = useState<CapitalPlannerResult | null>(lastResult);
   const [error, setError] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+
+  useEffect(() => {
+    setBankrollInput(initialBankroll);
+    setStrategy(initialStrategy);
+    setRisk(initialRisk);
+  }, [initialBankroll, initialStrategy, initialRisk]);
 
   const activePreset = presets.find((p) => p.id === activePresetId);
 
@@ -121,25 +125,30 @@ export function CapitalPlannerScreen({
       setError('Chọn game preset');
       return;
     }
-    const baseForm = applyPresetToForm(
-      { ...DEFAULT_PLANNER_FORM, userBankroll: bankrollInput },
-      activePreset,
-    );
-    const planned = planCapitalStrategy({
-      bankroll,
-      presetId: activePresetId,
-      baseForm,
-      strategy,
-      risk,
-    });
-    if (planned === null) {
-      setError('Không tìm được chiến lược khả thi với vốn và game này.');
-      setResult(null);
-      return;
-    }
+
+    setGenerating(true);
     setError(null);
-    setResult(planned);
-    onGenerate({ bankroll, strategy, risk, presetId: activePresetId, result: planned });
+
+    void (async () => {
+      try {
+        const baseForm = applyPresetToForm(
+          { ...DEFAULT_PLANNER_FORM, userBankroll: bankrollInput },
+          activePreset,
+        );
+        const set = await onGenerate({
+          bankroll,
+          presetId: activePresetId,
+          baseForm,
+          strategy,
+          risk,
+        });
+        if (set === null) {
+          setError('Không tìm được chiến lược khả thi với vốn và game này.');
+        }
+      } finally {
+        setGenerating(false);
+      }
+    })();
   }
 
   return (
@@ -195,27 +204,27 @@ export function CapitalPlannerScreen({
             onChange={setRisk}
             renderLabel={(r) => RISK_LABELS[r]}
           />
-          <Button className="w-full" size="lg" onClick={handleGenerate}>
+          <Button className="w-full" size="lg" onClick={handleGenerate} disabled={generating}>
             <Sparkles className="h-4 w-4" />
-            Generate Strategy
+            {generating ? 'Đang tính…' : 'Generate Strategy'}
           </Button>
           {error !== null ? <p className="text-sm text-destructive">{error}</p> : null}
         </CardContent>
       </Card>
 
-      {result !== null ? (
-        <ResultPanel result={result} onCreateSession={onCreateSession} />
+      {recommendationSet !== null ? (
+        <RecommendationSetPanel set={recommendationSet} onUseRecommendation={onUseRecommendation} />
       ) : null}
     </div>
   );
 }
 
-function ResultPanel({
-  result,
-  onCreateSession,
+function RecommendationSetPanel({
+  set,
+  onUseRecommendation,
 }: {
-  result: CapitalPlannerResult;
-  onCreateSession: (r: CapitalSessionRecommendation) => void;
+  set: RecommendationSet;
+  onUseRecommendation: (recommendationId: string) => void;
 }): ReactNode {
   return (
     <Card className="border-primary/20">
@@ -224,33 +233,30 @@ function ResultPanel({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-3">
-          <SummaryStat label="Vốn" value={`${formatAmount(result.totalBankroll)} đ`} />
-          <SummaryStat
-            label="Khả dụng"
-            value={`${formatAmount(result.usableBankroll)} đ`}
-          />
-          <SummaryStat label="Dự phòng" value={`${formatAmount(result.reserve)} đ`} />
+          <SummaryStat label="Vốn" value={`${formatAmount(set.totalBankroll)} đ`} />
+          <SummaryStat label="Khả dụng" value={`${formatAmount(set.usableBankroll)} đ`} />
+          <SummaryStat label="Dự phòng" value={`${formatAmount(set.reserve)} đ`} />
         </div>
 
         <div className="border-t border-border pt-3">
           <p className="text-sm text-muted-foreground">
-            {result.recommendations.length > 1
-              ? `${String(result.recommendations.length)} session`
+            {set.recommendations.length > 1
+              ? `${String(set.recommendations.length)} session`
               : '1 session'}
             {' · '}
             Tổng lợi nhuận mục tiêu{' '}
             <strong className="text-foreground">
-              {formatAmount(result.totalTargetProfit)} đ
+              {formatAmount(set.totalTargetProfit)} đ
             </strong>
           </p>
         </div>
 
         <div className="space-y-3">
-          {result.recommendations.map((rec) => (
+          {set.recommendations.map((rec) => (
             <RecommendationCard
-              key={rec.id}
+              key={rec.recommendationId}
               rec={rec}
-              onCreateSession={() => onCreateSession(rec)}
+              onUse={() => onUseRecommendation(rec.recommendationId)}
             />
           ))}
         </div>
@@ -270,10 +276,10 @@ function SummaryStat({ label, value }: { label: string; value: string }): ReactN
 
 function RecommendationCard({
   rec,
-  onCreateSession,
+  onUse,
 }: {
-  rec: CapitalSessionRecommendation;
-  onCreateSession: () => void;
+  rec: StrategyRecommendation;
+  onUse: () => void;
 }): ReactNode {
   return (
     <div className="rounded-xl border border-border p-4">
@@ -308,8 +314,8 @@ function RecommendationCard({
           <p className="font-medium">{formatAmount(rec.maxBet)} đ</p>
         </div>
       </div>
-      <Button className="mt-4 w-full sm:w-auto" size="sm" onClick={onCreateSession}>
-        Generate Session
+      <Button className="mt-4 w-full sm:w-auto" size="sm" onClick={onUse}>
+        Dùng phương án này
       </Button>
     </div>
   );

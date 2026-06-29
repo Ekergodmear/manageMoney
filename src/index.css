@@ -31,6 +31,9 @@
 }
 
 :root {
+  --motion-fast: 150ms;
+  --motion-normal: 220ms;
+  --motion-slow: 320ms;
   --radius: 0.75rem;
   --background: #f4f6fb;
   --foreground: #0f172a;

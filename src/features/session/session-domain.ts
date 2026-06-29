@@ -1,11 +1,8 @@
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
-import type { ImproveOption } from '@/features/improve/improve-service';
-import { applyImproveOption } from '@/features/improve/improve-service';
 import { accumulatedAtRound } from '@/features/planner/plan-display';
 import type { GenerateResult, PlannerFormValues } from '@/features/planner/plan-service';
-import { continuePlan } from '@/features/planner/plan-service';
 
-export type PlanOrigin = 'generate' | 'improve' | 'continue';
+export type PlanOrigin = 'generate' | 'improve' | 'continue' | 'capital' | 'scenario';
 
 export type PlanStatus = 'ready' | 'playing' | 'won' | 'lost' | 'superseded';
 
@@ -30,6 +27,7 @@ export interface SessionTimelineEvent {
   readonly type: SessionTimelineEventType;
   readonly planId?: string;
   readonly label?: string;
+  readonly origin?: PlanOrigin;
   readonly roundIndex?: number;
   readonly betAmount?: number;
 }
@@ -73,16 +71,14 @@ export interface Session {
   readonly archived: boolean;
   readonly tags: readonly string[];
   readonly pendingRename?: boolean;
+  readonly originDraftId?: string;
+  readonly originRecommendationId?: string;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
 
 function nowIso(): string {
   return new Date().toISOString();
-}
-
-function planLabel(index: number): string {
-  return `Plan ${String.fromCharCode(65 + index)}`;
 }
 
 function addEvent(
@@ -135,50 +131,6 @@ export function computeSessionStatistics(session: Session): SessionStatistics {
   };
 }
 
-export function createSessionFromGenerate(
-  values: PlannerFormValues,
-  result: GenerateResult,
-  presetId: string,
-  sessionNumber: number,
-): Session {
-  const sessionId = crypto.randomUUID();
-  const planId = crypto.randomUUID();
-  const at = nowIso();
-  const plan: Plan = {
-    id: planId,
-    label: planLabel(0),
-    origin: 'generate',
-    parentPlanId: null,
-    formValues: values,
-    generated: result,
-    status: 'ready',
-    completedThroughRound: 0,
-    createdAt: at,
-  };
-
-  return {
-    id: sessionId,
-    sessionNumber,
-    title: `Session #${String(sessionNumber)}`,
-    presetId,
-    status: 'draft',
-    plans: [plan],
-    currentPlanId: planId,
-    timeline: [
-      { at, type: 'session-created' },
-      { at, type: 'plan-added', planId, label: 'Generate' },
-    ],
-    notes: '',
-    startedAt: null,
-    profitAmount: null,
-    favorite: false,
-    archived: false,
-    tags: [],
-    createdAt: at,
-    updatedAt: at,
-  };
-}
-
 export function startCurrentPlan(session: Session): Session {
   const plan = getCurrentPlan(session);
   if (plan === null) {
@@ -209,19 +161,42 @@ export function placeBetOnPlan(session: Session, roundIndex: number): Session | 
   if (roundIndex !== plan.completedThroughRound + 1) {
     return null;
   }
-  const round = plan.generated.strategy.rounds[roundIndex - 1];
+  return setBetProgressOnPlan(session, roundIndex);
+}
+
+/** Ghi tiến độ hàng loạt — tick vòng N = đã cược đến vòng N. */
+export function setBetProgressOnPlan(session: Session, targetRound: number): Session | null {
+  const plan = getCurrentPlan(session);
+  if (plan === null || plan.status !== 'playing') {
+    return null;
+  }
+  const totalRounds = plan.generated.strategy.rounds.length;
+  if (targetRound < 0 || targetRound > totalRounds) {
+    return null;
+  }
+  if (targetRound === plan.completedThroughRound) {
+    return null;
+  }
+
   const updatedPlan: Plan = {
     ...plan,
-    completedThroughRound: roundIndex,
+    completedThroughRound: targetRound,
   };
+  const lastRound =
+    targetRound > 0 ? plan.generated.strategy.rounds[targetRound - 1] : undefined;
+  const advancing = targetRound > plan.completedThroughRound;
+
   return {
     ...session,
     plans: session.plans.map((p) => (p.id === plan.id ? updatedPlan : p)),
     timeline: addEvent(session.timeline, {
-      type: 'bet',
+      type: advancing ? 'bet' : 'undo',
       planId: plan.id,
-      roundIndex,
-      betAmount: round?.betAmount,
+      roundIndex: targetRound > 0 ? targetRound : plan.completedThroughRound,
+      betAmount: lastRound?.betAmount,
+      label: advancing
+        ? `Đến vòng ${String(targetRound)}`
+        : `Về vòng ${String(targetRound)}`,
     }),
     updatedAt: nowIso(),
   };
@@ -232,16 +207,7 @@ export function undoBetOnPlan(session: Session): Session | null {
   if (plan === null || plan.completedThroughRound <= 0) {
     return null;
   }
-  const updatedPlan: Plan = {
-    ...plan,
-    completedThroughRound: plan.completedThroughRound - 1,
-  };
-  return {
-    ...session,
-    plans: session.plans.map((p) => (p.id === plan.id ? updatedPlan : p)),
-    timeline: addEvent(session.timeline, { type: 'undo', planId: plan.id }),
-    updatedAt: nowIso(),
-  };
+  return setBetProgressOnPlan(session, plan.completedThroughRound - 1);
 }
 
 function markPlanFinished(plan: Plan, status: 'won' | 'lost'): Plan {
@@ -296,98 +262,6 @@ export function markCurrentPlanLost(session: Session): Session {
   };
 }
 
-export function addPlanFromContinue(
-  session: Session,
-  targetRoundCount: number,
-): { session: Session; error?: string } {
-  const parent = getCurrentPlan(session);
-  if (parent === null) {
-    return { session, error: 'Không có plan hiện tại.' };
-  }
-
-  const outcome = continuePlan(parent.formValues, targetRoundCount);
-  if (outcome.fieldErrors !== undefined || outcome.result === undefined) {
-    return { session, error: 'Không tạo được plan tiếp theo.' };
-  }
-
-  const lostParent = parent.status === 'playing' ? markPlanFinished(parent, 'lost') : parent;
-  const planId = crypto.randomUUID();
-  const newPlan: Plan = {
-    id: planId,
-    label: planLabel(session.plans.length),
-    origin: 'continue',
-    parentPlanId: parent.id,
-    formValues: { ...parent.formValues, roundCount: String(targetRoundCount) },
-    generated: outcome.result,
-    status: 'playing',
-    completedThroughRound: parent.completedThroughRound,
-    createdAt: nowIso(),
-  };
-
-  return {
-    session: {
-      ...session,
-      status: 'playing',
-      plans: [
-        ...session.plans.map((p) => (p.id === parent.id ? lostParent : p)),
-        newPlan,
-      ],
-      currentPlanId: planId,
-      timeline: addEvent(session.timeline, {
-        type: 'continue',
-        planId,
-        label: `Continue → ${String(targetRoundCount)} vòng`,
-      }),
-      updatedAt: nowIso(),
-    },
-  };
-}
-
-export function addPlanFromImprove(session: Session, option: ImproveOption): Session {
-  const parent = getCurrentPlan(session);
-  if (parent === null) {
-    return session;
-  }
-
-  const newFormValues = applyImproveOption(parent.formValues, option);
-  const capped = Math.min(
-    parent.completedThroughRound,
-    option.result.strategy.rounds.length,
-  );
-  const supersededParent =
-    parent.status === 'playing' || parent.status === 'ready'
-      ? { ...parent, status: 'superseded' as const, finishedAt: nowIso() }
-      : parent;
-
-  const planId = crypto.randomUUID();
-  const newPlan: Plan = {
-    id: planId,
-    label: planLabel(session.plans.length),
-    origin: 'improve',
-    parentPlanId: parent.id,
-    formValues: newFormValues,
-    generated: option.result,
-    status: parent.status === 'playing' ? 'playing' : 'ready',
-    completedThroughRound: capped,
-    createdAt: nowIso(),
-  };
-
-  return {
-    ...session,
-    plans: [
-      ...session.plans.map((p) => (p.id === parent.id ? supersededParent : p)),
-      newPlan,
-    ],
-    currentPlanId: planId,
-    timeline: addEvent(session.timeline, {
-      type: 'improve',
-      planId,
-      label: option.label,
-    }),
-    updatedAt: nowIso(),
-  };
-}
-
 export function updateSessionNotes(session: Session, notes: string): Session {
   if (session.notes === notes) {
     return session;
@@ -437,6 +311,10 @@ export function planOriginLabel(origin: PlanOrigin): string {
       return 'Cải thiện';
     case 'continue':
       return 'Continue';
+    case 'capital':
+      return 'Capital';
+    case 'scenario':
+      return 'Scenario';
   }
 }
 
@@ -487,7 +365,7 @@ export function isPlanExhausted(plan: Plan): boolean {
   return plan.completedThroughRound >= plan.generated.strategy.rounds.length;
 }
 
-export type SessionView = 'overview' | 'playing' | 'improve' | 'simulate';
+export type SessionView = 'overview' | 'playing' | 'improve' | 'improve-review' | 'simulate';
 
 export function sessionPresetName(preset: GamePolicyPreset | undefined): string {
   return preset?.name ?? 'Custom';

@@ -12,7 +12,7 @@ export const BUILTIN_GAME_PRESETS: readonly GamePolicyPreset[] = [
     maximumBet: '1.000.000',
     betStep: '10.000',
     rewardPolicy: { type: 'tier-tax', threshold: '10.000.000', ratePercent: '10' },
-    continuePolicy: { maximumRounds: 5000 },
+    continuePolicy: { maximumRounds: 5000, presets: [1000, 1500, 2000, 5000] },
     builtin: true,
   },
   {
@@ -24,7 +24,7 @@ export const BUILTIN_GAME_PRESETS: readonly GamePolicyPreset[] = [
     maximumBet: '500.000',
     betStep: '10.000',
     rewardPolicy: { type: 'no-tax' },
-    continuePolicy: { maximumRounds: 3000 },
+    continuePolicy: { maximumRounds: 3000, presets: [1000, 1500, 2000, 3000] },
     builtin: true,
   },
   {
@@ -36,7 +36,7 @@ export const BUILTIN_GAME_PRESETS: readonly GamePolicyPreset[] = [
     maximumBet: '500.000',
     betStep: '1.000',
     rewardPolicy: { type: 'no-tax' },
-    continuePolicy: { maximumRounds: 2000 },
+    continuePolicy: { maximumRounds: 2000, presets: [1000, 1500, 2000] },
     builtin: true,
   },
   {
@@ -48,7 +48,7 @@ export const BUILTIN_GAME_PRESETS: readonly GamePolicyPreset[] = [
     maximumBet: '200.000',
     betStep: '5.000',
     rewardPolicy: { type: 'no-tax' },
-    continuePolicy: { maximumRounds: 1500 },
+    continuePolicy: { maximumRounds: 1500, presets: [1000, 1500] },
     builtin: true,
   },
   {
@@ -60,7 +60,7 @@ export const BUILTIN_GAME_PRESETS: readonly GamePolicyPreset[] = [
     maximumBet: '1.000.000',
     betStep: '10.000',
     rewardPolicy: { type: 'tier-tax', threshold: '10.000.000', ratePercent: '10' },
-    continuePolicy: { maximumRounds: 5000 },
+    continuePolicy: { maximumRounds: 5000, presets: [1000, 1500, 2000, 5000] },
     builtin: true,
   },
 ];

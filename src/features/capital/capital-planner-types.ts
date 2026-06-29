@@ -48,8 +48,6 @@ export interface CapitalPlannerSnapshot {
   readonly strategy: CapitalGoal;
   readonly risk: RiskProfile;
   readonly presetId: string;
-  readonly result: CapitalPlannerResult;
-  readonly generatedAt: string;
 }
 
 export const CAPITAL_GOAL_LABELS: Record<CapitalGoal, string> = {

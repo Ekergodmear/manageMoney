@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import type { ContinuePolicyConfig } from '@/features/game-designer/game-policy-types';
+import { continueTargetsForPlan } from '@/features/continue/continue-policy-utils';
 import { accumulatedAtRound } from '@/features/planner/plan-display';
 import type { GenerateResult } from '@/features/planner/plan-service';
 import { PlanTableScreen } from '@/features/planner/PlanTableScreen';
@@ -24,28 +26,15 @@ interface PlayingSessionScreenProps {
   readonly focusRoundIndex?: number | null;
   readonly onFocusRoundHandled?: () => void;
   readonly onPlaceBet: (roundIndex: number) => void;
+  readonly onSetBetProgress: (targetRound: number) => void;
   readonly onUndoBet: () => void;
   readonly onWin: (roundIndex: number) => void;
   readonly onContinue: (targetRoundCount: number) => void;
   readonly onResetProgress: () => void;
   readonly onEdit: () => void;
   readonly onImprove?: () => void;
-  readonly continueMaxRounds?: number;
-}
-
-function continuePresets(totalRounds: number, maxRounds: number): number[] {
-  const candidates = [
-    totalRounds + 100,
-    totalRounds + 200,
-    totalRounds + 500,
-    1000,
-    1500,
-    2000,
-    5000,
-  ];
-  return [...new Set(candidates.filter((n) => n > totalRounds && n <= maxRounds))].sort(
-    (a, b) => a - b,
-  );
+  readonly hideContinue?: boolean;
+  readonly continuePolicy?: ContinuePolicyConfig;
 }
 
 export function PlayingSessionScreen({
@@ -58,13 +47,15 @@ export function PlayingSessionScreen({
   focusRoundIndex = null,
   onFocusRoundHandled,
   onPlaceBet,
+  onSetBetProgress,
   onUndoBet,
   onWin,
   onContinue,
   onResetProgress,
   onEdit,
   onImprove,
-  continueMaxRounds = 5000,
+  hideContinue = false,
+  continuePolicy = { maximumRounds: 5000, presets: [1000, 1500, 2000, 5000] },
 }: PlayingSessionScreenProps): React.ReactNode {
   const { strategy, statistics } = generated;
   const totalRounds = strategy.rounds.length;
@@ -80,7 +71,7 @@ export function PlayingSessionScreen({
   const currentBet = currentRound?.betAmount ?? 0;
   const nextBet = strategy.rounds[currentRoundIndex]?.betAmount ?? 0;
   const allRoundsDone = completedThroughRound >= totalRounds && sessionStatus === 'playing';
-  const presetTargets = continuePresets(totalRounds, continueMaxRounds);
+  const presetTargets = continueTargetsForPlan(continuePolicy, totalRounds);
   const progressPct =
     totalRounds > 0 ? Math.round((completedThroughRound / totalRounds) * 100) : 0;
 
@@ -161,12 +152,12 @@ export function PlayingSessionScreen({
           sessionNumber={sessionNumber}
           completedThroughRound={completedThroughRound}
           onToggleRound={(roundIndex, checked) => {
-            if (checked) {
-              onPlaceBet(roundIndex);
-            } else if (roundIndex === completedThroughRound) {
-              onUndoBet();
+            if (sessionStatus !== 'playing') {
+              return;
             }
+            onSetBetProgress(checked ? roundIndex : roundIndex - 1);
           }}
+          onJumpToRound={onSetBetProgress}
           onResetProgress={onResetProgress}
           onEdit={onEdit}
           sessionStatus={sessionStatus}
@@ -211,7 +202,7 @@ export function PlayingSessionScreen({
       {sessionStatus === 'won' ? (
         <Card className="border-success bg-success/10">
           <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
-            <PartyPopper className="h-10 w-10 text-success" />
+            <PartyPopper className="h-10 w-10 text-success-foreground" />
             <p className="text-lg font-bold">Chúc mừng — bạn đã thắng!</p>
           </CardContent>
         </Card>
@@ -312,11 +303,13 @@ export function PlayingSessionScreen({
         </CardContent>
       </Card>
 
-      {allRoundsDone ? (
+      {allRoundsDone && !hideContinue ? (
         <Card className="border-dashed">
           <CardContent className="space-y-4 p-5">
-            <p className="font-medium">Hết vòng — chưa thắng.</p>
-            <p className="text-sm text-muted-foreground">Continue until</p>
+            <p className="font-medium">
+              Bạn đã hoàn thành {totalRounds} vòng — chưa thắng.
+            </p>
+            <p className="text-sm text-muted-foreground">Tiếp tục đến:</p>
             <div className="flex flex-wrap gap-2">
               {presetTargets.map((n) => (
                 <Button
@@ -324,11 +317,18 @@ export function PlayingSessionScreen({
                   variant={selectedContinue === n ? 'default' : 'outline'}
                   size="sm"
                   type="button"
+                  className="gap-2"
                   onClick={() => {
                     setSelectedContinue(n);
                     setContinueTarget(String(n));
                   }}
                 >
+                  <span
+                    className={cn(
+                      'inline-block h-2 w-2 rounded-full border',
+                      selectedContinue === n ? 'bg-primary-foreground border-primary-foreground' : 'border-muted-foreground',
+                    )}
+                  />
                   {n}
                 </Button>
               ))}
@@ -338,14 +338,15 @@ export function PlayingSessionScreen({
                 type="button"
                 onClick={() => setSelectedContinue(-1)}
               >
-                Custom
+                Tùy chỉnh
               </Button>
             </div>
             {selectedContinue === -1 ? (
               <Input
                 type="number"
                 min={totalRounds + 1}
-                placeholder={`Ví dụ: ${String(totalRounds + 100)}`}
+                max={continuePolicy.maximumRounds}
+                placeholder={`Ví dụ: ${String(presetTargets[0] ?? totalRounds + 100)}`}
                 value={continueTarget}
                 onChange={(e) => setContinueTarget(e.target.value)}
               />
@@ -356,13 +357,17 @@ export function PlayingSessionScreen({
                 const target =
                   selectedContinue === -1
                     ? Number(continueTarget)
-                    : (selectedContinue ?? totalRounds + 100);
-                if (Number.isFinite(target) && target > totalRounds) {
+                    : (selectedContinue ?? presetTargets[0] ?? totalRounds + 100);
+                if (
+                  Number.isFinite(target) &&
+                  target > totalRounds &&
+                  target <= continuePolicy.maximumRounds
+                ) {
                   onContinue(target);
                 }
               }}
             >
-              Continue
+              Tiếp tục
             </Button>
           </CardContent>
         </Card>

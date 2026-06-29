@@ -1,3 +1,7 @@
+import { normalizePlanningDraft } from '@/features/planning/planning-types';
+import type { CapitalPlannerSnapshot } from '@/features/capital/capital-planner-types';
+import type { RecommendationSet } from '@/features/recommendation/recommendation-set-types';
+import type { PlanCandidate } from '@/features/planning/plan-candidate-types';
 import type { ActiveSession, HistorySession, PersistedAppState } from '@/features/session/session-types';
 import type { Session, SessionTimelineEvent } from '@/features/session/session-domain';
 import { normalizeSessionLibraryFields } from '@/features/library/library-actions';
@@ -104,6 +108,57 @@ function historyToSession(item: HistorySession, presetId: string): Session {
   };
 }
 
+function normalizePlanCandidate(candidate: PlanCandidate | null | undefined): PlanCandidate | null {
+  if (candidate === null || candidate === undefined) {
+    return null;
+  }
+  if ('target' in candidate && candidate.target !== undefined) {
+    return candidate;
+  }
+  const legacy = candidate as PlanCandidate & { sessionId: string; parentPlanId: string };
+  return {
+    ...legacy,
+    target: 'append-plan',
+    presetId: 'presetId' in legacy && typeof legacy.presetId === 'string' ? legacy.presetId : 'bingo-120',
+  };
+}
+
+function normalizeCapitalPlanner(
+  snapshot: CapitalPlannerSnapshot | null | undefined,
+): CapitalPlannerSnapshot | null {
+  if (snapshot === null || snapshot === undefined) {
+    return null;
+  }
+  const legacy = snapshot as CapitalPlannerSnapshot & { result?: unknown; generatedAt?: string };
+  return {
+    totalBankroll: legacy.totalBankroll,
+    strategy: legacy.strategy,
+    risk: legacy.risk,
+    presetId: legacy.presetId,
+  };
+}
+
+function normalizeRecommendationSet(raw: unknown): RecommendationSet | null {
+  if (raw === null || raw === undefined || typeof raw !== 'object') {
+    return null;
+  }
+  const legacy = raw as RecommendationSet & {
+    bundleId?: string;
+    createdAt?: string;
+  };
+  if ('setId' in legacy && typeof legacy.setId === 'string') {
+    return legacy;
+  }
+  if ('bundleId' in legacy && typeof legacy.bundleId === 'string') {
+    return {
+      ...legacy,
+      setId: legacy.bundleId,
+      generatedAt: legacy.generatedAt ?? legacy.createdAt ?? new Date().toISOString(),
+    };
+  }
+  return null;
+}
+
 export function migratePersistedState(raw: unknown): PersistedAppState {
   if (raw === null || raw === undefined || typeof raw !== 'object') {
     return {
@@ -115,7 +170,10 @@ export function migratePersistedState(raw: unknown): PersistedAppState {
       customGamePresets: [],
       activePresetId: 'bingo-120',
       capitalPlanner: null,
+      recommendationSet: null,
       libraryCollections: [],
+      planningDraft: null,
+      planCandidate: null,
     };
   }
 
@@ -123,13 +181,20 @@ export function migratePersistedState(raw: unknown): PersistedAppState {
     version?: number;
     activeSession?: ActiveSession | null;
     history?: HistorySession[];
+    strategyRecommendationBundle?: unknown;
   };
 
   if (state.version === 3) {
+    const recommendationSet =
+      normalizeRecommendationSet(state.recommendationSet) ??
+      normalizeRecommendationSet(state.strategyRecommendationBundle);
     return {
       ...state,
-      capitalPlanner: state.capitalPlanner ?? null,
+      capitalPlanner: normalizeCapitalPlanner(state.capitalPlanner),
+      recommendationSet,
       libraryCollections: state.libraryCollections ?? [],
+      planningDraft: normalizePlanningDraft(state.planningDraft),
+      planCandidate: normalizePlanCandidate(state.planCandidate),
       sessions: (state.sessions ?? []).map(normalizeSessionLibraryFields),
     };
   }
@@ -153,7 +218,10 @@ export function migratePersistedState(raw: unknown): PersistedAppState {
       customGamePresets: state.customGamePresets,
       activePresetId: state.activePresetId,
       capitalPlanner: null,
+      recommendationSet: null,
       libraryCollections: [],
+      planningDraft: null,
+      planCandidate: null,
     };
   }
 
@@ -166,6 +234,9 @@ export function migratePersistedState(raw: unknown): PersistedAppState {
     customGamePresets: [],
     activePresetId: 'bingo-120',
     capitalPlanner: null,
+    recommendationSet: null,
     libraryCollections: [],
+    planningDraft: null,
+    planCandidate: null,
   };
 }
