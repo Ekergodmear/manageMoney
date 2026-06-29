@@ -1,6 +1,7 @@
 import { collectorError, collectorLog } from '../log/collector-log.js';
+import type { RawHttpResponse } from '../types/draw-result.js';
 import { withRetry } from '../util/retry.js';
-import type { DrawSourceAdapter } from './draw-source-adapter.js';
+import type { DrawSourceAdapter, RawDrawFetch } from './draw-source-adapter.js';
 
 const DEFAULT_API_URL = 'https://bingo18.top/data/data.json';
 const DEFAULT_TIMEOUT_MS = 15_000;
@@ -20,11 +21,24 @@ interface Bingo18ApiResponse {
   readonly gbingoDraws?: readonly Bingo18RawDraw[];
 }
 
+interface FetchResult {
+  readonly data: Bingo18ApiResponse;
+  readonly rawResponse: RawHttpResponse;
+}
+
 function parseApiJson(text: string): Bingo18ApiResponse {
   return JSON.parse(text) as Bingo18ApiResponse;
 }
 
-async function fetchJson(url: string, timeoutMs: number): Promise<Bingo18ApiResponse> {
+function headersToRecord(headers: Headers): Record<string, string> {
+  const out: Record<string, string> = {};
+  headers.forEach((value, key) => {
+    out[key] = value;
+  });
+  return out;
+}
+
+async function fetchJson(url: string, timeoutMs: number): Promise<FetchResult> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -37,12 +51,18 @@ async function fetchJson(url: string, timeoutMs: number): Promise<Bingo18ApiResp
       },
     });
 
+    const body = await response.text();
+    const rawResponse: RawHttpResponse = {
+      status: response.status,
+      headers: headersToRecord(response.headers),
+      body,
+    };
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status} ${response.statusText}`);
     }
 
-    const text = await response.text();
-    return parseApiJson(text);
+    return { data: parseApiJson(body), rawResponse };
   } finally {
     clearTimeout(timer);
   }
@@ -71,13 +91,12 @@ export class Bingo18DrawSourceAdapter implements DrawSourceAdapter {
       Number(process.env['COLLECTOR_BINGO18_TIMEOUT_MS'] ?? DEFAULT_TIMEOUT_MS);
   }
 
-  async fetchLatest(): Promise<{ rawPayload: Bingo18ListPayload } | null> {
+  async fetchLatest(): Promise<RawDrawFetch | null> {
     try {
-      const data = await withRetry(() => fetchJson(this.apiUrl, this.timeoutMs), {
-        maxAttempts: 3,
-        baseDelayMs: 1_000,
-        label: 'bingo18-fetch',
-      });
+      const { data, rawResponse } = await withRetry(
+        () => fetchJson(this.apiUrl, this.timeoutMs),
+        { maxAttempts: 3, baseDelayMs: 1_000, label: 'bingo18-fetch' },
+      );
 
       const draws = data.gbingoDraws;
       if (draws === undefined || draws.length === 0) {
@@ -92,6 +111,7 @@ export class Bingo18DrawSourceAdapter implements DrawSourceAdapter {
           draws: sorted,
           fetchedAt: new Date().toISOString(),
         },
+        rawResponse,
       };
     } catch (err) {
       collectorError('Bingo18 fetch failed', err);

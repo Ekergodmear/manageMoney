@@ -1,20 +1,26 @@
-import { randomUUID } from 'node:crypto';
-
 import type { Bingo18ListPayload, Bingo18RawDraw } from '../adapter/bingo18-adapter.js';
 import {
   classifySmallLarge,
+  computeLatencyMs,
   detectFlower,
   diceTotal,
+  drawKeyFromDrawAt,
   type DrawResult,
+  type RawHttpResponse,
 } from '../types/draw-result.js';
 import { parseFailure, parseSuccess, type ParseResult } from '../types/parse-result.js';
 
 interface MockRawPayload {
   readonly kind: 'mock';
-  readonly drawNumber: string;
-  readonly drawTime: string;
+  readonly drawKey: string;
+  readonly drawAt: string;
   readonly publishedAt: string;
   readonly dice: [number, number, number];
+}
+
+export interface ParseDrawOptions {
+  readonly gameId?: string;
+  readonly rawResponse?: RawHttpResponse | null;
 }
 
 function isMockPayload(value: unknown): value is MockRawPayload {
@@ -22,8 +28,8 @@ function isMockPayload(value: unknown): value is MockRawPayload {
   const o = value as Record<string, unknown>;
   return (
     o['kind'] === 'mock' &&
-    typeof o['drawNumber'] === 'string' &&
-    typeof o['drawTime'] === 'string' &&
+    typeof o['drawKey'] === 'string' &&
+    typeof o['drawAt'] === 'string' &&
     Array.isArray(o['dice']) &&
     o['dice'].length === 3
   );
@@ -33,11 +39,6 @@ function isBingo18ListPayload(value: unknown): value is Bingo18ListPayload {
   if (typeof value !== 'object' || value === null) return false;
   const o = value as Record<string, unknown>;
   return o['kind'] === 'bingo18-list' && Array.isArray(o['draws']);
-}
-
-/** Stable unique key — bingo18 API has no official draw number. */
-export function drawNumberFromDrawAt(drawAt: string): string {
-  return drawAt;
 }
 
 function parseWinningResult(result: string): [number, number, number] | null {
@@ -52,7 +53,7 @@ function parseWinningResult(result: string): [number, number, number] | null {
 export function parseBingo18RawDraw(
   raw: Bingo18RawDraw,
   source: string,
-  gameId = 'bingo18',
+  options: ParseDrawOptions = {},
   collectedAt = new Date().toISOString(),
 ): ParseResult {
   const dice = parseWinningResult(raw.winningResult);
@@ -60,26 +61,29 @@ export function parseBingo18RawDraw(
     return parseFailure(raw, [`Invalid winningResult: ${raw.winningResult}`]);
   }
 
-  const drawTime = raw.drawAt;
-  const publishedAt: string | null = null;
-  const latencyMs = 0;
+  const drawAt = raw.drawAt;
+  const publishedAt = drawAt;
+  const publishedEstimated = true;
+  const latencyMs = computeLatencyMs(publishedAt, collectedAt);
   const total = diceTotal(dice);
+  const gameId = options.gameId ?? 'bingo18';
 
   const draw: DrawResult = {
-    id: randomUUID(),
+    drawKey: drawKeyFromDrawAt(drawAt),
     gameId,
     marketVersion: 1,
-    drawNumber: drawNumberFromDrawAt(drawTime),
-    drawTime,
+    drawAt,
     publishedAt,
+    publishedEstimated,
     collectedAt,
     latencyMs,
     dice,
     total,
     flower: detectFlower(dice),
     smallLarge: classifySmallLarge(total),
-    rawPayload: raw,
     source,
+    rawPayload: raw,
+    rawResponse: options.rawResponse ?? null,
   };
 
   return parseSuccess(draw, raw);
@@ -89,31 +93,31 @@ function buildDrawFromMock(
   rawPayload: MockRawPayload,
   source: string,
   gameId: string,
+  rawResponse: RawHttpResponse | null,
 ): DrawResult {
   const collectedAt = new Date().toISOString();
   const publishedAt = rawPayload.publishedAt;
-  const latencyMs = Math.max(
-    0,
-    new Date(collectedAt).getTime() - new Date(publishedAt).getTime(),
-  );
+  const publishedEstimated = publishedAt === rawPayload.drawAt;
+  const latencyMs = computeLatencyMs(publishedAt, collectedAt);
   const dice = rawPayload.dice;
   const total = diceTotal(dice);
 
   return {
-    id: randomUUID(),
+    drawKey: rawPayload.drawKey,
     gameId,
     marketVersion: 1,
-    drawNumber: rawPayload.drawNumber,
-    drawTime: rawPayload.drawTime,
+    drawAt: rawPayload.drawAt,
     publishedAt,
+    publishedEstimated,
     collectedAt,
     latencyMs,
     dice,
     total,
     flower: detectFlower(dice),
     smallLarge: classifySmallLarge(total),
-    rawPayload,
     source,
+    rawPayload,
+    rawResponse,
   };
 }
 
@@ -121,17 +125,22 @@ function buildDrawFromMock(
 export function parseDrawPayload(
   rawPayload: unknown,
   source: string,
-  gameId = 'bingo18',
+  options: ParseDrawOptions = {},
 ): ParseResult {
+  const gameId = options.gameId ?? 'bingo18';
+
   if (isMockPayload(rawPayload)) {
-    return parseSuccess(buildDrawFromMock(rawPayload, source, gameId), rawPayload);
+    return parseSuccess(
+      buildDrawFromMock(rawPayload, source, gameId, options.rawResponse ?? null),
+      rawPayload,
+    );
   }
 
   if (isBingo18ListPayload(rawPayload)) {
     if (rawPayload.draws.length === 0) {
       return parseFailure(rawPayload, ['Empty bingo18 draw list']);
     }
-    return parseBingo18RawDraw(rawPayload.draws[0], source, gameId);
+    return parseBingo18RawDraw(rawPayload.draws[0], source, options);
   }
 
   return parseFailure(rawPayload, ['Unsupported payload shape — configure parser for source']);
@@ -141,7 +150,7 @@ export function parseDrawPayload(
 export function parseBingo18DrawBatch(
   rawPayload: unknown,
   source: string,
-  gameId = 'bingo18',
+  options: ParseDrawOptions = {},
 ): { draws: DrawResult[]; errors: string[] } {
   if (!isBingo18ListPayload(rawPayload)) {
     return { draws: [], errors: ['Not a bingo18-list payload'] };
@@ -152,7 +161,7 @@ export function parseBingo18DrawBatch(
   const errors: string[] = [];
 
   for (const raw of rawPayload.draws) {
-    const result = parseBingo18RawDraw(raw, source, gameId, collectedAt);
+    const result = parseBingo18RawDraw(raw, source, options, collectedAt);
     if (result.success && result.draw !== undefined) {
       draws.push(result.draw);
     } else {
@@ -160,7 +169,7 @@ export function parseBingo18DrawBatch(
     }
   }
 
-  draws.sort((a, b) => new Date(a.drawTime).getTime() - new Date(b.drawTime).getTime());
+  draws.sort((a, b) => new Date(a.drawAt).getTime() - new Date(b.drawAt).getTime());
   return { draws, errors };
 }
 

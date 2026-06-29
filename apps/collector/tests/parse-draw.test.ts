@@ -1,29 +1,32 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  drawNumberFromDrawAt,
   parseBingo18DrawBatch,
   parseDrawPayload,
 } from '../src/parser/parse-draw.js';
+import { drawKeyFromDrawAt } from '../src/types/draw-result.js';
 
 describe('parseDrawPayload', () => {
   it('parses mock payload', () => {
     const result = parseDrawPayload(
       {
         kind: 'mock',
-        drawNumber: '100001',
-        drawTime: '2026-06-25T10:00:00.000Z',
+        drawKey: '100001',
+        drawAt: '2026-06-25T10:00:00.000Z',
         publishedAt: '2026-06-25T10:00:05.000Z',
         dice: [4, 5, 6],
       },
       'mock',
+      { rawResponse: { status: 200, headers: {}, body: '{}' } },
     );
     expect(result.success).toBe(true);
-    expect(result.draw?.drawNumber).toBe('100001');
+    expect(result.draw?.drawKey).toBe('100001');
     expect(result.draw?.dice).toEqual([4, 5, 6]);
     expect(result.draw?.total).toBe(15);
     expect(result.draw?.smallLarge).toBe('large');
     expect(result.draw?.flower).toBeNull();
+    expect(result.draw?.publishedEstimated).toBe(false);
+    expect(result.draw?.rawResponse?.status).toBe(200);
   });
 
   it('does not throw on invalid payload', () => {
@@ -45,9 +48,10 @@ describe('parseDrawPayload', () => {
     expect(result.draw?.dice).toEqual([1, 5, 5]);
     expect(result.draw?.total).toBe(11);
     expect(result.draw?.smallLarge).toBe('tie');
-    expect(result.draw?.publishedAt).toBeNull();
-    expect(result.draw?.latencyMs).toBe(0);
-    expect(result.draw?.drawNumber).toBe(drawNumberFromDrawAt('2026-06-29T21:53:00+07:00'));
+    expect(result.draw?.publishedAt).toBe('2026-06-29T21:53:00+07:00');
+    expect(result.draw?.publishedEstimated).toBe(true);
+    expect(result.draw?.drawKey).toBe(drawKeyFromDrawAt('2026-06-29T21:53:00+07:00'));
+    expect(result.draw?.drawKey).toBe('20260629215300');
   });
 
   it('detects flower (triple)', () => {
@@ -76,6 +80,12 @@ describe('parseDrawPayload', () => {
   });
 });
 
+describe('drawKeyFromDrawAt', () => {
+  it('formats wall-clock key without timezone chars', () => {
+    expect(drawKeyFromDrawAt('2026-06-29T21:53:00+07:00')).toBe('20260629215300');
+  });
+});
+
 describe('parseBingo18DrawBatch', () => {
   it('sorts draws chronologically', () => {
     const batch = parseBingo18DrawBatch(
@@ -90,7 +100,7 @@ describe('parseBingo18DrawBatch', () => {
       'bingo18',
     );
     expect(batch.draws).toHaveLength(2);
-    expect(batch.draws[0].drawTime).toBe('2026-06-29T21:00:00+07:00');
-    expect(batch.draws[1].drawTime).toBe('2026-06-29T22:00:00+07:00');
+    expect(batch.draws[0].drawAt).toBe('2026-06-29T21:00:00+07:00');
+    expect(batch.draws[1].drawAt).toBe('2026-06-29T22:00:00+07:00');
   });
 });

@@ -14,21 +14,23 @@ describe('AdaptivePollStrategy', () => {
     const old = new Date(Date.now() - 7 * 60_000).toISOString();
     const state = {
       ...initialCollectorState(),
+      lastDrawKey: 'old-key',
       lastDraw: {
-        id: '1',
+        drawKey: 'old-key',
         gameId: 'bingo18',
         marketVersion: 1,
-        drawNumber: '1',
-        drawTime: old,
+        drawAt: old,
         publishedAt: old,
+        publishedEstimated: true,
         collectedAt: old,
         latencyMs: 0,
         dice: [1, 2, 3] as const,
         total: 6,
         flower: null,
         smallLarge: 'small' as const,
-        rawPayload: {},
         source: 'mock',
+        rawPayload: {},
+        rawResponse: null,
       },
     };
     expect(strategy.nextDelayMs(state)).toBe(10_000);

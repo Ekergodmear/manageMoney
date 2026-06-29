@@ -6,10 +6,9 @@ export interface DrawSink {
   append(draw: DrawResult): Promise<void>;
   appendMany(draws: readonly DrawResult[]): Promise<void>;
   findLatest(): Promise<DrawResult | null>;
-  findByDrawNumber(drawNumber: string): Promise<DrawResult | null>;
+  findByDrawKey(drawKey: string): Promise<DrawResult | null>;
   count(): Promise<number>;
-  /** @deprecated Use findLatest — kept for collector dedupe shortcut */
-  getLastDrawNumber(): Promise<string | null>;
+  getLastDrawKey(): Promise<string | null>;
   loadCollectorState(): Promise<CollectorState>;
   saveCollectorState(state: CollectorState): Promise<void>;
   close(): Promise<void>;

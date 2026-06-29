@@ -7,7 +7,7 @@ import type { PollStrategy } from './poll-strategy.js';
  */
 export class AdaptivePollStrategy implements PollStrategy {
   nextDelayMs(state: CollectorState): number {
-    const anchor = state.lastDraw?.drawTime ?? state.lastSuccessAt;
+    const anchor = state.lastDraw?.drawAt ?? state.lastSuccessAt;
     if (anchor === null) {
       return 60_000;
     }

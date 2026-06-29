@@ -14,8 +14,8 @@ import {
   initialCollectorState,
   type CollectorState,
 } from './types/collector-state.js';
-import type { DrawResult } from './types/draw-result.js';
-import { dedupeDrawsByNumber, filterNewDraws } from './util/dedupe.js';
+import type { DrawResult, RawHttpResponse } from './types/draw-result.js';
+import { dedupeDrawsByKey, filterNewDraws } from './util/dedupe.js';
 
 export interface CollectorOptions {
   readonly sink: DrawSink;
@@ -60,8 +60,8 @@ export class Collector {
     this.state = { ...this.state, status: 'running' };
     await this.persistState();
     collectorLog(`Started (adapter=${this.options.adapter.id})`);
-    if (this.state.lastDraw !== null) {
-      collectorLog(`Resumed after draw #${this.state.lastDraw.drawNumber}`);
+    if (this.state.lastDrawKey !== null) {
+      collectorLog(`Resumed after draw key ${this.state.lastDrawKey}`);
     }
     void this.scheduleNext(0);
   }
@@ -94,37 +94,40 @@ export class Collector {
     return Math.min(backoff, 120_000);
   }
 
-  private async resolveNewDraws(rawPayload: unknown, source: string): Promise<{
-    draws: DrawResult[];
-    errors: string[];
-  }> {
+  private async resolveNewDraws(
+    rawPayload: unknown,
+    source: string,
+    rawResponse: RawHttpResponse | null,
+  ): Promise<{ draws: DrawResult[]; errors: string[] }> {
+    const parseOptions = { rawResponse };
+
     if (isBingo18BatchPayload(rawPayload)) {
-      const batch = parseBingo18DrawBatch(rawPayload, source);
-      const unique = dedupeDrawsByNumber(batch.draws);
-      const lastNumber = await this.options.sink.getLastDrawNumber();
-      if (lastNumber === null) {
+      const batch = parseBingo18DrawBatch(rawPayload, source, parseOptions);
+      const unique = dedupeDrawsByKey(batch.draws);
+      const lastKey = await this.options.sink.getLastDrawKey();
+      if (lastKey === null) {
         return { draws: unique.slice(-1), errors: batch.errors };
       }
-      const lastTime = new Date(
-        (await this.options.sink.findByDrawNumber(lastNumber))?.drawTime ??
-          this.state.lastDraw?.drawTime ??
-          lastNumber,
+      const lastAt = new Date(
+        (await this.options.sink.findByDrawKey(lastKey))?.drawAt ??
+          this.state.lastDraw?.drawAt ??
+          lastKey,
       ).getTime();
-      const newer = unique.filter((d) => new Date(d.drawTime).getTime() > lastTime);
+      const newer = unique.filter((d) => new Date(d.drawAt).getTime() > lastAt);
       return { draws: newer, errors: batch.errors };
     }
 
-    const parsed = parseDrawPayload(rawPayload, source);
+    const parsed = parseDrawPayload(rawPayload, source, parseOptions);
     if (!parsed.success || parsed.draw === undefined) {
       return { draws: [], errors: parsed.errors };
     }
 
-    const lastNumber = await this.options.sink.getLastDrawNumber();
-    if (lastNumber === parsed.draw.drawNumber) {
+    const lastKey = await this.options.sink.getLastDrawKey();
+    if (lastKey === parsed.draw.drawKey) {
       return { draws: [], errors: [] };
     }
 
-    const existing = await this.options.sink.findByDrawNumber(parsed.draw.drawNumber);
+    const existing = await this.options.sink.findByDrawKey(parsed.draw.drawKey);
     if (existing !== null) {
       return { draws: [], errors: [] };
     }
@@ -161,6 +164,7 @@ export class Collector {
       const { draws: candidates, errors } = await this.resolveNewDraws(
         fetch.rawPayload,
         this.options.adapter.id,
+        fetch.rawResponse,
       );
 
       if (errors.length > 0) {
@@ -175,8 +179,8 @@ export class Collector {
 
       const known = new Set<string>();
       for (const draw of candidates) {
-        const existing = await this.options.sink.findByDrawNumber(draw.drawNumber);
-        if (existing !== null) known.add(draw.drawNumber);
+        const existing = await this.options.sink.findByDrawKey(draw.drawKey);
+        if (existing !== null) known.add(draw.drawKey);
       }
       const newDraws = filterNewDraws(candidates, known);
 
@@ -193,6 +197,7 @@ export class Collector {
 
       this.state = {
         ...this.state,
+        lastDrawKey: latest.drawKey,
         lastDraw: latest,
         lastSuccessAt: now,
         failureCount: 0,
@@ -203,7 +208,7 @@ export class Collector {
 
       for (const draw of newDraws) {
         collectorLog(
-          `New draw #${draw.drawNumber} — Saved — Latency ${Math.round(draw.latencyMs / 1000)}s`,
+          `New draw ${draw.drawKey} — Saved — Latency ${Math.round(draw.latencyMs / 1000)}s`,
         );
       }
     } catch (err) {

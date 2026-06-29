@@ -58,7 +58,9 @@ apps/
 
 `data/draws.db` — append-only `draw_results` + single-row `collector_state`.
 
-Restart → resume từ state; dedupe theo `draw_number` (unique).
+Restart → resume từ `lastDrawKey`; dedupe theo `draw_key` (unique).
+
+**B1.1:** DB schema đổi — xóa `data/draws.db` cũ nếu upgrade từ B1.
 
 ## Tests
 

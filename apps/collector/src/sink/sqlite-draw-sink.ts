@@ -9,7 +9,7 @@ import {
   type CollectorState,
   type CollectorStatus,
 } from '../types/collector-state.js';
-import type { DrawResult } from '../types/draw-result.js';
+import type { DrawResult, RawHttpResponse } from '../types/draw-result.js';
 import { isSqliteBusyError, withSqliteRetry } from '../util/retry.js';
 import type { DrawSink } from './draw-sink.js';
 
@@ -17,12 +17,12 @@ const packageDir = dirname(fileURLToPath(import.meta.url));
 
 function drawToParams(draw: DrawResult): Record<string, unknown> {
   return {
-    id: draw.id,
+    drawKey: draw.drawKey,
     gameId: draw.gameId,
     marketVersion: draw.marketVersion,
-    drawNumber: draw.drawNumber,
-    drawTime: draw.drawTime,
+    drawAt: draw.drawAt,
     publishedAt: draw.publishedAt,
+    publishedEstimated: draw.publishedEstimated ? 1 : 0,
     collectedAt: draw.collectedAt,
     latencyMs: draw.latencyMs,
     d1: draw.dice[0],
@@ -31,35 +31,49 @@ function drawToParams(draw: DrawResult): Record<string, unknown> {
     total: draw.total,
     flower: draw.flower,
     smallLarge: draw.smallLarge,
-    rawPayload: JSON.stringify(draw.rawPayload),
     source: draw.source,
+    rawPayload: JSON.stringify(draw.rawPayload),
+    rawResponse: draw.rawResponse !== null ? JSON.stringify(draw.rawResponse) : null,
   };
 }
 
 function rowToDraw(row: Record<string, unknown>): DrawResult {
+  let rawResponse: RawHttpResponse | null = null;
+  const rawResponseJson = row['rawResponse'] as string | null;
+  if (rawResponseJson !== null && rawResponseJson !== undefined) {
+    try {
+      rawResponse = JSON.parse(rawResponseJson) as RawHttpResponse;
+    } catch {
+      rawResponse = null;
+    }
+  }
+
   return {
-    id: row['id'] as string,
+    drawKey: row['drawKey'] as string,
     gameId: row['gameId'] as string,
     marketVersion: row['marketVersion'] as number,
-    drawNumber: row['drawNumber'] as string,
-    drawTime: row['drawTime'] as string,
-    publishedAt: (row['publishedAt'] as string | null) ?? null,
+    drawAt: row['drawAt'] as string,
+    publishedAt: row['publishedAt'] as string,
+    publishedEstimated: (row['publishedEstimated'] as number) === 1,
     collectedAt: row['collectedAt'] as string,
     latencyMs: row['latencyMs'] as number,
     dice: [row['d1'] as number, row['d2'] as number, row['d3'] as number],
     total: row['total'] as number,
     flower: (row['flower'] as string | null) ?? null,
     smallLarge: row['smallLarge'] as DrawResult['smallLarge'],
-    rawPayload: JSON.parse(row['rawPayload'] as string) as unknown,
     source: row['source'] as string,
+    rawPayload: JSON.parse(row['rawPayload'] as string) as unknown,
+    rawResponse,
   };
 }
 
 const SELECT_DRAW_COLUMNS = `
-  id, game_id AS gameId, market_version AS marketVersion, draw_number AS drawNumber,
-  draw_time AS drawTime, published_at AS publishedAt, collected_at AS collectedAt,
+  draw_key AS drawKey, game_id AS gameId, market_version AS marketVersion,
+  draw_at AS drawAt, published_at AS publishedAt,
+  published_estimated AS publishedEstimated, collected_at AS collectedAt,
   latency_ms AS latencyMs, dice_1 AS d1, dice_2 AS d2, dice_3 AS d3,
-  total, flower, small_large AS smallLarge, raw_payload AS rawPayload, source
+  total, flower, small_large AS smallLarge, source,
+  raw_payload AS rawPayload, raw_response AS rawResponse
 `;
 
 function isUniqueConstraintError(err: unknown): boolean {
@@ -81,13 +95,13 @@ export class SqliteDrawSink implements DrawSink {
     this.db.exec(readFileSync(schemaPath, 'utf8'));
     this.insertDraw = this.db.prepare(`
       INSERT INTO draw_results (
-        id, game_id, market_version, draw_number, draw_time, published_at,
-        collected_at, latency_ms, dice_1, dice_2, dice_3, total, flower,
-        small_large, raw_payload, source
+        draw_key, game_id, market_version, draw_at, published_at,
+        published_estimated, collected_at, latency_ms, dice_1, dice_2, dice_3,
+        total, flower, small_large, source, raw_payload, raw_response
       ) VALUES (
-        @id, @gameId, @marketVersion, @drawNumber, @drawTime, @publishedAt,
-        @collectedAt, @latencyMs, @d1, @d2, @d3, @total, @flower,
-        @smallLarge, @rawPayload, @source
+        @drawKey, @gameId, @marketVersion, @drawAt, @publishedAt,
+        @publishedEstimated, @collectedAt, @latencyMs, @d1, @d2, @d3,
+        @total, @flower, @smallLarge, @source, @rawPayload, @rawResponse
       )
     `);
   }
@@ -122,17 +136,15 @@ export class SqliteDrawSink implements DrawSink {
 
   async findLatest(): Promise<DrawResult | null> {
     const row = this.db
-      .prepare(
-        `SELECT ${SELECT_DRAW_COLUMNS} FROM draw_results ORDER BY draw_time DESC LIMIT 1`,
-      )
+      .prepare(`SELECT ${SELECT_DRAW_COLUMNS} FROM draw_results ORDER BY draw_at DESC LIMIT 1`)
       .get() as Record<string, unknown> | undefined;
     return row !== undefined ? rowToDraw(row) : null;
   }
 
-  async findByDrawNumber(drawNumber: string): Promise<DrawResult | null> {
+  async findByDrawKey(drawKey: string): Promise<DrawResult | null> {
     const row = this.db
-      .prepare(`SELECT ${SELECT_DRAW_COLUMNS} FROM draw_results WHERE draw_number = ?`)
-      .get(drawNumber) as Record<string, unknown> | undefined;
+      .prepare(`SELECT ${SELECT_DRAW_COLUMNS} FROM draw_results WHERE draw_key = ?`)
+      .get(drawKey) as Record<string, unknown> | undefined;
     return row !== undefined ? rowToDraw(row) : null;
   }
 
@@ -143,21 +155,23 @@ export class SqliteDrawSink implements DrawSink {
     return row.c;
   }
 
-  async getLastDrawNumber(): Promise<string | null> {
+  async getLastDrawKey(): Promise<string | null> {
     const latest = await this.findLatest();
-    return latest?.drawNumber ?? null;
+    return latest?.drawKey ?? null;
   }
 
   async loadCollectorState(): Promise<CollectorState> {
     const row = this.db
       .prepare(
-        `SELECT last_draw_json AS lastDrawJson, last_success_at AS lastSuccessAt,
-                last_poll_at AS lastPollAt, failure_count AS failureCount,
-                average_latency_ms AS averageLatencyMs, status
+        `SELECT last_draw_key AS lastDrawKey, last_draw_json AS lastDrawJson,
+                last_success_at AS lastSuccessAt, last_poll_at AS lastPollAt,
+                failure_count AS failureCount, average_latency_ms AS averageLatencyMs,
+                status
          FROM collector_state WHERE id = 1`,
       )
       .get() as
       | {
+          lastDrawKey: string | null;
           lastDrawJson: string | null;
           lastSuccessAt: string | null;
           lastPollAt: string | null;
@@ -186,6 +200,7 @@ export class SqliteDrawSink implements DrawSink {
         : 'stopped';
 
     return {
+      lastDrawKey: row.lastDrawKey ?? lastDraw?.drawKey ?? null,
       lastDraw,
       lastSuccessAt: row.lastSuccessAt,
       lastPollAt: row.lastPollAt,
@@ -200,6 +215,7 @@ export class SqliteDrawSink implements DrawSink {
       this.db
         .prepare(
           `UPDATE collector_state SET
+            last_draw_key = @lastDrawKey,
             last_draw_json = @lastDrawJson,
             last_success_at = @lastSuccessAt,
             last_poll_at = @lastPollAt,
@@ -209,6 +225,7 @@ export class SqliteDrawSink implements DrawSink {
            WHERE id = 1`,
         )
         .run({
+          lastDrawKey: state.lastDrawKey,
           lastDrawJson: state.lastDraw !== null ? JSON.stringify(state.lastDraw) : null,
           lastSuccessAt: state.lastSuccessAt,
           lastPollAt: state.lastPollAt,

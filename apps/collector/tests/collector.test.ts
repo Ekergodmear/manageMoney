@@ -3,19 +3,17 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import type { DrawSourceAdapter } from '../src/adapter/draw-source-adapter.js';
+import type { DrawSourceAdapter, RawDrawFetch } from '../src/adapter/draw-source-adapter.js';
 import { Collector } from '../src/collector.js';
 import { SqliteDrawSink } from '../src/sink/sqlite-draw-sink.js';
 import { AdaptivePollStrategy } from '../src/strategy/adaptive-poll-strategy.js';
 
-function mockAdapter(
-  payloads: Array<{ rawPayload: unknown } | null>,
-): DrawSourceAdapter & { calls: number } {
+function mockAdapter(payloads: RawDrawFetch[]): DrawSourceAdapter & { calls: number } {
   let idx = 0;
   const adapter = {
     id: 'mock-test',
     calls: 0,
-    async fetchLatest() {
+    async fetchLatest(): Promise<RawDrawFetch | null> {
       adapter.calls += 1;
       const item = payloads[Math.min(idx, payloads.length - 1)];
       idx += 1;
@@ -23,6 +21,20 @@ function mockAdapter(
     },
   };
   return adapter;
+}
+
+function mockFetch(drawKey: string, drawAt: string): RawDrawFetch {
+  const rawPayload = {
+    kind: 'mock' as const,
+    drawKey,
+    drawAt,
+    publishedAt: drawAt,
+    dice: [2, 3, 4] as [number, number, number],
+  };
+  return {
+    rawPayload,
+    rawResponse: { status: 200, headers: {}, body: JSON.stringify(rawPayload) },
+  };
 }
 
 describe('Collector', () => {
@@ -41,15 +53,9 @@ describe('Collector', () => {
   });
 
   it('deduplicates — does not save same draw twice', async () => {
-    const payload = {
-      kind: 'mock' as const,
-      drawNumber: '200001',
-      drawTime: '2026-06-25T10:00:00.000Z',
-      publishedAt: '2026-06-25T10:00:00.000Z',
-      dice: [2, 3, 4] as [number, number, number],
-    };
+    const fetch = mockFetch('200001', '2026-06-25T10:00:00.000Z');
     const sink = new SqliteDrawSink(dbPath);
-    const adapter = mockAdapter([{ rawPayload: payload }, { rawPayload: payload }]);
+    const adapter = mockAdapter([fetch, fetch]);
     const collector = new Collector({
       sink,
       adapter,
@@ -65,16 +71,10 @@ describe('Collector', () => {
     expect(await sink.count()).toBe(1);
   });
 
-  it('resumes state after restart', async () => {
-    const payload = {
-      kind: 'mock' as const,
-      drawNumber: '300001',
-      drawTime: '2026-06-25T11:00:00.000Z',
-      publishedAt: '2026-06-25T11:00:00.000Z',
-      dice: [1, 1, 1] as [number, number, number],
-    };
+  it('resumes state after restart by drawKey', async () => {
+    const fetch = mockFetch('300001', '2026-06-25T11:00:00.000Z');
 
-    const adapter1 = mockAdapter([{ rawPayload: payload }]);
+    const adapter1 = mockAdapter([fetch]);
     const sink1 = new SqliteDrawSink(dbPath);
     const c1 = new Collector({ sink: sink1, adapter: adapter1, pollStrategy: new AdaptivePollStrategy() });
     await c1.start();
@@ -83,14 +83,14 @@ describe('Collector', () => {
 
     const sink2 = new SqliteDrawSink(dbPath);
     const state = await sink2.loadCollectorState();
-    expect(state.lastDraw?.drawNumber).toBe('300001');
+    expect(state.lastDrawKey).toBe('300001');
     expect(await sink2.count()).toBe(1);
     await sink2.close();
   });
 
   it('backs off when adapter returns null', async () => {
     const sink = new SqliteDrawSink(dbPath);
-    const adapter = mockAdapter([null, null]);
+    const adapter = mockAdapter([]);
     const collector = new Collector({
       sink,
       adapter,
@@ -108,11 +108,15 @@ describe('Collector', () => {
 
   it('continues after parse failure without crashing', async () => {
     const sink = new SqliteDrawSink(dbPath);
-    const adapter = mockAdapter([{ rawPayload: { bad: true } }, { rawPayload: null }]);
+    const adapter = mockAdapter([
+      { rawPayload: { bad: true }, rawResponse: null },
+      { rawPayload: { bad: true }, rawResponse: null },
+    ]);
     const collector = new Collector({ sink, adapter, pollStrategy: new AdaptivePollStrategy() });
 
     await collector.start();
     await vi.runOnlyPendingTimersAsync();
+    await vi.advanceTimersByTimeAsync(60_000);
     await vi.runOnlyPendingTimersAsync();
     expect(collector.getState().status).toBe('degraded');
     await collector.stop();

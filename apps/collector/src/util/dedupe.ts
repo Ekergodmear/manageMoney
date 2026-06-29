@@ -1,20 +1,20 @@
 import type { DrawResult } from '../types/draw-result.js';
 
-/** Filter draws not yet stored — by drawNumber. */
+/** Filter draws not yet stored — by drawKey. */
 export function filterNewDraws(
   draws: readonly DrawResult[],
-  knownDrawNumbers: ReadonlySet<string>,
+  knownDrawKeys: ReadonlySet<string>,
 ): DrawResult[] {
-  return draws.filter((d) => !knownDrawNumbers.has(d.drawNumber));
+  return draws.filter((d) => !knownDrawKeys.has(d.drawKey));
 }
 
-/** Deduplicate within batch by drawNumber (keeps last occurrence). */
-export function dedupeDrawsByNumber(draws: readonly DrawResult[]): DrawResult[] {
-  const byNumber = new Map<string, DrawResult>();
+/** Deduplicate within batch by drawKey (keeps last occurrence). */
+export function dedupeDrawsByKey(draws: readonly DrawResult[]): DrawResult[] {
+  const byKey = new Map<string, DrawResult>();
   for (const draw of draws) {
-    byNumber.set(draw.drawNumber, draw);
+    byKey.set(draw.drawKey, draw);
   }
-  return [...byNumber.values()].sort(
-    (a, b) => new Date(a.drawTime).getTime() - new Date(b.drawTime).getTime(),
+  return [...byKey.values()].sort(
+    (a, b) => new Date(a.drawAt).getTime() - new Date(b.drawAt).getTime(),
   );
 }

@@ -14,7 +14,8 @@ async function main(): Promise<void> {
   try {
     const state = await sink.loadCollectorState();
     const drawCount = await sink.count();
-    const health = buildCollectorHealth(state, adapter.id, drawCount);
+    const latestDraw = await sink.findLatest();
+    const health = buildCollectorHealth(state, adapter.id, drawCount, latestDraw);
     const report = assessHealth(health);
     console.log(formatHealthReport(report));
     process.exit(report.overall === 'healthy' ? 0 : 1);

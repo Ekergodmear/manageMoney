@@ -1,21 +1,46 @@
 export type SmallLarge = 'small' | 'tie' | 'large';
 
-/** Aligns with Game Integration v1 — shared shape for future packages/contracts. */
+/** HTTP capture for debug — not used in business logic. */
+export interface RawHttpResponse {
+  readonly status: number;
+  readonly headers: Readonly<Record<string, string>>;
+  readonly body: string;
+}
+
+/**
+ * Frozen after B1.1 — internal contract for Game Integration.
+ * Do not change without production evidence.
+ */
 export interface DrawResult {
-  readonly id: string;
+  readonly drawKey: string;
   readonly gameId: string;
   readonly marketVersion: number;
-  readonly drawNumber: string;
-  readonly drawTime: string;
-  readonly publishedAt: string | null;
+  readonly drawAt: string;
+  readonly publishedAt: string;
+  readonly publishedEstimated: boolean;
   readonly collectedAt: string;
   readonly latencyMs: number;
   readonly dice: readonly [number, number, number];
   readonly total: number;
   readonly flower: string | null;
   readonly smallLarge: SmallLarge;
-  readonly rawPayload: unknown;
   readonly source: string;
+  readonly rawPayload: unknown;
+  readonly rawResponse: RawHttpResponse | null;
+}
+
+/** Business key from draw wall-clock time, e.g. 20260629215300 */
+export function drawKeyFromDrawAt(drawAt: string): string {
+  const m = drawAt.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/);
+  if (m) {
+    return `${m[1]}${m[2]}${m[3]}${m[4]}${m[5]}${m[6]}`;
+  }
+  const digits = drawAt.replace(/\D/g, '');
+  return digits.length >= 14 ? digits.slice(0, 14) : digits;
+}
+
+export function computeLatencyMs(publishedAt: string, collectedAt: string): number {
+  return Math.max(0, new Date(collectedAt).getTime() - new Date(publishedAt).getTime());
 }
 
 export function diceTotal(dice: readonly [number, number, number]): number {

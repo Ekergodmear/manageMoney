@@ -1,4 +1,5 @@
 import type { CollectorState } from '../types/collector-state.js';
+import type { DrawResult } from '../types/draw-result.js';
 
 export type HealthStatus = 'healthy' | 'unhealthy';
 
@@ -10,7 +11,8 @@ export interface CollectorHealth {
   readonly failureCount: number;
   readonly activeAdapterId: string;
   readonly drawCount: number;
-  readonly lastDrawNumber: string | null;
+  readonly lastDrawKey: string | null;
+  readonly latestDraw: DrawResult | null;
 }
 
 export interface HealthReport {
@@ -29,6 +31,7 @@ export function buildCollectorHealth(
   state: CollectorState,
   adapterId: string,
   drawCount: number,
+  latestDraw: DrawResult | null,
 ): CollectorHealth {
   return {
     status: state.status,
@@ -38,7 +41,8 @@ export function buildCollectorHealth(
     failureCount: state.failureCount,
     activeAdapterId: adapterId,
     drawCount,
-    lastDrawNumber: state.lastDraw?.drawNumber ?? null,
+    lastDrawKey: state.lastDrawKey ?? latestDraw?.drawKey ?? null,
+    latestDraw: latestDraw ?? state.lastDraw,
   };
 }
 
@@ -81,9 +85,9 @@ export function assessHealth(
   });
 
   checks.push({
-    name: 'Last Draw',
-    ok: health.lastDrawNumber !== null,
-    detail: health.lastDrawNumber ?? 'none',
+    name: 'Last Draw Key',
+    ok: health.lastDrawKey !== null,
+    detail: health.lastDrawKey ?? 'none',
   });
 
   const overall: HealthStatus = checks.every((c) => c.ok) ? 'healthy' : 'unhealthy';
@@ -99,7 +103,16 @@ export function formatHealthReport(report: HealthReport): string {
   lines.push(`Status: ${report.health.status}`);
   lines.push(`Adapter: ${report.health.activeAdapterId}`);
   lines.push(`Draws in SQLite: ${report.health.drawCount}`);
-  lines.push(`Last Draw: ${report.health.lastDrawNumber ?? 'none'}`);
+  lines.push(`Latest Draw Key: ${report.health.lastDrawKey ?? 'none'}`);
+
+  const draw = report.health.latestDraw;
+  if (draw !== null) {
+    lines.push(`Draw At: ${draw.drawAt}`);
+    lines.push(`Published At: ${draw.publishedAt}`);
+    lines.push(`Collected At: ${draw.collectedAt}`);
+    lines.push(`Estimated Publish: ${draw.publishedEstimated ? 'Yes' : 'No'}`);
+  }
+
   lines.push(`Last Poll: ${report.health.lastPollAt ?? 'never'}`);
   lines.push(`Last Success: ${report.health.lastSuccessAt ?? 'never'}`);
   lines.push(`Average Latency: ${Math.round(report.health.averageLatencyMs / 1000)}s`);
