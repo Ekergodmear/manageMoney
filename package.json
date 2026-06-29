@@ -65,6 +65,7 @@
     "check": "pnpm verify",
     "collector:start": "pnpm --filter @stake/collector start",
     "collector:dev": "pnpm --filter @stake/collector dev",
+    "collector:doctor": "pnpm --filter @stake/collector doctor",
     "collector:test": "pnpm --filter @stake/collector test"
   },
   "dependencies": {

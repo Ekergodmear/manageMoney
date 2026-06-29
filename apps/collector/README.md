@@ -2,50 +2,66 @@
 
 Draw acquisition service — chạy song song Internal RC.
 
-Executable app trong `apps/collector` — không phải shared package.
-
 ```text
-DrawSourceAdapter → Collector → DrawSink → SQLite
+DrawSourceAdapter → Parser → DrawSink (SQLite) → collector_state
 ```
 
 ## Chạy
 
 ```bash
 # từ repo root
-pnpm collector:start
+pnpm collector:start      # mock (mặc định)
+pnpm collector:doctor     # health check (exit 0/1)
 
-# hoặc
-cd apps/collector && pnpm start
+# Bingo18 thật
+COLLECTOR_ADAPTER=bingo18 pnpm collector:start
 ```
 
-Mock adapter (mặc định): pipeline synthetic. Bingo18: stub — cần spike nguồn.
+Env: xem `.env.example`.
+
+## Bingo18 source
+
+Reverse-engineered từ `bingo18.top/script.js` → `GET /data/data.json`:
+
+```json
+{ "gbingoDraws": [{ "drawAt": "...", "winningResult": "236" }] }
+```
+
+`COLLECTOR_BINGO18_API_URL` override URL nếu cần.
+
+Lần chạy đầu: chỉ lưu kỳ mới nhất. Sau restart: catch-up các kỳ mới hơn `lastDraw`.
+
+## Cấu trúc
+
+```text
+src/
+  adapter/     mock + bingo18 (fetch JSON API)
+  parser/      ParseResult — không throw
+  sink/        append-only SQLite DrawStore
+  strategy/    AdaptivePollStrategy
+  health/      CollectorHealth read model
+  doctor/      CLI health
+  state/       collector_state types
+  logger/      [Collector] logs
+```
 
 ## Monorepo
 
 ```text
 apps/
-  web/          (hiện tại: repo root)
+  web/          (repo root)
   collector/    ← đây
   api/          (sau Internal RC)
-
-packages/
-  contracts/
-  sdk/
-  constraint-engine/
-```
-
-## Roadmap collector
-
-```text
-v0.1 Mock + SQLite + persisted state  ← hiện tại
-v0.2 Bingo18 adapter (API / Playwright)
-v0.3 Adaptive poll production tuning
-v0.4 Health export
-v1.0 Production 24/7
 ```
 
 ## Dữ liệu
 
-`apps/collector/data/draws.db` — append-only `draw_results` + `collector_state`.
+`data/draws.db` — append-only `draw_results` + single-row `collector_state`.
 
-Restart → resume từ `collector_state` (biết đã lấy tới kỳ nào).
+Restart → resume từ state; dedupe theo `draw_number` (unique).
+
+## Tests
+
+```bash
+pnpm collector:test
+```
