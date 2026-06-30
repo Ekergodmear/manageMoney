@@ -2,16 +2,26 @@ import { createCommandRegistry, type CommandRegistry } from '@/product-shell/reg
 import { createShortcutRegistry, type ShortcutRegistry } from '@/product-shell/registry/shortcut-registry';
 import { createWorkspaceRegistry, type WorkspaceRegistry } from '@/product-shell/registry/workspace-registry';
 import { createActionHistory, type ActionHistory } from '@/product-shell/runtime/action-history';
-import type { AppContext } from '@/product-shell/types/command';
-import type { WorkspaceDefinition } from '@/product-shell/types/workspace';
+import type { AppCommand, AppContext, CommandSearchResult } from '@/product-shell/types/command';
+import type { ShortcutSpec } from '@/product-shell/types/shortcut';
+import type { WorkspaceDefinition, WorkspaceId } from '@/product-shell/types/workspace';
 
 export interface ShellRuntime {
+  /** Advanced API. Prefer ShellRuntime facade methods. */
   readonly workspaces: WorkspaceRegistry;
+  /** Advanced API. Prefer ShellRuntime facade methods. */
   readonly commands: CommandRegistry;
+  /** Advanced API. Prefer ShellRuntime facade methods. */
   readonly shortcuts: ShortcutRegistry;
   readonly actionHistory: ActionHistory;
+
   registerWorkspace(definition: WorkspaceDefinition): void;
-  unregisterWorkspace(id: WorkspaceDefinition['id']): void;
+  unregisterWorkspace(id: WorkspaceId): void;
+  registerCommand(command: AppCommand): void;
+  unregisterCommand(id: string): void;
+  bindShortcut(shortcut: string | ShortcutSpec, commandId: string): void;
+  unbindShortcut(shortcut: string | ShortcutSpec): void;
+  searchCommands(query: string, ctx: AppContext): readonly CommandSearchResult[];
   executeCommand(id: string, ctx: AppContext): Promise<void>;
 }
 
@@ -31,13 +41,38 @@ export function createShellRuntime(): ShellRuntime {
       workspaces.register(definition);
     },
 
-    unregisterWorkspace(id: WorkspaceDefinition['id']): void {
+    unregisterWorkspace(id: WorkspaceId): void {
       workspaces.unregister(id);
     },
 
+    registerCommand(command: AppCommand): void {
+      commands.register(command);
+    },
+
+    unregisterCommand(id: string): void {
+      commands.unregister(id);
+    },
+
+    bindShortcut(shortcut: string | ShortcutSpec, commandId: string): void {
+      shortcuts.bind(shortcut, commandId);
+    },
+
+    unbindShortcut(shortcut: string | ShortcutSpec): void {
+      shortcuts.unbind(shortcut);
+    },
+
+    searchCommands(query: string, ctx: AppContext): readonly CommandSearchResult[] {
+      return commands.search(query, ctx);
+    },
+
     async executeCommand(id: string, ctx: AppContext): Promise<void> {
-      await commands.execute(id, ctx);
-      actionHistory.record(id);
+      try {
+        await commands.execute(id, ctx);
+        actionHistory.recordSuccess(id);
+      } catch (error) {
+        actionHistory.recordFailure(id);
+        throw error;
+      }
     },
   };
 }

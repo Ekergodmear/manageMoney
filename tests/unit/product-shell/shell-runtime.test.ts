@@ -31,10 +31,19 @@ function generatePlanCommand(executeFn?: (ctx: AppContext) => Promise<void>): Ap
     title: 'Generate Plan',
     category: 'Planning',
     keywords: ['plan', 'generate'],
-    visible: (ctx) => ctx.activeWorkspaceId === 'planning',
+    visible: (ctx) => ctx.flags.onPlanningWorkspace === true,
     enabled: (ctx) => ctx.flags.planReady === true,
     execute: executeFn ?? (async () => undefined),
   };
+}
+
+function planningCtx(overrides: { onPlanningWorkspace?: boolean; planReady?: boolean } = {}) {
+  return createAppContext({
+    flags: {
+      onPlanningWorkspace: overrides.onPlanningWorkspace ?? true,
+      planReady: overrides.planReady ?? true,
+    },
+  });
 }
 
 describe('workspace registry', () => {
@@ -96,11 +105,7 @@ describe('command registry', () => {
     const command = generatePlanCommand(execute);
     registry.register(command);
 
-    const ctx = createAppContext({
-      activeWorkspaceId: 'planning',
-      flags: { planReady: true },
-    });
-    await registry.execute('planning.generate', ctx);
+    await registry.execute('planning.generate', planningCtx());
     expect(execute).toHaveBeenCalledOnce();
   });
 
@@ -126,10 +131,10 @@ describe('command registry', () => {
     const registry = createCommandRegistry();
     registry.register(generatePlanCommand());
 
-    const hiddenCtx = createAppContext({ activeWorkspaceId: 'dashboard', flags: { planReady: true } });
+    const hiddenCtx = planningCtx({ onPlanningWorkspace: false, planReady: true });
     await expect(registry.execute('planning.generate', hiddenCtx)).rejects.toThrow(CommandNotVisibleError);
 
-    const disabledCtx = createAppContext({ activeWorkspaceId: 'planning', flags: { planReady: false } });
+    const disabledCtx = planningCtx({ onPlanningWorkspace: true, planReady: false });
     await expect(registry.execute('planning.generate', disabledCtx)).rejects.toThrow(CommandDisabledError);
   });
 
@@ -184,6 +189,22 @@ describe('action history', () => {
     ]);
   });
 
+  it('defaults record outcome to success', () => {
+    const history = createActionHistory();
+    history.record('planning.generate');
+    expect(history.recent(1)[0]?.outcome).toBe('success');
+  });
+
+  it('records success and failure outcomes', () => {
+    const history = createActionHistory();
+    history.recordSuccess('planning.generate');
+    history.recordFailure('planning.export');
+    expect(history.recent(2)).toEqual([
+      expect.objectContaining({ commandId: 'planning.export', outcome: 'failure' }),
+      expect.objectContaining({ commandId: 'planning.generate', outcome: 'success' }),
+    ]);
+  });
+
   it('applies recent limit', () => {
     const history = createActionHistory();
     history.record('a');
@@ -200,26 +221,70 @@ describe('action history', () => {
   });
 });
 
+describe('shell runtime facade', () => {
+  it('forwards workspace registration to the registry', () => {
+    const shell = createShellRuntime();
+    shell.registerWorkspace(planningWorkspace());
+    expect(shell.workspaces.get('planning')).toEqual(planningWorkspace());
+  });
+
+  it('forwards command registration and search to the registry', () => {
+    const shell = createShellRuntime();
+    shell.registerCommand(generatePlanCommand());
+    const results = shell.searchCommands('generate', planningCtx());
+    expect(results.map((entry) => entry.command.id)).toContain('planning.generate');
+  });
+
+  it('forwards shortcut bind and resolve to the registry', () => {
+    const shell = createShellRuntime();
+    shell.bindShortcut('Ctrl+K', 'planning.generate');
+    expect(shell.shortcuts.resolve('Ctrl+K')).toBe('planning.generate');
+    shell.unbindShortcut('Ctrl+K');
+    expect(shell.shortcuts.resolve('Ctrl+K')).toBeUndefined();
+  });
+
+  it('records success when executeCommand succeeds', async () => {
+    const shell = createShellRuntime();
+    shell.registerCommand(generatePlanCommand());
+    await shell.executeCommand('planning.generate', planningCtx());
+    expect(shell.actionHistory.recent(1)).toEqual([
+      expect.objectContaining({ commandId: 'planning.generate', outcome: 'success' }),
+    ]);
+  });
+
+  it('records failure when executeCommand throws', async () => {
+    const shell = createShellRuntime();
+    shell.registerCommand({
+      ...generatePlanCommand(),
+      enabled: () => true,
+      visible: () => true,
+      execute: async () => {
+        throw new Error('export failed');
+      },
+    });
+    await expect(shell.executeCommand('planning.generate', planningCtx())).rejects.toThrow('export failed');
+    expect(shell.actionHistory.recent(1)).toEqual([
+      expect.objectContaining({ commandId: 'planning.generate', outcome: 'failure' }),
+    ]);
+  });
+});
+
 describe('shell runtime integration', () => {
-  it('wires workspace, command, shortcut, execute, and history', async () => {
+  it('wires workspace, command, shortcut, execute, and history via facade', async () => {
     const shell = createShellRuntime();
     const execute = vi.fn(async () => undefined);
 
     shell.registerWorkspace(planningWorkspace());
-    shell.commands.register(generatePlanCommand(execute));
-    shell.shortcuts.bind('Ctrl+K', 'planning.generate');
+    shell.registerCommand(generatePlanCommand(execute));
+    shell.bindShortcut('Ctrl+K', 'planning.generate');
 
     expect(shell.shortcuts.resolve('Ctrl+K')).toBe('planning.generate');
 
-    const ctx = createAppContext({
-      activeWorkspaceId: 'planning',
-      flags: { planReady: true },
-    });
-    await shell.executeCommand('planning.generate', ctx);
+    await shell.executeCommand('planning.generate', planningCtx());
 
     expect(execute).toHaveBeenCalledOnce();
-    expect(shell.actionHistory.recent(10).map((entry) => entry.commandId)).toEqual([
-      'planning.generate',
+    expect(shell.actionHistory.recent(10)).toEqual([
+      expect.objectContaining({ commandId: 'planning.generate', outcome: 'success' }),
     ]);
   });
 });

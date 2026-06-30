@@ -19,7 +19,7 @@ export {
 export type { ShortcutRegistry } from '@/product-shell/registry/shortcut-registry';
 
 export { createActionHistory } from '@/product-shell/runtime/action-history';
-export type { ActionHistory, ActionHistoryEntry } from '@/product-shell/runtime/action-history';
+export type { ActionHistory, ActionHistoryEntry, ActionOutcome } from '@/product-shell/runtime/action-history';
 
 export { createAppContext } from '@/product-shell/runtime/app-context';
 export type { CreateAppContextOptions } from '@/product-shell/runtime/app-context';

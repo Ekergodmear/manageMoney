@@ -35,7 +35,6 @@ export interface AppContext {
   readonly notifications: ShellNotificationApi;
   readonly logger: ShellLogger;
   readonly flags: Readonly<Record<string, boolean>>;
-  readonly activeWorkspaceId: WorkspaceId | null;
 }
 
 export interface AppCommand {

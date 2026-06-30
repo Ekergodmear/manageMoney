@@ -7,7 +7,6 @@ export interface CreateAppContextOptions {
   readonly notifications?: ShellNotificationApi;
   readonly logger?: ShellLogger;
   readonly flags?: Readonly<Record<string, boolean>>;
-  readonly activeWorkspaceId?: WorkspaceId | null;
 }
 
 const noopLogger: ShellLogger = {
@@ -27,6 +26,5 @@ export function createAppContext(options: CreateAppContextOptions = {}): AppCont
     notifications: options.notifications ?? noopNotifications,
     logger: options.logger ?? noopLogger,
     flags: options.flags ?? {},
-    activeWorkspaceId: options.activeWorkspaceId ?? null,
   };
 }
