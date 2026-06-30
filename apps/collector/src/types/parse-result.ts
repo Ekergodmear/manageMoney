@@ -7,10 +7,7 @@ export interface ParseResult {
   readonly errors: readonly string[];
 }
 
-export function parseFailure(
-  rawPayload: unknown,
-  errors: readonly string[],
-): ParseResult {
+export function parseFailure(rawPayload: unknown, errors: readonly string[]): ParseResult {
   return { success: false, rawPayload, errors };
 }
 

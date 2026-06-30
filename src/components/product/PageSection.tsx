@@ -13,10 +13,7 @@ export function PageSection({ title, description, children }: PageSectionProps):
   return (
     <section>
       <Stack spacing={12}>
-        <SectionHeader
-          title={title}
-          {...(description !== undefined ? { description } : {})}
-        />
+        <SectionHeader title={title} {...(description !== undefined ? { description } : {})} />
         {children}
       </Stack>
     </section>

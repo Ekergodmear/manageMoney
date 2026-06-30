@@ -33,8 +33,7 @@ if (simulation.kind === 'failure') {
   throw simulation.error;
 }
 
-const { winningRoundIndex, profitAmount, requiredBankrollAmount, rounds } =
-  simulation.value;
+const { winningRoundIndex, profitAmount, requiredBankrollAmount, rounds } = simulation.value;
 
 console.log(`Win at round ${winningRoundIndex}`);
 console.log(`Scenario profit: ${profitAmount}`);

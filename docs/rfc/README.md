@@ -23,8 +23,8 @@
 
 **Index:** [`docs/rfc/product/README.md`](product/README.md)
 
-| RFC | Title | Status |
-| --- | ----- | ------ |
+| RFC                                        | Title        | Status      |
+| ------------------------------------------ | ------------ | ----------- |
 | [RFC-101](product/RFC-101-user-problem.md) | User Problem | ✅ Accepted |
 | [RFC-102](product/RFC-102-user-journey.md) | User Journey | ✅ Accepted |
 

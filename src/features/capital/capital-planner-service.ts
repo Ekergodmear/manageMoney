@@ -41,6 +41,7 @@ function toRecommendation(
   return {
     id: crypto.randomUUID(),
     label,
+    marketId: candidate.formValues.marketId,
     allocatedCapital,
     targetProfit: candidate.profit,
     roundCount: candidate.rounds,
@@ -128,6 +129,7 @@ export function planCapitalStrategy(input: CapitalPlannerInput): CapitalPlannerR
     strategy: input.strategy,
     risk: input.risk,
     presetId: input.presetId,
+    marketId: input.baseForm.marketId,
     recommendations,
     totalTargetProfit,
     singleBest,

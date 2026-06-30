@@ -1,4 +1,5 @@
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
+import type { PlayedRound } from '@/features/game-data/entities/played-round';
 import { accumulatedAtRound } from '@/features/planner/plan-display';
 import type { GenerateResult, PlannerFormValues } from '@/features/planner/plan-service';
 
@@ -20,7 +21,8 @@ export type SessionTimelineEventType =
   | 'session-stopped'
   | 'improve'
   | 'continue'
-  | 'note-updated';
+  | 'note-updated'
+  | 'round-settled';
 
 export interface SessionTimelineEvent {
   readonly at: string;
@@ -37,6 +39,7 @@ export interface Plan {
   readonly label: string;
   readonly origin: PlanOrigin;
   readonly parentPlanId: string | null;
+  readonly marketId: string;
   readonly formValues: PlannerFormValues;
   readonly generated: GenerateResult;
   readonly status: PlanStatus;
@@ -73,6 +76,10 @@ export interface Session {
   readonly pendingRename?: boolean;
   readonly originDraftId?: string;
   readonly originRecommendationId?: string;
+  /** Kỳ quay cuối đã auto-settle — tránh duplicate. */
+  readonly lastSettledDrawKey: string | null;
+  /** Lịch sử vòng đã settle — append-only. */
+  readonly playedRounds: readonly PlayedRound[];
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -141,9 +148,7 @@ export function startCurrentPlan(session: Session): Session {
     ...session,
     status: 'playing',
     startedAt: session.startedAt ?? at,
-    plans: session.plans.map((p) =>
-      p.id === plan.id ? { ...p, status: 'playing' as const } : p,
-    ),
+    plans: session.plans.map((p) => (p.id === plan.id ? { ...p, status: 'playing' as const } : p)),
     timeline: addEvent(session.timeline, {
       type: 'plan-started',
       planId: plan.id,
@@ -182,8 +187,7 @@ export function setBetProgressOnPlan(session: Session, targetRound: number): Ses
     ...plan,
     completedThroughRound: targetRound,
   };
-  const lastRound =
-    targetRound > 0 ? plan.generated.strategy.rounds[targetRound - 1] : undefined;
+  const lastRound = targetRound > 0 ? plan.generated.strategy.rounds[targetRound - 1] : undefined;
   const advancing = targetRound > plan.completedThroughRound;
 
   return {
@@ -193,10 +197,8 @@ export function setBetProgressOnPlan(session: Session, targetRound: number): Ses
       type: advancing ? 'bet' : 'undo',
       planId: plan.id,
       roundIndex: targetRound > 0 ? targetRound : plan.completedThroughRound,
-      betAmount: lastRound?.betAmount,
-      label: advancing
-        ? `Đến vòng ${String(targetRound)}`
-        : `Về vòng ${String(targetRound)}`,
+      ...(lastRound?.betAmount !== undefined ? { betAmount: lastRound.betAmount } : {}),
+      label: advancing ? `Đến vòng ${String(targetRound)}` : `Về vòng ${String(targetRound)}`,
     }),
     updatedAt: nowIso(),
   };
@@ -218,16 +220,17 @@ function markPlanFinished(plan: Plan, status: 'won' | 'lost'): Plan {
   };
 }
 
-export function winCurrentPlan(session: Session, roundIndex: number, profit: number | null): Session {
+export function winCurrentPlan(
+  session: Session,
+  roundIndex: number,
+  profit: number | null,
+): Session {
   const plan = getCurrentPlan(session);
   if (plan === null) {
     return session;
   }
   const completed = Math.max(plan.completedThroughRound, roundIndex);
-  const finished = markPlanFinished(
-    { ...plan, completedThroughRound: completed },
-    'won',
-  );
+  const finished = markPlanFinished({ ...plan, completedThroughRound: completed }, 'won');
   return {
     ...session,
     status: 'won',
@@ -321,7 +324,10 @@ export function planOriginLabel(origin: PlanOrigin): string {
 export function planStatusBadge(
   plan: Plan,
   isCurrent: boolean,
-): { readonly text: string; readonly variant: 'default' | 'outline' | 'secondary' | 'destructive' } {
+): {
+  readonly text: string;
+  readonly variant: 'default' | 'outline' | 'secondary' | 'destructive';
+} {
   if (isCurrent && (plan.status === 'playing' || plan.status === 'ready')) {
     return { text: 'Hiện tại', variant: 'default' };
   }

@@ -11,6 +11,7 @@ function moneyField(label: string) {
 
 export const plannerFormSchema = z
   .object({
+    marketId: z.string().min(1, 'Vui lòng chọn market.'),
     targetProfit: moneyField('lợi nhuận mục tiêu'),
     roundCount: z
       .string()
@@ -31,11 +32,19 @@ export const plannerFormSchema = z
     }
     if (data.winTaxEnabled) {
       if (parseMoneyPositiveInt(data.winTaxThreshold) === null) {
-        ctx.addIssue({ code: 'custom', message: 'Ngưỡng thuế phải là số nguyên.', path: ['winTaxThreshold'] });
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Ngưỡng thuế phải là số nguyên.',
+          path: ['winTaxThreshold'],
+        });
       }
       const rate = Number(data.winTaxRatePercent.trim());
       if (!Number.isInteger(rate) || rate < 1 || rate > 99) {
-        ctx.addIssue({ code: 'custom', message: 'Thuế phải từ 1% đến 99%.', path: ['winTaxRatePercent'] });
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Thuế phải từ 1% đến 99%.',
+          path: ['winTaxRatePercent'],
+        });
       }
     }
   });
@@ -43,9 +52,14 @@ export const plannerFormSchema = z
 export type PlannerFormSchema = z.infer<typeof plannerFormSchema>;
 
 export function isMoneyField(name: string): boolean {
-  return ['targetProfit', 'minimumBet', 'maximumBet', 'betStep', 'winTaxThreshold', 'userBankroll'].includes(
-    name,
-  );
+  return [
+    'targetProfit',
+    'minimumBet',
+    'maximumBet',
+    'betStep',
+    'winTaxThreshold',
+    'userBankroll',
+  ].includes(name);
 }
 
 export function formatMoneyFieldValue(name: string, raw: string): string {

@@ -38,7 +38,9 @@ export function PresetPicker({ presets, activePresetId, onSelect }: PresetPicker
                 <button
                   key={preset.id}
                   type="button"
-                  onClick={() => onSelect(preset)}
+                  onClick={() => {
+                    onSelect(preset);
+                  }}
                   className={cn(
                     'rounded-xl border p-3 text-left transition-colors',
                     active

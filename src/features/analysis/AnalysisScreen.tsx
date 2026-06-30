@@ -78,7 +78,9 @@ export function AnalysisScreen({
                 min={1}
                 max={totalRounds}
                 value={winRound}
-                onChange={(e) => setWinRound(Number(e.target.value))}
+                onChange={(e) => {
+                  setWinRound(Number(e.target.value));
+                }}
                 className="w-full accent-primary"
               />
               <div className="mt-1 flex justify-between text-xs text-muted-foreground">
@@ -115,7 +117,8 @@ export function AnalysisScreen({
             {completedThroughRound > 0 ? (
               <p className="text-xs text-muted-foreground">
                 Tiến độ hiện tại: đã chi{' '}
-                {formatAmount(accumulatedAtRound(generated.strategy.rounds, completedThroughRound))} đ
+                {formatAmount(accumulatedAtRound(generated.strategy.rounds, completedThroughRound))}{' '}
+                đ
               </p>
             ) : null}
           </CardContent>
@@ -149,10 +152,7 @@ export function AnalysisScreen({
           <StatCard label="Phiên" value={String(stats.sessions)} />
           <StatCard label="Thắng" value={String(stats.wins)} />
           <StatCard label="Thua" value={String(stats.losses)} />
-          <StatCard
-            label="ROI"
-            value={stats.sessions > 0 ? `${stats.roi.toFixed(1)}%` : '—'}
-          />
+          <StatCard label="ROI" value={stats.sessions > 0 ? `${stats.roi.toFixed(1)}%` : '—'} />
           <StatCard
             label="Tổng cược"
             value={stats.totalBet > 0 ? `${formatAmount(stats.totalBet)} đ` : '—'}

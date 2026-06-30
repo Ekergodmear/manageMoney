@@ -1,3 +1,5 @@
+import type { MarketDefinition } from '@/features/game-data/markets/market-definition';
+
 export type RewardPolicyType = 'no-tax' | 'tier-tax';
 
 export interface RewardPolicyConfig {
@@ -16,6 +18,9 @@ export interface GamePolicyPreset {
   readonly id: string;
   readonly name: string;
   readonly category: string;
+  readonly gameId?: string;
+  readonly marketVersion?: number;
+  readonly markets?: readonly MarketDefinition[];
   readonly rewardMultiplier: string;
   readonly minimumBet: string;
   readonly maximumBet: string;

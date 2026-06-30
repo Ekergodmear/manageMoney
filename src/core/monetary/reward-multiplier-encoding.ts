@@ -43,9 +43,6 @@ export function rewardFromBet(bet: number, encoded: EncodedRewardMultiplier): nu
 }
 
 /** Minimum reward at minimumBet — for overflow guards in validation. */
-export function minimumRewardAmount(
-  minimumBet: number,
-  encoded: EncodedRewardMultiplier,
-): number {
+export function minimumRewardAmount(minimumBet: number, encoded: EncodedRewardMultiplier): number {
   return rewardFromBet(minimumBet, encoded);
 }

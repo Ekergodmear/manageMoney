@@ -30,7 +30,7 @@ describe('Telemetry — EventStore', () => {
   });
 
   it('does not import IndexedDB directly — uses StorageDriver', () => {
-    expect(EventStore.prototype.append).toBeDefined();
+    expect(typeof EventStore.prototype.append).toBe('function');
   });
 });
 

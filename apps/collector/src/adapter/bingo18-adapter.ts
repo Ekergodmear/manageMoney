@@ -40,7 +40,9 @@ function headersToRecord(headers: Headers): Record<string, string> {
 
 async function fetchJson(url: string, timeoutMs: number): Promise<FetchResult> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const timer = setTimeout(() => {
+    controller.abort();
+  }, timeoutMs);
 
   try {
     const response = await fetch(url, {
@@ -59,7 +61,7 @@ async function fetchJson(url: string, timeoutMs: number): Promise<FetchResult> {
     };
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status} ${response.statusText}`);
+      throw new Error(`HTTP ${String(response.status)} ${response.statusText}`);
     }
 
     return { data: parseApiJson(body), rawResponse };
@@ -69,9 +71,7 @@ async function fetchJson(url: string, timeoutMs: number): Promise<FetchResult> {
 }
 
 function sortDrawsNewestFirst(draws: readonly Bingo18RawDraw[]): Bingo18RawDraw[] {
-  return [...draws].sort(
-    (a, b) => new Date(b.drawAt).getTime() - new Date(a.drawAt).getTime(),
-  );
+  return [...draws].sort((a, b) => new Date(b.drawAt).getTime() - new Date(a.drawAt).getTime());
 }
 
 /**
@@ -93,10 +93,11 @@ export class Bingo18DrawSourceAdapter implements DrawSourceAdapter {
 
   async fetchLatest(): Promise<RawDrawFetch | null> {
     try {
-      const { data, rawResponse } = await withRetry(
-        () => fetchJson(this.apiUrl, this.timeoutMs),
-        { maxAttempts: 3, baseDelayMs: 1_000, label: 'bingo18-fetch' },
-      );
+      const { data, rawResponse } = await withRetry(() => fetchJson(this.apiUrl, this.timeoutMs), {
+        maxAttempts: 3,
+        baseDelayMs: 1_000,
+        label: 'bingo18-fetch',
+      });
 
       const draws = data.gbingoDraws;
       if (draws === undefined || draws.length === 0) {

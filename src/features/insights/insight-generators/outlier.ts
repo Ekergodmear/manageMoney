@@ -1,4 +1,8 @@
-import type { InsightCard, OutlierSeverity, SessionInsightMetrics } from '@/features/insights/insight-types';
+import type {
+  InsightCard,
+  OutlierSeverity,
+  SessionInsightMetrics,
+} from '@/features/insights/insight-types';
 import { formatAmount } from '@/lib/money-format';
 
 export function generateOutliers(metrics: readonly SessionInsightMetrics[]): InsightCard[] {

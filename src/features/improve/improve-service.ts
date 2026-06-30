@@ -85,7 +85,9 @@ function formValuesFromRequest(
   request: CalculationRequest,
 ): PlannerFormValues {
   const profit =
-    request.targetProfit.mode === 'fixedAmount' ? String(request.targetProfit.amount) : formValues.targetProfit;
+    request.targetProfit.mode === 'fixedAmount'
+      ? String(request.targetProfit.amount)
+      : formValues.targetProfit;
   return {
     ...formValues,
     roundCount: String(request.roundCount),
@@ -101,7 +103,9 @@ function buildOption(
   description: string,
 ): ImproveOption {
   const newProfit =
-    result.request.targetProfit.mode === 'fixedAmount' ? result.request.targetProfit.amount : originalProfit;
+    result.request.targetProfit.mode === 'fixedAmount'
+      ? result.request.targetProfit.amount
+      : originalProfit;
   return {
     id: mode,
     mode,
@@ -170,7 +174,9 @@ function improveFromOptimize(
   }
 
   const profit =
-    outcome.request.targetProfit.mode === 'fixedAmount' ? outcome.request.targetProfit.amount : originalProfit;
+    outcome.request.targetProfit.mode === 'fixedAmount'
+      ? outcome.request.targetProfit.amount
+      : originalProfit;
   const desc = `${String(outcome.request.roundCount)} vòng · lợi nhuận ${profit.toLocaleString('vi-VN')} đ · cần ${result.statistics.requiredBankrollAmount.toLocaleString('vi-VN')} đ`;
 
   return buildOption(mode, result, originalRounds, originalProfit, desc);
@@ -252,12 +258,7 @@ export function runImproveForMode(
 }
 
 export function runAllImproveOptions(context: ImproveContext): ImproveOption[] {
-  const modes: ImproveMode[] = [
-    'fit-bankroll',
-    'keep-profit',
-    'keep-rounds',
-    'reduce-both',
-  ];
+  const modes: ImproveMode[] = ['fit-bankroll', 'keep-profit', 'keep-rounds', 'reduce-both'];
   if (context.maxBetLimit !== undefined) {
     modes.push('fit-max-bet');
   }
@@ -283,7 +284,8 @@ export function runAllImproveOptions(context: ImproveContext): ImproveOption[] {
   }
 
   return options.sort(
-    (a, b) => a.result.statistics.requiredBankrollAmount - b.result.statistics.requiredBankrollAmount,
+    (a, b) =>
+      a.result.statistics.requiredBankrollAmount - b.result.statistics.requiredBankrollAmount,
   );
 }
 

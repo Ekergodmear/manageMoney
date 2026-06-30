@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  parseBingo18DrawBatch,
-  parseDrawPayload,
-} from '../src/parser/parse-draw.js';
+import { parseBingo18DrawBatch, parseDrawPayload } from '../src/parser/parse-draw.js';
 import { drawKeyFromDrawAt } from '../src/types/draw-result.js';
 
 describe('parseDrawPayload', () => {

@@ -17,10 +17,14 @@ export function createLibraryCollection(name: string, tag: string): LibraryColle
 export function normalizeSessionLibraryFields(session: Session): Session {
   return {
     ...session,
-    favorite: session.favorite ?? false,
-    archived: session.archived ?? false,
-    tags: session.tags ?? [],
     pendingRename: session.pendingRename ?? false,
+    plans: session.plans.map((plan) => ({
+      ...plan,
+      formValues: {
+        ...plan.formValues,
+        marketId: plan.marketId,
+      },
+    })),
   };
 }
 
@@ -54,15 +58,15 @@ function duplicateRootTitle(title: string): string {
   t = t.replace(/\s*-\s*Copy$/i, '').trim();
   const numbered = /^(.+?)\s*\((\d+)\)$/.exec(t);
   if (numbered !== null) {
-    return numbered[1]!.trim();
+    const baseTitle = numbered[1];
+    if (baseTitle !== undefined) {
+      return baseTitle.trim();
+    }
   }
   return t;
 }
 
-export function nextDuplicateTitle(
-  sourceTitle: string,
-  allSessions: readonly Session[],
-): string {
+export function nextDuplicateTitle(sourceTitle: string, allSessions: readonly Session[]): string {
   const root = duplicateRootTitle(sourceTitle);
   let maxNum = 1;
   for (const s of allSessions) {
@@ -93,14 +97,16 @@ export function duplicateSession(
   const newPlans: Plan[] = session.plans.map((plan) => {
     const newId = oldToNew.get(plan.id) ?? crypto.randomUUID();
     return {
-      ...plan,
       id: newId,
-      parentPlanId:
-        plan.parentPlanId !== null ? (oldToNew.get(plan.parentPlanId) ?? null) : null,
+      label: plan.label,
+      origin: plan.origin,
+      parentPlanId: plan.parentPlanId !== null ? (oldToNew.get(plan.parentPlanId) ?? null) : null,
+      marketId: plan.marketId,
+      formValues: plan.formValues,
+      generated: plan.generated,
       status: 'ready' as const,
       completedThroughRound: 0,
       createdAt: at,
-      finishedAt: undefined,
     };
   });
 
@@ -119,14 +125,17 @@ export function duplicateSession(
     currentPlanId,
     timeline: [
       { at, type: 'session-created' },
-      { at, type: 'plan-added', planId: currentPlanId ?? undefined, label: 'Duplicate' },
+      ...(currentPlanId !== null
+        ? [{ at, type: 'plan-added' as const, planId: currentPlanId, label: 'Duplicate' }]
+        : [{ at, type: 'plan-added' as const, label: 'Duplicate' }]),
     ],
     startedAt: null,
-    finishedAt: undefined,
     profitAmount: null,
     favorite: false,
     archived: false,
     tags: [...session.tags],
+    lastSettledDrawKey: null,
+    playedRounds: [],
     notes: session.notes,
     pendingRename: true,
     createdAt: at,

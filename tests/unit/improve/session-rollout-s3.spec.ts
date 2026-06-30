@@ -4,12 +4,13 @@ import { FakeClock } from '@/services/clock/fake-clock';
 import { runImproveForMode } from '@/features/improve/improve-service';
 import { createImprovementCandidateUseCase } from '@/features/improve/create-improvement-candidate-use-case';
 import { createPromoteCandidateToPlanUseCase } from '@/features/improve/promote-candidate-to-plan-use-case';
-import { createSessionFromGenerate } from '@/features/session/session-factory';
+import { createTestSessionFromGenerate } from '../../support/create-test-session';
 import { getCurrentPlan } from '@/features/session/session-domain';
 import { DEFAULT_PLANNER_FORM } from '@/features/planner/plan-service';
 import { generatePlan } from '@/features/planner/plan-service';
 import { MemoryStorageDriver } from '@/services/storage/MemoryStorageDriver';
 import { PersistenceService } from '@/services/storage/PersistenceService';
+import { isAppendPlanCandidate } from '@/features/planning/plan-candidate-types';
 import { PlanCandidateRepository } from '@/services/storage/repositories/plan-candidate-repository';
 import { SessionRepository } from '@/services/storage/repositories/session-repository';
 import { EventBus } from '@/services/events/domain-events';
@@ -52,12 +53,7 @@ describe('S3 — Improve candidate pipeline', () => {
       return;
     }
 
-    const session = createSessionFromGenerate(
-      IMPROVE_FORM,
-      generated.result,
-      'bingo-120',
-      1,
-    );
+    const session = createTestSessionFromGenerate(IMPROVE_FORM, generated.result, 'bingo-120', 1);
     await deps.driver.put('app-state', {
       ...EMPTY_PERSISTED_STATE,
       activeSessionId: session.id,
@@ -99,12 +95,7 @@ describe('S3 — Improve candidate pipeline', () => {
       return;
     }
 
-    const session = createSessionFromGenerate(
-      IMPROVE_FORM,
-      generated.result,
-      'bingo-120',
-      1,
-    );
+    const session = createTestSessionFromGenerate(IMPROVE_FORM, generated.result, 'bingo-120', 1);
     await deps.driver.put('app-state', {
       ...EMPTY_PERSISTED_STATE,
       activeSessionId: session.id,
@@ -168,12 +159,7 @@ describe('S3 — Improve candidate pipeline', () => {
       return;
     }
 
-    const session = createSessionFromGenerate(
-      IMPROVE_FORM,
-      generated.result,
-      'bingo-120',
-      1,
-    );
+    const session = createTestSessionFromGenerate(IMPROVE_FORM, generated.result, 'bingo-120', 1);
     await deps.driver.put('app-state', {
       ...EMPTY_PERSISTED_STATE,
       activeSessionId: session.id,
@@ -216,12 +202,7 @@ describe('S3 — Improve candidate pipeline', () => {
       return;
     }
 
-    const session = createSessionFromGenerate(
-      IMPROVE_FORM,
-      generated.result,
-      'bingo-120',
-      1,
-    );
+    const session = createTestSessionFromGenerate(IMPROVE_FORM, generated.result, 'bingo-120', 1);
     await deps.driver.put('app-state', {
       ...EMPTY_PERSISTED_STATE,
       activeSessionId: session.id,
@@ -257,7 +238,11 @@ describe('S3 — Improve candidate pipeline', () => {
     }
 
     const state = await deps.storage.load();
-    expect(state.planCandidate?.candidateId).toBe(second.candidate.candidateId);
-    expect(state.planCandidate?.mode).toBe('keep-rounds');
+    const candidate = state.planCandidate;
+    expect(candidate?.candidateId).toBe(second.candidate.candidateId);
+    expect(candidate !== null && isAppendPlanCandidate(candidate)).toBe(true);
+    if (candidate !== null && isAppendPlanCandidate(candidate)) {
+      expect(candidate.mode).toBe('keep-rounds');
+    }
   });
 });

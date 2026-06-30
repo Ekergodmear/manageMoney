@@ -14,6 +14,7 @@ import { Text } from '@/components/ui/Text';
 import type { StatusTone } from '@/components/product/StatusChip';
 import type { CardTone } from '@/components/ui/card';
 import type { CapitalPlannerSnapshot } from '@/features/capital/capital-planner-types';
+import type { GameStatisticsSnapshot } from '@/features/game-data/statistics/statistics-types';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
 import { generateInsights } from '@/features/insights/insight-engine';
 import type {
@@ -32,6 +33,7 @@ interface InsightsScreenProps {
   readonly sessions: readonly Session[];
   readonly presets: readonly GamePolicyPreset[];
   readonly capitalPlanner: CapitalPlannerSnapshot | null;
+  readonly gameStatistics?: GameStatisticsSnapshot | null;
   readonly onNavigate: (workspace: WorkspaceId) => void;
   readonly onOpenSession: (sessionId: string) => void;
 }
@@ -47,12 +49,13 @@ export function InsightsScreen({
   sessions,
   presets,
   capitalPlanner,
+  gameStatistics = null,
   onNavigate,
   onOpenSession,
 }: InsightsScreenProps): ReactNode {
   const snapshot = useMemo(
-    () => generateInsights({ sessions, presets, capitalPlanner }),
-    [sessions, presets, capitalPlanner],
+    () => generateInsights({ sessions, presets, capitalPlanner, gameStatistics }),
+    [sessions, presets, capitalPlanner, gameStatistics],
   );
 
   if (!snapshot.hasData) {
@@ -63,7 +66,9 @@ export function InsightsScreen({
           title="Chưa đủ dữ liệu từ Session Library."
           description="Hoàn thành 3 phiên để bắt đầu nhận insight."
           actionLabel="Mở Session Library"
-          onAction={() => onNavigate('history')}
+          onAction={() => {
+            onNavigate('history');
+          }}
         />
       </Page>
     );
@@ -73,9 +78,7 @@ export function InsightsScreen({
     <Page>
       <InsightsPageHeader updated={snapshot.updated} />
 
-      {snapshot.reflection !== null ? (
-        <ReflectionSection reflection={snapshot.reflection} />
-      ) : null}
+      {snapshot.reflection !== null ? <ReflectionSection reflection={snapshot.reflection} /> : null}
 
       <PageSection title="Quick Insights">
         <Stack spacing={12}>
@@ -89,6 +92,21 @@ export function InsightsScreen({
           ))}
         </Stack>
       </PageSection>
+
+      {snapshot.observations.length > 0 ? (
+        <PageSection title="Quan sát draw (khách quan)">
+          <Stack spacing={12}>
+            {snapshot.observations.map((card) => (
+              <InsightCardPanel
+                key={card.id}
+                card={card}
+                onNavigate={onNavigate}
+                onOpenSession={onOpenSession}
+              />
+            ))}
+          </Stack>
+        </PageSection>
+      ) : null}
 
       {snapshot.recommendations.length > 0 ? (
         <PageSection title="Khuyến nghị">
@@ -144,7 +162,10 @@ function InsightsPageHeader({ updated }: { updated?: InsightsUpdatedMeta }): Rea
       </Text>
       {updated !== undefined && updated.sessionCount > 0 ? (
         <Text variant="small" muted>
-          Cập nhật <Text variant="small" emphasis as="span">{updated.relativeLabel}</Text>
+          Cập nhật{' '}
+          <Text variant="small" emphasis as="span">
+            {updated.relativeLabel}
+          </Text>
           {' · '}
           sau {updated.sessionCount} phiên
         </Text>
@@ -222,7 +243,11 @@ function TrendGrid({ trends }: { trends: readonly InsightTrend[] }): ReactNode {
           <MetricCard
             key={trend.id}
             label={trend.label}
-            value={<Text variant="mono" accent>{trend.sparkline}</Text>}
+            value={
+              <Text variant="mono" accent>
+                {trend.sparkline}
+              </Text>
+            }
             detail={trend.summary}
             footer={`Gần nhất: ${trend.latestLabel}`}
             {...(confidence !== undefined
@@ -254,7 +279,9 @@ function RecordGrid({
             ? {
                 footer: 'Mở Session →',
                 interactive: true,
-                onClick: () => onOpenSession(record.sessionId as string),
+                onClick: () => {
+                  onOpenSession(record.sessionId as string);
+                },
               }
             : {})}
         />

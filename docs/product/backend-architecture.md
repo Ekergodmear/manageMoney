@@ -7,12 +7,12 @@
 
 ## Ranh giới
 
-| Client (luôn) | Cloud Layer (Supabase) |
-|---------------|------------------------|
-| `@stake/constraint-engine` | Auth (Google · Email) |
+| Client (luôn)               | Cloud Layer (Supabase)   |
+| --------------------------- | ------------------------ |
+| `@stake/constraint-engine`  | Auth (Google · Email)    |
 | IndexedDB — primary offline | PostgreSQL — mirror JSON |
-| PersistenceService | SyncService |
-| Insights engine | Không compute |
+| PersistenceService          | SyncService              |
+| Insights engine             | Không compute            |
 
 **Không bao giờ:** `POST /solve` · `POST /optimize` · `POST /simulate`
 
@@ -74,9 +74,9 @@ Chi tiết v0.8: `docs/product/core-services.md`
 Domain Session giữ nguyên. Thêm metadata sync (không normalize DB):
 
 ```ts
-syncStatus: 'pending' | 'uploading' | 'synced' | 'failed'
-lastSyncedAt: string | null
-version: number
+syncStatus: 'pending' | 'uploading' | 'synced' | 'failed';
+lastSyncedAt: string | null;
+version: number;
 ```
 
 Cloud row:
@@ -203,14 +203,14 @@ Supabase Free — đủ 1 user: PostgreSQL · Auth · Storage · Realtime · Edg
 
 ## Ranh giới code
 
-| Làm | Không làm |
-|-----|-----------|
-| Mirror Session JSON | Solver trên server |
-| Document-level sync | Field-level sync |
-| IndexedDB first | Wait for POST |
+| Làm                          | Không làm               |
+| ---------------------------- | ----------------------- |
+| Mirror Session JSON          | Solver trên server      |
+| Document-level sync          | Field-level sync        |
+| IndexedDB first              | Wait for POST           |
 | `src/services/cloud` adapter | Feature import Supabase |
-| Version optimistic lock | Merge Phase 1 |
+| Version optimistic lock      | Merge Phase 1           |
 
 ---
 
-*Prerequisite v0.8:* Core Services + Event Bus · Freeze DS · Playwright · Telemetry — `docs/product/core-services.md` · `docs/product/release-engineering.md`*
+_Prerequisite v0.8:_ Core Services + Event Bus · Freeze DS · Playwright · Telemetry — `docs/product/core-services.md` · `docs/product/release-engineering.md`\*

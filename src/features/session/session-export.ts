@@ -17,7 +17,8 @@ export function exportFullSessionJson(session: Session): void {
     session,
     statistics: computeSessionStatistics(session),
   };
-  const safeTitle = session.title.replace(/[^\w\s-]/g, '').trim() || `session-${String(session.sessionNumber)}`;
+  const safeTitle =
+    session.title.replace(/[^\w\s-]/g, '').trim() || `session-${String(session.sessionNumber)}`;
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   downloadBlob(`${safeTitle}.json`, blob);
 }
@@ -54,10 +55,18 @@ th{background:#f5f5f5}</style></head><body>
   if (win === null) {
     return;
   }
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  win.print();
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  win.location.assign(url);
+  win.addEventListener(
+    'load',
+    () => {
+      URL.revokeObjectURL(url);
+      win.focus();
+      win.print();
+    },
+    { once: true },
+  );
 }
 
 export function exportHistoryJson(sessions: readonly Session[]): void {

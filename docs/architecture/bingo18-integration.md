@@ -33,12 +33,12 @@ Session (aggregate root)
 
 ## Quan hệ với Architecture v1 Frozen
 
-| Giữ nguyên | Mở rộng |
-| ---------- | ------- |
-| Session = aggregate root | `PlayedRound[]`, play stats |
-| Planning / Continue / Capital / … pipelines | `GamePolicy` markets |
-| Cloud Session mirror opaque | DrawStore + Snapshot API trên server |
-| Manual Tick (fallback) | Giữ khi Collector chết |
+| Giữ nguyên                                  | Mở rộng                              |
+| ------------------------------------------- | ------------------------------------ |
+| Session = aggregate root                    | `PlayedRound[]`, play stats          |
+| Planning / Continue / Capital / … pipelines | `GamePolicy` markets                 |
+| Cloud Session mirror opaque                 | DrawStore + Snapshot API trên server |
+| Manual Tick (fallback)                      | Giữ khi Collector chết               |
 
 **Không** unfreeze: `PlanFactory`, `SessionFactory`, `RecommendationSet`, Cloud Session payload semantics.
 
@@ -52,7 +52,7 @@ Planning và engine **chỉ đọc `GamePolicy`** — không hardcode Bingo18.
 
 ```ts
 interface GamePolicyPreset {
-  readonly gameId: string;           // 'bingo18' | 'sunwin' | …
+  readonly gameId: string; // 'bingo18' | 'sunwin' | …
   readonly marketVersion: number;
   readonly markets: readonly MarketDefinition[];
   // rewardPolicy, bet limits… hiện có
@@ -139,16 +139,16 @@ interface DrawResult {
   readonly gameId: string;
   readonly marketVersion: number;
   readonly drawNumber: string;
-  readonly drawTime: string;        // thời điểm kỳ quay (nguồn)
-  readonly publishedAt: string;     // khi website công bố (nếu có)
-  readonly collectedAt: string;     // khi Collector ghi
-  readonly latencyMs: number;       // collectedAt − publishedAt (hoặc drawTime)
+  readonly drawTime: string; // thời điểm kỳ quay (nguồn)
+  readonly publishedAt: string; // khi website công bố (nếu có)
+  readonly collectedAt: string; // khi Collector ghi
+  readonly latencyMs: number; // collectedAt − publishedAt (hoặc drawTime)
   readonly dice: readonly [number, number, number];
   readonly total: number;
   readonly flower: string | null;
   readonly smallLarge: 'small' | 'tie' | 'large';
-  readonly rawPayload: unknown;      // dữ liệu gốc — parser sai vẫn audit được
-  readonly source: string;           // adapter id
+  readonly rawPayload: unknown; // dữ liệu gốc — parser sai vẫn audit được
+  readonly source: string; // adapter id
 }
 ```
 
@@ -160,13 +160,13 @@ Nếu parser sai: không sửa row — tạo **Correction** hoặc **Reimport** 
 
 ## Collector — Adaptive Polling
 
-Mục tiêu: *Đã có Draw mới chưa?* — gọi `adapter.fetchLatest()`.
+Mục tiêu: _Đã có Draw mới chưa?_ — gọi `adapter.fetchLatest()`.
 
 | Giai đoạn (từ draw trước) | Interval |
 | ------------------------- | -------- |
-| 0–4 phút | 60s |
-| 4–6 phút | 20s |
-| > 6 phút | 10s |
+| 0–4 phút                  | 60s      |
+| 4–6 phút                  | 20s      |
+| > 6 phút                  | 10s      |
 
 Tận dụng countdown / drawNumber từ `rawPayload` khi adapter cung cấp.
 
@@ -294,8 +294,8 @@ interface PlayedRound {
   readonly round: number;
   readonly drawNumber: string;
   readonly bet: number;
-  readonly market: string;          // 'total-4' | …
-  readonly draw: DrawResult;        // hoặc drawResultId + snapshot
+  readonly market: string; // 'total-4' | …
+  readonly draw: DrawResult; // hoặc drawResultId + snapshot
   readonly win: boolean;
   readonly stake: number;
   readonly prize: number;
@@ -322,11 +322,11 @@ AlertService
 Browser Notification / in-app toast
 ```
 
-| Trigger | Alert |
-| ------- | ----- |
-| Còn 5, 4, 3, 2, 1 vòng | Sắp hết kế hoạch |
+| Trigger                          | Alert                    |
+| -------------------------------- | ------------------------ |
+| Còn 5, 4, 3, 2, 1 vòng           | Sắp hết kế hoạch         |
 | Settlement WIN (`marketMatched`) | Trúng — netPrize, profit |
-| Plan hoàn thành | Hết kế hoạch |
+| Plan hoàn thành                  | Hết kế hoạch             |
 
 AlertService subscribe Event Bus client — Session domain không gọi notification API.
 
@@ -362,7 +362,7 @@ Dashboard **chỉ đọc** `StatisticsSnapshot` + `CollectorHealth` + latest `Dr
 interface SessionLibraryStats {
   // … hiện có
   readonly actualHitRate: number;
-  readonly expectedProbability: number;  // từ GamePolicy / theory
+  readonly expectedProbability: number; // từ GamePolicy / theory
   readonly variance: number;
 }
 ```
@@ -390,11 +390,11 @@ Nguồn kép: **StatisticsSnapshot (draw)** + **Library (session đã chơi)**.
 
 ## Cloud
 
-| Entity | Vai trò |
-| ------ | ------- |
-| Session · Preset · Setting | Mirror opaque (như cũ) |
-| DrawResult · StatisticsSnapshot | Server authoritative |
-| Staging / Telemetry | Không sync |
+| Entity                          | Vai trò                |
+| ------------------------------- | ---------------------- |
+| Session · Preset · Setting      | Mirror opaque (như cũ) |
+| DrawResult · StatisticsSnapshot | Server authoritative   |
+| Staging / Telemetry             | Không sync             |
 
 ### Prisma (đề xuất)
 
@@ -463,17 +463,17 @@ Manual Entry → DrawResult → (cùng luồng Settlement)
 
 ## Ma trận module
 
-| Module | Thay đổi |
-| ------ | -------- |
-| `game-policy-types` | `gameId`, `marketVersion`, `markets` |
-| `game-data/*` | **Mới** — toàn bộ bounded context |
-| `session-domain` | `applySettlement` — **không** settlement logic |
-| `PlayedRound` | Entity riêng trên Session |
-| `DashboardScreen` | Game Monitor + heatmap |
-| `AlertService` | **Mới** — subscribe events |
-| `apps/collector` | Worker + adapters |
-| `apps/api` | draws, statistics, collector health |
-| Planning / Continue / Capital / Experiment | **Không đổi** pipeline |
+| Module                                     | Thay đổi                                       |
+| ------------------------------------------ | ---------------------------------------------- |
+| `game-policy-types`                        | `gameId`, `marketVersion`, `markets`           |
+| `game-data/*`                              | **Mới** — toàn bộ bounded context              |
+| `session-domain`                           | `applySettlement` — **không** settlement logic |
+| `PlayedRound`                              | Entity riêng trên Session                      |
+| `DashboardScreen`                          | Game Monitor + heatmap                         |
+| `AlertService`                             | **Mới** — subscribe events                     |
+| `apps/collector`                           | Worker + adapters                              |
+| `apps/api`                                 | draws, statistics, collector health            |
+| Planning / Continue / Capital / Experiment | **Không đổi** pipeline                         |
 
 ---
 
@@ -517,13 +517,13 @@ Chi tiết: [`bingo18-roadmap.md`](../product/bingo18-roadmap.md).
 
 ## Quyết định đã chốt
 
-| # | Quyết định |
-| - | ---------- |
-| 1 | Nguồn: API ẩn → Playwright → HTML scrape. Không OCR. |
-| 2 | Settlement chỉ `activeSessionId` |
-| 3 | Manual Tick / manual entry khi Collector chết |
-| 4 | Tax qua `RewardPolicy` |
-| 5 | **Không code** trước Internal RC — Game Data = Future Product |
+| #   | Quyết định                                                    |
+| --- | ------------------------------------------------------------- |
+| 1   | Nguồn: API ẩn → Playwright → HTML scrape. Không OCR.          |
+| 2   | Settlement chỉ `activeSessionId`                              |
+| 3   | Manual Tick / manual entry khi Collector chết                 |
+| 4   | Tax qua `RewardPolicy`                                        |
+| 5   | **Không code** trước Internal RC — Game Data = Future Product |
 
 ---
 
@@ -531,11 +531,11 @@ Chi tiết: [`bingo18-roadmap.md`](../product/bingo18-roadmap.md).
 
 Khi Draw History đủ dày — **không** đưa vào roadmap hiện tại:
 
-| Ý tưởng | Ví dụ |
-| ------- | ----- |
-| **Drought** | Tổng 4 — 48 kỳ liên tiếp không ra (30 ngày) |
-| **Last seen** | Hoa 666 — lần cuối 421 kỳ trước |
-| **Rolling frequency** | Tần suất rolling 100 / 1000 / 10000 kỳ |
+| Ý tưởng               | Ví dụ                                       |
+| --------------------- | ------------------------------------------- |
+| **Drought**           | Tổng 4 — 48 kỳ liên tiếp không ra (30 ngày) |
+| **Last seen**         | Hoa 666 — lần cuối 421 kỳ trước             |
+| **Rolling frequency** | Tần suất rolling 100 / 1000 / 10000 kỳ      |
 
 Insights đọc DrawStore + Snapshot — implement sau Bingo18 Stable.
 
@@ -543,9 +543,9 @@ Insights đọc DrawStore + Snapshot — implement sau Bingo18 Stable.
 
 ## Internal RC
 
-| | |
-| - | - |
-| **Loại** | 🟦 Future (Game Integration v1) |
+|          |                                         |
+| -------- | --------------------------------------- |
+| **Loại** | 🟦 Future (Game Integration v1)         |
 | **Code** | Sau RC + daily-notes chứng minh nhu cầu |
 
 ---

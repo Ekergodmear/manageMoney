@@ -1,9 +1,4 @@
-import {
-  Archive,
-  Copy,
-  Play,
-  Star,
-} from 'lucide-react';
+import { Archive, Copy, Play, Star } from 'lucide-react';
 import { useState, type KeyboardEvent, type ReactNode } from 'react';
 
 import { ActionMenu } from '@/components/product';
@@ -20,6 +15,7 @@ import { semanticText } from '@/design/tokens/colors';
 import { motionDuration } from '@/design/tokens/motion';
 import type { SessionCardSummary } from '@/features/library/library-types';
 import { sessionStatusVisual } from '@/features/library/library-stats';
+import { formatHitRate } from '@/features/game-data/statistics/statistics-format';
 import { formatAmount } from '@/lib/money-format';
 import { cn } from '@/lib/utils';
 
@@ -52,7 +48,16 @@ export function SessionLibraryCard({
   onToggleCompare,
   onTagAdd,
 }: SessionLibraryCardProps): ReactNode {
-  const { session, presetName, stats, totalRounds, completedRounds, rewardMultiplier } = summary;
+  const {
+    session,
+    stats,
+    totalRounds,
+    completedRounds,
+    marketLabel,
+    marketMultiplier,
+    sessionHitExpected,
+    sessionHitActual,
+  } = summary;
   const statusVisual = sessionStatusVisual(session.status);
   const [starPulse, setStarPulse] = useState(false);
 
@@ -78,7 +83,9 @@ export function SessionLibraryCard({
   function handleFavoriteClick(): void {
     setStarPulse(true);
     onToggleFavorite();
-    window.setTimeout(() => setStarPulse(false), 150);
+    window.setTimeout(() => {
+      setStarPulse(false);
+    }, 150);
   }
 
   return (
@@ -121,11 +128,21 @@ export function SessionLibraryCard({
               <button type="button" onClick={onOpen} className="w-full text-left">
                 <Stack spacing={4}>
                   <Text variant="body" emphasis>
-                    {presetName} ×{rewardMultiplier}
+                    {marketLabel}
+                    {marketMultiplier !== null ? ` · ×${String(marketMultiplier)}` : ''}
                   </Text>
                   <Text variant="small" muted>
-                    {stats.roundsPlayed} vòng · Plans {stats.planCount} · Continue{' '}
-                    {stats.continueCount} · Cải thiện {stats.improveCount}
+                    {totalRounds} kỳ · {statusVisual.label}
+                  </Text>
+                  {sessionHitExpected !== null && sessionHitActual !== null ? (
+                    <Text variant="small" muted>
+                      Expected {formatHitRate(sessionHitExpected)} → Actual{' '}
+                      {formatHitRate(sessionHitActual)}
+                    </Text>
+                  ) : null}
+                  <Text variant="small" muted>
+                    Plans {stats.planCount} · Continue {stats.continueCount} · Cải thiện{' '}
+                    {stats.improveCount}
                   </Text>
                   <Text variant="small" muted>
                     Max bet {formatAmount(stats.highestBet)}
@@ -160,7 +177,9 @@ export function SessionLibraryCard({
             placeholder="+ tag"
             className="text-[11px]"
             onKeyDown={handleTagKeyDown}
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
           />
 
           <Divider />

@@ -4,10 +4,7 @@ export interface RetryOptions {
   readonly label?: string;
 }
 
-export async function withRetry<T>(
-  fn: () => Promise<T>,
-  options: RetryOptions = {},
-): Promise<T> {
+export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
   const maxAttempts = options.maxAttempts ?? 3;
   const baseDelayMs = options.baseDelayMs ?? 500;
   let lastError: unknown;
@@ -32,10 +29,7 @@ export function isSqliteBusyError(err: unknown): boolean {
   return code === 'SQLITE_BUSY' || code === 'SQLITE_LOCKED';
 }
 
-export async function withSqliteRetry<T>(
-  fn: () => T | Promise<T>,
-  maxAttempts = 5,
-): Promise<T> {
+export async function withSqliteRetry<T>(fn: () => T | Promise<T>, maxAttempts = 5): Promise<T> {
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {

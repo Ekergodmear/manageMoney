@@ -3,7 +3,11 @@ import {
   mostRecentLostSession,
   sessionWithMostContinues,
 } from '@/features/insights/insight-confidence';
-import type { AggregatedInsightMetrics, InsightCard, SessionInsightMetrics } from '@/features/insights/insight-types';
+import type {
+  AggregatedInsightMetrics,
+  InsightCard,
+  SessionInsightMetrics,
+} from '@/features/insights/insight-types';
 
 export function generateSessionRecommendations(
   agg: AggregatedInsightMetrics,

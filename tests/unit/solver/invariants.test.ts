@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { CalculationRequest, TargetProfit } from '@/application/dto';
-import {
-  encodeRewardMultiplier,
-  rewardFromBet,
-} from '@/core/monetary/reward-multiplier-encoding';
+import { encodeRewardMultiplier, rewardFromBet } from '@/core/monetary/reward-multiplier-encoding';
 import { resolveTarget } from '@/core/solver/resolve-target';
 import { solveMinimalFeasibleBet } from '@/core/solver/solve-minimal-feasible-bet';
 import { solve } from '@/core/solver';
@@ -81,7 +78,13 @@ describe('ConstraintSolver — constructive proof checkpoints', () => {
   });
 
   it('round 12 (§2 constructive proof)', () => {
-    const bet = solveMinimalFeasibleBet(111_000, 100_000, encodeRewardMultiplier(20), 10_000, 1_000);
+    const bet = solveMinimalFeasibleBet(
+      111_000,
+      100_000,
+      encodeRewardMultiplier(20),
+      10_000,
+      1_000,
+    );
     expect(bet).toBe(12_000);
   });
 

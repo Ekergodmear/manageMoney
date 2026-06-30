@@ -42,10 +42,7 @@ interface ScenarioPlannerScreenProps {
   readonly presets: readonly GamePolicyPreset[];
   readonly activePresetId: string;
   readonly onPresetSelect: (preset: GamePolicyPreset) => void;
-  readonly onUseExperiment: (
-    experiment: Experiment,
-    allExperiments: readonly Experiment[],
-  ) => void;
+  readonly onUseExperiment: (experiment: Experiment, allExperiments: readonly Experiment[]) => void;
   readonly onPromotePreset: (preset: GamePolicyPreset) => void;
 }
 
@@ -71,7 +68,9 @@ function bindMoney(
 } {
   return {
     value,
-    onChange: (e) => onChange(formatMoneyFieldValue(field, e.target.value)),
+    onChange: (e) => {
+      onChange(formatMoneyFieldValue(field, e.target.value));
+    },
   };
 }
 
@@ -160,7 +159,12 @@ export function ScenarioPlannerScreen({
     if (fork === undefined) {
       return;
     }
-    const experiment = forkExperiment(lab.baseline.formValues, lab.experiments, fork.overrides, fork.label);
+    const experiment = forkExperiment(
+      lab.baseline.formValues,
+      lab.experiments,
+      fork.overrides,
+      fork.label,
+    );
     setLab((prev) => ({
       ...prev,
       experiments: [...prev.experiments, experiment],
@@ -169,7 +173,7 @@ export function ScenarioPlannerScreen({
   }
 
   function duplicateSelected(): void {
-    if (selectedExperiment === null || selectedExperiment === undefined || selectedExperiment.isBaseline) {
+    if (selectedExperiment === null || selectedExperiment.isBaseline) {
       return;
     }
     const copy = duplicateExperiment(selectedExperiment, lab.experiments);
@@ -181,14 +185,14 @@ export function ScenarioPlannerScreen({
   }
 
   function regenerateSelected(): void {
-    if (selectedExperiment === null || selectedExperiment === undefined) {
+    if (selectedExperiment === null) {
       return;
     }
     patchExperiment(regenerateExperiment(selectedExperiment));
   }
 
   function updateSelectedField(field: keyof PlannerFormValues, value: string | boolean): void {
-    if (selectedExperiment === null || selectedExperiment === undefined || lab.baseline === null) {
+    if (selectedExperiment === null || lab.baseline === null) {
       return;
     }
     const nextForm = { ...selectedExperiment.formValues, [field]: value };
@@ -196,7 +200,7 @@ export function ScenarioPlannerScreen({
   }
 
   function updateSelectedNotes(notes: string): void {
-    if (selectedExperiment === null || selectedExperiment === undefined) {
+    if (selectedExperiment === null) {
       return;
     }
     patchExperiment(updateExperimentNotes(selectedExperiment, notes));
@@ -257,26 +261,42 @@ export function ScenarioPlannerScreen({
                 <Field label="Vốn">
                   <Input
                     inputMode="numeric"
-                    {...bindMoney(baseForm.userBankroll, (v) => setBaseForm((f) => ({ ...f, userBankroll: v })), 'userBankroll')}
+                    {...bindMoney(
+                      baseForm.userBankroll,
+                      (v) => {
+                        setBaseForm((f) => ({ ...f, userBankroll: v }));
+                      },
+                      'userBankroll',
+                    )}
                   />
                 </Field>
                 <Field label="Lợi nhuận mục tiêu">
                   <Input
                     inputMode="numeric"
-                    {...bindMoney(baseForm.targetProfit, (v) => setBaseForm((f) => ({ ...f, targetProfit: v })), 'targetProfit')}
+                    {...bindMoney(
+                      baseForm.targetProfit,
+                      (v) => {
+                        setBaseForm((f) => ({ ...f, targetProfit: v }));
+                      },
+                      'targetProfit',
+                    )}
                   />
                 </Field>
                 <Field label="Số vòng">
                   <Input
                     inputMode="numeric"
                     value={baseForm.roundCount}
-                    onChange={(e) => setBaseForm((f) => ({ ...f, roundCount: e.target.value.replace(/\D/g, '') }))}
+                    onChange={(e) => {
+                      setBaseForm((f) => ({ ...f, roundCount: e.target.value.replace(/\D/g, '') }));
+                    }}
                   />
                 </Field>
                 <Field label="Hệ số">
                   <Input
                     value={baseForm.rewardMultiplier}
-                    onChange={(e) => setBaseForm((f) => ({ ...f, rewardMultiplier: e.target.value }))}
+                    onChange={(e) => {
+                      setBaseForm((f) => ({ ...f, rewardMultiplier: e.target.value }));
+                    }}
                   />
                 </Field>
               </div>
@@ -311,7 +331,9 @@ export function ScenarioPlannerScreen({
                       {compareTable.experiments.map((col) => (
                         <th key={col.id} colSpan={2} className="pb-2 pr-3 font-medium">
                           {col.name}
-                          <p className="text-[10px] font-normal text-muted-foreground">{col.label}</p>
+                          <p className="text-[10px] font-normal text-muted-foreground">
+                            {col.label}
+                          </p>
                         </th>
                       ))}
                     </tr>
@@ -339,7 +361,10 @@ export function ScenarioPlannerScreen({
                             <Fragment key={col.id}>
                               <td className="py-2 pr-2 font-mono text-xs">{cell?.value ?? '—'}</td>
                               <td
-                                className={cn('py-2 pr-3 font-mono text-xs', deltaClass(cell?.deltaTone ?? null))}
+                                className={cn(
+                                  'py-2 pr-3 font-mono text-xs',
+                                  deltaClass(cell?.deltaTone ?? null),
+                                )}
                               >
                                 {cell?.delta ?? '—'}
                               </td>
@@ -354,7 +379,7 @@ export function ScenarioPlannerScreen({
             </Card>
           ) : null}
 
-          {selectedExperiment !== null && selectedExperiment !== undefined ? (
+          {selectedExperiment !== null ? (
             <Card>
               <CardHeader className="pb-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -374,9 +399,9 @@ export function ScenarioPlannerScreen({
                       <>
                         <Button
                           size="sm"
-                          onClick={() =>
-                            onUseExperiment(selectedExperiment, lab.experiments)
-                          }
+                          onClick={() => {
+                            onUseExperiment(selectedExperiment, lab.experiments);
+                          }}
                         >
                           <Save className="h-3.5 w-3.5" />
                           Dùng experiment này
@@ -384,14 +409,14 @@ export function ScenarioPlannerScreen({
                         <Button
                           variant="secondary"
                           size="sm"
-                          onClick={() =>
+                          onClick={() => {
                             onPromotePreset(
                               promoteExperimentToPreset(
                                 selectedExperiment,
                                 `${selectedExperiment.label} preset`,
                               ),
-                            )
-                          }
+                            );
+                          }}
                         >
                           Save as Preset
                         </Button>
@@ -407,10 +432,22 @@ export function ScenarioPlannerScreen({
                 ) : null}
                 {selectedExperiment.result !== null ? (
                   <div className="grid gap-2 text-sm sm:grid-cols-4">
-                    <Stat label="Vốn cần" value={`${formatAmount(selectedExperiment.result.statistics.requiredBankrollAmount)} đ`} />
-                    <Stat label="Max bet" value={`${formatAmount(selectedExperiment.result.statistics.maximumBetAmount)} đ`} />
-                    <Stat label="Lợi nhuận" value={`${formatAmount(selectedExperiment.result.statistics.expectedProfitAmount)} đ`} />
-                    <Stat label="Vòng" value={String(selectedExperiment.result.statistics.roundCount)} />
+                    <Stat
+                      label="Vốn cần"
+                      value={`${formatAmount(selectedExperiment.result.statistics.requiredBankrollAmount)} đ`}
+                    />
+                    <Stat
+                      label="Max bet"
+                      value={`${formatAmount(selectedExperiment.result.statistics.maximumBetAmount)} đ`}
+                    />
+                    <Stat
+                      label="Lợi nhuận"
+                      value={`${formatAmount(selectedExperiment.result.statistics.expectedProfitAmount)} đ`}
+                    />
+                    <Stat
+                      label="Vòng"
+                      value={String(selectedExperiment.result.statistics.roundCount)}
+                    />
                   </div>
                 ) : null}
                 <div className="space-y-1.5 border-t border-border pt-3">
@@ -421,7 +458,9 @@ export function ScenarioPlannerScreen({
                   <textarea
                     className="min-h-[72px] w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
                     value={selectedExperiment.notes}
-                    onChange={(e) => updateSelectedNotes(e.target.value)}
+                    onChange={(e) => {
+                      updateSelectedNotes(e.target.value);
+                    }}
                     placeholder="Game mới. Casino A. VIP..."
                     rows={3}
                   />
@@ -430,7 +469,9 @@ export function ScenarioPlannerScreen({
                   <Field label="Hệ số">
                     <Input
                       value={selectedExperiment.formValues.rewardMultiplier}
-                      onChange={(e) => updateSelectedField('rewardMultiplier', e.target.value)}
+                      onChange={(e) => {
+                        updateSelectedField('rewardMultiplier', e.target.value);
+                      }}
                     />
                   </Field>
                   <Field label="Max bet">
@@ -438,7 +479,9 @@ export function ScenarioPlannerScreen({
                       inputMode="numeric"
                       {...bindMoney(
                         selectedExperiment.formValues.maximumBet,
-                        (v) => updateSelectedField('maximumBet', v),
+                        (v) => {
+                          updateSelectedField('maximumBet', v);
+                        },
                         'maximumBet',
                       )}
                     />
@@ -448,7 +491,9 @@ export function ScenarioPlannerScreen({
                       inputMode="numeric"
                       {...bindMoney(
                         selectedExperiment.formValues.targetProfit,
-                        (v) => updateSelectedField('targetProfit', v),
+                        (v) => {
+                          updateSelectedField('targetProfit', v);
+                        },
                         'targetProfit',
                       )}
                     />
@@ -457,7 +502,9 @@ export function ScenarioPlannerScreen({
                     <Input
                       inputMode="numeric"
                       value={selectedExperiment.formValues.roundCount}
-                      onChange={(e) => updateSelectedField('roundCount', e.target.value.replace(/\D/g, ''))}
+                      onChange={(e) => {
+                        updateSelectedField('roundCount', e.target.value.replace(/\D/g, ''));
+                      }}
                     />
                   </Field>
                   <Field label="Vốn">
@@ -465,7 +512,9 @@ export function ScenarioPlannerScreen({
                       inputMode="numeric"
                       {...bindMoney(
                         selectedExperiment.formValues.userBankroll,
-                        (v) => updateSelectedField('userBankroll', v),
+                        (v) => {
+                          updateSelectedField('userBankroll', v);
+                        },
                         'userBankroll',
                       )}
                     />
@@ -475,7 +524,9 @@ export function ScenarioPlannerScreen({
                       <Checkbox
                         id="scenario-tax"
                         checked={selectedExperiment.formValues.winTaxEnabled}
-                        onCheckedChange={(c) => updateSelectedField('winTaxEnabled', c === true)}
+                        onCheckedChange={(c) => {
+                          updateSelectedField('winTaxEnabled', c === true);
+                        }}
                       />
                       <Label htmlFor="scenario-tax" className="text-sm">
                         Thuế thắng
@@ -485,7 +536,12 @@ export function ScenarioPlannerScreen({
                       <Input
                         inputMode="numeric"
                         value={selectedExperiment.formValues.winTaxRatePercent}
-                        onChange={(e) => updateSelectedField('winTaxRatePercent', e.target.value.replace(/\D/g, ''))}
+                        onChange={(e) => {
+                          updateSelectedField(
+                            'winTaxRatePercent',
+                            e.target.value.replace(/\D/g, ''),
+                          );
+                        }}
                         placeholder="10"
                       />
                     ) : null}
@@ -512,7 +568,9 @@ export function ScenarioPlannerScreen({
                   <button
                     key={experiment.id}
                     type="button"
-                    onClick={() => setLab((prev) => ({ ...prev, selectedExperimentId: experiment.id }))}
+                    onClick={() => {
+                      setLab((prev) => ({ ...prev, selectedExperimentId: experiment.id }));
+                    }}
                     className={cn(
                       'w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors',
                       lab.selectedExperimentId === experiment.id
@@ -543,7 +601,9 @@ export function ScenarioPlannerScreen({
                         variant="outline"
                         size="sm"
                         className="h-7 text-[11px]"
-                        onClick={() => addQuickFork(fork.id)}
+                        onClick={() => {
+                          addQuickFork(fork.id);
+                        }}
                       >
                         <Plus className="h-3 w-3" />
                         {fork.label}
@@ -570,7 +630,9 @@ export function ScenarioPlannerScreen({
                   <div key={item.id} className="flex items-center gap-1">
                     <button
                       type="button"
-                      onClick={() => loadRecent(item)}
+                      onClick={() => {
+                        loadRecent(item);
+                      }}
                       className="flex-1 rounded-lg border border-border px-2 py-1.5 text-left text-xs hover:bg-muted/40"
                     >
                       <p className="font-medium">{item.name}</p>
@@ -582,7 +644,9 @@ export function ScenarioPlannerScreen({
                       variant="ghost"
                       size="sm"
                       className="h-7 px-2 text-[10px]"
-                      onClick={() => setRecent(removeRecentScenario(item.id))}
+                      onClick={() => {
+                        setRecent(removeRecentScenario(item.id));
+                      }}
                     >
                       ×
                     </Button>

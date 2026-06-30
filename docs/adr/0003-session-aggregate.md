@@ -17,10 +17,10 @@ Session là trung tâm product: planning → playing → continue/improve → wo
 
 ## Hệ quả
 
-| Tích cực | Tiêu cực |
-|----------|----------|
-| Library/Insights đọc cùng shape | JSON lớn theo thời gian |
-| Sync mirror 1 document | Query phức tạp phải client-side |
+| Tích cực                              | Tiêu cực                          |
+| ------------------------------------- | --------------------------------- |
+| Library/Insights đọc cùng shape       | JSON lớn theo thời gian           |
+| Sync mirror 1 document                | Query phức tạp phải client-side   |
 | Continue/Improve trong cùng aggregate | Migration cẩn thận khi đổi schema |
 
 **Persistence:** `PersistenceService` load/save `PersistedAppState` — sessions[] là mảng aggregate.
@@ -29,4 +29,4 @@ Session là trung tâm product: planning → playing → continue/improve → wo
 
 ---
 
-*Liên quan: ADR 0001 · session-domain.ts · docs/product/core-services.md*
+_Liên quan: ADR 0001 · session-domain.ts · docs/product/core-services.md_

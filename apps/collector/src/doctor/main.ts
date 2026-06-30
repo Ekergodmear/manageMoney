@@ -24,7 +24,10 @@ async function main(): Promise<void> {
   }
 }
 
-void main().catch((err) => {
-  console.error('[Collector] Doctor failed —', err instanceof Error ? err.message : err);
+void main().catch((err: unknown) => {
+  console.error(
+    '[Collector] Doctor failed —',
+    err instanceof Error ? err.message : String(err),
+  );
   process.exit(1);
 });

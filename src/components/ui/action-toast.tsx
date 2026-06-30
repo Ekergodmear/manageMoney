@@ -8,7 +8,12 @@ interface ActionToastProps {
   readonly onClose: () => void;
 }
 
-export function ActionToast({ message, actionLabel, onAction, onClose }: ActionToastProps): React.ReactNode {
+export function ActionToast({
+  message,
+  actionLabel,
+  onAction,
+  onClose,
+}: ActionToastProps): React.ReactNode {
   return (
     <div
       role="status"
@@ -23,7 +28,12 @@ export function ActionToast({ message, actionLabel, onAction, onClose }: ActionT
           {actionLabel}
         </Button>
       ) : null}
-      <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground" onClick={onClose}>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-8 px-2 text-muted-foreground"
+        onClick={onClose}
+      >
         ✕
       </Button>
     </div>

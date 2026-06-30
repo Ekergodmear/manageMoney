@@ -24,11 +24,11 @@ Scale, fixed-point encoding, and internal constants are **implementation details
 
 ### Compatibility matrix
 
-| Input | Supported |
-| ----- | --------- |
-| Integer multiplier (e.g. `20`, `35`) | ✅ |
-| Decimal multiplier, ≤ 2 decimal places (e.g. `1.95`, `9.8`, `19.6`) | ✅ |
-| More than 2 decimal places (e.g. `1.333`, `19.678`) | ❌ |
+| Input                                                               | Supported |
+| ------------------------------------------------------------------- | --------- |
+| Integer multiplier (e.g. `20`, `35`)                                | ✅        |
+| Decimal multiplier, ≤ 2 decimal places (e.g. `1.95`, `9.8`, `19.6`) | ✅        |
+| More than 2 decimal places (e.g. `1.333`, `19.678`)                 | ❌        |
 
 ---
 
@@ -72,8 +72,8 @@ R = (b × Mᵢ) / scale          // scaled integer arithmetic — no IEEE float 
 
 ### New rule (in addition to existing B001, S002, …)
 
-| Rule | Layer | Check | Example failure |
-| ---- | ----- | ----- | ----------------- |
+| Rule                  | Layer      | Check                                                                         | Example failure   |
+| --------------------- | ---------- | ----------------------------------------------------------------------------- | ----------------- |
 | **Decimal precision** | structural | `rewardMultiplier` is exactly representable with **at most 2 decimal places** | `1.333`, `19.678` |
 
 | Multiplier | Valid |
@@ -105,17 +105,17 @@ validateCalculationRequest
 
 ## 4. Solver impact
 
-| Area | Change |
-| ---- | ------ |
-| Algorithm / state machine | **None** |
-| Constructive proof | **None** — scaled arithmetic preserves structure |
-| `solve-minimal-feasible-bet.ts` | Pass scaled `Mᵢ − scale` instead of `M − 1` |
-| `solve.ts` | Reward via `(bet × Mᵢ) / scale`, not `bet * M` |
-| `integer-math.ts` | **No change** |
-| `validateCalculationRequest` | New decimal-precision rule |
-| `mathematical-rules.ts` | Overflow check uses scaled product, not float multiply |
-| Public API types | **No change** to field names or shapes |
-| `PUBLIC_API.md` | One line: up to 2 decimal places on `rewardMultiplier` |
+| Area                            | Change                                                 |
+| ------------------------------- | ------------------------------------------------------ |
+| Algorithm / state machine       | **None**                                               |
+| Constructive proof              | **None** — scaled arithmetic preserves structure       |
+| `solve-minimal-feasible-bet.ts` | Pass scaled `Mᵢ − scale` instead of `M − 1`            |
+| `solve.ts`                      | Reward via `(bet × Mᵢ) / scale`, not `bet * M`         |
+| `integer-math.ts`               | **No change**                                          |
+| `validateCalculationRequest`    | New decimal-precision rule                             |
+| `mathematical-rules.ts`         | Overflow check uses scaled product, not float multiply |
+| Public API types                | **No change** to field names or shapes                 |
+| `PUBLIC_API.md`                 | One line: up to 2 decimal places on `rewardMultiplier` |
 
 **SemVer:** patch or minor (additive capability). Not major — no breaking public contract.
 
@@ -149,15 +149,15 @@ rewardMultiplier = 20
 
 If `M = 20` differs by even one unit after migration, the migration has failed. Write this test before changing solver arithmetic.
 
-| Step | Action |
-| ---- | ------ |
-| **Regression guarantee** | `M = 20` — byte-identical JSON to pre-migration baseline |
-| Decimal smoke | Golden cases: `1.95`, `9.8`, `19.6`, `20.2` — no float artifacts (`9.8 × 12000` case) |
-| Validation | Reject `1.333`, `19.678`; assert error `path` |
-| Property tests | Extend `rewardMultiplier` arbitrary: integers + 2-decimal values |
-| Differential | Re-run brute-force oracle on extended multiplier set |
-| Formal / architecture | No proof rewrite; update `MATHEMATICAL-SPECIFICATION.md` §validation + I5 note only |
-| Consumer | `examples/minimal-consumer` unchanged API; optional decimal example |
+| Step                     | Action                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| **Regression guarantee** | `M = 20` — byte-identical JSON to pre-migration baseline                              |
+| Decimal smoke            | Golden cases: `1.95`, `9.8`, `19.6`, `20.2` — no float artifacts (`9.8 × 12000` case) |
+| Validation               | Reject `1.333`, `19.678`; assert error `path`                                         |
+| Property tests           | Extend `rewardMultiplier` arbitrary: integers + 2-decimal values                      |
+| Differential             | Re-run brute-force oracle on extended multiplier set                                  |
+| Formal / architecture    | No proof rewrite; update `MATHEMATICAL-SPECIFICATION.md` §validation + I5 note only   |
+| Consumer                 | `examples/minimal-consumer` unchanged API; optional decimal example                   |
 
 **Sign-off gate:** regression guarantee passes; decimal `9.8` case passes; validation rejects >2-decimal multipliers before `solve` is called.
 

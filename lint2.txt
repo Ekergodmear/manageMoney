@@ -1,0 +1,411 @@
+﻿
+> @stake/constraint-engine@1.0.0-rc.1 lint C:\Users\Admin\OneDrive\Desktop\earnmoney
+> eslint . --max-warnings 0
+
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\apps\collector\src\adapter\bingo18-adapter.ts
+  62:31  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\apps\collector\src\adapter\mock-adapter.ts
+  12:3  error  Async method 'fetchLatest' has no 'await' expression  @typescript-eslint/require-await
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\apps\collector\src\collector.ts
+  112:43  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  162:59  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  222:20  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  227:57  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\apps\collector\src\doctor\main.ts
+  27:20  error  Prefer the safe `: unknown` for a `catch` callback variable  @typescript-eslint/use-unknown-in-catch-callback-variable
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\apps\collector\src\health\collector-health.ts
+   67:16  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  105:34  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  118:34  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  119:32  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\apps\collector\src\http\server.ts
+  109:57  error  Prefer the safe `: unknown` for a `catch` callback variable            @typescript-eslint/use-unknown-in-catch-callback-variable
+  119:61  error  Invalid type "number" of template literal expression                   @typescript-eslint/restrict-template-expressions
+  126:33  error  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\apps\collector\src\http\today-stats.ts
+  18:56  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  18:60  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  18:64  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  26:13  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\apps\collector\src\log\collector-log.ts
+  9:82  error  'err' may use Object's default stringification format ('[object Object]') when stringified  @typescript-eslint/no-base-to-string
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\apps\collector\src\sink\sqlite-draw-sink.ts
+   43:35  error  Unnecessary conditional, the types have no overlap           @typescript-eslint/no-unnecessary-condition
+  137:3   error  Async method 'findLatest' has no 'await' expression          @typescript-eslint/require-await
+  144:3   error  Async method 'findByDrawKey' has no 'await' expression       @typescript-eslint/require-await
+  151:3   error  Async method 'count' has no 'await' expression               @typescript-eslint/require-await
+  163:3   error  Async method 'getTodayDrawRows' has no 'await' expression    @typescript-eslint/require-await
+  173:3   error  Async method 'findRecent' has no 'await' expression          @typescript-eslint/require-await
+  183:3   error  Async method 'findBetween' has no 'await' expression         @typescript-eslint/require-await
+  194:3   error  Async method 'loadCollectorState' has no 'await' expression  @typescript-eslint/require-await
+  270:3   error  Async method 'close' has no 'await' expression               @typescript-eslint/require-await
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\apps\collector\src\types\draw-result.ts
+  36:15  error  Invalid type "string | undefined" of template literal expression  @typescript-eslint/restrict-template-expressions
+  36:22  error  Invalid type "string | undefined" of template literal expression  @typescript-eslint/restrict-template-expressions
+  36:29  error  Invalid type "string | undefined" of template literal expression  @typescript-eslint/restrict-template-expressions
+  36:36  error  Invalid type "string | undefined" of template literal expression  @typescript-eslint/restrict-template-expressions
+  36:43  error  Invalid type "string | undefined" of template literal expression  @typescript-eslint/restrict-template-expressions
+  36:50  error  Invalid type "string | undefined" of template literal expression  @typescript-eslint/restrict-template-expressions
+  58:15  error  Invalid type "number" of template literal expression              @typescript-eslint/restrict-template-expressions
+  58:25  error  Invalid type "number" of template literal expression              @typescript-eslint/restrict-template-expressions
+  58:35  error  Invalid type "number" of template literal expression              @typescript-eslint/restrict-template-expressions
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\apps\collector\tests\collector.test.ts
+  16:5  error  Async method 'fetchLatest' has no 'await' expression  @typescript-eslint/require-await
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\apps\collector\tests\retry.test.ts
+   8:45  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+  19:26  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\apps\collector\vitest.config.ts
+  0:0  error  Parsing error: C:\Users\Admin\OneDrive\Desktop\earnmoney\apps\collector\vitest.config.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\examples\minimal-consumer\index.ts
+   25:9   error  Unsafe assignment of an error typed value                                       @typescript-eslint/no-unsafe-assignment
+   25:21  error  Unsafe call of a type that could not be resolved                                @typescript-eslint/no-unsafe-call
+   26:17  error  Unsafe member access .kind on a type that cannot be resolved                    @typescript-eslint/no-unsafe-member-access
+   30:9   error  Unsafe assignment of an error typed value                                       @typescript-eslint/no-unsafe-assignment
+   30:18  error  Unsafe call of a type that could not be resolved                                @typescript-eslint/no-unsafe-call
+   30:34  error  Unsafe member access .value on a type that cannot be resolved                   @typescript-eslint/no-unsafe-member-access
+   31:14  error  Unsafe member access .kind on a type that cannot be resolved                    @typescript-eslint/no-unsafe-member-access
+   35:9   error  Unsafe assignment of an error typed value                                       @typescript-eslint/no-unsafe-assignment
+   35:20  error  Unsafe call of a type that could not be resolved                                @typescript-eslint/no-unsafe-call
+   35:41  error  Unsafe member access .value on a type that cannot be resolved                   @typescript-eslint/no-unsafe-member-access
+   36:9   error  Unsafe assignment of an error typed value                                       @typescript-eslint/no-unsafe-assignment
+   36:22  error  Unsafe call of a type that could not be resolved                                @typescript-eslint/no-unsafe-call
+   38:12  error  Unsafe assignment of an error typed value                                       @typescript-eslint/no-unsafe-assignment
+   38:22  error  Unsafe assignment of an error typed value                                       @typescript-eslint/no-unsafe-assignment
+   52:9   error  Unsafe object destructuring of a property with an error typed value             @typescript-eslint/no-unsafe-assignment
+   56:26  error  Unsafe argument of type error typed assigned to a parameter of type `number`    @typescript-eslint/no-unsafe-argument
+   56:37  error  Unsafe member access .requiredBankrollAmount on a type that cannot be resolved  @typescript-eslint/no-unsafe-member-access
+   61:7   error  Unsafe assignment of an error typed value                                       @typescript-eslint/no-unsafe-assignment
+   61:22  error  Unsafe call of a type that could not be resolved                                @typescript-eslint/no-unsafe-call
+   62:3   error  Unsafe assignment of an error typed value                                       @typescript-eslint/no-unsafe-assignment
+   71:18  error  Unsafe member access .kind on a type that cannot be resolved                    @typescript-eslint/no-unsafe-member-access
+   72:9   error  Unsafe assignment of an error typed value                                       @typescript-eslint/no-unsafe-assignment
+   73:9   error  Unsafe assignment of an error typed value                                       @typescript-eslint/no-unsafe-assignment
+   74:13  error  Unsafe member access .targetProfit on a type that cannot be resolved            @typescript-eslint/no-unsafe-member-access
+   74:59  error  Unsafe member access .targetProfit on a type that cannot be resolved            @typescript-eslint/no-unsafe-member-access
+   76:46  error  Unsafe argument of type error typed assigned to a parameter of type `number`    @typescript-eslint/no-unsafe-argument
+   77:26  error  Invalid type "any" of template literal expression                               @typescript-eslint/restrict-template-expressions
+   77:34  error  Unsafe member access .roundCount on a type that cannot be resolved              @typescript-eslint/no-unsafe-member-access
+   78:26  error  Invalid type "any" of template literal expression                               @typescript-eslint/restrict-template-expressions
+   78:38  error  Unsafe member access .reason on a type that cannot be resolved                  @typescript-eslint/no-unsafe-member-access
+   80:19  error  Unsafe member access .reason on a type that cannot be resolved                  @typescript-eslint/no-unsafe-member-access
+   80:50  error  Unsafe member access .IDENTITY on a type that cannot be resolved                @typescript-eslint/no-unsafe-member-access
+   81:21  error  Unsafe member access .profitReducedBy on a type that cannot be resolved         @typescript-eslint/no-unsafe-member-access
+   82:54  error  Unsafe argument of type error typed assigned to a parameter of type `number`    @typescript-eslint/no-unsafe-argument
+   82:66  error  Unsafe member access .profitReducedBy on a type that cannot be resolved         @typescript-eslint/no-unsafe-member-access
+   84:21  error  Unsafe member access .roundsReducedBy on a type that cannot be resolved         @typescript-eslint/no-unsafe-member-access
+   85:41  error  Invalid type "any" of template literal expression                               @typescript-eslint/restrict-template-expressions
+   85:53  error  Unsafe member access .roundsReducedBy on a type that cannot be resolved         @typescript-eslint/no-unsafe-member-access
+   89:23  error  Unsafe object destructuring of a property with an error typed value             @typescript-eslint/no-unsafe-assignment
+   89:39  error  Unsafe object destructuring of a property with an error typed value             @typescript-eslint/no-unsafe-assignment
+   90:50  error  Unsafe argument of type error typed assigned to a parameter of type `number`    @typescript-eslint/no-unsafe-argument
+   90:65  error  Unsafe member access .requiredBankrollAmount on a type that cannot be resolved  @typescript-eslint/no-unsafe-member-access
+   96:32  error  Unsafe argument of type error typed assigned to a parameter of type `number`    @typescript-eslint/no-unsafe-argument
+   96:40  error  Unsafe member access .roundCount on a type that cannot be resolved              @typescript-eslint/no-unsafe-member-access
+   97:9   error  Unsafe assignment of an error typed value                                       @typescript-eslint/no-unsafe-assignment
+   97:22  error  Unsafe call of a type that could not be resolved                                @typescript-eslint/no-unsafe-call
+  101:18  error  Unsafe member access .kind on a type that cannot be resolved                    @typescript-eslint/no-unsafe-member-access
+  102:34  error  Invalid type "any" of template literal expression                               @typescript-eslint/restrict-template-expressions
+  102:45  error  Unsafe member access .value on a type that cannot be resolved                   @typescript-eslint/no-unsafe-member-access
+  103:50  error  Unsafe argument of type error typed assigned to a parameter of type `number`    @typescript-eslint/no-unsafe-argument
+  103:61  error  Unsafe member access .value on a type that cannot be resolved                   @typescript-eslint/no-unsafe-member-access
+  104:50  error  Unsafe argument of type error typed assigned to a parameter of type `number`    @typescript-eslint/no-unsafe-argument
+  104:61  error  Unsafe member access .value on a type that cannot be resolved                   @typescript-eslint/no-unsafe-member-access
+  106:38  error  Invalid type "any" of template literal expression                               @typescript-eslint/restrict-template-expressions
+  106:49  error  Unsafe member access .error on a type that cannot be resolved                   @typescript-eslint/no-unsafe-member-access
+  109:36  error  Invalid type "any" of template literal expression                               @typescript-eslint/restrict-template-expressions
+  109:49  error  Unsafe member access .code on a type that cannot be resolved                    @typescript-eslint/no-unsafe-member-access
+  110:26  error  Invalid type "any" of template literal expression                               @typescript-eslint/restrict-template-expressions
+  110:39  error  Unsafe member access .explanation on a type that cannot be resolved             @typescript-eslint/no-unsafe-member-access
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\App.tsx
+  273:10  error  `loadPersistedState` is deprecated. Import `getAppServices().storage` ΓÇö kept for App.tsx during Milestone 4 rollout  @typescript-eslint/no-deprecated
+  311:12  error  `savePersistedState` is deprecated. Import `getAppServices().storage` ΓÇö kept for App.tsx during Milestone 4 rollout  @typescript-eslint/no-deprecated
+  330:14  error  `savePersistedState` is deprecated. Import `getAppServices().storage` ΓÇö kept for App.tsx during Milestone 4 rollout  @typescript-eslint/no-deprecated
+  367:12  error  `savePersistedState` is deprecated. Import `getAppServices().storage` ΓÇö kept for App.tsx during Milestone 4 rollout  @typescript-eslint/no-deprecated
+  399:16  error  `savePersistedState` is deprecated. Import `getAppServices().storage` ΓÇö kept for App.tsx during Milestone 4 rollout  @typescript-eslint/no-deprecated
+  420:16  error  `savePersistedState` is deprecated. Import `getAppServices().storage` ΓÇö kept for App.tsx during Milestone 4 rollout  @typescript-eslint/no-deprecated
+  688:14  error  `savePersistedState` is deprecated. Import `getAppServices().storage` ΓÇö kept for App.tsx during Milestone 4 rollout  @typescript-eslint/no-deprecated
+  894:12  error  `savePersistedState` is deprecated. Import `getAppServices().storage` ΓÇö kept for App.tsx during Milestone 4 rollout  @typescript-eslint/no-deprecated
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\components\ui\checkbox.tsx
+  8:9  error  `ElementRef` is deprecated. Use `ComponentRef<T>` instead
+
+Retrieves the type of the 'ref' prop for a given component type or tag name  @typescript-eslint/no-deprecated
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\components\ui\label.tsx
+  7:9  error  `ElementRef` is deprecated. Use `ComponentRef<T>` instead
+
+Retrieves the type of the 'ref' prop for a given component type or tag name  @typescript-eslint/no-deprecated
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\components\ui\separator.tsx
+  7:9  error  `ElementRef` is deprecated. Use `ComponentRef<T>` instead
+
+Retrieves the type of the 'ref' prop for a given component type or tag name  @typescript-eslint/no-deprecated
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\core\validation\rules\structural-rules.ts
+  160:11  error  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+  178:11  error  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\capital\capital-planner-types.ts
+  17:24  error  `import()` type annotations are forbidden  @typescript-eslint/consistent-type-imports
+  18:20  error  `import()` type annotations are forbidden  @typescript-eslint/consistent-type-imports
+  37:22  error  `import()` type annotations are forbidden  @typescript-eslint/consistent-type-imports
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\capital\capital-recommendation-mapper.ts
+  48:5   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  48:5   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  48:5   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  57:17  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  57:17  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\dashboard\DashboardScreen.tsx
+  149:21  error  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+  287:42  error  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\experiment\ScenarioPlannerScreen.tsx
+  172:40  error  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+  184:40  error  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+  191:40  error  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+  199:40  error  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+  357:43  error  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\experiment\experiment-actions.ts
+  83:20  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  83:20  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\experiment\experiment-engine.ts
+   18:66  error  Unnecessary conditional, the types have no overlap                                                  @typescript-eslint/no-unnecessary-condition
+  161:17  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  161:17  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\game-data\adapters\draw-feed-adapter.ts
+  6:3  error  Unsafe return of a value of type `any`  @typescript-eslint/no-unsafe-return
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\game-data\hooks\use-auto-settlement.ts
+  88:11  error  Unnecessary conditional, value is always truthy  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\game-data\hooks\use-game-statistics.ts
+  52:13  error  Unnecessary conditional, value is always truthy  @typescript-eslint/no-unnecessary-condition
+  57:13  error  Unnecessary conditional, value is always truthy  @typescript-eslint/no-unnecessary-condition
+  62:13  error  Unnecessary conditional, value is always truthy  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\game-data\markets\market-definition.ts
+  6:41  error  "small" is overridden by string in this union type  @typescript-eslint/no-redundant-type-constituents
+  6:51  error  "tie" is overridden by string in this union type    @typescript-eslint/no-redundant-type-constituents
+  6:59  error  "large" is overridden by string in this union type  @typescript-eslint/no-redundant-type-constituents
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\game-data\settlement\apply-settlement-use-case.ts
+  49:15  error  `import()` type annotations are forbidden  @typescript-eslint/consistent-type-imports
+  50:4   error  `import()` type annotations are forbidden  @typescript-eslint/consistent-type-imports
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\game-data\statistics\repositories\http-draw-repository.ts
+  9:3  error  Unsafe return of a value of type `any`  @typescript-eslint/no-unsafe-return
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\game-designer\GameDesignerScreen.tsx
+  41:62  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\game-monitor\GameMonitorScreen.tsx
+  15:26  error  Invalid type "string | undefined" of template literal expression  @typescript-eslint/restrict-template-expressions
+  15:34  error  Invalid type "string | undefined" of template literal expression  @typescript-eslint/restrict-template-expressions
+  21:27  error  Invalid type "number" of template literal expression              @typescript-eslint/restrict-template-expressions
+  23:27  error  Invalid type "number" of template literal expression              @typescript-eslint/restrict-template-expressions
+  25:13  error  Invalid type "number" of template literal expression              @typescript-eslint/restrict-template-expressions
+  65:18  error  Unnecessary optional chain on a non-nullish value                 @typescript-eslint/no-unnecessary-condition
+  70:19  error  Unnecessary optional chain on a non-nullish value                 @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\game-monitor\SimpleBarChart.tsx
+  28:37  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  29:42  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\game-monitor\collector-api.ts
+  10:3   error  Unsafe return of a value of type `any`                                                              @typescript-eslint/no-unsafe-return
+  29:28  error  Passing a number to Number() does not change the type or value of the number                        @typescript-eslint/no-unnecessary-type-conversion
+  33:12  error  Passing a number to Number() does not change the type or value of the number                        @typescript-eslint/no-unnecessary-type-conversion
+  52:57  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
+  57:18  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  58:15  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\insights\insight-confidence.ts
+  29:18  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\insights\insight-generators\trend.ts
+  46:21  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  58:27  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\library\SessionLibraryCard.tsx
+  135:57  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\library\SessionLibraryScreen.tsx
+  142:17  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\library\library-actions.ts
+   21:15  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   22:15  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   23:11  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   26:19  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   29:17  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   29:17  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   32:19  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   32:19  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   68:12  error  Forbidden non-null assertion                                                                        @typescript-eslint/no-non-null-assertion
+  106:25  error  '_finishedAt' is assigned a value but never used                                                    @typescript-eslint/no-unused-vars
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\notifications\hooks\use-notification-center.ts
+  131:11  error  Unnecessary conditional, value is always truthy  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\notifications\notification-center.ts
+  93:9  error  Unnecessary conditional, comparison is always true, since `"plan-exhausted" === "plan-exhausted"` is true  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\planner\GeneratePlanScreen.tsx
+  117:22  error  Promise-returning function provided to attribute where a void return was expected  @typescript-eslint/no-misused-promises
+  129:25  error  Unnecessary conditional, the types have no overlap                                 @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\planner\PlanReadyScreen.tsx
+  74:68  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\planning\planning-types.ts
+  21:19  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  22:7   error  Unnecessary conditional, the types have no overlap                                                  @typescript-eslint/no-unnecessary-condition
+  22:32  error  Unnecessary conditional, the types have no overlap                                                  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\playing\PlayingSessionScreen.tsx
+  245:33  error  Unnecessary conditional, comparison is always true, since `"playing" === "playing"` is true  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\session\SessionCockpit.tsx
+  288:29  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+  315:39  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+  327:57  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\session\SessionStatisticsPanel.tsx
+  22:29  error  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+  26:29  error  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\session\SessionTimeline.tsx
+  112:21  error  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+  183:29  error  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\session\plan-factory.ts
+  57:11  error  Unnecessary conditional, comparison is always true, since `"scenario" === "scenario"` is true  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\session\session-export.ts
+  57:16  error  `write` is deprecated. [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/write)  @typescript-eslint/no-deprecated
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\session\session-migration.ts
+   21:5   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   21:5   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   21:5   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   37:19  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   40:24  error  '_removed' is assigned a value but never used                                                       @typescript-eslint/no-unused-vars
+   68:15  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   75:15  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  120:15  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  127:15  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  167:38  error  Unnecessary conditional, the types have no overlap                                                  @typescript-eslint/no-unnecessary-condition
+  168:12  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  170:32  error  Unnecessary conditional, the types have no overlap                                                  @typescript-eslint/no-unnecessary-condition
+  172:36  error  Unnecessary conditional, the types have no overlap                                                  @typescript-eslint/no-unnecessary-condition
+  178:25  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  204:15  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  223:20  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  223:20  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  268:27  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  271:18  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  276:9   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  281:7   error  Unnecessary conditional, comparison is always true, since `6 === 6` is true                         @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\features\session\session-types.ts
+  70:24  error  `import()` type annotations are forbidden  @typescript-eslint/consistent-type-imports
+  71:23  error  `import()` type annotations are forbidden  @typescript-eslint/consistent-type-imports
+  79:24  error  `import()` type annotations are forbidden  @typescript-eslint/consistent-type-imports
+  80:23  error  `import()` type annotations are forbidden  @typescript-eslint/consistent-type-imports
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\services\events\domain-events.ts
+  76:5  error  Unnecessary conditional, comparison is always true, since `1 === 1` is true  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\services\index.ts
+  38:3   error  `DOMAIN_EVENT_VERSION` is deprecated. Use EVENT_SCHEMA_VERSION  @typescript-eslint/no-deprecated
+  40:10  error  `DomainEventBus` is deprecated. Alias ΓÇö prefer EventBus         @typescript-eslint/no-deprecated
+  40:48  error  `isDomainEvent` is deprecated. Use isAppEvent                   @typescript-eslint/no-deprecated
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\services\registry\app-services.ts
+  45:5  error  Async method 'append' has no 'await' expression   @typescript-eslint/require-await
+  46:5  error  Async method 'readAll' has no 'await' expression  @typescript-eslint/require-await
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\services\storage\IndexedDbDriver.ts
+  39:13  error  Type parameter T is used only once in the function signature  @typescript-eslint/no-unnecessary-type-parameters
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\services\storage\MemoryStorageDriver.ts
+   7:3   error  Async method 'get' has no 'await' expression                  @typescript-eslint/require-await
+  12:3   error  Async method 'put' has no 'await' expression                  @typescript-eslint/require-await
+  12:13  error  Type parameter T is used only once in the function signature  @typescript-eslint/no-unnecessary-type-parameters
+  16:3   error  Async method 'remove' has no 'await' expression               @typescript-eslint/require-await
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\services\storage\StorageDriver.ts
+  6:7  error  Type parameter T is used only once in the function signature  @typescript-eslint/no-unnecessary-type-parameters
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\src\services\storage\repositories\app-state-repository.ts
+  22:34  error  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\tests\examples\minimal-consumer.test.ts
+  28:13  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  29:13  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\tests\support\brute-force-optimization.ts
+  202:14  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\tests\unit\continue\continuation-regression.spec.ts
+   42:19  error  `createSessionFromGenerate` is deprecated. Kh├┤ng d├╣ng ΓÇö Scenario/Capital ─æi qua RecommendationSet ΓåÆ Candidate ΓåÆ createFromCandidate  @typescript-eslint/no-deprecated
+  133:21  error  `createSessionFromGenerate` is deprecated. Kh├┤ng d├╣ng ΓÇö Scenario/Capital ─æi qua RecommendationSet ΓåÆ Candidate ΓåÆ createFromCandidate  @typescript-eslint/no-deprecated
+  168:21  error  `createSessionFromGenerate` is deprecated. Kh├┤ng d├╣ng ΓÇö Scenario/Capital ─æi qua RecommendationSet ΓåÆ Candidate ΓåÆ createFromCandidate  @typescript-eslint/no-deprecated
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\tests\unit\game-data\settlement.test.ts
+  24:16  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  25:19  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  26:19  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  84:20  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\tests\unit\improve\session-rollout-s3.spec.ts
+   56:21  error  `createSessionFromGenerate` is deprecated. Kh├┤ng d├╣ng ΓÇö Scenario/Capital ─æi qua RecommendationSet ΓåÆ Candidate ΓåÆ createFromCandidate  @typescript-eslint/no-deprecated
+  103:21  error  `createSessionFromGenerate` is deprecated. Kh├┤ng d├╣ng ΓÇö Scenario/Capital ─æi qua RecommendationSet ΓåÆ Candidate ΓåÆ createFromCandidate  @typescript-eslint/no-deprecated
+  172:21  error  `createSessionFromGenerate` is deprecated. Kh├┤ng d├╣ng ΓÇö Scenario/Capital ─æi qua RecommendationSet ΓåÆ Candidate ΓåÆ createFromCandidate  @typescript-eslint/no-deprecated
+  220:21  error  `createSessionFromGenerate` is deprecated. Kh├┤ng d├╣ng ΓÇö Scenario/Capital ─æi qua RecommendationSet ΓåÆ Candidate ΓåÆ createFromCandidate  @typescript-eslint/no-deprecated
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\tests\unit\optimization\optimize-profit-properties.test.ts
+  85:16  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  85:31  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\tests\unit\optimization\optimize-round-search.test.ts
+  100:12  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\tests\unit\optimization\optimize.differential.test.ts
+  24:12  error  Unnecessary conditional, comparison is always true, since `"NO_FEASIBLE_SOLUTION" === "NO_FEASIBLE_SOLUTION"` is true  @typescript-eslint/no-unnecessary-condition
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\tests\unit\services\events.spec.ts
+  38:12  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\tests\unit\services\telemetry.spec.ts
+  33:12  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+
+C:\Users\Admin\OneDrive\Desktop\earnmoney\tests\unit\solver\tier-win-tax.test.ts
+  97:12  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  97:56  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+Γ£û 253 problems (253 errors, 0 warnings)
+
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.

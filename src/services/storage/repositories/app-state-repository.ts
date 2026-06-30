@@ -14,14 +14,12 @@ export class AppStateRepository {
   constructor(private readonly driver: StorageDriver) {}
 
   async loadWithMeta(): Promise<AppStateLoadResult> {
-    const raw = await this.driver.get<unknown>(APP_STATE_STORAGE_KEY);
-    if (raw === null) {
+    const raw = await this.driver.get(APP_STATE_STORAGE_KEY);
+    if (raw === null || typeof raw !== 'object') {
       return { state: EMPTY_PERSISTED_STATE, migratedFrom: null };
     }
     const beforeVersion =
-      typeof raw === 'object' && raw !== null && 'version' in raw
-        ? Number((raw as { version?: number }).version)
-        : null;
+      'version' in raw ? Number((raw as { version?: number }).version) : null;
     const state = migratePersistedState(raw);
     const migratedFrom =
       beforeVersion !== null && !Number.isNaN(beforeVersion) && beforeVersion !== state.version

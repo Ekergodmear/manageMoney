@@ -47,7 +47,10 @@ export function FormRightPanel({ form }: { form: PlannerFormValues }): ReactNode
           <Separator className="my-1" />
           <SummaryRow label="Số vòng" value={form.roundCount || '—'} />
           <Separator className="my-1" />
-          <SummaryRow label="Hệ số" value={form.rewardMultiplier ? `×${form.rewardMultiplier}` : '—'} />
+          <SummaryRow
+            label="Hệ số"
+            value={form.rewardMultiplier ? `×${form.rewardMultiplier}` : '—'}
+          />
           <Separator className="my-1" />
           <SummaryRow label="Cược min" value={displayMoney(form.minimumBet)} />
           <Separator className="my-1" />
@@ -87,7 +90,10 @@ export function PlayingProgressPanel({
       </CardHeader>
       <CardContent className="p-3 pt-0">
         <div className="h-2 overflow-hidden rounded-full bg-muted">
-          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${String(pct)}%` }} />
+          <div
+            className="h-full rounded-full bg-primary transition-all"
+            style={{ width: `${String(pct)}%` }}
+          />
         </div>
         <p className="mt-2 text-center text-lg font-bold">{pct}%</p>
         <p className="text-center text-xs text-muted-foreground">

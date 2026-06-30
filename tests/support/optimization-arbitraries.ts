@@ -11,7 +11,7 @@ import { isWithinBruteForceBounds } from './brute-force-optimization';
 
 const GRANULARITY_CHOICES = [1_000, 2_000, 5_000, 10_000] as const;
 
-export const smallFixedIntentArb: fc.Arbitrary<CalculationRequest> = fc
+export const smallFixedIntentArb: fc.Arbitrary<OptimizationRequest> = fc
   .record({
     rewardMultiplier: fc.constant(20),
     roundCount: fc.integer({ min: 1, max: 6 }),

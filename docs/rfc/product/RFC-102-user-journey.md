@@ -27,8 +27,8 @@ User **không** mở app để “optimize”. Họ mở app vì:
 
 Hệ thống trả lời:
 
-- **Được** — đây là plan và vốn cần  
-- **Không được** — đây là phương án gần nhất, kèm giải thích  
+- **Được** — đây là plan và vốn cần
+- **Không được** — đây là phương án gần nhất, kèm giải thích
 
 Đó là flow tự nhiên.
 
@@ -54,7 +54,7 @@ Nếu hợp lý → **Use This Plan**. Compare có thể là tính năng sau; **
 
 Simulation đứng **trước Export**, không phải bước phụ ở cuối.
 
-User muốn biết *“Nếu thắng vòng 17 thì sao?”* **trước khi** mang plan ra ngoài.
+User muốn biết _“Nếu thắng vòng 17 thì sao?”_ **trước khi** mang plan ra ngoài.
 
 ### 4. Explainable Planning (RFC-101)
 
@@ -114,11 +114,11 @@ Mọi con số quan trọng kèm lý do người dùng đọc được.
 
 ### Home
 
-| Element | Nội dung |
-| ------- | -------- |
+| Element  | Nội dung                              |
+| -------- | ------------------------------------- |
 | Headline | Lập kế hoạch — biết cần bao nhiêu vốn |
-| CTA | **Tạo kế hoạch** → Generate |
-| Không có | Nút Optimize độc lập |
+| CTA      | **Tạo kế hoạch** → Generate           |
+| Không có | Nút Optimize độc lập                  |
 
 ---
 
@@ -126,13 +126,13 @@ Mọi con số quan trọng kèm lý do người dùng đọc được.
 
 Thu thập **ý định** — ngân sách **không bắt buộc**.
 
-| Input (v1) | Bắt buộc | Ghi chú |
-| ---------- | -------- | ------- |
-| Quy tắc thưởng | ✅ | Hệ số tùy chọn (×15, ×20, ×25, …) |
-| Số vòng | ✅ | |
-| Lợi nhuận mục tiêu | ✅ | |
-| Cược tối thiểu / bước cược | ✅ | Môi trường user |
-| **Expected bankroll** | ❌ Optional | User mới thường chưa biết; nếu có → gợi ý nhánh sớm trên Result |
+| Input (v1)                 | Bắt buộc    | Ghi chú                                                         |
+| -------------------------- | ----------- | --------------------------------------------------------------- |
+| Quy tắc thưởng             | ✅          | Hệ số tùy chọn (×15, ×20, ×25, …)                               |
+| Số vòng                    | ✅          |                                                                 |
+| Lợi nhuận mục tiêu         | ✅          |                                                                 |
+| Cược tối thiểu / bước cược | ✅          | Môi trường user                                                 |
+| **Expected bankroll**      | ❌ Optional | User mới thường chưa biết; nếu có → gợi ý nhánh sớm trên Result |
 
 **Action:** Generate → Result
 
@@ -140,19 +140,19 @@ Thu thập **ý định** — ngân sách **không bắt buộc**.
 
 ### Result
 
-| Hiển thị | Mô tả |
-| -------- | ----- |
-| Bảng từng vòng | Cược, tích lũy |
-| **Vốn cần** | Nổi bật |
-| Thống kê | Tóm tắt |
-| Giải thích | *“Với quy tắc bạn chọn, 50 vòng, 100k lợi nhuận → cần …”* |
+| Hiển thị       | Mô tả                                                     |
+| -------------- | --------------------------------------------------------- |
+| Bảng từng vòng | Cược, tích lũy                                            |
+| **Vốn cần**    | Nổi bật                                                   |
+| Thống kê       | Tóm tắt                                                   |
+| Giải thích     | _“Với quy tắc bạn chọn, 50 vòng, 100k lợi nhuận → cần …”_ |
 
 **Phân nhánh:**
 
-| Tình huống | Tiếp theo |
-| ---------- | --------- |
+| Tình huống                                 | Tiếp theo      |
+| ------------------------------------------ | -------------- |
 | Đủ vốn (hoặc chưa nhập — user tự đánh giá) | **Simulation** |
-| Không đủ vốn | **Optimize** |
+| Không đủ vốn                               | **Optimize**   |
 
 **Actions:** Mô phỏng · Điều chỉnh kế hoạch (Optimize) · Sửa ý định (Generate)
 
@@ -160,10 +160,10 @@ Thu thập **ý định** — ngân sách **không bắt buộc**.
 
 ### Optimize (khi không đủ vốn)
 
-| Input | Ví dụ |
-| ----- | ----- |
-| Budget | 500.000 |
-| Cho phép giảm vòng? | Toggle |
+| Input               | Ví dụ         |
+| ------------------- | ------------- |
+| Budget              | 500.000       |
+| Cho phép giảm vòng? | Toggle        |
 | Bước giảm lợi nhuận | Default 5.000 |
 
 **Thoát:** → **Suggested Plan** (không qua Compare)
@@ -174,18 +174,18 @@ Thu thập **ý định** — ngân sách **không bắt buộc**.
 
 **Một màn — một đề xuất.** User đọc plan + explanation, quyết định dùng hay không.
 
-| Hiển thị | |
-| -------- | - |
-| Plan đề xuất | Lợi nhuận / vòng đã điều chỉnh |
-| Vốn cần | ≤ budget |
-| **Explanation** | *“Giảm lợi nhuận 100k → 70k, giữ 50 vòng vì ngân sách 500k”* |
-| So với ý định (inline) | Một dòng tóm tắt thay đổi — **không** màn Compare riêng |
+| Hiển thị               |                                                              |
+| ---------------------- | ------------------------------------------------------------ |
+| Plan đề xuất           | Lợi nhuận / vòng đã điều chỉnh                               |
+| Vốn cần                | ≤ budget                                                     |
+| **Explanation**        | _“Giảm lợi nhuận 100k → 70k, giữ 50 vòng vì ngân sách 500k”_ |
+| So với ý định (inline) | Một dòng tóm tắt thay đổi — **không** màn Compare riêng      |
 
-| Action | Kết quả |
-| ------ | ------- |
+| Action            | Kết quả                            |
+| ----------------- | ---------------------------------- |
 | **Use This Plan** | Plan active = đề xuất → Simulation |
-| Thử budget khác | Quay Optimize |
-| Sửa ý định | Quay Generate |
+| Thử budget khác   | Quay Optimize                      |
+| Sửa ý định        | Quay Generate                      |
 
 **Không dùng:** “Accept”, “Compare” (v1).
 
@@ -195,9 +195,9 @@ Thu thập **ý định** — ngân sách **không bắt buộc**.
 
 **Vai trò:** Tạo **niềm tin** — user hiểu hành vi plan trước khi export.
 
-| Input | Ví dụ |
-| ----- | ----- |
-| Vòng thắng | 17 |
+| Input      | Ví dụ |
+| ---------- | ----- |
+| Vòng thắng | 17    |
 
 | Output | Timeline / kết quả kịch bản |
 
@@ -260,48 +260,48 @@ Nếu hai command chạy trơn tru → public API **đủ để xây app**.
 
 Sau CLI — không còn “Frontend Sprint” thuần. Trọng tâm: user hoàn thành công việc, hiểu & tin kết quả.
 
-| Phase | Phạm vi | Journey |
-| ----- | ------- | ------- |
-| 4.1 | App Shell | Home, routing |
-| 4.2 | Calculation Form | Generate |
-| 4.3 | Result | Result + nhánh |
-| 4.4 | Suggested Plan | Optimize output + **Use This Plan** |
-| 4.5 | Simulation | Simulation (trước Export) |
-| 4.6 | Export | Export |
+| Phase | Phạm vi          | Journey                             |
+| ----- | ---------------- | ----------------------------------- |
+| 4.1   | App Shell        | Home, routing                       |
+| 4.2   | Calculation Form | Generate                            |
+| 4.3   | Result           | Result + nhánh                      |
+| 4.4   | Suggested Plan   | Optimize output + **Use This Plan** |
+| 4.5   | Simulation       | Simulation (trước Export)           |
+| 4.6   | Export           | Export                              |
 
 ---
 
 ## v1 — không làm
 
-| Không | Lý do |
-| ----- | ----- |
-| Optimize từ Home | Generate là entry |
-| Màn Compare riêng | Suggested Plan + Use This Plan đủ cho v1 |
-| Simulation chỉ “bonus” cuối | Phải trước Export |
-| CLI menu / interactive | Hai command, đúng journey |
-| Nhiều plan song song | RFC-101 |
+| Không                       | Lý do                                    |
+| --------------------------- | ---------------------------------------- |
+| Optimize từ Home            | Generate là entry                        |
+| Màn Compare riêng           | Suggested Plan + Use This Plan đủ cho v1 |
+| Simulation chỉ “bonus” cuối | Phải trước Export                        |
+| CLI menu / interactive      | Hai command, đúng journey                |
+| Nhiều plan song song        | RFC-101                                  |
 
 ---
 
 ## Success criteria
 
-| # | Criterion |
-| - | --------- |
-| J1 | User hoàn thành Nhánh A hoặc B không cần hướng dẫn |
-| J2 | 0% vào Optimize trước Generate |
-| J3 | Sau Suggested Plan, user hiểu đã đổi gì (explanation) |
-| J4 | User mô phỏng ít nhất 1 kịch bản trước Export (5-user test) |
-| J5 | CLI `generate` + `optimize` khớp journey |
+| #   | Criterion                                                   |
+| --- | ----------------------------------------------------------- |
+| J1  | User hoàn thành Nhánh A hoặc B không cần hướng dẫn          |
+| J2  | 0% vào Optimize trước Generate                              |
+| J3  | Sau Suggested Plan, user hiểu đã đổi gì (explanation)       |
+| J4  | User mô phỏng ít nhất 1 kịch bản trước Export (5-user test) |
+| J5  | CLI `generate` + `optimize` khớp journey                    |
 
 ---
 
 ## Sign-off (Product Lead)
 
-- [x] Generate = entry point  
-- [x] Suggested Plan + **Use This Plan** (không Compare/Accept v1)  
-- [x] Simulation trước Export — niềm tin, không bonus  
-- [x] Expected bankroll optional trên Generate  
-- [x] Demo CLI: hai command, mapping rõ  
+- [x] Generate = entry point
+- [x] Suggested Plan + **Use This Plan** (không Compare/Accept v1)
+- [x] Simulation trước Export — niềm tin, không bonus
+- [x] Expected bankroll optional trên Generate
+- [x] Demo CLI: hai command, mapping rõ
 
 **Accepted** → triển khai **Demo CLI**
 
@@ -309,5 +309,5 @@ Sau CLI — không còn “Frontend Sprint” thuần. Trọng tâm: user hoàn 
 
 ## References
 
-- [RFC-101 User Problem](RFC-101-user-problem.md)  
+- [RFC-101 User Problem](RFC-101-user-problem.md)
 - `docs/rfc/product/README.md`

@@ -21,7 +21,9 @@ export function SearchField({ value, placeholder, onChange }: SearchFieldProps):
         placeholder={placeholder}
         className="pl-9"
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => {
+          onChange(event.target.value);
+        }}
       />
     </div>
   );

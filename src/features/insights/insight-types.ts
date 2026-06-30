@@ -1,4 +1,5 @@
 import type { CapitalPlannerSnapshot } from '@/features/capital/capital-planner-types';
+import type { GameStatisticsSnapshot } from '@/features/game-data/statistics/statistics-types';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
 import type { Session } from '@/features/session/session-domain';
 
@@ -100,11 +101,13 @@ export interface InsightEngineInput {
   readonly sessions: readonly Session[];
   readonly presets: readonly GamePolicyPreset[];
   readonly capitalPlanner: CapitalPlannerSnapshot | null;
+  readonly gameStatistics?: GameStatisticsSnapshot | null;
 }
 
 export interface InsightsSnapshot {
   readonly reflection: InsightReflection | null;
   readonly quick: readonly InsightCard[];
+  readonly observations: readonly InsightCard[];
   readonly recommendations: readonly InsightCard[];
   readonly outliers: readonly InsightCard[];
   readonly trends: readonly InsightTrend[];

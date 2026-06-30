@@ -64,7 +64,7 @@ export function assessHealth(
   checks.push({
     name: 'SQLite',
     ok: true,
-    detail: `${health.drawCount} draws stored`,
+    detail: `${String(health.drawCount)} draws stored`,
   });
 
   checks.push({
@@ -102,7 +102,7 @@ export function formatHealthReport(report: HealthReport): string {
   lines.push(`Overall: ${statusIcon}`);
   lines.push(`Status: ${report.health.status}`);
   lines.push(`Adapter: ${report.health.activeAdapterId}`);
-  lines.push(`Draws in SQLite: ${report.health.drawCount}`);
+  lines.push(`Draws in SQLite: ${String(report.health.drawCount)}`);
   lines.push(`Latest Draw Key: ${report.health.lastDrawKey ?? 'none'}`);
 
   const draw = report.health.latestDraw;
@@ -115,8 +115,10 @@ export function formatHealthReport(report: HealthReport): string {
 
   lines.push(`Last Poll: ${report.health.lastPollAt ?? 'never'}`);
   lines.push(`Last Success: ${report.health.lastSuccessAt ?? 'never'}`);
-  lines.push(`Average Latency: ${Math.round(report.health.averageLatencyMs / 1000)}s`);
-  lines.push(`Failure Count: ${report.health.failureCount}`);
+  lines.push(
+    `Average Latency: ${String(Math.round(report.health.averageLatencyMs / 1000))}s`,
+  );
+  lines.push(`Failure Count: ${String(report.health.failureCount)}`);
   lines.push('');
   lines.push('Checks:');
   for (const check of report.checks) {

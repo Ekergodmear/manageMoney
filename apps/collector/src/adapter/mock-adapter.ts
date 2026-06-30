@@ -9,7 +9,7 @@ export class MockDrawSourceAdapter implements DrawSourceAdapter {
 
   private seq = 100_000;
 
-  async fetchLatest(): Promise<RawDrawFetch> {
+  fetchLatest(): Promise<RawDrawFetch> {
     this.seq += 1;
     const d1 = randomInt(1, 7);
     const d2 = randomInt(1, 7);
@@ -27,6 +27,6 @@ export class MockDrawSourceAdapter implements DrawSourceAdapter {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(rawPayload),
     };
-    return { rawPayload, rawResponse };
+    return Promise.resolve({ rawPayload, rawResponse });
   }
 }

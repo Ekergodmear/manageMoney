@@ -18,21 +18,26 @@ import {
   profitSearchGranularity,
   profitSearchIntent,
   withFixedProfit,
-} from '../../support/optimization-test-helpers';
+} from '../support/optimization-test-helpers';
+import { getPropertyRuns } from '../support/property-runs';
 
 /** Each optimize() runs multiple pipeline evals — keep runs lower than solver P-tests. */
-const PROPERTY_RUNS = 200;
+const PROPERTY_RUNS = getPropertyRuns();
 
 const canonical = canonicalProfitEvaluationOrder(profitSearchIntent, profitSearchGranularity);
 
 const bankrollMin = Math.min(
-  ...canonical.map((profit) => measureRequiredBankroll(withFixedProfit(profitSearchIntent, profit))),
+  ...canonical.map((profit) =>
+    measureRequiredBankroll(withFixedProfit(profitSearchIntent, profit)),
+  ),
 );
 const bankrollMax = measureRequiredBankroll(profitSearchIntent);
 
 const bankrollArb = fc.integer({ min: Math.floor(bankrollMin), max: Math.ceil(bankrollMax) });
 
-function profitFromValidatedCall(request: { targetProfit: { mode: string; amount?: number } }): number | null {
+function profitFromValidatedCall(request: {
+  targetProfit: { mode: string; amount?: number };
+}): number | null {
   if (request.targetProfit.mode !== 'fixedAmount') {
     return null;
   }
@@ -75,14 +80,11 @@ describe('optimize — profit search properties (Sprint 3.2C.1)', () => {
         if (profitHigh === null && profitLow === null) {
           return true;
         }
-        if (profitHigh !== null && profitLow === null) {
-          return true;
-        }
-        if (profitHigh === null && profitLow !== null) {
-          return false;
+        if (profitHigh === null || profitLow === null) {
+          return profitHigh !== null;
         }
 
-        return profitHigh! >= profitLow!;
+        return profitHigh >= profitLow;
       }),
       { numRuns: PROPERTY_RUNS },
     );

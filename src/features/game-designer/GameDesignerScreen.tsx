@@ -15,6 +15,10 @@ import {
   presetFromDraft,
   rewardPolicyLabel,
 } from '@/features/game-designer/preset-utils';
+import { MarketsPanel } from '@/features/game-designer/MarketsPanel';
+import { useGameStatistics } from '@/features/game-data/hooks/use-game-statistics';
+import { buildBingo18Markets } from '@/features/game-data/markets/bingo18-markets';
+import { resolvePresetMarkets } from '@/features/game-data/markets/market-catalog';
 import { formatMoneyFieldValue } from '@/features/planner/schema';
 import { cn } from '@/lib/utils';
 
@@ -34,7 +38,16 @@ export function GameDesignerScreen({
   onSelectPreset,
 }: GameDesignerScreenProps): ReactNode {
   const allPresets = useMemo(() => mergePresets(customPresets), [customPresets]);
-  const selected = findPreset(allPresets, activePresetId) ?? findPreset(allPresets, DEFAULT_PRESET_ID)!;
+  const selected = useMemo((): GamePolicyPreset => {
+    const found =
+      findPreset(allPresets, activePresetId) ??
+      findPreset(allPresets, DEFAULT_PRESET_ID) ??
+      allPresets[0];
+    if (found === undefined) {
+      throw new Error('No game presets available');
+    }
+    return found;
+  }, [allPresets, activePresetId]);
   const [draft, setDraft] = useState<GamePolicyDraft>(() => draftFromPreset(selected));
 
   function loadPreset(preset: GamePolicyPreset): void {
@@ -43,8 +56,20 @@ export function GameDesignerScreen({
   }
 
   function updateDraft<K extends keyof GamePolicyDraft>(key: K, value: GamePolicyDraft[K]): void {
-    setDraft((prev) => ({ ...prev, [key]: value }));
+    setDraft((prev) => {
+      const next = { ...prev, [key]: value };
+      if (
+        key === 'rewardPolicy' &&
+        (prev.gameId === 'bingo18' || selected.id.startsWith('bingo'))
+      ) {
+        return { ...next, markets: [...buildBingo18Markets(next.rewardPolicy)] };
+      }
+      return next;
+    });
   }
+
+  const draftMarkets = draft.markets ?? resolvePresetMarkets(selected);
+  const { snapshot: gameStatistics } = useGameStatistics(selected);
 
   function bindMoney(field: 'minimumBet' | 'maximumBet' | 'betStep'): {
     value: string;
@@ -52,7 +77,9 @@ export function GameDesignerScreen({
   } {
     return {
       value: draft[field],
-      onChange: (e) => updateDraft(field, formatMoneyFieldValue(field, e.target.value)),
+      onChange: (e) => {
+        updateDraft(field, formatMoneyFieldValue(field, e.target.value));
+      },
     };
   }
 
@@ -93,7 +120,9 @@ export function GameDesignerScreen({
               <button
                 key={preset.id}
                 type="button"
-                onClick={() => loadPreset(preset)}
+                onClick={() => {
+                  loadPreset(preset);
+                }}
                 className={cn(
                   'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors',
                   activePresetId === preset.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted/60',
@@ -125,14 +154,18 @@ export function GameDesignerScreen({
                 <Input
                   className={inputClass}
                   value={draft.name}
-                  onChange={(e) => updateDraft('name', e.target.value)}
+                  onChange={(e) => {
+                    updateDraft('name', e.target.value);
+                  }}
                 />
               </Field>
               <Field label="Nhóm">
                 <Input
                   className={inputClass}
                   value={draft.category}
-                  onChange={(e) => updateDraft('category', e.target.value)}
+                  onChange={(e) => {
+                    updateDraft('category', e.target.value);
+                  }}
                 />
               </Field>
               <Field label="Reward multiplier">
@@ -140,7 +173,9 @@ export function GameDesignerScreen({
                   className={inputClass}
                   inputMode="decimal"
                   value={draft.rewardMultiplier}
-                  onChange={(e) => updateDraft('rewardMultiplier', e.target.value)}
+                  onChange={(e) => {
+                    updateDraft('rewardMultiplier', e.target.value);
+                  }}
                 />
               </Field>
               <Field label="Minimum bet (đ)">
@@ -155,6 +190,14 @@ export function GameDesignerScreen({
             </CardContent>
           </Card>
 
+          <MarketsPanel
+            markets={draftMarkets}
+            {...(gameStatistics?.markets !== undefined
+              ? { observedStats: gameStatistics.markets }
+              : {})}
+            readOnly={selected.builtin === true}
+          />
+
           <Card className="shadow-sm">
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-sm font-semibold">Reward Policy</CardTitle>
@@ -166,7 +209,9 @@ export function GameDesignerScreen({
                     type="radio"
                     name="reward-policy"
                     checked={draft.rewardPolicy.type === 'no-tax'}
-                    onChange={() => updateDraft('rewardPolicy', { type: 'no-tax' })}
+                    onChange={() => {
+                      updateDraft('rewardPolicy', { type: 'no-tax' });
+                    }}
                   />
                   No tax
                 </label>
@@ -175,13 +220,13 @@ export function GameDesignerScreen({
                     type="radio"
                     name="reward-policy"
                     checked={draft.rewardPolicy.type === 'tier-tax'}
-                    onChange={() =>
+                    onChange={() => {
                       updateDraft('rewardPolicy', {
                         type: 'tier-tax',
                         threshold: '10.000.000',
                         ratePercent: '10',
-                      })
-                    }
+                      });
+                    }}
                   />
                   Fixed tax (tier)
                 </label>
@@ -192,24 +237,24 @@ export function GameDesignerScreen({
                     <Input
                       className={inputClass}
                       value={draft.rewardPolicy.threshold ?? ''}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         updateDraft('rewardPolicy', {
                           ...draft.rewardPolicy,
                           threshold: formatMoneyFieldValue('winTaxThreshold', e.target.value),
-                        })
-                      }
+                        });
+                      }}
                     />
                   </Field>
                   <Field label="Tax (%)">
                     <Input
                       className={inputClass}
                       value={draft.rewardPolicy.ratePercent ?? ''}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         updateDraft('rewardPolicy', {
                           ...draft.rewardPolicy,
                           ratePercent: e.target.value,
-                        })
-                      }
+                        });
+                      }}
                     />
                   </Field>
                 </div>
@@ -228,12 +273,12 @@ export function GameDesignerScreen({
                   type="number"
                   min={100}
                   value={draft.continuePolicy.maximumRounds}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     updateDraft('continuePolicy', {
                       ...draft.continuePolicy,
                       maximumRounds: Number(e.target.value) || 5000,
-                    })
-                  }
+                    });
+                  }}
                 />
               </Field>
               <Field label="Continue presets (tổng số vòng mục tiêu)">
@@ -262,7 +307,13 @@ export function GameDesignerScreen({
               {selected.builtin === true ? 'Save as Preset' : 'Save Preset'}
             </Button>
             {selected.builtin !== true ? (
-              <Button variant="destructive" size="sm" onClick={() => onDeletePreset(selected.id)}>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => {
+                  onDeletePreset(selected.id);
+                }}
+              >
                 <Trash2 className="h-4 w-4" />
                 Xóa
               </Button>

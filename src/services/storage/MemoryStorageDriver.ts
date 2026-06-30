@@ -4,17 +4,19 @@ import type { StorageDriver } from '@/services/storage/StorageDriver';
 export class MemoryStorageDriver implements StorageDriver {
   private readonly store = new Map<string, unknown>();
 
-  async get<T>(key: string): Promise<T | null> {
+  get(key: string): Promise<unknown> {
     const value = this.store.get(key);
-    return value === undefined ? null : (value as T);
+    return Promise.resolve(value === undefined ? null : value);
   }
 
-  async put<T>(key: string, value: T): Promise<void> {
+  put(key: string, value: unknown): Promise<void> {
     this.store.set(key, value);
+    return Promise.resolve();
   }
 
-  async remove(key: string): Promise<void> {
+  remove(key: string): Promise<void> {
     this.store.delete(key);
+    return Promise.resolve();
   }
 
   clear(): void {

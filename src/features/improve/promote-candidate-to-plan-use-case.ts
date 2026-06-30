@@ -67,10 +67,7 @@ export class PromoteCandidateToPlanUseCase {
     const updatedSession: Session = {
       ...session,
       status: newPlan.status === 'playing' ? 'playing' : session.status,
-      plans: [
-        ...session.plans.map((p) => (p.id === parent.id ? supersededParent : p)),
-        newPlan,
-      ],
+      plans: [...session.plans.map((p) => (p.id === parent.id ? supersededParent : p)), newPlan],
       currentPlanId: newPlan.id,
       timeline: [...session.timeline, timelineEvent],
       updatedAt: at,

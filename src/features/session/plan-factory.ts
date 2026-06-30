@@ -24,11 +24,13 @@ export interface CreateInitialPlanInput {
 }
 
 export function createInitialPlan(input: CreateInitialPlanInput): Plan {
+  const marketId = input.formValues.marketId;
   return {
     id: input.planId ?? crypto.randomUUID(),
     label: planLabel(input.index),
     origin: input.origin,
     parentPlanId: null,
+    marketId,
     formValues: input.formValues,
     generated: input.generated,
     status: input.status ?? 'ready',
@@ -52,15 +54,14 @@ export function createPlanFromCandidate(
       ? 'improve'
       : candidate.source === 'capital'
         ? 'capital'
-        : candidate.source === 'scenario'
-          ? 'scenario'
-          : 'generate';
+        : 'scenario';
 
   return {
     id: crypto.randomUUID(),
     label: planLabel(planIndex),
     origin,
     parentPlanId: parentPlan.id,
+    marketId: candidate.marketId,
     formValues: candidate.formValues,
     generated: candidate.generated,
     status: parentPlan.status === 'playing' ? 'playing' : 'ready',
@@ -88,6 +89,7 @@ export function createContinuationPlan(input: CreateContinuationPlanInput): Plan
     label: planLabel(input.planIndex),
     origin: 'continue',
     parentPlanId: input.parentPlan.id,
+    marketId: input.formValues.marketId,
     formValues: input.formValues,
     generated: input.generated,
     status: 'playing',
@@ -96,11 +98,7 @@ export function createContinuationPlan(input: CreateContinuationPlanInput): Plan
   };
 }
 
-export function buildPlanAddedEvent(
-  plan: Plan,
-  at: string,
-  label?: string,
-): SessionTimelineEvent {
+export function buildPlanAddedEvent(plan: Plan, at: string, label?: string): SessionTimelineEvent {
   return {
     at,
     type: 'plan-added',

@@ -1,0 +1,17 @@
+[
+  {
+    "wave": "R1 baseline",
+    "total": 253,
+    "at": "2026-06-30T05:37:58.000Z"
+  },
+  {
+    "wave": "Wave R2 src batch",
+    "total": 74,
+    "at": "2026-06-30T05:54:10.078Z"
+  },
+  {
+    "wave": "Wave 3-5 manual cleanup",
+    "total": 0,
+    "at": "2026-06-30T06:06:15.512Z"
+  }
+]

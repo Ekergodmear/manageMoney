@@ -24,18 +24,18 @@ The engine does **not** predict wins. It only sizes bets so that a win at any ro
 
 ## 2. Terminology
 
-| Symbol  | Domain field        | Meaning                                     |
-| ------- | ------------------- | ------------------------------------------- |
+| Symbol  | Domain field        | Meaning                                                 |
+| ------- | ------------------- | ------------------------------------------------------- |
 | `M`     | `rewardMultiplier`  | Reward multiplier (must be > 1; up to 2 decimal places) |
-| `B_min` | `minimumBet`        | Floor bet per round                         |
-| `S`     | `betStep`           | Bet increment (all bets are multiples of S) |
-| `N`     | `roundCount`        | Number of rounds                            |
-| `P*`    | from `targetProfit` | Target profit if win at current round       |
-| `bᵢ`    | `betAmount`         | Bet in round i                              |
-| `Aᵢ₋₁`  | `accumulatedSpent`  | Sum of bets **before** round i (`A₀ = 0`)   |
-| `Aᵢ`    | `accumulatedSpent`  | Sum of bets **through** round i (inclusive) |
-| `Rᵢ`    | `rewardAmount`      | `bᵢ × M` if round i wins                    |
-| `πᵢ`    | derived             | `Rᵢ − Aᵢ` (profit if win at round i)        |
+| `B_min` | `minimumBet`        | Floor bet per round                                     |
+| `S`     | `betStep`           | Bet increment (all bets are multiples of S)             |
+| `N`     | `roundCount`        | Number of rounds                                        |
+| `P*`    | from `targetProfit` | Target profit if win at current round                   |
+| `bᵢ`    | `betAmount`         | Bet in round i                                          |
+| `Aᵢ₋₁`  | `accumulatedSpent`  | Sum of bets **before** round i (`A₀ = 0`)               |
+| `Aᵢ`    | `accumulatedSpent`  | Sum of bets **through** round i (inclusive)             |
+| `Rᵢ`    | `rewardAmount`      | `bᵢ × M` if round i wins                                |
+| `πᵢ`    | derived             | `Rᵢ − Aᵢ` (profit if win at round i)                    |
 
 All amounts are **positive integers** in implementation (see §9 Rounding Policy).
 
@@ -181,16 +181,16 @@ flowchart TD
 
 ## 8. Invariants
 
-| ID  | Rule                                                                      |
-| --- | ------------------------------------------------------------------------- |
-| I1  | `Rᵢ − Aᵢ ≥ P*` (ProfitConstraint) for all i                               |
-| I2  | `bᵢ ≥ B_min`                                                              |
-| I3  | `bᵢ mod S = 0`                                                            |
-| I4  | `Aᵢ = Aᵢ₋₁ + bᵢ`; hence `Aᵢ > Aᵢ₋₁` when `bᵢ > 0` (validated `B_min > 0`) |
+| ID  | Rule                                                                            |
+| --- | ------------------------------------------------------------------------------- |
+| I1  | `Rᵢ − Aᵢ ≥ P*` (ProfitConstraint) for all i                                     |
+| I2  | `bᵢ ≥ B_min`                                                                    |
+| I3  | `bᵢ mod S = 0`                                                                  |
+| I4  | `Aᵢ = Aᵢ₋₁ + bᵢ`; hence `Aᵢ > Aᵢ₋₁` when `bᵢ > 0` (validated `B_min > 0`)       |
 | I5  | `Rᵢ = bᵢ × M` (exact integer) — scaled fixed-point arithmetic in implementation |
-| I6  | All amount fields are integers                                            |
-| I7  | Same `ValidatedCalculationRequest` → same `Strategy`                      |
-| I8  | `Aᵢ = Σ bₖ` for k = 1..i (accumulatedSpent equals sum of bets)            |
+| I6  | All amount fields are integers                                                  |
+| I7  | Same `ValidatedCalculationRequest` → same `Strategy`                            |
+| I8  | `Aᵢ = Σ bₖ` for k = 1..i (accumulatedSpent equals sum of bets)                  |
 
 I8 is the primary structural check for ConstraintSolver unit tests.
 
@@ -323,14 +323,14 @@ ValidationEngine classifies errors into three layers. **DTO carries no validatio
 
 Shape and type sanity — reject before business rules.
 
-| Check                              | Example failure                 |
-| ---------------------------------- | ------------------------------- |
-| Required fields present            | missing `roundCount`            |
-| `undefined`, `null`                | any field                       |
-| `NaN`, `Infinity`                  | `rewardMultiplier`              |
+| Check                              | Example failure                  |
+| ---------------------------------- | -------------------------------- |
+| Required fields present            | missing `roundCount`             |
+| `undefined`, `null`                | any field                        |
+| `NaN`, `Infinity`                  | `rewardMultiplier`               |
 | `rewardMultiplier` precision       | M = 1.333 (more than 2 decimals) |
-| Non-integer where integer required | `roundCount = 1.5`              |
-| Wrong discriminant                 | `targetProfit.mode = "unknown"` |
+| Non-integer where integer required | `roundCount = 1.5`               |
+| Wrong discriminant                 | `targetProfit.mode = "unknown"`  |
 
 ### 12.2 Business Validation
 

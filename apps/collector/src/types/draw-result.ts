@@ -33,7 +33,10 @@ export interface DrawResult {
 export function drawKeyFromDrawAt(drawAt: string): string {
   const m = drawAt.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/);
   if (m) {
-    return `${m[1]}${m[2]}${m[3]}${m[4]}${m[5]}${m[6]}`;
+    const [, year, month, day, hour, minute, second] = m;
+    if (year && month && day && hour && minute && second) {
+      return `${year}${month}${day}${hour}${minute}${second}`;
+    }
   }
   const digits = drawAt.replace(/\D/g, '');
   return digits.length >= 14 ? digits.slice(0, 14) : digits;
@@ -55,7 +58,7 @@ export function classifySmallLarge(total: number): SmallLarge {
 
 export function detectFlower(dice: readonly [number, number, number]): string | null {
   if (dice[0] === dice[1] && dice[1] === dice[2]) {
-    return `${dice[0]}${dice[1]}${dice[2]}`;
+    return `${String(dice[0])}${String(dice[1])}${String(dice[2])}`;
   }
   return null;
 }

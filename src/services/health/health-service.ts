@@ -28,15 +28,12 @@ export class HealthService {
   private updatedAt: Date;
   private readonly unsubscribes: (() => void)[] = [];
 
-  constructor(
-    bus: EventBus,
-    eventTypes: readonly SystemEventType[] = HEALTH_EVENT_TYPES,
-  ) {
+  constructor(bus: EventBus, eventTypes: readonly SystemEventType[] = HEALTH_EVENT_TYPES) {
     this.updatedAt = new Date();
     for (const type of eventTypes) {
       this.unsubscribes.push(
         bus.subscribe(type, (event) => {
-          this.handleSystemEvent(event as SystemEvent);
+          this.handleSystemEvent(event);
         }),
       );
     }

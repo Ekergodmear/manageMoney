@@ -17,7 +17,7 @@ export function SessionComparePanel({ result, onClose }: SessionComparePanelProp
 
   return (
     <Drawer open title="So sánh session" subtitle={subtitle} onClose={onClose}>
-      <Stack spacing={0}>
+      <Stack spacing={2}>
         <table className="w-full">
           <thead>
             <tr className={cn('border-b', semanticBorder.default)}>

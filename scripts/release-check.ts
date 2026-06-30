@@ -22,8 +22,7 @@ async function checkCollectorHealth(): Promise<ReleaseCheck> {
     }
     const body = (await res.json()) as { failureCount?: number; overall?: string; status?: string };
     const ok =
-      (body.overall === 'healthy' || body.status === 'running') &&
-      (body.failureCount ?? 0) < 10;
+      (body.overall === 'healthy' || body.status === 'running') && (body.failureCount ?? 0) < 10;
     return {
       name: 'Collector Health',
       ok,
@@ -43,9 +42,7 @@ function checkStatisticsTests(): ReleaseCheck {
   return {
     name: 'Statistics',
     ok: result.ok,
-    ...(result.total !== undefined
-      ? { detail: `${result.passed ?? 0}/${result.total}` }
-      : {}),
+    ...(result.total !== undefined ? { detail: `${result.passed ?? 0}/${result.total}` } : {}),
   };
 }
 
@@ -54,9 +51,7 @@ function checkNotificationTests(): ReleaseCheck {
   return {
     name: 'Notifications',
     ok: result.ok,
-    ...(result.total !== undefined
-      ? { detail: `${result.passed ?? 0}/${result.total}` }
-      : {}),
+    ...(result.total !== undefined ? { detail: `${result.passed ?? 0}/${result.total}` } : {}),
   };
 }
 
@@ -89,6 +84,15 @@ async function main(): Promise<void> {
     });
   }
 
+  const smoke = verify.steps.find((s) => s.id === 'smoke');
+  checks.push({
+    name: 'Smoke',
+    ok: smoke?.status === 'PASS',
+    ...(smoke?.passed !== undefined && smoke.total !== undefined
+      ? { detail: `${smoke.passed}/${smoke.total}` }
+      : {}),
+  });
+
   checks.push(await checkCollectorHealth());
   checks.push(checkStatisticsTests());
   checks.push(checkNotificationTests());
@@ -105,7 +109,10 @@ async function main(): Promise<void> {
 
   const failures = checks.filter((c) => !c.ok);
   const ready = failures.length === 0;
-  const verdict = ready ? 'READY FOR INTERNAL RC' : 'NOT READY';
+  const verdict =
+    verify.verdict === 'READY' || verify.verdict === 'READY FOR RC'
+      ? 'READY FOR INTERNAL RC'
+      : 'NOT READY';
 
   const lines: string[] = [
     '# Release Report',

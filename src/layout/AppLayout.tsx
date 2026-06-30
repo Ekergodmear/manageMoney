@@ -20,6 +20,8 @@ import { type ReactNode, useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { FeedbackButton } from '@/components/FeedbackButton';
+import { NotificationBell } from '@/features/notifications/NotificationBell';
+import type { AppNotification } from '@/features/notifications/notification-types';
 import { Tooltip, TooltipProvider } from '@/components/ui/tooltip';
 import {
   buildWorkspaces,
@@ -54,6 +56,12 @@ export interface AppLayoutProps {
   readonly main: ReactNode;
   readonly rightPanel: ReactNode;
   readonly showRightPanel?: boolean;
+  readonly notifications?: readonly AppNotification[];
+  readonly notificationUnreadCount?: number;
+  readonly onNotificationMarkRead?: (id: string) => void;
+  readonly onNotificationMarkAllRead?: () => void;
+  readonly onNotificationClearAll?: () => void;
+  readonly onNotificationOpenSession?: (sessionId: string) => void;
 }
 
 export function AppLayout({
@@ -64,6 +72,12 @@ export function AppLayout({
   main,
   rightPanel,
   showRightPanel = true,
+  notifications = [],
+  notificationUnreadCount = 0,
+  onNotificationMarkRead,
+  onNotificationMarkAllRead,
+  onNotificationClearAll,
+  onNotificationOpenSession,
 }: AppLayoutProps): ReactNode {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
@@ -116,7 +130,9 @@ export function AppLayout({
               size="icon"
               className="absolute right-0 top-0 h-7 w-7"
               aria-label="Thu gọn sidebar"
-              onClick={() => setCollapsed(true)}
+              onClick={() => {
+                setCollapsed(true);
+              }}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -128,7 +144,9 @@ export function AppLayout({
             size="icon"
             className="mt-2 h-7 w-7"
             aria-label="Mở rộng sidebar"
-            onClick={() => setCollapsed(false)}
+            onClick={() => {
+              setCollapsed(false);
+            }}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -149,7 +167,9 @@ export function AppLayout({
               'inline-flex items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground',
               compact ? 'p-2' : 'gap-2 px-2.5 py-2 text-xs',
             )}
-            onClick={() => onThemeChange(!isDark)}
+            onClick={() => {
+              onThemeChange(!isDark);
+            }}
           >
             {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             {!compact ? <span>Dark Mode</span> : null}
@@ -159,6 +179,22 @@ export function AppLayout({
     </>
   );
 
+  const notificationBell =
+    onNotificationMarkRead !== undefined &&
+    onNotificationMarkAllRead !== undefined &&
+    onNotificationClearAll !== undefined ? (
+      <NotificationBell
+        notifications={notifications}
+        unreadCount={notificationUnreadCount}
+        onMarkRead={onNotificationMarkRead}
+        onMarkAllRead={onNotificationMarkAllRead}
+        onClearAll={onNotificationClearAll}
+        {...(onNotificationOpenSession !== undefined
+          ? { onOpenSession: onNotificationOpenSession }
+          : {})}
+      />
+    ) : null;
+
   return (
     <TooltipProvider>
       <div className={cn('flex h-screen flex-col overflow-hidden bg-background', isDark && 'dark')}>
@@ -166,13 +202,18 @@ export function AppLayout({
           <button
             type="button"
             className="rounded-md border border-border px-1.5 py-0.5 text-sm"
-            onClick={() => setMobileOpen(true)}
+            onClick={() => {
+              setMobileOpen(true);
+            }}
             aria-label="Mở menu"
           >
             ☰
           </button>
           <span className="text-sm font-semibold">Stake Planner</span>
-          <FeedbackButton />
+          <div className="flex items-center gap-1">
+            {notificationBell}
+            <FeedbackButton />
+          </div>
         </header>
 
         <div className="flex min-h-0 flex-1 overflow-hidden">
@@ -199,12 +240,15 @@ export function AppLayout({
               type="button"
               className="fixed inset-0 z-30 bg-black/40 lg:hidden"
               aria-label="Đóng menu"
-              onClick={() => setMobileOpen(false)}
+              onClick={() => {
+                setMobileOpen(false);
+              }}
             />
           ) : null}
 
           <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-            <div className="hidden shrink-0 items-center justify-end border-b border-border bg-card/95 px-4 py-2 lg:flex">
+            <div className="hidden shrink-0 items-center justify-end gap-2 border-b border-border bg-card/95 px-4 py-2 lg:flex">
+              {notificationBell}
               <FeedbackButton />
             </div>
             <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden lg:flex-row">

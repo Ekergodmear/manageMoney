@@ -11,6 +11,7 @@ export type RecommendationSource = 'capital' | 'scenario';
 export interface StrategyRecommendation {
   readonly recommendationId: string;
   readonly label: string;
+  readonly marketId: string;
   readonly allocatedCapital: number;
   readonly targetProfit: number;
   readonly roundCount: number;
@@ -31,6 +32,7 @@ export interface RecommendationSet {
   readonly strategy: CapitalGoal;
   readonly risk: RiskProfile;
   readonly presetId: string;
+  readonly marketId: string;
   readonly recommendations: readonly StrategyRecommendation[];
   readonly totalTargetProfit: number;
   readonly selectedRecommendationId: string | null;

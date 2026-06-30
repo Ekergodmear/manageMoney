@@ -49,8 +49,7 @@ export function DecisionScreen({
   onStartPlaying,
 }: DecisionScreenProps): React.ReactNode {
   const { statistics, userBankroll, request } = generated;
-  const bankrollShort =
-    userBankroll !== null && userBankroll < statistics.requiredBankrollAmount;
+  const bankrollShort = userBankroll !== null && userBankroll < statistics.requiredBankrollAmount;
   const targetAmount =
     request.targetProfit.mode === 'fixedAmount' ? request.targetProfit.amount : null;
 
@@ -114,7 +113,12 @@ export function DecisionScreen({
               Xem kế hoạch cược
             </Button>
             {onStartPlaying !== undefined ? (
-              <Button size="lg" variant="secondary" className="w-full sm:w-auto" onClick={onStartPlaying}>
+              <Button
+                size="lg"
+                variant="secondary"
+                className="w-full sm:w-auto"
+                onClick={onStartPlaying}
+              >
                 <Play className="h-4 w-4" />
                 Bắt đầu chơi
               </Button>

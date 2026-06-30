@@ -7,7 +7,7 @@ import {
   createPlanCandidateFromImprove,
   type PlanCandidate,
 } from '@/features/planning/plan-candidate-types';
-import { findPlan, getCurrentPlan } from '@/features/session/session-domain';
+import { getCurrentPlan } from '@/features/session/session-domain';
 
 export interface CreateImprovementCandidateUseCaseDeps {
   readonly candidates: PlanCandidateRepository;
@@ -41,9 +41,7 @@ export type CreateImprovementCandidateResult =
 export class CreateImprovementCandidateUseCase {
   constructor(private readonly deps: CreateImprovementCandidateUseCaseDeps) {}
 
-  async execute(
-    input: CreateImprovementCandidateInput,
-  ): Promise<CreateImprovementCandidateResult> {
+  async execute(input: CreateImprovementCandidateInput): Promise<CreateImprovementCandidateResult> {
     const state = await this.deps.sessions.loadState();
     const session = state.sessions.find((s) => s.id === input.sessionId);
     if (session === undefined) {

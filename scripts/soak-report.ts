@@ -50,8 +50,12 @@ interface SoakAnalysis {
   readonly apiError?: string;
 }
 
+const COLLECTOR_FETCH_TIMEOUT_MS = 5_000;
+
 async function fetchJson<T>(path: string): Promise<T> {
-  const res = await fetch(`${COLLECTOR_BASE}${path}`);
+  const res = await fetch(`${COLLECTOR_BASE}${path}`, {
+    signal: AbortSignal.timeout(COLLECTOR_FETCH_TIMEOUT_MS),
+  });
   if (!res.ok) {
     throw new Error(`HTTP ${res.status} ${path}`);
   }
@@ -204,7 +208,9 @@ function formatPerformanceSection(): string[] {
   try {
     const artifact = JSON.parse(readFileSync(benchPath, 'utf-8')) as {
       measuredAt?: string;
-      results?: { latency?: Array<{ capability: string; scenario: string; latencyUsPerOp: number }> };
+      results?: {
+        latency?: Array<{ capability: string; scenario: string; latencyUsPerOp: number }>;
+      };
     };
     const rows = artifact.results?.latency ?? [];
     const lines = [`Measured at: ${artifact.measuredAt ?? 'unknown'}`, ''];

@@ -8,12 +8,12 @@
 
 ## Quy tắc trong giai đoạn này
 
-| Làm | Không làm |
-| --- | --------- |
-| Dùng app như người dùng thật | Refactor P1/P2/P4/P3 |
+| Làm                                            | Không làm                         |
+| ---------------------------------------------- | --------------------------------- |
+| Dùng app như người dùng thật                   | Refactor P1/P2/P4/P3              |
 | Ghi `daily-notes.md` (local, copy từ template) | Đổi màu · icon · wording · layout |
-| Tick checklist mỗi tối | Mở thêm tài liệu kiến trúc |
-| Sửa **blocker** (crash, mất data, logic sai) | Feature mới |
+| Tick checklist mỗi tối                         | Mở thêm tài liệu kiến trúc        |
+| Sửa **blocker** (crash, mất data, logic sai)   | Feature mới                       |
 
 **Blocker** = mất dữ liệu · crash · hydrate lỗi · Continue/Improve sai kết quả · không thể hoàn thành workflow cốt lõi.
 

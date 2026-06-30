@@ -8,9 +8,7 @@ import type { ValidatedCalculationRequest } from '@/application/dto';
 import type { Result } from '@/core/contracts';
 import { success } from '@/core/contracts';
 import type { Round, Strategy } from '@/core/models';
-import {
-  encodeRewardMultiplier,
-} from '@/core/monetary/reward-multiplier-encoding';
+import { encodeRewardMultiplier } from '@/core/monetary/reward-multiplier-encoding';
 import { netRewardFromBet } from '@/core/monetary/net-reward';
 
 import { resolveTarget } from './resolve-target';

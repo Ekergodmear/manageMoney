@@ -104,10 +104,7 @@ export class ContinuePlanUseCase {
     const updatedSession: Session = {
       ...session,
       status: 'playing',
-      plans: [
-        ...session.plans.map((p) => (p.id === parent.id ? supersededParent : p)),
-        newPlan,
-      ],
+      plans: [...session.plans.map((p) => (p.id === parent.id ? supersededParent : p)), newPlan],
       currentPlanId: newPlan.id,
       timeline: [...session.timeline, timelineEvent],
       updatedAt: at,
@@ -139,8 +136,6 @@ export class ContinuePlanUseCase {
   }
 }
 
-export function createContinuePlanUseCase(
-  deps: ContinuePlanUseCaseDeps,
-): ContinuePlanUseCase {
+export function createContinuePlanUseCase(deps: ContinuePlanUseCaseDeps): ContinuePlanUseCase {
   return new ContinuePlanUseCase(deps);
 }

@@ -95,8 +95,7 @@ const METRICS: MetricDef[] = [
     id: 'profit',
     label: 'Lợi nhuận',
     kind: 'money',
-    pick: (e) =>
-      e.result !== null ? formatMoney(e.result.statistics.expectedProfitAmount) : '—',
+    pick: (e) => (e.result !== null ? formatMoney(e.result.statistics.expectedProfitAmount) : '—'),
     numeric: (e) => e.result?.statistics.expectedProfitAmount ?? null,
   },
   {

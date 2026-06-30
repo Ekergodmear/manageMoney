@@ -1,5 +1,5 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import { Check, PartyPopper, RotateCcw, Sparkles, Table2, Trophy } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { CheckCircle2, Clock, PartyPopper, Sparkles, Table2, XCircle } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import type { ContinuePolicyConfig } from '@/features/game-designer/game-policy-types';
 import { continueTargetsForPlan } from '@/features/continue/continue-policy-utils';
+import type { PlayedRound } from '@/features/game-data/entities/played-round';
+import type { CollectorDrawResult } from '@/features/game-monitor/collector-api-types';
 import { accumulatedAtRound } from '@/features/planner/plan-display';
 import type { GenerateResult } from '@/features/planner/plan-service';
 import { PlanTableScreen } from '@/features/planner/PlanTableScreen';
@@ -23,18 +25,25 @@ interface PlayingSessionScreenProps {
   readonly completedThroughRound: number;
   readonly timeline: readonly SessionTimelineEvent[];
   readonly sessionStatus: 'playing' | 'won' | 'lost';
+  readonly betMarketLabel: string;
+  readonly latestDraw: CollectorDrawResult | null;
+  readonly playedRounds: readonly PlayedRound[];
+  readonly autoSettlement?: boolean;
   readonly focusRoundIndex?: number | null;
   readonly onFocusRoundHandled?: () => void;
-  readonly onPlaceBet: (roundIndex: number) => void;
-  readonly onSetBetProgress: (targetRound: number) => void;
-  readonly onUndoBet: () => void;
-  readonly onWin: (roundIndex: number) => void;
   readonly onContinue: (targetRoundCount: number) => void;
   readonly onResetProgress: () => void;
   readonly onEdit: () => void;
   readonly onImprove?: () => void;
   readonly hideContinue?: boolean;
   readonly continuePolicy?: ContinuePolicyConfig;
+}
+
+function lastPlayedRound(playedRounds: readonly PlayedRound[]): PlayedRound | null {
+  if (playedRounds.length === 0) {
+    return null;
+  }
+  return playedRounds[playedRounds.length - 1] ?? null;
 }
 
 export function PlayingSessionScreen({
@@ -44,12 +53,12 @@ export function PlayingSessionScreen({
   completedThroughRound,
   timeline,
   sessionStatus,
+  betMarketLabel,
+  latestDraw,
+  playedRounds,
+  autoSettlement = true,
   focusRoundIndex = null,
   onFocusRoundHandled,
-  onPlaceBet,
-  onSetBetProgress,
-  onUndoBet,
-  onWin,
   onContinue,
   onResetProgress,
   onEdit,
@@ -62,7 +71,6 @@ export function PlayingSessionScreen({
   const [viewMode, setViewMode] = useState<'focus' | 'table'>('focus');
   const [continueTarget, setContinueTarget] = useState<string>('');
   const [selectedContinue, setSelectedContinue] = useState<number | null>(null);
-  const [betPulse, setBetPulse] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
 
   const accumulated = accumulatedAtRound(strategy.rounds, completedThroughRound);
@@ -72,26 +80,18 @@ export function PlayingSessionScreen({
   const nextBet = strategy.rounds[currentRoundIndex]?.betAmount ?? 0;
   const allRoundsDone = completedThroughRound >= totalRounds && sessionStatus === 'playing';
   const presetTargets = continueTargetsForPlan(continuePolicy, totalRounds);
-  const progressPct =
-    totalRounds > 0 ? Math.round((completedThroughRound / totalRounds) * 100) : 0;
+  const progressPct = totalRounds > 0 ? Math.round((completedThroughRound / totalRounds) * 100) : 0;
+  const lastRound = lastPlayedRound(playedRounds);
 
-  const focusRounds = useMemo(() => {
-    const start = Math.max(1, completedThroughRound);
-    const end = Math.min(totalRounds, completedThroughRound + 3);
-    const indices: number[] = [];
-    for (let i = start; i <= end; i++) {
-      indices.push(i);
+  const liveStatus = useMemo((): { label: string; tone: 'waiting' | 'win' | 'lose' } => {
+    if (sessionStatus === 'won') {
+      return { label: 'Thắng', tone: 'win' };
     }
-    return indices.map((index) => {
-      const round = strategy.rounds[index - 1];
-      return {
-        index,
-        betAmount: round?.betAmount ?? 0,
-        isCurrent: index === currentRoundIndex,
-        isDone: index <= completedThroughRound,
-      };
-    });
-  }, [strategy.rounds, completedThroughRound, totalRounds, currentRoundIndex]);
+    if (lastRound !== null && lastRound.round === completedThroughRound) {
+      return lastRound.won ? { label: 'Trúng', tone: 'win' } : { label: 'Thua', tone: 'lose' };
+    }
+    return { label: 'Đang chờ kỳ…', tone: 'waiting' };
+  }, [sessionStatus, lastRound, completedThroughRound]);
 
   useEffect(() => {
     if (focusRoundIndex !== null && focusRoundIndex > 0) {
@@ -107,43 +107,17 @@ export function PlayingSessionScreen({
     heroRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [completedThroughRound, viewMode, sessionStatus]);
 
-  useEffect(() => {
-    if (sessionStatus !== 'playing' || currentRound === undefined) {
-      return;
-    }
-    function onKeyDown(e: KeyboardEvent): void {
-      const tag = (e.target as HTMLElement).tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') {
-        return;
-      }
-      if (e.key === 'Enter' || e.key === 'b' || e.key === 'B') {
-        e.preventDefault();
-        onPlaceBet(currentRoundIndex);
-        setBetPulse(true);
-        setTimeout(() => setBetPulse(false), 300);
-      }
-      if (e.key === 'w' || e.key === 'W') {
-        e.preventDefault();
-        onWin(currentRoundIndex);
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-        e.preventDefault();
-        onUndoBet();
-      }
-      if (e.key === 'z' && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault();
-        onUndoBet();
-      }
-    }
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [sessionStatus, currentRound, currentRoundIndex, onPlaceBet, onWin, onUndoBet]);
-
   if (viewMode === 'table') {
     return (
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => setViewMode('focus')}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setViewMode('focus');
+            }}
+          >
             Chế độ tập trung
           </Button>
         </div>
@@ -151,13 +125,10 @@ export function PlayingSessionScreen({
           generated={generated}
           sessionNumber={sessionNumber}
           completedThroughRound={completedThroughRound}
-          onToggleRound={(roundIndex, checked) => {
-            if (sessionStatus !== 'playing') {
-              return;
-            }
-            onSetBetProgress(checked ? roundIndex : roundIndex - 1);
-          }}
-          onJumpToRound={onSetBetProgress}
+          playedRounds={playedRounds}
+          autoSettlement={autoSettlement}
+          onToggleRound={() => undefined}
+          onJumpToRound={() => undefined}
           onResetProgress={onResetProgress}
           onEdit={onEdit}
           sessionStatus={sessionStatus}
@@ -176,19 +147,19 @@ export function PlayingSessionScreen({
             {sessionTitle ?? `Phiên #${String(sessionNumber)}`}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {completedThroughRound} / {totalRounds} · {progressPct}%
+            {betMarketLabel} · {completedThroughRound} / {totalRounds} · {progressPct}%
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {sessionStatus === 'playing' && completedThroughRound > 0 ? (
-            <Button variant="outline" size="sm" onClick={onUndoBet} title="Phím Z">
-              <RotateCcw className="h-4 w-4" />
-              Hoàn tác
-            </Button>
-          ) : null}
-          <Button variant="outline" size="sm" onClick={() => setViewMode('table')}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setViewMode('table');
+            }}
+          >
             <Table2 className="h-4 w-4" />
-            Bảng
+            Lịch sử vòng
           </Button>
           {onImprove !== undefined ? (
             <Button variant="outline" size="sm" onClick={onImprove}>
@@ -204,53 +175,89 @@ export function PlayingSessionScreen({
           <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
             <PartyPopper className="h-10 w-10 text-success-foreground" />
             <p className="text-lg font-bold">Chúc mừng — bạn đã thắng!</p>
+            {lastRound?.won === true ? (
+              <p className="text-sm text-muted-foreground">
+                +{formatAmount(lastRound.netPrize)} đ (lợi nhuận {formatAmount(lastRound.profit)} đ)
+              </p>
+            ) : null}
           </CardContent>
         </Card>
       ) : null}
 
       {sessionStatus === 'playing' && currentRound !== undefined ? (
         <>
-          <motion.div
-            ref={heroRef}
-            animate={betPulse ? { scale: [1, 1.02, 1] } : { scale: 1 }}
-            transition={{ duration: 0.25 }}
-          >
+          <motion.div ref={heroRef} layout>
             <Card className="border-primary shadow-xl ring-2 ring-primary/25">
-              <CardContent className="space-y-6 p-8 text-center sm:p-10">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                    Vòng
-                  </p>
-                  <p className="mt-1 text-5xl font-bold tabular-nums tracking-tight">
-                    {currentRoundIndex}
-                  </p>
+              <CardContent className="space-y-5 p-8 text-center sm:p-10">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      Kỳ hiện tại
+                    </p>
+                    <p className="mt-1 font-mono text-lg font-bold tabular-nums tracking-tight">
+                      {latestDraw?.drawKey ?? '—'}
+                    </p>
+                    {latestDraw !== null ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {latestDraw.dice.join('-')} · Tổng {latestDraw.total}
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-xs text-muted-foreground">Chờ Collector…</p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      Vòng hiện tại
+                    </p>
+                    <p className="mt-1 text-4xl font-bold tabular-nums tracking-tight">
+                      {currentRoundIndex}
+                      <span className="text-lg text-muted-foreground"> / {totalRounds}</span>
+                    </p>
+                  </div>
                 </div>
-                <div className="border-t border-border pt-6">
+
+                <div className="border-t border-border pt-5">
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                    Cược
+                    Cược vòng này
                   </p>
-                  <p className="mt-2 text-4xl font-bold tabular-nums tracking-tight text-primary sm:text-5xl">
+                  <p className="mt-2 text-3xl font-bold tabular-nums text-primary">
                     {formatAmount(currentBet)} đ
                   </p>
                 </div>
-                <div className="flex flex-wrap justify-center gap-3 pt-2">
-                  <Button size="lg" className="min-h-12 min-w-[140px] text-base" onClick={() => onPlaceBet(currentRoundIndex)}>
-                    <Check className="h-5 w-5" />
-                    Đã cược
-                  </Button>
-                  <Button size="lg" variant="outline" className="min-h-12 min-w-[140px] text-base" onClick={() => onWin(currentRoundIndex)}>
-                    <Trophy className="h-5 w-5" />
-                    Thắng
-                  </Button>
+
+                <div className="flex flex-col items-center gap-2 pt-2">
+                  <StatusBadge status={liveStatus.tone} label={liveStatus.label} />
+                  {autoSettlement ? (
+                    <p className="text-xs text-muted-foreground">
+                      Tự động khớp khi Collector có kỳ mới
+                    </p>
+                  ) : null}
                 </div>
+
+                {lastRound !== null ? (
+                  <div className="rounded-lg border border-dashed bg-muted/30 px-4 py-3 text-sm">
+                    <p className="text-muted-foreground">Vòng {lastRound.round}</p>
+                    <p className="font-medium">
+                      {lastRound.won ? (
+                        <span className="text-success-foreground">
+                          Trúng · +{formatAmount(lastRound.netPrize)} đ
+                        </span>
+                      ) : (
+                        <span>
+                          Thua · Tổng {lastRound.dice.reduce((a, b) => a + b, 0)} (
+                          {lastRound.dice.join('-')})
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                ) : null}
+
                 {nextBet > 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    Tiếp theo: <strong className="text-foreground">{formatAmount(nextBet)} đ</strong>
+                    Tiếp theo:{' '}
+                    <strong className="text-foreground">{formatAmount(nextBet)} đ</strong>
                   </p>
                 ) : null}
-                <p className="text-xs text-muted-foreground">
-                  Enter / B · cược · W · thắng · Z · hoàn tác
-                </p>
               </CardContent>
             </Card>
           </motion.div>
@@ -268,47 +275,48 @@ export function PlayingSessionScreen({
               Đã chi {formatAmount(accumulated)} đ
             </p>
           </div>
-
-          <div className="space-y-2">
-            <AnimatePresence mode="popLayout">
-              {focusRounds.slice(1).map((round) => (
-                <motion.div
-                  key={round.index}
-                  layout
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: round.isDone ? 0.4 : 0.85, y: 0 }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div
-                    className={cn(
-                      'flex items-center justify-between rounded-lg border px-3 py-2 text-sm',
-                      round.isDone && 'bg-muted/30',
-                    )}
-                  >
-                    <span className="text-muted-foreground">Vòng {round.index}</span>
-                    <span className="font-mono tabular-nums">{formatAmount(round.betAmount)} đ</span>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
         </>
+      ) : null}
+
+      {playedRounds.length > 0 ? (
+        <Card>
+          <CardContent className="space-y-2 p-4">
+            <p className="text-xs font-medium text-muted-foreground">Vòng gần đây</p>
+            <ul className="max-h-40 space-y-1 overflow-y-auto text-sm">
+              {[...playedRounds]
+                .reverse()
+                .slice(0, 8)
+                .map((pr) => (
+                  <li
+                    key={pr.id}
+                    className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5"
+                  >
+                    <span className="text-muted-foreground">#{pr.round}</span>
+                    <span className="font-mono text-xs">{pr.drawKey.slice(-6)}</span>
+                    <span>{pr.dice.join('-')}</span>
+                    {pr.won ? (
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-success-foreground" />
+                    ) : (
+                      <XCircle className="h-4 w-4 shrink-0 text-destructive" />
+                    )}
+                  </li>
+                ))}
+            </ul>
+          </CardContent>
+        </Card>
       ) : null}
 
       <Card className="border-dashed">
         <CardContent className="p-4">
           <p className="mb-2 text-xs font-medium text-muted-foreground">Timeline</p>
-          <SessionTimeline events={timeline} compact variant="horizontal" onNavigate={undefined} />
+          <SessionTimeline events={timeline} compact variant="horizontal" />
         </CardContent>
       </Card>
 
       {allRoundsDone && !hideContinue ? (
         <Card className="border-dashed">
           <CardContent className="space-y-4 p-5">
-            <p className="font-medium">
-              Bạn đã hoàn thành {totalRounds} vòng — chưa thắng.
-            </p>
+            <p className="font-medium">Bạn đã hoàn thành {totalRounds} vòng — chưa thắng.</p>
             <p className="text-sm text-muted-foreground">Tiếp tục đến:</p>
             <div className="flex flex-wrap gap-2">
               {presetTargets.map((n) => (
@@ -326,7 +334,9 @@ export function PlayingSessionScreen({
                   <span
                     className={cn(
                       'inline-block h-2 w-2 rounded-full border',
-                      selectedContinue === n ? 'bg-primary-foreground border-primary-foreground' : 'border-muted-foreground',
+                      selectedContinue === n
+                        ? 'bg-primary-foreground border-primary-foreground'
+                        : 'border-muted-foreground',
                     )}
                   />
                   {n}
@@ -336,7 +346,9 @@ export function PlayingSessionScreen({
                 variant={selectedContinue === -1 ? 'default' : 'outline'}
                 size="sm"
                 type="button"
-                onClick={() => setSelectedContinue(-1)}
+                onClick={() => {
+                  setSelectedContinue(-1);
+                }}
               >
                 Tùy chỉnh
               </Button>
@@ -348,7 +360,9 @@ export function PlayingSessionScreen({
                 max={continuePolicy.maximumRounds}
                 placeholder={`Ví dụ: ${String(presetTargets[0] ?? totalRounds + 100)}`}
                 value={continueTarget}
-                onChange={(e) => setContinueTarget(e.target.value)}
+                onChange={(e) => {
+                  setContinueTarget(e.target.value);
+                }}
               />
             ) : null}
             <Button
@@ -377,5 +391,36 @@ export function PlayingSessionScreen({
         Vốn cần {formatAmount(statistics.requiredBankrollAmount)} đ
       </p>
     </div>
+  );
+}
+
+function StatusBadge({
+  status,
+  label,
+}: {
+  readonly status: 'waiting' | 'win' | 'lose';
+  readonly label: string;
+}): React.ReactNode {
+  if (status === 'win') {
+    return (
+      <Badge className="gap-1.5 bg-success/15 text-success-foreground hover:bg-success/20">
+        <CheckCircle2 className="h-3.5 w-3.5" />
+        {label}
+      </Badge>
+    );
+  }
+  if (status === 'lose') {
+    return (
+      <Badge variant="destructive" className="gap-1.5">
+        <XCircle className="h-3.5 w-3.5" />
+        {label}
+      </Badge>
+    );
+  }
+  return (
+    <Badge variant="secondary" className="gap-1.5">
+      <Clock className="h-3.5 w-3.5" />
+      {label}
+    </Badge>
   );
 }

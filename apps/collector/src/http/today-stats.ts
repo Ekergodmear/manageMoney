@@ -15,7 +15,7 @@ export interface TodayStatsPayload {
 }
 
 const TOTAL_VALUES = Array.from({ length: 16 }, (_, i) => i + 3);
-const FLOWER_VALUES = [1, 2, 3, 4, 5, 6].map((d) => `${d}${d}${d}`);
+const FLOWER_VALUES = [1, 2, 3, 4, 5, 6].map((d) => `${String(d)}${String(d)}${String(d)}`);
 
 /** Date prefix YYYY-MM-DD in fixed offset (Bingo18 = +07:00). */
 export function todayDatePrefix(offsetHours = 7): string {
@@ -23,7 +23,7 @@ export function todayDatePrefix(offsetHours = 7): string {
   const y = shifted.getUTCFullYear();
   const m = String(shifted.getUTCMonth() + 1).padStart(2, '0');
   const d = String(shifted.getUTCDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  return `${String(y)}-${m}-${d}`;
 }
 
 export function buildTodayStats(

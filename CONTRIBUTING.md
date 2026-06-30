@@ -10,11 +10,11 @@ Product changes      →  Stake Planner app logic, CLI, workflows
 UI changes           →  Screens, components, styling (src/features/, src/pages/)
 ```
 
-| Layer | Where | Question to ask |
-| ----- | ----- | --------------- |
-| **Platform** | `src/public/`, `src/core/`, `tests/` | Does this change the SDK contract or engine behavior? |
-| **Product** | `apps/`, `examples/`, product flows | Does this help users plan faster or with more confidence? |
-| **UI** | `src/features/`, `src/pages/` | Is the experience clear in under 30 seconds? |
+| Layer        | Where                                | Question to ask                                           |
+| ------------ | ------------------------------------ | --------------------------------------------------------- |
+| **Platform** | `src/public/`, `src/core/`, `tests/` | Does this change the SDK contract or engine behavior?     |
+| **Product**  | `apps/`, `examples/`, product flows  | Does this help users plan faster or with more confidence? |
+| **UI**       | `src/features/`, `src/pages/`        | Is the experience clear in under 30 seconds?              |
 
 ---
 
@@ -61,11 +61,11 @@ pnpm install
 pnpm verify
 ```
 
-| Script | Layer |
-| ------ | ----- |
-| `pnpm build:lib` | Platform → `dist/` |
-| `pnpm build:app` | Product UI → `dist-app/` |
-| `pnpm test` | Platform tests |
+| Script               | Layer                              |
+| -------------------- | ---------------------------------- |
+| `pnpm build:lib`     | Platform → `dist/`                 |
+| `pnpm build:app`     | Product UI → `dist-app/`           |
+| `pnpm test`          | Platform tests                     |
 | `pnpm test:property` | Platform property tests (optional) |
 
 ---

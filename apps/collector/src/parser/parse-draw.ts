@@ -161,7 +161,7 @@ export function parseBingo18DrawBatch(
   const errors: string[] = [];
 
   for (const raw of rawPayload.draws) {
-    const result = parseBingo18RawDraw(raw, source, options, collectedAt);
+    const result = parseBingo18RawDraw(raw, source, { ...options, rawResponse: null }, collectedAt);
     if (result.success && result.draw !== undefined) {
       draws.push(result.draw);
     } else {
@@ -170,6 +170,11 @@ export function parseBingo18DrawBatch(
   }
 
   draws.sort((a, b) => new Date(a.drawAt).getTime() - new Date(b.drawAt).getTime());
+
+  if (draws.length > 0 && options.rawResponse != null) {
+    const last = draws[draws.length - 1];
+    draws[draws.length - 1] = { ...last, rawResponse: options.rawResponse };
+  }
   return { draws, errors };
 }
 

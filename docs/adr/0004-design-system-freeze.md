@@ -25,11 +25,11 @@ Core Services **không** bắt đầu trước Foundation Freeze Review.
 
 ## Hệ quả
 
-| Tích cực | Tiêu cực |
-|----------|----------|
-| DS ổn định trước v0.9/v1.0 | Session rollout phải adapt layout, không thêm token |
-| Một API Card/Button/Text | Select/Textarea primitive deferred |
-| Playground = living catalog | Cần discipline cập nhật report |
+| Tích cực                    | Tiêu cực                                            |
+| --------------------------- | --------------------------------------------------- |
+| DS ổn định trước v0.9/v1.0  | Session rollout phải adapt layout, không thêm token |
+| Một API Card/Button/Text    | Select/Textarea primitive deferred                  |
+| Playground = living catalog | Cần discipline cập nhật report                      |
 
 **Pilot PASS:** Insights, Library (screen-level).
 
@@ -39,4 +39,4 @@ Core Services **không** bắt đầu trước Foundation Freeze Review.
 
 ---
 
-*Liên quan: docs/design-system/freeze-report.md · docs/product/release-engineering.md*
+_Liên quan: docs/design-system/freeze-report.md · docs/product/release-engineering.md_

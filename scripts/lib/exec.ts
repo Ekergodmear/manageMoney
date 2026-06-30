@@ -3,6 +3,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { countBuildWarnings } from './warnings.js';
+
 export interface StepResult {
   readonly ok: boolean;
   readonly exitCode: number;
@@ -12,6 +14,7 @@ export interface StepResult {
   readonly passed?: number;
   readonly total?: number;
   readonly errorSummary?: string;
+  readonly warningCount?: number;
 }
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..', '..');
@@ -44,6 +47,11 @@ function runNode(args: readonly string[], options?: { readonly cwd?: string }): 
   };
 }
 
+function withBuildWarnings(step: StepResult): StepResult {
+  const warningCount = countBuildWarnings(`${step.stdout}\n${step.stderr}`);
+  return warningCount > 0 ? { ...step, warningCount } : step;
+}
+
 export function runTypecheck(): StepResult {
   const tsc = binPath('typescript', 'bin', 'tsc');
   return runNode([tsc, '--noEmit']);
@@ -56,36 +64,95 @@ export function runLint(): StepResult {
 
 export function runBuildLib(): StepResult {
   const vite = binPath('vite', 'bin', 'vite.js');
-  return runNode([vite, 'build', '--config', 'vite.lib.config.ts']);
+  return withBuildWarnings(runNode([vite, 'build', '--config', 'vite.lib.config.ts']));
 }
 
 export function runBuildApp(): StepResult {
   const vite = binPath('vite', 'bin', 'vite.js');
-  return runNode([vite, 'build']);
+  return withBuildWarnings(runNode([vite, 'build']));
+}
+
+export function runBenchmark(): StepResult {
+  const tsx = binPath('tsx', 'dist', 'cli.mjs');
+  return runNode([tsx, 'benchmarks/run.ts']);
+}
+
+export function runUnitTestsBatched(): StepResult {
+  const runner = join(ROOT, 'scripts', 'test-unit-batched.mjs');
+  const started = Date.now();
+  const result = spawnSync(process.execPath, [runner], {
+    cwd: ROOT,
+    shell: false,
+    stdio: 'inherit',
+    env: process.env,
+  });
+  const durationMs = Date.now() - started;
+  const exitCode = result.status ?? 1;
+  const ok = exitCode === 0;
+  return {
+    ok,
+    exitCode,
+    stdout: '',
+    stderr: '',
+    durationMs,
+    ...(ok ? {} : { errorSummary: `unit batches exit ${String(exitCode)}` }),
+  };
 }
 
 export function runVitest(
   paths: readonly string[],
   excludes: readonly string[] = [],
+  options?: { readonly propertyProfile?: string },
 ): StepResult {
-  const vitest = binPath('vitest', 'vitest.mjs');
-  const outputFile = join(ROOT, 'reports', '.tmp-vitest.json');
-  const args = [vitest, 'run', ...paths, '--reporter=json', `--outputFile=${outputFile}`];
+  const runner = join(ROOT, 'scripts', 'run-vitest.mjs');
+  const args = [runner, ...paths];
   for (const pattern of excludes) {
     args.push('--exclude', pattern);
   }
 
-  const step = runNode(args);
-  const counts = parseVitestJsonOutput(outputFile);
-  const errorSummary =
-    step.ok === false ? (counts.failureDetail ?? step.errorSummary) : step.errorSummary;
+  const env = { ...process.env };
+  if (options?.propertyProfile !== undefined) {
+    env.PROPERTY_PROFILE = options.propertyProfile;
+  }
 
-  return {
-    ...step,
-    passed: counts.passed,
-    total: counts.total,
-    ...(errorSummary !== undefined ? { errorSummary } : {}),
+  const started = Date.now();
+  const result = spawnSync(process.execPath, args, {
+    cwd: ROOT,
+    shell: false,
+    stdio: 'inherit',
+    env,
+  });
+  const durationMs = Date.now() - started;
+  const exitCode = result.status ?? 1;
+  const ok = exitCode === 0;
+  const step: StepResult = {
+    ok,
+    exitCode,
+    stdout: '',
+    stderr: '',
+    durationMs,
+    ...(ok ? {} : { errorSummary: `vitest exit ${String(exitCode)}` }),
   };
+  return step;
+}
+
+function parseVitestStdout(output: string): {
+  passed: number;
+  total: number;
+  failureDetail?: string;
+} {
+  const filesMatch = output.match(/Tests\s+(\d+)\s+failed\s*\|\s*(\d+)\s+passed\s*\((\d+)\)/);
+  if (filesMatch !== null) {
+    const failed = Number(filesMatch[1]);
+    const passed = Number(filesMatch[2]);
+    const total = Number(filesMatch[3]);
+    return { passed, total, ...(failed > 0 ? { failureDetail: `${failed} failed` } : {}) };
+  }
+  const passMatch = output.match(/Tests\s+(\d+)\s+passed\s*\((\d+)\)/);
+  if (passMatch !== null) {
+    return { passed: Number(passMatch[1]), total: Number(passMatch[2]) };
+  }
+  return { passed: 0, total: 0 };
 }
 
 function parseVitestJsonOutput(path: string): {
@@ -121,9 +188,7 @@ function parseVitestJsonOutput(path: string): {
         }
       }
     }
-    return failureDetail === undefined
-      ? { passed, total }
-      : { passed, total, failureDetail };
+    return failureDetail === undefined ? { passed, total } : { passed, total, failureDetail };
   } catch {
     return { passed: 0, total: 0 };
   }

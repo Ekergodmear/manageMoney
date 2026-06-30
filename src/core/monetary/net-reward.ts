@@ -8,10 +8,7 @@ import type { WinTax } from '@/application/dto';
 import type { EncodedRewardMultiplier } from './reward-multiplier-encoding';
 import { rewardFromBet } from './reward-multiplier-encoding';
 
-export function grossRewardFromBet(
-  bet: number,
-  encoded: EncodedRewardMultiplier,
-): number {
+export function grossRewardFromBet(bet: number, encoded: EncodedRewardMultiplier): number {
   return rewardFromBet(bet, encoded);
 }
 

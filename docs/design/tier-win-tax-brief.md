@@ -21,19 +21,19 @@ else:
 
 **Default preset (Stake Planner):**
 
-| Field | Value |
-| ----- | ----- |
-| `threshold` | 10_000_000 (10 triệu VND) |
-| `ratePercent` | 10 |
+| Field         | Value                     |
+| ------------- | ------------------------- |
+| `threshold`   | 10_000_000 (10 triệu VND) |
+| `ratePercent` | 10                        |
 
 Tax applies to **total gross win**, not profit only.  
 Below threshold: no tax. At or above: full gross is taxed.
 
 **Example** (multiplier 120, bet 100_000):
 
-| | Gross | Net |
-| --- | --- | --- |
-| No tax | 12_000_000 | 12_000_000 |
+|          | Gross      | Net        |
+| -------- | ---------- | ---------- |
+| No tax   | 12_000_000 | 12_000_000 |
 | With tax | 12_000_000 | 10_800_000 |
 
 ---
@@ -44,8 +44,8 @@ Optional field on `CalculationRequest`:
 
 ```ts
 interface WinTax {
-  readonly threshold: number;    // positive integer, VND
-  readonly ratePercent: number;  // integer 1–99
+  readonly threshold: number; // positive integer, VND
+  readonly ratePercent: number; // integer 1–99
 }
 
 interface CalculationRequest {
@@ -60,7 +60,7 @@ Omitted `winTax` → legacy linear behavior (regression M=20 byte-identical).
 
 ## 3. Solver contract
 
-Profit at win round *i*:
+Profit at win round _i_:
 
 ```text
 πᵢ = netReward(bᵢ) − (accumulatedSpentBefore + bᵢ)  ≥  P*

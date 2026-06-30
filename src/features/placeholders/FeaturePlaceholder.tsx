@@ -87,7 +87,9 @@ export function GuidePreviewScreen(): ReactNode {
                 <span
                   className={cn(
                     'rounded-lg px-3 py-1.5 text-sm font-medium',
-                    index === 0 ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground',
+                    index === 0
+                      ? 'bg-accent text-accent-foreground'
+                      : 'bg-muted text-muted-foreground',
                   )}
                 >
                   {step}
@@ -102,20 +104,20 @@ export function GuidePreviewScreen(): ReactNode {
           </div>
           <div className="space-y-2 text-sm text-muted-foreground">
             <p>
-              <strong className="text-foreground">Generate</strong> — Tạo kế hoạch từ mục tiêu và luật
-              game. <span className="text-primary">Đã có.</span>
+              <strong className="text-foreground">Generate</strong> — Tạo kế hoạch từ mục tiêu và
+              luật game. <span className="text-primary">Đã có.</span>
             </p>
             <p>
-              <strong className="text-foreground">Improve</strong> — Cải thiện kế hoạch khi thiếu vốn.{' '}
+              <strong className="text-foreground">Improve</strong> — Cải thiện kế hoạch khi thiếu
+              vốn. Coming soon.
+            </p>
+            <p>
+              <strong className="text-foreground">Continue</strong> — Mở rộng phiên khi chưa thắng.
               Coming soon.
             </p>
             <p>
-              <strong className="text-foreground">Continue</strong> — Mở rộng phiên khi chưa thắng. Coming
-              soon.
-            </p>
-            <p>
-              <strong className="text-foreground">Simulation</strong> — Mô phỏng nếu thắng ở vòng N. Beta
-              preview.
+              <strong className="text-foreground">Simulation</strong> — Mô phỏng nếu thắng ở vòng N.
+              Beta preview.
             </p>
           </div>
         </CardContent>

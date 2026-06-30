@@ -65,15 +65,15 @@ Quy tắc thưởng ×20   ← ví dụ, không phải persona
 
 Câu hỏi trong đầu họ **không** phải “thuật toán tối ưu thế nào” mà là:
 
-> *“Kế hoạch này có khả thi không? Nếu không — tôi nên điều chỉnh gì để vẫn gần với ý muốn nhất?”*
+> _“Kế hoạch này có khả thi không? Nếu không — tôi nên điều chỉnh gì để vẫn gần với ý muốn nhất?”_
 
 ### Ai **không** phải user v1
 
-| Không nhắm tới (v1) | Lý do |
-| ------------------- | ----- |
-| Người muốn “AI chọn hộ mọi thứ” | Stake Planner giữ **ý định** của user, chỉ điều chỉnh khi cần |
-| Người so sánh nhiều quy tắc thưởng cùng lúc trong một phiên | v1: một kế hoạch, một câu trả lời |
-| Trader / bot tự động | Không phải execution platform |
+| Không nhắm tới (v1)                                         | Lý do                                                         |
+| ----------------------------------------------------------- | ------------------------------------------------------------- |
+| Người muốn “AI chọn hộ mọi thứ”                             | Stake Planner giữ **ý định** của user, chỉ điều chỉnh khi cần |
+| Người so sánh nhiều quy tắc thưởng cùng lúc trong một phiên | v1: một kế hoạch, một câu trả lời                             |
+| Trader / bot tự động                                        | Không phải execution platform                                 |
 
 ---
 
@@ -81,18 +81,18 @@ Câu hỏi trong đầu họ **không** phải “thuật toán tối ưu thế 
 
 Khi không có Stake Planner, người dùng mục tiêu thường:
 
-| Cách làm | Vấn đề |
-| -------- | ------ |
-| **Excel / Google Sheet** | Tự lập công thức; dễ sai; khó bảo trì khi đổi tham số |
-| **Bấm máy** | Chậm; không nhất quán; khó thử nhiều kịch bản |
-| **Nhẩm** | Sai số lớn; không giải thích được vì sao thiếu vốn |
+| Cách làm                            | Vấn đề                                                       |
+| ----------------------------------- | ------------------------------------------------------------ |
+| **Excel / Google Sheet**            | Tự lập công thức; dễ sai; khó bảo trì khi đổi tham số        |
+| **Bấm máy**                         | Chậm; không nhất quán; khó thử nhiều kịch bản                |
+| **Nhẩm**                            | Sai số lớn; không giải thích được vì sao thiếu vốn           |
 | **Hỏi group / kinh nghiệm cá nhân** | Không reproducible; không gắn với **kế hoạch cụ thể** của họ |
 
 ### Hệ quả
 
-1. **Không biết cần bao nhiêu vốn** trước khi vào lệnh thật  
-2. **Không biết nên giảm lợi nhuận hay giảm vòng** khi vốn không đủ  
-3. **Mất niềm tin** vào con số — “chắc tính sai rồi”  
+1. **Không biết cần bao nhiêu vốn** trước khi vào lệnh thật
+2. **Không biết nên giảm lợi nhuận hay giảm vòng** khi vốn không đủ
+3. **Mất niềm tin** vào con số — “chắc tính sai rồi”
 4. **Mất thời gian** — 30 phút trên sheet thay vì 30 giây ra quyết định
 
 ### Câu pain cốt lõi
@@ -163,16 +163,16 @@ Người dùng hiểu **vì sao** con số xuất hiện — từ kế hoạch g
 
 ### Stake Planner **là**
 
-- Máy tính kế hoạch **đáng tin** — cùng input → cùng output  
-- **Explainable planning** — mọi con số gắn với lý do người dùng đọc được  
-- Công cụ **“what-if”**: thử ngân sách, xem đề xuất thay đổi  
+- Máy tính kế hoạch **đáng tin** — cùng input → cùng output
+- **Explainable planning** — mọi con số gắn với lý do người dùng đọc được
+- Công cụ **“what-if”**: thử ngân sách, xem đề xuất thay đổi
 - Nơi **mô phỏng** nếu thắng ở vòng X thì chuyện gì xảy ra (hiểu rủi ro trước khi chơi)
 
 ### Stake Planner **không phải**
 
-- Ứng dụng đặt cược / kết nối sàn  
-- Lời khuyên đầu tư hay cam kết lợi nhuận  
-- “AI bảo vậy” — không có giải thích  
+- Ứng dụng đặt cược / kết nối sàn
+- Lời khuyên đầu tư hay cam kết lợi nhuận
+- “AI bảo vậy” — không có giải thích
 - Thuật ngữ kỹ thuật trên màn hình
 
 Người dùng thấy:
@@ -188,12 +188,12 @@ Người dùng thấy:
 
 ## Jobs to be done (v1)
 
-| # | Việc user cần làm | Stake Planner |
-| - | ----------------- | ------------- |
-| J1 | Kiểm tra kế hoạch có khả thi với vốn dự kiến | Generate + hiển thị vốn cần |
-| J2 | Khi vốn không đủ — biết nên sửa gì **và vì sao** | Optimize + giải thích bằng lời |
-| J3 | Hiểu diễn biến từng vòng nếu thắng sớm | Simulation / timeline |
-| J4 | Lưu hoặc chia sẻ kế hoạch | Export (Sprint 4.6) |
+| #   | Việc user cần làm                                | Stake Planner                  |
+| --- | ------------------------------------------------ | ------------------------------ |
+| J1  | Kiểm tra kế hoạch có khả thi với vốn dự kiến     | Generate + hiển thị vốn cần    |
+| J2  | Khi vốn không đủ — biết nên sửa gì **và vì sao** | Optimize + giải thích bằng lời |
+| J3  | Hiểu diễn biến từng vòng nếu thắng sớm           | Simulation / timeline          |
+| J4  | Lưu hoặc chia sẻ kế hoạch                        | Export (Sprint 4.6)            |
 
 ---
 
@@ -210,28 +210,28 @@ mà không phải tính tay (Excel / máy tính / nhẩm)
 
 ### UX metrics
 
-| Metric | Target v1 | Ý nghĩa |
-| ------ | --------- | ------- |
-| **Time-to-plan** | **90%** user < **30s** | Từ mở app → có kết quả generate hoặc optimize |
-| **Task completion** | **≥ 80%** | Hoàn thành flow không bỏ giữa chừng |
-| **Explanation clarity** | Qualitative (5-user test) | User hiểu *vì sao* con số / đề xuất |
-| **Return usage** | Baseline sau launch | Cùng user quay lại trong 7 ngày |
+| Metric                  | Target v1                 | Ý nghĩa                                       |
+| ----------------------- | ------------------------- | --------------------------------------------- |
+| **Time-to-plan**        | **90%** user < **30s**    | Từ mở app → có kết quả generate hoặc optimize |
+| **Task completion**     | **≥ 80%**                 | Hoàn thành flow không bỏ giữa chừng           |
+| **Explanation clarity** | Qualitative (5-user test) | User hiểu _vì sao_ con số / đề xuất           |
+| **Return usage**        | Baseline sau launch       | Cùng user quay lại trong 7 ngày               |
 
 ### Outcome metrics
 
-| Metric | Target v1 | Ý nghĩa |
-| ------ | --------- | ------- |
-| **No manual calculation** | **≥ 85%** phiên đầu | Plan hoàn thành **không** mở Excel / máy tính song song |
-| **First plan without spreadsheet** | **≥ 70%** user mới | Tạo plan đầu tiên thành công mà không dựa sheet có sẵn |
-| **Self-reported replacement** | Qualitative | “Tôi không cần file Excel cũ nữa” (survey sau 2 tuần) |
-| **Trust in explanation** | **≥ 4/5** (5-user test) | User đồng ý “Tôi hiểu vì sao con số này” |
+| Metric                             | Target v1               | Ý nghĩa                                                 |
+| ---------------------------------- | ----------------------- | ------------------------------------------------------- |
+| **No manual calculation**          | **≥ 85%** phiên đầu     | Plan hoàn thành **không** mở Excel / máy tính song song |
+| **First plan without spreadsheet** | **≥ 70%** user mới      | Tạo plan đầu tiên thành công mà không dựa sheet có sẵn  |
+| **Self-reported replacement**      | Qualitative             | “Tôi không cần file Excel cũ nữa” (survey sau 2 tuần)   |
+| **Trust in explanation**           | **≥ 4/5** (5-user test) | User đồng ý “Tôi hiểu vì sao con số này”                |
 
 **Không chỉ nhanh — mà giảm công việc thủ công.**
 
 ### Anti-metrics (không tối ưu v1)
 
-- Số tính năng trên màn hình  
-- Độ sâu của thuật toán  
+- Số tính năng trên màn hình
+- Độ sâu của thuật toán
 - Số dòng code UI
 
 ---
@@ -240,36 +240,36 @@ mà không phải tính tay (Excel / máy tính / nhẩm)
 
 ### Có
 
-- Một kế hoạch, một câu trả lời tốt nhất (không bảng xếp hạng nhiều phương án)  
-- Quy tắc thưởng do user nhập — không khóa ×20  
-- Điều chỉnh **lợi nhuận mục tiêu** và **số vòng** (khi user cho phép)  
-- Giải thích dạng câu: *“Giảm lợi nhuận từ 100k xuống 70k, giữ 50 vòng — vì ngân sách 500k”*
+- Một kế hoạch, một câu trả lời tốt nhất (không bảng xếp hạng nhiều phương án)
+- Quy tắc thưởng do user nhập — không khóa ×20
+- Điều chỉnh **lợi nhuận mục tiêu** và **số vòng** (khi user cho phép)
+- Giải thích dạng câu: _“Giảm lợi nhuận từ 100k xuống 70k, giữ 50 vòng — vì ngân sách 500k”_
 
 ### Chưa có (v1)
 
-- Đa mục tiêu / Pareto / “phương án B tốt hơn phương án A”  
-- Tự động hóa đặt cược  
+- Đa mục tiêu / Pareto / “phương án B tốt hơn phương án A”
+- Tự động hóa đặt cược
 - Tài khoản / đăng nhập / lưu cloud (có thể sau)
 
 ---
 
 ## Rủi ro sản phẩm cần theo dõi
 
-| Rủi ro | Giảm thiểu |
-| ------ | ---------- |
-| User không tin con số | Explainable planning + deterministic; Demo CLI làm bằng chứng |
-| UI quá kỹ thuật | RFC-102 journey; copy tiếng Việt đời thường |
-| Persona gắn chặt một game | Persona = quy tắc thưởng tùy chọn; ×20 chỉ là ví dụ |
-| Scope creep (thêm knob) | Khóa v1 theo RFC-101; mọi knob mới → RFC mới |
+| Rủi ro                    | Giảm thiểu                                                    |
+| ------------------------- | ------------------------------------------------------------- |
+| User không tin con số     | Explainable planning + deterministic; Demo CLI làm bằng chứng |
+| UI quá kỹ thuật           | RFC-102 journey; copy tiếng Việt đời thường                   |
+| Persona gắn chặt một game | Persona = quy tắc thưởng tùy chọn; ×20 chỉ là ví dụ           |
+| Scope creep (thêm knob)   | Khóa v1 theo RFC-101; mọi knob mới → RFC mới                  |
 
 ---
 
 ## Sign-off (Product Lead)
 
-- [x] Persona = lập kế hoạch theo quy tắc thưởng — không gắn ×20  
-- [x] Product Promise + **Explainable Planning** (confidence)  
-- [x] UX metrics + **Outcome metrics** (giảm tính tay)  
-- [x] Phạm vi v1 / không-v1 rõ ràng  
+- [x] Persona = lập kế hoạch theo quy tắc thưởng — không gắn ×20
+- [x] Product Promise + **Explainable Planning** (confidence)
+- [x] UX metrics + **Outcome metrics** (giảm tính tay)
+- [x] Phạm vi v1 / không-v1 rõ ràng
 
 **Accepted** → [RFC-102 User Journey](RFC-102-user-journey.md)
 
@@ -277,5 +277,5 @@ mà không phải tính tay (Excel / máy tính / nhẩm)
 
 ## References (nội bộ)
 
-- `docs/design/optimization-formal-verification.md`  
+- `docs/design/optimization-formal-verification.md`
 - `docs/rfc/product/README.md`

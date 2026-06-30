@@ -1,6 +1,7 @@
 import type { ImproveMode } from '@/features/improve/improve-service';
 import type { GenerateResult, PlannerFormValues } from '@/features/planner/plan-service';
 import type { CalculationRequest, StrategyStatistics } from '@stake/constraint-engine';
+import { DEFAULT_MARKET_ID } from '@/features/game-data/markets/market-definition';
 
 export type PlanCandidateSource = 'improve' | 'capital' | 'scenario';
 
@@ -18,6 +19,7 @@ export interface PlanCandidateBase {
   readonly target: PlanCandidateTarget;
   readonly source: PlanCandidateSource;
   readonly presetId: string;
+  readonly marketId: string;
   readonly calculation: CalculationRequest;
   readonly statistics: StrategyStatistics;
   readonly summary: PlanCandidateSummary;
@@ -49,9 +51,7 @@ export function isNewSessionCandidate(
   return candidate.target === 'new-session';
 }
 
-export function isAppendPlanCandidate(
-  candidate: PlanCandidate,
-): candidate is AppendPlanCandidate {
+export function isAppendPlanCandidate(candidate: PlanCandidate): candidate is AppendPlanCandidate {
   return candidate.target === 'append-plan';
 }
 
@@ -81,6 +81,7 @@ export function createPlanCandidateFromImprove(input: {
     sessionId: input.sessionId,
     parentPlanId: input.parentPlanId,
     presetId: input.presetId,
+    marketId: input.formValues.marketId,
     source: 'improve',
     calculation: input.generated.request,
     statistics: input.generated.statistics,
@@ -108,6 +109,7 @@ export function createPlanCandidateFromRecommendation(input: {
     sessionId: null,
     parentPlanId: null,
     presetId: input.presetId,
+    marketId: input.formValues.marketId || DEFAULT_MARKET_ID,
     source: input.source,
     recommendationId: input.recommendationId,
     calculation: input.generated.request,

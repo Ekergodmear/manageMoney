@@ -10,14 +10,9 @@ export interface AppServicesProviderProps {
   readonly children: ReactNode;
 }
 
-export function AppServicesProvider({
-  services,
-  children,
-}: AppServicesProviderProps): ReactNode {
+export function AppServicesProvider({ services, children }: AppServicesProviderProps): ReactNode {
   const value = services ?? getAppServices();
-  return (
-    <AppServicesContext.Provider value={value}>{children}</AppServicesContext.Provider>
-  );
+  return <AppServicesContext.Provider value={value}>{children}</AppServicesContext.Provider>;
 }
 
 export function useAppServices(): AppServices {

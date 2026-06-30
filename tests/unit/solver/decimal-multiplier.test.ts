@@ -56,7 +56,9 @@ describe('Arithmetic migration — decimal precision validation', () => {
       expect(result.kind).toBe('failure');
       if (result.kind !== 'success') {
         expect(
-          result.error.errors.some((e) => e.code === ValidationCodes.S013_REWARD_MULTIPLIER_PRECISION),
+          result.error.errors.some(
+            (e) => e.code === ValidationCodes.S013_REWARD_MULTIPLIER_PRECISION,
+          ),
         ).toBe(true);
       }
     }

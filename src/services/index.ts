@@ -9,7 +9,6 @@ export type {
   AppEventType,
   ContinuationCreatedEvent,
   DomainEvent,
-  DomainEventHandler,
   DomainEventOf,
   DomainEventType,
   ImproveAppliedEvent,
@@ -36,16 +35,21 @@ export {
   EVENT_SCHEMA_VERSION,
   HEALTH_EVENT_TYPES,
   TELEMETRY_EVENT_TYPES,
-  DOMAIN_EVENT_VERSION,
 } from '@/services/events/event-types';
-export { DomainEventBus, EventBus, isAppEvent, isDomainEvent } from '@/services/events/domain-events';
+export {
+  EventBus,
+  isAppEvent,
+} from '@/services/events/domain-events';
 export { registerEventSubscriber } from '@/services/events/subscribers';
 
 export type { StorageDriver } from '@/services/storage/StorageDriver';
 export { IndexedDbDriver } from '@/services/storage/IndexedDbDriver';
 export { MemoryStorageDriver } from '@/services/storage/MemoryStorageDriver';
 export { PersistenceService } from '@/services/storage/PersistenceService';
-export { AppStateRepository, APP_STATE_STORAGE_KEY } from '@/services/storage/repositories/app-state-repository';
+export {
+  AppStateRepository,
+  APP_STATE_STORAGE_KEY,
+} from '@/services/storage/repositories/app-state-repository';
 
 export { EventStore, TELEMETRY_EVENT_LOG_KEY } from '@/services/telemetry/event-store';
 export type { StoredAppEvent } from '@/services/telemetry/event-store';
@@ -58,7 +62,16 @@ export { ConsoleSink } from '@/services/logger/sinks/console-sink';
 export { HealthService } from '@/services/health/health-service';
 export type { HealthSnapshot, HealthStatus } from '@/services/health/health-service';
 
-export type { AppConfig, CreateAppConfigOptions, BuildInfo, CloudConfig, DeveloperConfig, Environment, TelemetryConfig, UiConfig } from '@/services/config';
+export type {
+  AppConfig,
+  CreateAppConfigOptions,
+  BuildInfo,
+  CloudConfig,
+  DeveloperConfig,
+  Environment,
+  TelemetryConfig,
+  UiConfig,
+} from '@/services/config';
 export { createAppConfig, resolveEnvironment } from '@/services/config';
 
 export type { FeatureFlag, Flags } from '@/services/feature-flags/Flags';

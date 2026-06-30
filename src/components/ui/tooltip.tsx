@@ -7,13 +7,7 @@ export function TooltipProvider({ children }: { children: ReactNode }) {
   return <TooltipPrimitive.Provider delayDuration={200}>{children}</TooltipPrimitive.Provider>;
 }
 
-export function Tooltip({
-  content,
-  children,
-}: {
-  content: string;
-  children: ReactNode;
-}) {
+export function Tooltip({ content, children }: { content: string; children: ReactNode }) {
   return (
     <TooltipPrimitive.Root>
       <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>

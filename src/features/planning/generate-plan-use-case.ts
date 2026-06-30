@@ -1,6 +1,6 @@
 import type { Clock } from '@/services/clock/clock';
 import type { EventBus } from '@/services/events/domain-events';
-import type { PlanningDraftRepository } from '@/services/storage/repositories/planning-draft-repository';
+import type { PlanningDraft } from '@/features/planning/planning-types';
 import type { PlanningDraftRepository } from '@/services/storage/repositories/planning-draft-repository';
 import {
   generatePlan,

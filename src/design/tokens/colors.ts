@@ -55,14 +55,7 @@ export const semanticBg: Record<
 };
 
 export const semanticText: Record<
-  | 'foreground'
-  | 'muted'
-  | 'primary'
-  | 'secondary'
-  | 'accent'
-  | 'success'
-  | 'warning'
-  | 'danger',
+  'foreground' | 'muted' | 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'danger',
   string
 > = {
   foreground: 'text-foreground',
@@ -75,7 +68,10 @@ export const semanticText: Record<
   danger: 'text-destructive',
 };
 
-export const semanticBorder: Record<'default' | 'primary' | 'success' | 'warning' | 'danger', string> = {
+export const semanticBorder: Record<
+  'default' | 'primary' | 'success' | 'warning' | 'danger',
+  string
+> = {
   default: 'border-border',
   primary: 'border-primary/20',
   success: 'border-emerald-500/25',

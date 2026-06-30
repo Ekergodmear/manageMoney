@@ -159,7 +159,7 @@ describe('SearchPolicy — mode guard', () => {
   it('returns null for percentage intent profit steps (deterministic unsupported)', () => {
     const percentageIntent: CalculationRequest = {
       ...intent,
-      targetProfit: { mode: 'percentage', percent: 10 },
+      targetProfit: { mode: 'percentage', percentage: 10 },
     };
     expect(policy.nextProfit(percentageIntent, 100_000, granularity)).toBeNull();
   });

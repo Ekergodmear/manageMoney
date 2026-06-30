@@ -1,12 +1,6 @@
 import { Button } from '@/components/ui/button';
 
-export function ComingSoonToast({
-  message,
-  onClose,
-}: {
-  message: string;
-  onClose: () => void;
-}) {
+export function ComingSoonToast({ message, onClose }: { message: string; onClose: () => void }) {
   return (
     <div
       role="status"

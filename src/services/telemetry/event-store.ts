@@ -27,13 +27,15 @@ export class EventStore {
   ) {}
 
   async append(event: AppEvent): Promise<void> {
-    const log = (await this.driver.get<StoredAppEvent[]>(this.key)) ?? [];
+    const existing = await this.driver.get(this.key);
+    const log = Array.isArray(existing) ? (existing as StoredAppEvent[]) : [];
     log.push(serializeAppEvent(event));
     await this.driver.put(this.key, log);
   }
 
   async readAll(): Promise<readonly StoredAppEvent[]> {
-    return (await this.driver.get<StoredAppEvent[]>(this.key)) ?? [];
+    const existing = await this.driver.get(this.key);
+    return Array.isArray(existing) ? (existing as StoredAppEvent[]) : [];
   }
 
   async clear(): Promise<void> {

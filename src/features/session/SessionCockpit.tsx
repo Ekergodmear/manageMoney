@@ -1,10 +1,4 @@
-import {
-  Download,
-  LineChart,
-  Play,
-  Sparkles,
-  Square,
-} from 'lucide-react';
+import { Download, LineChart, Play, Sparkles, Square } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -31,10 +25,7 @@ import {
 } from '@/features/session/session-health';
 import { SessionNotesPanel } from '@/features/session/SessionNotesPanel';
 import { SessionStatisticsPanel } from '@/features/session/SessionStatisticsPanel';
-import {
-  SessionTimeline,
-  type TimelineNavigateTarget,
-} from '@/features/session/SessionTimeline';
+import { SessionTimeline, type TimelineNavigateTarget } from '@/features/session/SessionTimeline';
 import { formatAmount } from '@/lib/money-format';
 import { cn } from '@/lib/utils';
 
@@ -121,8 +112,7 @@ export function SessionCockpit({
   const currentExhausted = currentPlan !== null && isPlanExhausted(currentPlan);
   const canPlay =
     currentPlan !== null &&
-    (currentPlan.status === 'ready' ||
-      (currentPlan.status === 'playing' && !currentExhausted));
+    (currentPlan.status === 'ready' || (currentPlan.status === 'playing' && !currentExhausted));
 
   const ctx =
     currentPlan !== null
@@ -164,7 +154,9 @@ export function SessionCockpit({
                   <Input
                     ref={renameRef}
                     value={renameValue}
-                    onChange={(e) => setRenameValue(e.target.value)}
+                    onChange={(e) => {
+                      setRenameValue(e.target.value);
+                    }}
                     className="text-lg font-bold"
                     autoFocus
                     onKeyDown={(e) => {
@@ -172,7 +164,9 @@ export function SessionCockpit({
                         onTitleChange(renameValue);
                       }
                     }}
-                    onBlur={() => onTitleChange(renameValue)}
+                    onBlur={() => {
+                      onTitleChange(renameValue);
+                    }}
                   />
                 </div>
               ) : (
@@ -285,7 +279,7 @@ export function SessionCockpit({
             {!readOnly && canPlay ? (
               <Button onClick={onStartPlaying} size="lg">
                 <Play className="h-4 w-4" />
-                {currentPlan?.status === 'ready' ? 'Bắt đầu chơi' : 'Tiếp tục'}
+                {currentPlan.status === 'ready' ? 'Bắt đầu chơi' : 'Tiếp tục'}
               </Button>
             ) : null}
             {currentPlan !== null && session.status !== 'won' && !readOnly ? (
@@ -312,7 +306,7 @@ export function SessionCockpit({
         </CardContent>
       </Card>
 
-      {currentExhausted && currentPlan?.status === 'playing' && !minimalMode ? (
+      {currentExhausted && currentPlan.status === 'playing' && !minimalMode ? (
         <Card className="border-dashed border-amber-500/40 bg-amber-500/5">
           <CardContent className="p-4 text-sm">
             <p className="font-medium">{currentPlan.label} — hết vòng, chưa thắng.</p>
@@ -324,13 +318,11 @@ export function SessionCockpit({
             </Button>
           </CardContent>
         </Card>
-      ) : minimalMode && currentExhausted && currentPlan?.status === 'playing' ? (
+      ) : minimalMode && currentExhausted && currentPlan.status === 'playing' ? (
         <Card className="border-dashed border-amber-500/40 bg-amber-500/5">
           <CardContent className="p-4 text-sm">
             <p className="font-medium">{currentPlan.label} — hết vòng, chưa thắng.</p>
-            <p className="mt-1 text-muted-foreground">
-              Dùng Cải thiện để tạo plan tiếp theo.
-            </p>
+            <p className="mt-1 text-muted-foreground">Dùng Cải thiện để tạo plan tiếp theo.</p>
             {onImprove !== undefined ? (
               <Button className="mt-3" size="sm" variant="outline" onClick={onImprove}>
                 Cải thiện
@@ -356,11 +348,7 @@ export function SessionCockpit({
         <SessionStatisticsPanel stats={stats} currentPlan={currentPlan} />
       </div>
 
-      <SessionNotesPanel
-        notes={session.notes}
-        readOnly={readOnly}
-        onNotesChange={onNotesChange}
-      />
+      <SessionNotesPanel notes={session.notes} readOnly={readOnly} onNotesChange={onNotesChange} />
 
       <Card>
         <CardContent className="divide-y divide-border p-0">

@@ -86,7 +86,10 @@ export function canonicalProfitEvaluationOrder(
   return order;
 }
 
-export function isFeasibleUnderBankroll(intent: CalculationRequest, bankrollLimit: number): boolean {
+export function isFeasibleUnderBankroll(
+  intent: CalculationRequest,
+  bankrollLimit: number,
+): boolean {
   return measureRequiredBankroll(intent) <= bankrollLimit;
 }
 

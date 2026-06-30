@@ -28,7 +28,10 @@ function makeRequest(
   };
 }
 
-function collectEvaluatedPairs(bankrollLimit: number, allowRoundReduction: boolean): Array<{
+function collectEvaluatedPairs(
+  bankrollLimit: number,
+  allowRoundReduction: boolean,
+): Array<{
   profit: number;
   rounds: number;
 }> {
@@ -96,8 +99,11 @@ describe('optimize — round search (Sprint 3.2C.2)', () => {
 
     expect(lastAt50).toBeDefined();
     expect(firstAt49).toBeDefined();
-    expect(firstAt49?.profit).toBe(100_000);
-    expect(lastAt50!.rounds).toBe(50);
+    if (firstAt49 === undefined || lastAt50 === undefined) {
+      return;
+    }
+    expect(firstAt49.profit).toBe(100_000);
+    expect(lastAt50.rounds).toBe(50);
   });
 
   it('decrements rounds by one per policy step', () => {

@@ -25,10 +25,7 @@ export interface ActionMenuProps {
   readonly ariaLabel?: string;
 }
 
-export function ActionMenu({
-  sections,
-  ariaLabel = 'Thêm hành động',
-}: ActionMenuProps): ReactNode {
+export function ActionMenu({ sections, ariaLabel = 'Thêm hành động' }: ActionMenuProps): ReactNode {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -42,7 +39,9 @@ export function ActionMenu({
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, [open]);
 
   return (
@@ -52,7 +51,9 @@ export function ActionMenu({
         size="sm"
         variant="ghost"
         className="h-8 w-8 p-0"
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => {
+          setOpen((value) => !value);
+        }}
         aria-label={ariaLabel}
       >
         <MoreVertical className="h-4 w-4" />
@@ -69,7 +70,7 @@ export function ActionMenu({
           )}
         >
           {sections.map((section, sectionIndex) => (
-            <Stack key={section.title ?? sectionIndex} spacing={0}>
+            <Stack key={section.title ?? sectionIndex} spacing={2}>
               {section.title !== undefined ? (
                 <Text variant="caption" muted className="px-3 py-1">
                   {section.title}
@@ -79,11 +80,7 @@ export function ActionMenu({
                 <button
                   key={item.label}
                   type="button"
-                  className={cn(
-                    'w-full px-3 py-1.5 text-left',
-                    radius.xs,
-                    'hover:bg-muted',
-                  )}
+                  className={cn('w-full px-3 py-1.5 text-left', radius.xs, 'hover:bg-muted')}
                   onClick={() => {
                     item.onClick();
                     setOpen(false);

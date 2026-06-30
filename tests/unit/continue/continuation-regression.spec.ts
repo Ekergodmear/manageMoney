@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createContinuePlanUseCase } from '@/features/continue/continue-plan-use-case';
 import { FakeClock } from '@/services/clock/fake-clock';
 import { DEFAULT_PLANNER_FORM, generatePlan } from '@/features/planner/plan-service';
-import { createSessionFromGenerate } from '@/features/session/session-factory';
+import { createTestSessionFromGenerate } from '../../support/create-test-session';
 import { getCurrentPlan, type Session } from '@/features/session/session-domain';
 import { MemoryStorageDriver } from '@/services/storage/MemoryStorageDriver';
 import { PersistenceService } from '@/services/storage/PersistenceService';
@@ -38,8 +38,10 @@ function createDeps(clockDate: string) {
   };
 }
 
-function sessionExhaustedAt500(generated: NonNullable<ReturnType<typeof generatePlan>['result']>): Session {
-  const session = createSessionFromGenerate(CONTINUE_FORM, generated, 'bingo-120', 1);
+function sessionExhaustedAt500(
+  generated: NonNullable<ReturnType<typeof generatePlan>['result']>,
+): Session {
+  const session = createTestSessionFromGenerate(CONTINUE_FORM, generated, 'bingo-120', 1);
   const planA = getCurrentPlan(session);
   if (planA === null) {
     throw new Error('missing plan A');
@@ -83,45 +85,41 @@ async function runContinueFrom(
 }
 
 describe('S4 — Continue pipeline', () => {
-  it(
-    'continuation regression: cùng SessionState → plan byte-identical',
-    async () => {
-      const generated = generatePlan(CONTINUE_FORM);
-      expect(generated.result).toBeDefined();
-      if (generated.result === undefined) {
-        return;
-      }
+  it('continuation regression: cùng SessionState → plan byte-identical', async () => {
+    const generated = generatePlan(CONTINUE_FORM);
+    expect(generated.result).toBeDefined();
+    if (generated.result === undefined) {
+      return;
+    }
 
-      const baseSession = sessionExhaustedAt500(generated.result);
-      const depsA = createDeps('2026-06-25T18:00:00.000Z');
-      const depsB = createDeps('2026-06-25T18:00:00.000Z');
+    const baseSession = sessionExhaustedAt500(generated.result);
+    const depsA = createDeps('2026-06-25T18:00:00.000Z');
+    const depsB = createDeps('2026-06-25T18:00:00.000Z');
 
-      const sessionA = await runContinueFrom(structuredClone(baseSession), depsA);
-      const sessionB = await runContinueFrom(structuredClone(baseSession), depsB);
+    const sessionA = await runContinueFrom(structuredClone(baseSession), depsA);
+    const sessionB = await runContinueFrom(structuredClone(baseSession), depsB);
 
-      const planA = getCurrentPlan(sessionA);
-      const planB = getCurrentPlan(sessionB);
-      expect(planA).not.toBeNull();
-      expect(planB).not.toBeNull();
-      if (planA === null || planB === null) {
-        return;
-      }
+    const planA = getCurrentPlan(sessionA);
+    const planB = getCurrentPlan(sessionB);
+    expect(planA).not.toBeNull();
+    expect(planB).not.toBeNull();
+    if (planA === null || planB === null) {
+      return;
+    }
 
-      expect(JSON.stringify(planA.generated)).toBe(JSON.stringify(planB.generated));
-      expect(planA.origin).toBe('continue');
-      expect(planA.completedThroughRound).toBe(500);
-      expect(planA.generated.strategy.rounds).toHaveLength(1000);
-      expect(planA.generated.strategy.rounds[500]?.betAmount).toBeGreaterThan(0);
+    expect(JSON.stringify(planA.generated)).toBe(JSON.stringify(planB.generated));
+    expect(planA.origin).toBe('continue');
+    expect(planA.completedThroughRound).toBe(500);
+    expect(planA.generated.strategy.rounds).toHaveLength(1000);
+    expect(planA.generated.strategy.rounds[500]?.betAmount).toBeGreaterThan(0);
 
-      const parent = sessionA.plans.find((p) => p.id === planA.parentPlanId);
-      expect(parent?.status).toBe('superseded');
+    const parent = sessionA.plans.find((p) => p.id === planA.parentPlanId);
+    expect(parent?.status).toBe('superseded');
 
-      const timelineEvent = sessionA.timeline.at(-1);
-      expect(timelineEvent?.type).toBe('plan-added');
-      expect(timelineEvent?.origin).toBe('continue');
-    },
-    120_000,
-  );
+    const timelineEvent = sessionA.timeline.at(-1);
+    expect(timelineEvent?.type).toBe('plan-added');
+    expect(timelineEvent?.origin).toBe('continue');
+  }, 120_000);
 
   it('emits PlanPromoted và ContinuationCreated', async () => {
     const generated = generatePlan({ ...CONTINUE_FORM, roundCount: '30' });
@@ -130,7 +128,7 @@ describe('S4 — Continue pipeline', () => {
       return;
     }
 
-    const session = createSessionFromGenerate(CONTINUE_FORM, generated.result, 'bingo-120', 1);
+    const session = createTestSessionFromGenerate(CONTINUE_FORM, generated.result, 'bingo-120', 1);
     const planA = getCurrentPlan(session);
     if (planA === null) {
       return;
@@ -165,7 +163,7 @@ describe('S4 — Continue pipeline', () => {
       return;
     }
 
-    const session = createSessionFromGenerate(
+    const session = createTestSessionFromGenerate(
       { ...CONTINUE_FORM, roundCount: '20' },
       generated.result,
       'bingo-120',

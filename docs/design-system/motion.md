@@ -1,10 +1,10 @@
 # Motion
 
-| Token | ms | Dùng cho |
-|-------|-----|----------|
-| `fast` | 150 | Hover, màu |
-| `normal` | 220 | Drawer, panel |
-| `slow` | 320 | Page transition |
+| Token    | ms  | Dùng cho        |
+| -------- | --- | --------------- |
+| `fast`   | 150 | Hover, màu      |
+| `normal` | 220 | Drawer, panel   |
+| `slow`   | 320 | Page transition |
 
 ## Khi dùng
 

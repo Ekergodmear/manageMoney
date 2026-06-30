@@ -1,5 +1,4 @@
 import type { AppConfig } from '@/services/config/AppConfig';
-import type { Environment } from '@/services/config/Environment';
 import { isTest } from '@/services/config/Environment';
 
 export type FeatureFlag = 'cloud' | 'telemetry' | 'playwright';

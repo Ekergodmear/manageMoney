@@ -5,11 +5,7 @@ import {
   validateCalculationRequest,
 } from '@stake/constraint-engine';
 
-import type {
-  CalculationRequest,
-  Strategy,
-  StrategyStatistics,
-} from '@stake/constraint-engine';
+import type { CalculationRequest, Strategy, StrategyStatistics } from '@stake/constraint-engine';
 
 import { parseMoneyPositiveInt } from '@/lib/money-format';
 
@@ -17,6 +13,7 @@ const MULTIPLIER_DECIMAL_PLACES = 2;
 
 export interface PlannerFormValues {
   presetId: string;
+  marketId: string;
   targetProfit: string;
   roundCount: string;
   rewardMultiplier: string;
@@ -184,9 +181,7 @@ export function buildRequest(
       minimumBet,
       betStep,
       targetProfit: { mode: 'fixedAmount', amount: targetProfit },
-      ...(values.winTaxEnabled &&
-      winTaxThreshold !== null &&
-      winTaxRatePercent !== null
+      ...(values.winTaxEnabled && winTaxThreshold !== null && winTaxRatePercent !== null
         ? { winTax: { threshold: winTaxThreshold, ratePercent: winTaxRatePercent } }
         : {}),
     },
@@ -234,7 +229,9 @@ export function generatePlan(values: PlannerFormValues): {
 
   const solved = solve(validated.value);
   if (solved.kind === 'failure') {
-    return { fieldErrors: { request: 'Không tạo được kế hoạch. Vui lòng kiểm tra lại thông tin.' } };
+    return {
+      fieldErrors: { request: 'Không tạo được kế hoạch. Vui lòng kiểm tra lại thông tin.' },
+    };
   }
 
   const strategy = buildStrategy(solved.value.rounds);
@@ -254,6 +251,7 @@ export function generatePlan(values: PlannerFormValues): {
 
 export const DEFAULT_PLANNER_FORM: PlannerFormValues = {
   presetId: 'bingo-120',
+  marketId: 'total-4',
   targetProfit: '100.000',
   roundCount: '500',
   rewardMultiplier: '120',

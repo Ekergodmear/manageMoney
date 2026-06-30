@@ -9,8 +9,8 @@ import { describe, it } from 'vitest';
 import { solve } from '@/core/solver';
 import { validateCalculationRequest } from '@/core/validation';
 
-import { calculationRequestArb } from '../../support/solver-arbitraries';
-import { getPropertyRuns } from '../../support/property-runs';
+import { calculationRequestArb } from '../support/solver-arbitraries';
+import { getPropertyRuns } from '../support/property-runs';
 import {
   assertStrategyInvariants,
   isValidRequest,
@@ -19,7 +19,7 @@ import {
   withBetStep,
   withMinimumBet,
   withTargetProfit,
-} from '../../support/solver-test-helpers';
+} from '../support/solver-test-helpers';
 
 const PROPERTY_RUNS = getPropertyRuns();
 

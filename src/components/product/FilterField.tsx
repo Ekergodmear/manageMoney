@@ -35,7 +35,9 @@ export function FilterField({ label, value, options, onChange }: FilterFieldProp
           typography.body,
         )}
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => {
+          onChange(event.target.value);
+        }}
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>

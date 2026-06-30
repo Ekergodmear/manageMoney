@@ -29,13 +29,16 @@ describe('EventBus', () => {
     expect(received).toHaveLength(1);
     const first = received[0];
     expect(first).toBeDefined();
+    if (first === undefined) {
+      return;
+    }
     expect(first).toMatchObject({
       type: 'PlanGenerated',
       schemaVersion: 1,
       sessionId: 'session-1',
       planId: 'plan-a',
     });
-    expect(first!.occurredAt.toISOString()).toBe(fixed.toISOString());
+    expect(first.occurredAt.toISOString()).toBe(fixed.toISOString());
   });
 
   it('does not notify unsubscribed handlers', () => {
@@ -105,9 +108,7 @@ describe('Milestone 1 DoD — Generate Plan flow', () => {
 
     const sessionId = crypto.randomUUID();
     const planId = crypto.randomUUID();
-    services.events.emit(
-      services.events.createEvent('PlanGenerated', { sessionId, planId }),
-    );
+    services.events.emit(services.events.createEvent('PlanGenerated', { sessionId, planId }));
 
     expect(audit).toEqual([`received:${sessionId}:${planId}`]);
   });

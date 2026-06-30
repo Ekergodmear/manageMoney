@@ -16,11 +16,11 @@ Sau v0.8 Internal, cần backup, đa thiết bị, và health cloud — nhưng k
 
 ## Hệ quả
 
-| Tích cực | Tiêu cực |
-|----------|----------|
-| Tách biệt rõ client/cloud | Conflict resolution phức tạp (v1.0) |
-| Có thể ship v0.8 không cloud | Thêm schema migration v4 (sync metadata) |
-| UI đọc Sync Status, không biết Supabase | Cần Health check cloud disconnected |
+| Tích cực                                | Tiêu cực                                 |
+| --------------------------------------- | ---------------------------------------- |
+| Tách biệt rõ client/cloud               | Conflict resolution phức tạp (v1.0)      |
+| Có thể ship v0.8 không cloud            | Thêm schema migration v4 (sync metadata) |
+| UI đọc Sync Status, không biết Supabase | Cần Health check cloud disconnected      |
 
 **Không bao giờ:** `POST /solve` · `POST /optimize` · server-side insights
 
@@ -28,4 +28,4 @@ Sau v0.8 Internal, cần backup, đa thiết bị, và health cloud — nhưng k
 
 ---
 
-*Liên quan: ADR 0001-local-first.md · docs/product/backend-architecture.md*
+_Liên quan: ADR 0001-local-first.md · docs/product/backend-architecture.md_

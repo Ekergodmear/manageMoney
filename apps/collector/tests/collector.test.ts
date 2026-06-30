@@ -13,11 +13,11 @@ function mockAdapter(payloads: RawDrawFetch[]): DrawSourceAdapter & { calls: num
   const adapter = {
     id: 'mock-test',
     calls: 0,
-    async fetchLatest(): Promise<RawDrawFetch | null> {
+    fetchLatest(): Promise<RawDrawFetch | null> {
       adapter.calls += 1;
       const item = payloads[Math.min(idx, payloads.length - 1)];
       idx += 1;
-      return item ?? null;
+      return Promise.resolve(item ?? null);
     },
   };
   return adapter;
@@ -76,7 +76,11 @@ describe('Collector', () => {
 
     const adapter1 = mockAdapter([fetch]);
     const sink1 = new SqliteDrawSink(dbPath);
-    const c1 = new Collector({ sink: sink1, adapter: adapter1, pollStrategy: new AdaptivePollStrategy() });
+    const c1 = new Collector({
+      sink: sink1,
+      adapter: adapter1,
+      pollStrategy: new AdaptivePollStrategy(),
+    });
     await c1.start();
     await vi.runOnlyPendingTimersAsync();
     await c1.stop();
@@ -104,6 +108,30 @@ describe('Collector', () => {
     expect(stateAfterFail.failureCount).toBeGreaterThan(0);
     expect(stateAfterFail.status).toBe('degraded');
     await collector.stop();
+  });
+
+  it('backfills all draws on empty store (bingo18 batch)', async () => {
+    const sink = new SqliteDrawSink(dbPath);
+    const batchPayload = {
+      kind: 'bingo18-list' as const,
+      draws: [
+        { drawAt: '2026-06-29T20:00:00+07:00', winningResult: '123' },
+        { drawAt: '2026-06-29T21:00:00+07:00', winningResult: '456' },
+        { drawAt: '2026-06-29T22:00:00+07:00', winningResult: '155' },
+      ],
+      fetchedAt: '2026-06-29T15:00:00.000Z',
+    };
+    const adapter = mockAdapter([
+      { rawPayload: batchPayload, rawResponse: { status: 200, headers: {}, body: '{}' } },
+    ]);
+    const collector = new Collector({ sink, adapter, pollStrategy: new AdaptivePollStrategy() });
+
+    await collector.start();
+    await vi.runOnlyPendingTimersAsync();
+    await collector.stop();
+
+    expect(await sink.count()).toBe(3);
+    expect(await sink.getLastDrawKey()).toBeTruthy();
   });
 
   it('continues after parse failure without crashing', async () => {

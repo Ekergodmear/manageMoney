@@ -9,10 +9,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { InfoTip } from '@/components/ui/tooltip';
 import { PresetPicker } from '@/features/game-designer/PresetPicker';
+import { MarketPicker } from '@/features/game-designer/MarketPicker';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
+import { applyMarketToForm, findPreset } from '@/features/game-designer/preset-utils';
 import type { PlannerFormValues } from '@/features/planner/plan-service';
 import { DEFAULT_PLANNER_FORM } from '@/features/planner/plan-service';
-import { formatMoneyFieldValue, plannerFormSchema, type PlannerFormSchema } from '@/features/planner/schema';
+import {
+  formatMoneyFieldValue,
+  plannerFormSchema,
+  type PlannerFormSchema,
+} from '@/features/planner/schema';
 
 interface GeneratePlanScreenProps {
   readonly defaultValues?: PlannerFormValues;
@@ -46,7 +52,9 @@ function Field({
         {hint != null && hint !== '' ? <InfoTip content={hint} /> : null}
       </div>
       {children}
-      {error != null && error !== '' ? <p className="text-[11px] text-destructive">{error}</p> : null}
+      {error != null && error !== '' ? (
+        <p className="text-[11px] text-destructive">{error}</p>
+      ) : null}
     </div>
   );
 }
@@ -73,6 +81,8 @@ export function GeneratePlanScreen({
   });
 
   const winTaxEnabled = watch('winTaxEnabled');
+  const marketId = watch('marketId');
+  const activePreset = findPreset(presets, activePresetId) ?? presets[0];
 
   useEffect(() => {
     if (onValuesChange === undefined) {
@@ -81,7 +91,9 @@ export function GeneratePlanScreen({
     const sub = watch((values) => {
       onValuesChange(values as PlannerFormValues);
     });
-    return () => sub.unsubscribe();
+    return () => {
+      sub.unsubscribe();
+    };
   }, [watch, onValuesChange]);
 
   function bindMoney(name: keyof PlannerFormSchema) {
@@ -104,29 +116,89 @@ export function GeneratePlanScreen({
         </p>
       </div>
 
-      <PresetPicker
-        presets={presets}
-        activePresetId={activePresetId}
-        onSelect={onPresetSelect}
-      />
+      <PresetPicker presets={presets} activePresetId={activePresetId} onSelect={onPresetSelect} />
 
-      <form onSubmit={handleSubmit((data) => onSubmit(data as PlannerFormValues))} className="space-y-4">
+      <form
+        onSubmit={(event) => {
+          void handleSubmit((data) => {
+            onSubmit(data as PlannerFormValues);
+          })(event);
+        }}
+        className="space-y-4"
+      >
         <Card className="shadow-sm">
           <CardHeader className="p-4 pb-2">
             <CardTitle className="text-sm font-semibold">Thông tin trò chơi</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 p-4 pt-0 sm:grid-cols-2">
-            <Field id="rewardMultiplier" label="Game (×)" hint="Hệ số thưởng" error={errors.rewardMultiplier?.message}>
-              <Input id="rewardMultiplier" className={inputClass} inputMode="decimal" {...register('rewardMultiplier')} />
+            {activePreset !== undefined ? (
+              <div className="sm:col-span-2">
+                <MarketPicker
+                  preset={activePreset}
+                  value={marketId}
+                  onChange={(id) => {
+                    const merged = applyMarketToForm(
+                      watch() as PlannerFormValues,
+                      activePreset,
+                      id,
+                    );
+                    for (const [key, val] of Object.entries(merged)) {
+                      setValue(key as keyof PlannerFormSchema, val as string | boolean, {
+                        shouldValidate: true,
+                      });
+                    }
+                  }}
+                />
+              </div>
+            ) : null}
+            <Field
+              id="rewardMultiplier"
+              label="Hệ số (×)"
+              hint="Từ market đã chọn"
+              error={errors.rewardMultiplier?.message}
+            >
+              <Input
+                id="rewardMultiplier"
+                className={inputClass}
+                inputMode="decimal"
+                readOnly
+                {...register('rewardMultiplier')}
+              />
             </Field>
-            <Field id="minimumBet" label="Minimum bet (đ)" hint="Cược tối thiểu" error={errors.minimumBet?.message}>
-              <Input id="minimumBet" className={inputClass} inputMode="numeric" {...bindMoney('minimumBet')} />
+            <Field
+              id="minimumBet"
+              label="Minimum bet (đ)"
+              hint="Cược tối thiểu"
+              error={errors.minimumBet?.message}
+            >
+              <Input
+                id="minimumBet"
+                className={inputClass}
+                inputMode="numeric"
+                {...bindMoney('minimumBet')}
+              />
             </Field>
             <Field id="betStep" label="Step (đ)" hint="Bước cược" error={errors.betStep?.message}>
-              <Input id="betStep" className={inputClass} inputMode="numeric" {...bindMoney('betStep')} />
+              <Input
+                id="betStep"
+                className={inputClass}
+                inputMode="numeric"
+                {...bindMoney('betStep')}
+              />
             </Field>
-            <Field id="maximumBet" label="Maximum (đ)" hint="Giới hạn cược — từ Game Designer" error={errors.maximumBet?.message}>
-              <Input id="maximumBet" className={inputClass} inputMode="numeric" {...bindMoney('maximumBet')} readOnly />
+            <Field
+              id="maximumBet"
+              label="Maximum (đ)"
+              hint="Giới hạn cược — từ Game Designer"
+              error={errors.maximumBet?.message}
+            >
+              <Input
+                id="maximumBet"
+                className={inputClass}
+                inputMode="numeric"
+                {...bindMoney('maximumBet')}
+                readOnly
+              />
             </Field>
           </CardContent>
         </Card>
@@ -136,14 +208,44 @@ export function GeneratePlanScreen({
             <CardTitle className="text-sm font-semibold">Mục tiêu</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 p-4 pt-0 sm:grid-cols-2">
-            <Field id="targetProfit" label="Lợi nhuận (đ)" hint="Số tiền lời khi thắng" error={errors.targetProfit?.message}>
-              <Input id="targetProfit" className={inputClass} inputMode="numeric" {...bindMoney('targetProfit')} />
+            <Field
+              id="targetProfit"
+              label="Lợi nhuận (đ)"
+              hint="Số tiền lời khi thắng"
+              error={errors.targetProfit?.message}
+            >
+              <Input
+                id="targetProfit"
+                className={inputClass}
+                inputMode="numeric"
+                {...bindMoney('targetProfit')}
+              />
             </Field>
-            <Field id="roundCount" label="Số vòng" hint="Tối đa trước khi thắng" error={errors.roundCount?.message}>
-              <Input id="roundCount" className={inputClass} inputMode="numeric" {...register('roundCount')} />
+            <Field
+              id="roundCount"
+              label="Số vòng"
+              hint="Tối đa trước khi thắng"
+              error={errors.roundCount?.message}
+            >
+              <Input
+                id="roundCount"
+                className={inputClass}
+                inputMode="numeric"
+                {...register('roundCount')}
+              />
             </Field>
-            <Field id="userBankroll" label="Vốn hiện có (đ)" hint="Tùy chọn — để so sánh" error={errors.userBankroll?.message}>
-              <Input id="userBankroll" className={inputClass} inputMode="numeric" {...bindMoney('userBankroll')} />
+            <Field
+              id="userBankroll"
+              label="Vốn hiện có (đ)"
+              hint="Tùy chọn — để so sánh"
+              error={errors.userBankroll?.message}
+            >
+              <Input
+                id="userBankroll"
+                className={inputClass}
+                inputMode="numeric"
+                {...bindMoney('userBankroll')}
+              />
             </Field>
           </CardContent>
         </Card>
@@ -157,9 +259,9 @@ export function GeneratePlanScreen({
               <Checkbox
                 id="winTaxEnabled"
                 checked={winTaxEnabled}
-                onCheckedChange={(checked) =>
-                  setValue('winTaxEnabled', checked === true, { shouldValidate: true })
-                }
+                onCheckedChange={(checked) => {
+                  setValue('winTaxEnabled', checked === true, { shouldValidate: true });
+                }}
               />
               <Label htmlFor="winTaxEnabled" className="cursor-pointer text-sm">
                 Thuế khi thắng lớn
@@ -168,11 +270,29 @@ export function GeneratePlanScreen({
             </div>
             {winTaxEnabled ? (
               <div className="grid gap-3 sm:grid-cols-2">
-                <Field id="winTaxThreshold" label="Ngưỡng (đ)" error={errors.winTaxThreshold?.message}>
-                  <Input id="winTaxThreshold" className={inputClass} inputMode="numeric" {...bindMoney('winTaxThreshold')} />
+                <Field
+                  id="winTaxThreshold"
+                  label="Ngưỡng (đ)"
+                  error={errors.winTaxThreshold?.message}
+                >
+                  <Input
+                    id="winTaxThreshold"
+                    className={inputClass}
+                    inputMode="numeric"
+                    {...bindMoney('winTaxThreshold')}
+                  />
                 </Field>
-                <Field id="winTaxRatePercent" label="Thuế (%)" error={errors.winTaxRatePercent?.message}>
-                  <Input id="winTaxRatePercent" className={inputClass} inputMode="numeric" {...register('winTaxRatePercent')} />
+                <Field
+                  id="winTaxRatePercent"
+                  label="Thuế (%)"
+                  error={errors.winTaxRatePercent?.message}
+                >
+                  <Input
+                    id="winTaxRatePercent"
+                    className={inputClass}
+                    inputMode="numeric"
+                    {...register('winTaxRatePercent')}
+                  />
                 </Field>
               </div>
             ) : null}

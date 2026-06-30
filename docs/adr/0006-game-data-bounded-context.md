@@ -37,13 +37,13 @@ Statistics và audit luôn **reproducible**.
 
 ### Ranh giới
 
-| Game Data | Session |
-| --------- | ------- |
-| `DrawSourceAdapter.fetchLatest()` | Không fetch |
-| `DrawStore` append-only | `PlayedRound[]` entity |
-| `RoundSettlementEngine` | `ApplySettlementUseCase` — persist only |
-| `StatisticsSnapshot` (đa cấp) | Play stats (stake, ROI) |
-| `AlertService` | Không `notify()` |
+| Game Data                         | Session                                 |
+| --------------------------------- | --------------------------------------- |
+| `DrawSourceAdapter.fetchLatest()` | Không fetch                             |
+| `DrawStore` append-only           | `PlayedRound[]` entity                  |
+| `RoundSettlementEngine`           | `ApplySettlementUseCase` — persist only |
+| `StatisticsSnapshot` (đa cấp)     | Play stats (stake, ROI)                 |
+| `AlertService`                    | Không `notify()`                        |
 
 Collector **không biết** website cụ thể — chỉ gọi adapter.
 
@@ -76,9 +76,9 @@ Settlement **chỉ `activeSessionId`**.
 
 ## Thay thế đã xem xét
 
-| Phương án | Lý do loại |
-| --------- | ---------- |
-| `MatchService` | Quá hẹp — không cover prize/tax/profit |
-| Sửa row Draw khi parser sai | Phá reproducibility statistics |
-| Một snapshot duy nhất | Không scale dashboard theo ngày/tháng/quý/năm |
-| Session tự settle | Trộn bounded context |
+| Phương án                   | Lý do loại                                    |
+| --------------------------- | --------------------------------------------- |
+| `MatchService`              | Quá hẹp — không cover prize/tax/profit        |
+| Sửa row Draw khi parser sai | Phá reproducibility statistics                |
+| Một snapshot duy nhất       | Không scale dashboard theo ngày/tháng/quý/năm |
+| Session tự settle           | Trộn bounded context                          |

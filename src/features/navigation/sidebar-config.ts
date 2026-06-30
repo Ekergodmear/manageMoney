@@ -51,10 +51,7 @@ export function buildSidebarSections(
   if (context === 'initial') {
     return [
       {
-        items: [
-          item('create', 'Tạo kế hoạch'),
-          item('history', 'Lịch sử', { badge: 'soon' }),
-        ],
+        items: [item('create', 'Tạo kế hoạch'), item('history', 'Lịch sử', { badge: 'soon' })],
       },
       {
         items: [

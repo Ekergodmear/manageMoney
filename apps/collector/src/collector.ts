@@ -10,10 +10,7 @@ import {
 import type { DrawSink } from './sink/draw-sink.js';
 import { AdaptivePollStrategy } from './strategy/adaptive-poll-strategy.js';
 import type { PollStrategy } from './strategy/poll-strategy.js';
-import {
-  initialCollectorState,
-  type CollectorState,
-} from './types/collector-state.js';
+import { initialCollectorState, type CollectorState } from './types/collector-state.js';
 import type { DrawResult, RawHttpResponse } from './types/draw-result.js';
 import { dedupeDrawsByKey, filterNewDraws } from './util/dedupe.js';
 
@@ -63,7 +60,7 @@ export class Collector {
     if (this.state.lastDrawKey !== null) {
       collectorLog(`Resumed after draw key ${this.state.lastDrawKey}`);
     }
-    void this.scheduleNext(0);
+    this.scheduleNext(0);
   }
 
   async stop(): Promise<void> {
@@ -104,10 +101,15 @@ export class Collector {
     if (isBingo18BatchPayload(rawPayload)) {
       const batch = parseBingo18DrawBatch(rawPayload, source, parseOptions);
       const unique = dedupeDrawsByKey(batch.draws);
+      const storedCount = await this.options.sink.count();
       const lastKey = await this.options.sink.getLastDrawKey();
-      if (lastKey === null) {
-        return { draws: unique.slice(-1), errors: batch.errors };
+
+      // DB trống → import toàn bộ lịch sử từ data.json (một lần).
+      if (storedCount === 0 || lastKey === null) {
+        collectorLog(`Initial backfill: ${String(unique.length)} draws from source`);
+        return { draws: unique, errors: batch.errors };
       }
+
       const lastAt = new Date(
         (await this.options.sink.findByDrawKey(lastKey))?.drawAt ??
           this.state.lastDraw?.drawAt ??
@@ -154,7 +156,7 @@ export class Collector {
         };
         await this.persistState();
         const delay = this.adapterFailureDelay();
-        collectorError(`Adapter returned null — backoff ${delay}ms`);
+        collectorError(`Adapter returned null — backoff ${String(delay)}ms`);
         this.scheduleNext(delay);
         return;
       }
@@ -177,12 +179,18 @@ export class Collector {
         return;
       }
 
-      const known = new Set<string>();
-      for (const draw of candidates) {
-        const existing = await this.options.sink.findByDrawKey(draw.drawKey);
-        if (existing !== null) known.add(draw.drawKey);
+      let newDraws: DrawResult[];
+      if (candidates.length > 200) {
+        // Backfill / catch-up lớn — UNIQUE constraint lo trùng, tránh N query findByDrawKey.
+        newDraws = candidates;
+      } else {
+        const known = new Set<string>();
+        for (const draw of candidates) {
+          const existing = await this.options.sink.findByDrawKey(draw.drawKey);
+          if (existing !== null) known.add(draw.drawKey);
+        }
+        newDraws = filterNewDraws(candidates, known);
       }
-      const newDraws = filterNewDraws(candidates, known);
 
       if (newDraws.length === 0) {
         const delay = this.pollStrategy.nextDelayMs(this.state);
@@ -206,9 +214,14 @@ export class Collector {
       };
       await this.persistState();
 
-      for (const draw of newDraws) {
+      if (newDraws.length > 1) {
         collectorLog(
-          `New draw ${draw.drawKey} — Saved — Latency ${Math.round(draw.latencyMs / 1000)}s`,
+          `Saved ${String(newDraws.length)} draws (${newDraws[0].drawKey} … ${latest.drawKey})`,
+        );
+      } else {
+        const draw = newDraws[0];
+        collectorLog(
+          `New draw ${draw.drawKey} — Saved — Latency ${String(Math.round(draw.latencyMs / 1000))}s`,
         );
       }
     } catch (err) {

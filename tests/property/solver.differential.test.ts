@@ -9,8 +9,11 @@ import { describe, expect, it } from 'vitest';
 import { solve } from '@/core/solver';
 import { validateCalculationRequest } from '@/core/validation';
 
-import { bruteForceSolve, totalBankroll } from '../../support/brute-force-solver';
-import { smallCalculationRequestArb } from '../../support/solver-arbitraries';
+import { bruteForceSolve, totalBankroll } from '../support/brute-force-solver';
+import { smallCalculationRequestArb } from '../support/solver-arbitraries';
+import { getDifferentialRuns } from '../support/property-runs';
+
+const DIFFERENTIAL_RUNS = getDifferentialRuns();
 
 describe('ConstraintSolver — differential (Level 3)', () => {
   it('greedy bankroll equals brute-force optimum for N <= 5', () => {
@@ -30,7 +33,7 @@ describe('ConstraintSolver — differential (Level 3)', () => {
 
         return totalBankroll(greedy.value) === totalBankroll(brute);
       }),
-      { numRuns: 150 },
+      { numRuns: DIFFERENTIAL_RUNS },
     );
   });
 
@@ -53,7 +56,7 @@ describe('ConstraintSolver — differential (Level 3)', () => {
         const bruteBets = brute.rounds.map((r) => r.betAmount);
         return JSON.stringify(greedyBets) === JSON.stringify(bruteBets);
       }),
-      { numRuns: 150 },
+      { numRuns: DIFFERENTIAL_RUNS },
     );
   });
 

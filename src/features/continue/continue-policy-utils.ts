@@ -25,7 +25,5 @@ export function continueTargetsForPlan(
   currentTotalRounds: number,
 ): number[] {
   const normalized = normalizeContinuePolicy(policy);
-  return normalized.presets.filter(
-    (n) => n > currentTotalRounds && n <= normalized.maximumRounds,
-  );
+  return normalized.presets.filter((n) => n > currentTotalRounds && n <= normalized.maximumRounds);
 }

@@ -37,14 +37,13 @@ export function generateTrends(metrics: readonly SessionInsightMetrics[]): Insig
     });
   }
 
+  const lastRecent = recent[recent.length - 1];
   trends.push({
     id: 'trend-continue',
     label: 'Continue',
     sparkline: toSparkline(continueSeries),
     latestLabel:
-      recent[recent.length - 1] !== undefined
-        ? `${String(recent[recent.length - 1]!.continueCount)} lần`
-        : '—',
+      lastRecent !== undefined ? `${String(lastRecent.continueCount)} lần` : '—',
     summary: summarizeCount(continueSeries, sessionCount, 'lần'),
     confidence,
   });
@@ -54,9 +53,7 @@ export function generateTrends(metrics: readonly SessionInsightMetrics[]): Insig
     label: 'Highest Bet',
     sparkline: toSparkline(betSeries),
     latestLabel:
-      recent[recent.length - 1] !== undefined
-        ? `${formatAmount(recent[recent.length - 1]!.highestBet)} đ`
-        : '—',
+      lastRecent !== undefined ? `${formatAmount(lastRecent.highestBet)} đ` : '—',
     summary: summarizePercentChange(betSeries, sessionCount),
     confidence,
   });

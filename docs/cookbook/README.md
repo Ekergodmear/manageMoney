@@ -13,7 +13,7 @@ pnpm add @stake/constraint-engine
 Import **only** from the package entry:
 
 ```typescript
-import { validateCalculationRequest, solve, /* … */ } from '@stake/constraint-engine';
+import { validateCalculationRequest, solve /* … */ } from '@stake/constraint-engine';
 ```
 
 ---
@@ -37,13 +37,13 @@ pnpm example:minimal-consumer
 
 ## Common Workflows
 
-| Recipe | When to use |
-| ------ | ----------- |
-| [Generate a plan](generate-plan.md) | User submits inputs — first screen |
-| [Optimize for bankroll](optimize-for-bankroll.md) | Required bankroll exceeds budget |
-| [Run simulation](run-simulation.md) | Show “what if I win at round _k_?” |
-| [Export JSON](export-json.md) | Persist or share a plan |
-| [Error codes](error-codes.md) | Map engine codes → UI copy |
+| Recipe                                            | When to use                        |
+| ------------------------------------------------- | ---------------------------------- |
+| [Generate a plan](generate-plan.md)               | User submits inputs — first screen |
+| [Optimize for bankroll](optimize-for-bankroll.md) | Required bankroll exceeds budget   |
+| [Run simulation](run-simulation.md)               | Show “what if I win at round _k_?” |
+| [Export JSON](export-json.md)                     | Persist or share a plan            |
+| [Error codes](error-codes.md)                     | Map engine codes → UI copy         |
 
 ---
 

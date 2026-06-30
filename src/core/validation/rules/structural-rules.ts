@@ -157,7 +157,6 @@ export const structuralRules: ValidationPhase = [
         }
         return (
           typeof r.winTax === 'object' &&
-          r.winTax !== null &&
           isFiniteNumber(r.winTax.threshold) &&
           Number.isInteger(r.winTax.threshold)
         );
@@ -175,7 +174,6 @@ export const structuralRules: ValidationPhase = [
         }
         return (
           typeof r.winTax === 'object' &&
-          r.winTax !== null &&
           isFiniteNumber(r.winTax.ratePercent) &&
           Number.isInteger(r.winTax.ratePercent)
         );

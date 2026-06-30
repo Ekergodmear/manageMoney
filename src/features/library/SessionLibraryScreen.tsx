@@ -139,7 +139,8 @@ export function SessionLibraryScreen({
         return prev.filter((x) => x !== id);
       }
       if (prev.length >= 2) {
-        return [prev[1]!, id];
+        const second = prev[1];
+        return second !== undefined ? [second, id] : [id];
       }
       return [...prev, id];
     });
@@ -209,18 +210,20 @@ export function SessionLibraryScreen({
             <SearchField
               value={filters.query}
               placeholder="Tìm session, tag, số vòng…"
-              onChange={(query) => setFilters((current) => ({ ...current, query }))}
+              onChange={(query) => {
+                setFilters((current) => ({ ...current, query }));
+              }}
             />
             <Grid columns={4} spacing={8}>
               <FilterField
                 label="Trạng thái"
                 value={filters.status}
-                onChange={(value) =>
+                onChange={(value) => {
                   setFilters((current) => ({
                     ...current,
                     status: value as LibraryFilters['status'],
-                  }))
-                }
+                  }));
+                }}
                 options={STATUS_OPTIONS.map((option) => ({
                   value: option.value,
                   label: option.label,
@@ -229,7 +232,9 @@ export function SessionLibraryScreen({
               <FilterField
                 label="Game"
                 value={filters.presetId}
-                onChange={(value) => setFilters((current) => ({ ...current, presetId: value }))}
+                onChange={(value) => {
+                  setFilters((current) => ({ ...current, presetId: value }));
+                }}
                 options={[
                   { value: 'all', label: 'Tất cả' },
                   ...presets.map((preset) => ({ value: preset.id, label: preset.name })),
@@ -238,12 +243,12 @@ export function SessionLibraryScreen({
               <FilterField
                 label="Tag"
                 value={filters.tag ?? 'all'}
-                onChange={(value) =>
+                onChange={(value) => {
                   setFilters((current) => ({
                     ...current,
                     tag: value === 'all' ? null : value,
-                  }))
-                }
+                  }));
+                }}
                 options={[
                   { value: 'all', label: 'Tất cả' },
                   ...allTags.map((tag) => ({ value: tag, label: tag })),
@@ -252,16 +257,18 @@ export function SessionLibraryScreen({
               <NumberFilterField
                 label="Continue ≥"
                 value={filters.minContinue}
-                onChange={(value) => setFilters((current) => ({ ...current, minContinue: value }))}
+                onChange={(value) => {
+                  setFilters((current) => ({ ...current, minContinue: value }));
+                }}
               />
             </Grid>
             <Grid columns={2} spacing={8}>
               <NumberFilterField
                 label="Max bet ≥"
                 value={filters.minHighestBet}
-                onChange={(value) =>
-                  setFilters((current) => ({ ...current, minHighestBet: value }))
-                }
+                onChange={(value) => {
+                  setFilters((current) => ({ ...current, minHighestBet: value }));
+                }}
               />
             </Grid>
           </Stack>
@@ -278,7 +285,9 @@ export function SessionLibraryScreen({
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => setShowCollectionForm((value) => !value)}
+              onClick={() => {
+                setShowCollectionForm((value) => !value);
+              }}
             >
               <FolderPlus className="h-4 w-4" />
             </Button>
@@ -289,13 +298,13 @@ export function SessionLibraryScreen({
               name="Tất cả"
               count={sessions.filter((session) => !session.archived).length}
               active={filters.collectionId === null}
-              onClick={() =>
+              onClick={() => {
                 setFilters((current) => ({
                   ...current,
                   collectionId: null,
                   includeArchived: false,
-                }))
-              }
+                }));
+              }}
             />
             {allCollections.map((collection) => (
               <FolderTile
@@ -312,13 +321,13 @@ export function SessionLibraryScreen({
                 name={collection.name.replace('⭐ ', '')}
                 count={countSessionsInCollection(sessions, collection.id, collections)}
                 active={filters.collectionId === collection.id}
-                onClick={() =>
+                onClick={() => {
                   setFilters((current) => ({
                     ...current,
                     collectionId: collection.id,
                     includeArchived: collection.id === 'archive',
-                  }))
-                }
+                  }));
+                }}
               />
             ))}
           </Grid>
@@ -327,7 +336,9 @@ export function SessionLibraryScreen({
               <Input
                 placeholder="Tên folder (tag)"
                 value={newCollectionName}
-                onChange={(event) => setNewCollectionName(event.target.value)}
+                onChange={(event) => {
+                  setNewCollectionName(event.target.value);
+                }}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
                     handleAddCollection();
@@ -388,9 +399,7 @@ export function SessionLibraryScreen({
         </PageSection>
       ) : null}
 
-      {filtered.length === 0 ? (
-        <EmptyState title="Không có session khớp bộ lọc." />
-      ) : null}
+      {filtered.length === 0 ? <EmptyState title="Không có session khớp bộ lọc." /> : null}
 
       {compareIds.length > 0 && compareIds.length < 2 ? (
         <Text variant="small" muted>
@@ -399,7 +408,12 @@ export function SessionLibraryScreen({
       ) : null}
 
       {compareResult !== null ? (
-        <SessionComparePanel result={compareResult} onClose={() => setCompareIds([])} />
+        <SessionComparePanel
+          result={compareResult}
+          onClose={() => {
+            setCompareIds([]);
+          }}
+        />
       ) : null}
     </Page>
   );
@@ -443,14 +457,30 @@ function SessionCardGrid({
           isActive={session.id === activeSessionId}
           isPinned={isPinned}
           compareSelected={compareIds.includes(session.id)}
-          onOpen={() => onOpenSession(session.id)}
-          onToggleFavorite={() => onToggleFavorite(session.id)}
-          onToggleArchive={() => onToggleArchive(session.id)}
-          onDuplicate={() => onDuplicate(session.id)}
-          onExportJson={() => onExportJson(session.id)}
-          onExportPrint={() => onExportPrint(session.id)}
-          onTagAdd={(tag) => onTagAdd(session.id, tag)}
-          onToggleCompare={() => onToggleCompare(session.id)}
+          onOpen={() => {
+            onOpenSession(session.id);
+          }}
+          onToggleFavorite={() => {
+            onToggleFavorite(session.id);
+          }}
+          onToggleArchive={() => {
+            onToggleArchive(session.id);
+          }}
+          onDuplicate={() => {
+            onDuplicate(session.id);
+          }}
+          onExportJson={() => {
+            onExportJson(session.id);
+          }}
+          onExportPrint={() => {
+            onExportPrint(session.id);
+          }}
+          onTagAdd={(tag) => {
+            onTagAdd(session.id, tag);
+          }}
+          onToggleCompare={() => {
+            onToggleCompare(session.id);
+          }}
         />
       ))}
     </Grid>

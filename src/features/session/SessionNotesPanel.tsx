@@ -60,14 +60,18 @@ export function SessionNotesPanel({
         <textarea
           className="min-h-[120px] w-full resize-y rounded-lg border border-border bg-background px-3 py-2 text-sm leading-relaxed"
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => {
+            setDraft(e.target.value);
+          }}
           placeholder="Casino đông. Đổi bàn. VIP..."
           rows={5}
           readOnly={readOnly}
           disabled={readOnly}
         />
         {!readOnly ? (
-          <p className="mt-1.5 text-[10px] text-muted-foreground">Tự lưu sau {String(DEBOUNCE_MS)}ms</p>
+          <p className="mt-1.5 text-[10px] text-muted-foreground">
+            Tự lưu sau {String(DEBOUNCE_MS)}ms
+          </p>
         ) : null}
       </CardContent>
     </Card>

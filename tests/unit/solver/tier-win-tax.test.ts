@@ -40,14 +40,7 @@ describe('Tier win tax', () => {
 
   it('solver raises bet when accumulated spend crosses taxed region — user scenario', () => {
     const encoded = encodeRewardMultiplier(120);
-    const bet = solveMinimalFeasibleBet(
-      11_760_000,
-      0,
-      encoded,
-      10_000,
-      10_000,
-      WIN_TAX,
-    );
+    const bet = solveMinimalFeasibleBet(11_760_000, 0, encoded, 10_000, 10_000, WIN_TAX);
 
     expect(bet).toBeGreaterThan(100_000);
     expect(bet).toBe(110_000);
@@ -94,6 +87,9 @@ describe('Tier win tax', () => {
     const lastWith = withTax.value.rounds.at(-1);
     expect(lastWithout).toBeDefined();
     expect(lastWith).toBeDefined();
-    expect(lastWith!.betAmount).toBeGreaterThanOrEqual(lastWithout!.betAmount);
+    if (lastWithout === undefined || lastWith === undefined) {
+      return;
+    }
+    expect(lastWith.betAmount).toBeGreaterThanOrEqual(lastWithout.betAmount);
   });
 });

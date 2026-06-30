@@ -18,14 +18,9 @@ export function SessionStatisticsPanel({
   stats,
   currentPlan = null,
 }: SessionStatisticsPanelProps): ReactNode {
-  const usage =
-    currentPlan !== null && currentPlan !== undefined
-      ? computeCapitalUsagePercent(currentPlan)
-      : null;
+  const usage = currentPlan !== null ? computeCapitalUsagePercent(currentPlan) : null;
   const efficiency =
-    currentPlan !== null && currentPlan !== undefined
-      ? computeCapitalEfficiencyPercent(currentPlan)
-      : null;
+    currentPlan !== null ? computeCapitalEfficiencyPercent(currentPlan) : null;
 
   return (
     <Card className="h-full">

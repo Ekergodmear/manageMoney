@@ -1,7 +1,7 @@
 import type { AppEvent, AppEventType } from '@/services/events/event-types';
 import { TELEMETRY_EVENT_TYPES } from '@/services/events/event-types';
 import type { EventBus } from '@/services/events/domain-events';
-import { EventStore } from '@/services/telemetry/event-store';
+import type { EventStore } from '@/services/telemetry/event-store';
 import type { StoredAppEvent } from '@/services/telemetry/event-store';
 
 export interface TelemetryStoreOptions {
@@ -18,14 +18,14 @@ export class TelemetryStore {
 
   constructor(
     private readonly eventStore: EventStore,
-    private readonly bus: EventBus,
+    _bus: EventBus,
     options: TelemetryStoreOptions = {},
     eventTypes: readonly AppEventType[] = TELEMETRY_EVENT_TYPES,
   ) {
     this.enabled = options.enabled ?? true;
     for (const type of eventTypes) {
       this.unsubscribes.push(
-        bus.subscribe(type, (event) => {
+        _bus.subscribe(type, (event) => {
           if (!this.enabled) {
             return;
           }

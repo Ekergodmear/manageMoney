@@ -4,13 +4,13 @@ Semantic colors — không dùng tên palette (`green500`).
 
 ## Tokens
 
-| Token | CSS var | Dùng cho |
-|-------|---------|----------|
-| `background` | `--background` | Nền app |
-| `surface` | `--card` | Card, panel |
-| `primary` | `--primary` | CTA, link, accent |
-| `muted` | `--muted` | Nền phụ, chip nhạt |
-| `success` | `--success` (nền) / `--success-foreground` (chữ) | Lời, thắng |
+| Token        | CSS var                                          | Dùng cho           |
+| ------------ | ------------------------------------------------ | ------------------ |
+| `background` | `--background`                                   | Nền app            |
+| `surface`    | `--card`                                         | Card, panel        |
+| `primary`    | `--primary`                                      | CTA, link, accent  |
+| `muted`      | `--muted`                                        | Nền phụ, chip nhạt |
+| `success`    | `--success` (nền) / `--success-foreground` (chữ) | Lời, thắng         |
 
 **Quan trọng:** `text-success` = màu nền nhạt, gần như không đọc được. Luôn dùng `text-success-foreground` hoặc `semanticText.success` cho chữ.
 | `warning` | `--warning` | Cảnh báo, outlier |
@@ -31,5 +31,5 @@ Semantic colors — không dùng tên palette (`green500`).
 ```tsx
 import { semanticText } from '@/design/tokens/colors';
 
-<Text className={semanticText.muted}>Phụ đề</Text>
+<Text className={semanticText.muted}>Phụ đề</Text>;
 ```

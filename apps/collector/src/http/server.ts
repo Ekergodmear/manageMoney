@@ -85,7 +85,8 @@ export async function buildDashboardPayload(
 
 export function createCollectorHttpServer(options: CollectorHttpOptions) {
   const port = options.port ?? Number(process.env['COLLECTOR_HTTP_PORT'] ?? 8788);
-  const corsOrigin = options.corsOrigin ?? process.env['COLLECTOR_HTTP_CORS'] ?? 'http://localhost:5173';
+  const corsOrigin =
+    options.corsOrigin ?? process.env['COLLECTOR_HTTP_CORS'] ?? 'http://localhost:5173';
 
   const server = createServer((req: IncomingMessage, res: ServerResponse) => {
     const url = req.url ?? '/';
@@ -106,7 +107,7 @@ export function createCollectorHttpServer(options: CollectorHttpOptions) {
       return;
     }
 
-    void routeGet(url, res, options, corsOrigin).catch((err) => {
+    void routeGet(url, res, options, corsOrigin).catch((err: unknown) => {
       collectorLog(`HTTP error ${url}: ${err instanceof Error ? err.message : String(err)}`);
       sendJson(res, 500, { error: 'Internal server error' }, corsOrigin);
     });
@@ -116,14 +117,20 @@ export function createCollectorHttpServer(options: CollectorHttpOptions) {
     listen(): Promise<void> {
       return new Promise((resolve) => {
         server.listen(port, () => {
-          collectorLog(`HTTP read API on http://localhost:${port}`);
+          collectorLog(`HTTP read API on http://localhost:${String(port)}`);
           resolve();
         });
       });
     },
     close(): Promise<void> {
       return new Promise((resolve, reject) => {
-        server.close((err) => (err !== undefined ? reject(err) : resolve()));
+        server.close((err) => {
+          if (err !== undefined) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
       });
     },
   };
@@ -150,6 +157,28 @@ async function routeGet(
   if (url === '/draws/latest' || url === '/draws/latest/') {
     const draw = await sink.findLatest();
     sendJson(res, 200, { draw }, corsOrigin);
+    return;
+  }
+
+  if (url.startsWith('/draws/recent')) {
+    const parsed = new URL(url, 'http://localhost');
+    const limitRaw = parsed.searchParams.get('limit') ?? '1000';
+    const limit = Math.max(1, Math.min(Number.parseInt(limitRaw, 10) || 1000, 50_000));
+    const draws = await sink.findRecent(limit);
+    sendJson(res, 200, { draws, limit, count: draws.length }, corsOrigin);
+    return;
+  }
+
+  if (url.startsWith('/draws/between')) {
+    const parsed = new URL(url, 'http://localhost');
+    const from = parsed.searchParams.get('from');
+    const to = parsed.searchParams.get('to');
+    if (from === null || to === null || from === '' || to === '') {
+      sendJson(res, 400, { error: 'from and to query params required (ISO datetime)' }, corsOrigin);
+      return;
+    }
+    const draws = await sink.findBetween(from, to);
+    sendJson(res, 200, { draws, from, to, count: draws.length }, corsOrigin);
     return;
   }
 

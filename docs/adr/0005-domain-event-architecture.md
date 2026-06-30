@@ -16,10 +16,10 @@ Stake Planner có nhiều cross-cutting concerns: persistence, telemetry, loggin
 
 ### 2. Event taxonomy — Domain vs System
 
-| Loại | Ví dụ | Telemetry | Logger | Health |
-|------|-------|-----------|--------|--------|
-| **Domain** | PlanGenerated, SessionWon | ✓ | ✓ | ✗ |
-| **System** | StorageOpened, SyncFailed | ✓ | ✓ | ✓ |
+| Loại       | Ví dụ                     | Telemetry | Logger | Health |
+| ---------- | ------------------------- | --------- | ------ | ------ |
+| **Domain** | PlanGenerated, SessionWon | ✓         | ✓      | ✗      |
+| **System** | StorageOpened, SyncFailed | ✓         | ✓      | ✓      |
 
 Health **không** nghe domain events (PlanningViewed, PlanGenerated).
 
@@ -27,11 +27,11 @@ Health **không** nghe domain events (PlanningViewed, PlanGenerated).
 
 Event mô tả **điều đã xảy ra**:
 
-| Không | Có |
-|-------|-----|
-| `GeneratePlan` | `PlanGenerated` |
-| `Continue` | `ContinuationCreated` |
-| `Opened Planning` | `PlanningViewed` |
+| Không             | Có                    |
+| ----------------- | --------------------- |
+| `GeneratePlan`    | `PlanGenerated`       |
+| `Continue`        | `ContinuationCreated` |
+| `Opened Planning` | `PlanningViewed`      |
 
 ### 4. schemaVersion (không `version`)
 
@@ -66,14 +66,14 @@ Workspace inject qua `useServices()` — không `getAppServices()` lung tung.
 
 ## Hệ quả
 
-| Tích cực | Tiêu cực |
-|----------|----------|
-| Cloud/Telemetry thêm subscriber | Catalog + taxonomy cần maintain |
-| M4 wire từng workflow | Chưa emit everywhere until M4 |
+| Tích cực                        | Tiêu cực                           |
+| ------------------------------- | ---------------------------------- |
+| Cloud/Telemetry thêm subscriber | Catalog + taxonomy cần maintain    |
+| M4 wire từng workflow           | Chưa emit everywhere until M4      |
 | Insights đọc EventStore sau này | schemaVersion bump khi payload đổi |
 
 **Triển khai:** `docs/product/core-services-milestones.md`
 
 ---
 
-*Liên quan: ADR 0001 · ADR 0003 · ADR 0004*
+_Liên quan: ADR 0001 · ADR 0003 · ADR 0004_

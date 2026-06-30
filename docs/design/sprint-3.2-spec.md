@@ -86,13 +86,13 @@ Search engine **consumes** `SearchPolicy`; it does not embed granularity rules.
 
 **Locked invariants (maintainer sign-off):**
 
-| Invariant | Rule |
-| --------- | ---- |
-| Candidate only | Policy returns next candidate; never evaluates |
-| Terminal `null` | `nextProfit(x) === null` → idempotent on repeat |
-| Mode guard | `fixedAmount` steps; `breakEven` / `percentage` → `null` |
-| Intent immutable | `nextProfit` / `nextRoundCount` do not mutate `intent` |
-| O(1) policy | No loops, no large allocations — see `PERFORMANCE-CONTRACT.md` |
+| Invariant        | Rule                                                           |
+| ---------------- | -------------------------------------------------------------- |
+| Candidate only   | Policy returns next candidate; never evaluates                 |
+| Terminal `null`  | `nextProfit(x) === null` → idempotent on repeat                |
+| Mode guard       | `fixedAmount` steps; `breakEven` / `percentage` → `null`       |
+| Intent immutable | `nextProfit` / `nextRoundCount` do not mutate `intent`         |
+| O(1) policy      | No loops, no large allocations — see `PERFORMANCE-CONTRACT.md` |
 
 **Gate (maintainer):** Pure · Deterministic · Minimal-step — enforced by tests
 
@@ -125,9 +125,9 @@ NO_FEASIBLE_SOLUTION
 
 Profit search is complete. Property tests (no new features):
 
-| Property | Test file |
-| -------- | --------- |
-| Monotonic Budget | `optimize-profit-properties.test.ts` |
+| Property                               | Test file                            |
+| -------------------------------------- | ------------------------------------ |
+| Monotonic Budget                       | `optimize-profit-properties.test.ts` |
 | Prefix Stability + First Feasible Wins | `optimize-profit-properties.test.ts` |
 
 **Frozen:** profit search semantics — no changes until 3.2C.2 ships.

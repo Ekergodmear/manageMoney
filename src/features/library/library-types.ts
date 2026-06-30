@@ -1,5 +1,5 @@
 import type { Session } from '@/features/session/session-domain';
-import { computeSessionStatistics, getCurrentPlan } from '@/features/session/session-domain';
+import type { computeSessionStatistics } from '@/features/session/session-domain';
 
 export interface LibraryCollection {
   readonly id: string;
@@ -46,10 +46,13 @@ export const BUILTIN_COLLECTIONS: readonly { readonly id: string; readonly name:
 export interface SessionCardSummary {
   readonly session: Session;
   readonly presetName: string;
+  readonly marketLabel: string;
+  readonly marketMultiplier: number | null;
+  readonly sessionHitExpected: number | null;
+  readonly sessionHitActual: number | null;
   readonly stats: ReturnType<typeof computeSessionStatistics>;
   readonly totalRounds: number;
   readonly completedRounds: number;
-  readonly rewardMultiplier: string;
 }
 
 export interface CompareMetricRow {

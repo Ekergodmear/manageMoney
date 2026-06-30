@@ -4,9 +4,7 @@ export class ConsoleSink implements LogSink {
   write(entry: LogEntry): void {
     if (entry.event.type === 'PlanGenerated') {
       const event = entry.event as { sessionId: string; planId: string };
-      console.info(
-        `[Planning] PlanGenerated session=${event.sessionId} plan=${event.planId}`,
-      );
+      console.info(`[Planning] PlanGenerated session=${event.sessionId} plan=${event.planId}`);
       return;
     }
     if (entry.event.type === 'SessionCreated') {

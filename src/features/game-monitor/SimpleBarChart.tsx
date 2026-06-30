@@ -25,8 +25,8 @@ export function SimpleBarChart({ items, className }: SimpleBarChartProps): React
             <div className="flex h-24 w-full items-end justify-center">
               <div
                 className="w-full max-w-6 rounded-t bg-primary/80 transition-all"
-                style={{ height: `${Math.max(heightPct, item.value > 0 ? 8 : 2)}%` }}
-                title={`${item.label}: ${item.value}`}
+                style={{ height: `${String(Math.max(heightPct, item.value > 0 ? 8 : 2))}%` }}
+                title={`${item.label}: ${String(item.value)}`}
               />
             </div>
             <span className="truncate text-[10px] font-medium">{item.label}</span>

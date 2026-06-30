@@ -9,12 +9,7 @@ export interface StackProps extends HTMLAttributes<HTMLDivElement> {
   readonly children: ReactNode;
 }
 
-export function Stack({
-  spacing = 16,
-  className,
-  children,
-  ...props
-}: StackProps): ReactNode {
+export function Stack({ spacing = 16, className, children, ...props }: StackProps): ReactNode {
   return (
     <div className={cn('flex flex-col', spacingGap[spacing], className)} {...props}>
       {children}

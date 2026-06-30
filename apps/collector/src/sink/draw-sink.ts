@@ -9,7 +9,13 @@ export interface DrawSink {
   findByDrawKey(drawKey: string): Promise<DrawResult | null>;
   count(): Promise<number>;
   getLastDrawKey(): Promise<string | null>;
-  getTodayDrawRows(datePrefix: string): Promise<readonly { total: number; flower: string | null }[]>;
+  getTodayDrawRows(
+    datePrefix: string,
+  ): Promise<readonly { total: number; flower: string | null }[]>;
+  /** Chronological order (oldest first). */
+  findRecent(limit: number): Promise<readonly DrawResult[]>;
+  /** Inclusive ISO range on draw_at, chronological order. */
+  findBetween(fromIso: string, toIso: string): Promise<readonly DrawResult[]>;
   loadCollectorState(): Promise<CollectorState>;
   saveCollectorState(state: CollectorState): Promise<void>;
   close(): Promise<void>;

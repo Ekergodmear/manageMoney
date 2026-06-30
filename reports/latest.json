@@ -1,16 +1,26 @@
 {
-  "date": "2026-06-30T04:48:27.463Z",
-  "commit": "07c6f80dd80ebe0e1389722062c27f73b16bfca9",
+  "date": "2026-06-30T11:55:36.459Z",
+  "commit": "6f9ddcc1dadcf6b56920bf2f1ea2c05a6966a315",
   "branch": "release/internal-rc",
-  "status": "FAIL",
+  "status": "PASS",
+  "verdict": "READY FOR RC",
+  "reasons": [],
   "tests": {
-    "typecheck": "FAIL",
-    "lint": "SKIP",
-    "unit": "SKIP",
-    "architecture": "SKIP",
-    "gameData": "SKIP",
-    "notifications": "SKIP",
-    "build": "SKIP"
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "unit": "PASS",
+    "architecture": "PASS",
+    "gameData": "PASS",
+    "notifications": "PASS",
+    "build": "PASS",
+    "smoke": "PASS",
+    "property": "SKIP",
+    "soak": "SKIP",
+    "performance": "SKIP"
   },
-  "durationMs": 8293
+  "durationMs": 130919,
+  "buildTimeMs": 14181,
+  "bundleBytes": 997106,
+  "qualityScore": 100,
+  "totalWarnings": 0
 }

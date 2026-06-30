@@ -8,10 +8,10 @@
 
 ## Phân tách với RFC kỹ thuật
 
-| Loại | Thư mục | Đối tượng | Ngôn ngữ vấn đề |
-| ---- | ------- | --------- | ---------------- |
+| Loại         | Thư mục                  | Đối tượng               | Ngôn ngữ vấn đề                 |
+| ------------ | ------------------------ | ----------------------- | ------------------------------- |
 | Engine / SDK | `docs/rfc/optimization/` | Maintainer, implementer | Thuật toán, contract, invariant |
-| **Product** | `docs/rfc/product/` | User, Product Lead, UI | Vấn đề, hành trình, giá trị |
+| **Product**  | `docs/rfc/product/`      | User, Product Lead, UI  | Vấn đề, hành trình, giá trị     |
 
 Product RFC **không** mô tả kiến trúc nội bộ engine. Chỉ mô tả **ai cần gì** và **thành công trông như thế nào**.
 
@@ -19,9 +19,9 @@ Product RFC **không** mô tả kiến trúc nội bộ engine. Chỉ mô tả *
 
 ## RFC index
 
-| RFC | Tiêu đề | Status | Gate |
-| --- | ------- | ------ | ---- |
-| [RFC-101](RFC-101-user-problem.md) | User Problem | ✅ Accepted | Sprint 3.5 |
+| RFC                                | Tiêu đề      | Status      | Gate          |
+| ---------------------------------- | ------------ | ----------- | ------------- |
+| [RFC-101](RFC-101-user-problem.md) | User Problem | ✅ Accepted | Sprint 3.5    |
 | [RFC-102](RFC-102-user-journey.md) | User Journey | ✅ Accepted | Demo CLI gate |
 
 ---

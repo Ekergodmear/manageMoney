@@ -260,9 +260,7 @@ export const HEALTH_EVENT_TYPES: readonly SystemEventType[] = [
   'SyncFailed',
 ] as const;
 
-export const ALL_APP_EVENT_TYPES: readonly AppEventType[] = [
-  ...TELEMETRY_EVENT_TYPES,
-] as const;
+export const ALL_APP_EVENT_TYPES: readonly AppEventType[] = [...TELEMETRY_EVENT_TYPES] as const;
 
 /** @deprecated Use EVENT_SCHEMA_VERSION */
 export const DOMAIN_EVENT_VERSION = EVENT_SCHEMA_VERSION;

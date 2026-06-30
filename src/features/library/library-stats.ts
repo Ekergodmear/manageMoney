@@ -1,6 +1,16 @@
 import type { StatusTone } from '@/components/product/StatusChip';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
-import type { LibraryStats, RecencyGroup, SessionCardSummary } from '@/features/library/library-types';
+import {
+  marketLabelFromPreset,
+  resolvePresetMarkets,
+} from '@/features/game-data/markets/market-catalog';
+import { findMarketById } from '@/features/game-data/markets/market-resolver';
+import { computeSessionMarketPerformance } from '@/features/game-data/statistics/player-statistics-engine';
+import type {
+  LibraryStats,
+  RecencyGroup,
+  SessionCardSummary,
+} from '@/features/library/library-types';
 import { RECENCY_GROUP_LABELS } from '@/features/library/library-types';
 import type { Session, SessionStatus } from '@/features/session/session-domain';
 import { computeSessionStatistics, getCurrentPlan } from '@/features/session/session-domain';
@@ -64,15 +74,30 @@ export function buildSessionCardSummary(
   const preset = presets.find((p) => p.id === session.presetId);
   const totalRounds = plan?.generated.strategy.rounds.length ?? 0;
   const completedRounds = plan?.completedThroughRound ?? 0;
-  const rewardMultiplier = plan?.formValues.rewardMultiplier ?? '—';
+  const marketId = plan?.marketId;
+  const market =
+    preset !== undefined && marketId !== undefined
+      ? findMarketById(resolvePresetMarkets(preset), marketId)
+      : undefined;
+  const marketLabel =
+    market?.label ??
+    (preset !== undefined && marketId !== undefined
+      ? marketLabelFromPreset(preset, marketId)
+      : (preset?.name ?? session.presetId));
+
+  const performance =
+    market !== undefined ? computeSessionMarketPerformance(session, market) : null;
 
   return {
     session,
     presetName: preset?.name ?? session.presetId,
+    marketLabel,
+    marketMultiplier: market?.multiplier ?? null,
+    sessionHitExpected: performance?.expectedHitRate ?? null,
+    sessionHitActual: performance?.actualHitRate ?? null,
     stats,
     totalRounds,
     completedRounds,
-    rewardMultiplier,
   };
 }
 

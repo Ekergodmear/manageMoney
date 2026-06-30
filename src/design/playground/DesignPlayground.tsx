@@ -28,7 +28,7 @@ import { TooltipProvider, InfoTip } from '@/components/ui/tooltip';
 import { semanticBg, semanticText } from '@/design/tokens/colors';
 import { elevationShadow } from '@/design/tokens/shadows';
 import { radius } from '@/design/tokens/radius';
-import { spacing } from '@/design/tokens/spacing';
+import { spacing, type SpacingKey } from '@/design/tokens/spacing';
 import { cn } from '@/lib/utils';
 
 /**
@@ -123,7 +123,7 @@ export function DesignPlayground(): ReactNode {
 
         <PageSection title="Spacing">
           <Stack spacing={8}>
-            {(Object.keys(spacing) as Array<keyof typeof spacing>).map((key) => (
+            {(Object.keys(spacing) as unknown as SpacingKey[]).map((key) => (
               <Row key={key} spacing={16} align="center">
                 <Text variant="small" className="w-8 tabular-nums">
                   {key}
@@ -152,7 +152,7 @@ export function DesignPlayground(): ReactNode {
               <Button size="icon" variant="outline" aria-label="Icon button">
                 ★
               </Button>
-              <InfoTip label="Tooltip on icon button — dùng Button size=icon + Tooltip" />
+              <InfoTip content="Tooltip on icon button — dùng Button size=icon + Tooltip" />
             </Row>
           </Stack>
         </PageSection>
@@ -207,14 +207,21 @@ export function DesignPlayground(): ReactNode {
 
         <PageSection title="Drawer">
           <Stack spacing={12}>
-            <Button type="button" onClick={() => setDrawerOpen(true)}>
+            <Button
+              type="button"
+              onClick={() => {
+                setDrawerOpen(true);
+              }}
+            >
               Mở Compare Drawer
             </Button>
             <Drawer
               open={drawerOpen}
               title="So sánh session"
               subtitle="Session A vs Session B"
-              onClose={() => setDrawerOpen(false)}
+              onClose={() => {
+                setDrawerOpen(false);
+              }}
             >
               <Stack spacing={8}>
                 <Text variant="body" muted>
@@ -272,7 +279,11 @@ export function DesignPlayground(): ReactNode {
               <MetricCard label="Win rate" value="62%" detail="12 phiên gần nhất" />
               <MetricCard
                 label="Sparkline"
-                value={<Text variant="mono" accent>▁▂▄▆█</Text>}
+                value={
+                  <Text variant="mono" accent>
+                    ▁▂▄▆█
+                  </Text>
+                }
                 footer="Gần nhất: +12%"
                 statusLabel="Medium"
                 statusTone="warning"

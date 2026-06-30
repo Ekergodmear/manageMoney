@@ -18,11 +18,11 @@ v1.0 Cloud
   Share · Realtime · Conflict
 ```
 
-| Doc | Nội dung |
-|-----|----------|
-| `release-engineering.md` | Checklist · gate · Playwright · PWA |
-| `core-services.md` | Event bus · storage · clock · telemetry · health |
-| `backend-architecture.md` | Cloud Layer (v0.9) |
+| Doc                       | Nội dung                                         |
+| ------------------------- | ------------------------------------------------ |
+| `release-engineering.md`  | Checklist · gate · Playwright · PWA              |
+| `core-services.md`        | Event bus · storage · clock · telemetry · health |
+| `backend-architecture.md` | Cloud Layer (v0.9)                               |
 
 ---
 
@@ -66,4 +66,4 @@ Constraint Engine · Planning · Session · Continue · Improve · Capital · Sc
 
 ---
 
-*Client = compute + events. Cloud = mirror (v0.9).*
+_Client = compute + events. Cloud = mirror (v0.9)._

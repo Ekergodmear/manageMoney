@@ -1,10 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { FakeClock } from '@/services/clock/fake-clock';
-import {
-  DEFAULT_PLANNER_FORM,
-  generatePlan,
-} from '@/features/planner/plan-service';
+import { DEFAULT_PLANNER_FORM, generatePlan } from '@/features/planner/plan-service';
 import { GeneratePlanUseCase } from '@/features/planning/generate-plan-use-case';
 import { PromotePlanningDraftUseCase } from '@/features/planning/promote-planning-draft-use-case';
 import { MemoryStorageDriver } from '@/services/storage/MemoryStorageDriver';

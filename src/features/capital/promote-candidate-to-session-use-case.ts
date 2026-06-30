@@ -67,7 +67,9 @@ export class PromoteCandidateToSessionUseCase {
       this.deps.events.createEvent('SessionCreated', {
         sessionId: session.id,
         planId: plan.id,
-        originRecommendationId: candidate.recommendationId,
+        ...(candidate.recommendationId !== undefined
+          ? { originRecommendationId: candidate.recommendationId }
+          : {}),
       }),
     );
 

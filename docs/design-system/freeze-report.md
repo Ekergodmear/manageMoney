@@ -12,15 +12,15 @@ Playground: Settings → Design System · `src/design/playground/DesignPlaygroun
 
 ## Tóm tắt
 
-| Hạng mục | Kết quả |
-|----------|---------|
-| Token Freeze | ✅ PASS |
-| Primitive Freeze | ✅ PASS (có ghi chú) |
-| Product Component Freeze | ✅ PASS |
-| API Freeze | ✅ PASS |
-| Naming Freeze | ✅ PASS |
-| Insights pilot | ✅ PASS |
-| Library pilot | ✅ PASS |
+| Hạng mục                  | Kết quả                        |
+| ------------------------- | ------------------------------ |
+| Token Freeze              | ✅ PASS                        |
+| Primitive Freeze          | ✅ PASS (có ghi chú)           |
+| Product Component Freeze  | ✅ PASS                        |
+| API Freeze                | ✅ PASS                        |
+| Naming Freeze             | ✅ PASS                        |
+| Insights pilot            | ✅ PASS                        |
+| Library pilot             | ✅ PASS                        |
 | Workspace grep (toàn app) | ⏳ PENDING — rollout chưa xong |
 
 **Foundation Freeze:** 🔒 **LOCKED** — không thêm token/primitive/product mới nếu chưa có evidence.
@@ -31,15 +31,15 @@ Playground: Settings → Design System · `src/design/playground/DesignPlaygroun
 
 ## 1. Token Freeze ✅ PASS
 
-| Token | File | Trạng thái |
-|-------|------|------------|
-| colors | `src/design/tokens/colors.ts` | ✅ |
-| spacing | `src/design/tokens/spacing.ts` | ✅ |
-| radius | `src/design/tokens/radius.ts` | ✅ |
-| typography | `src/design/tokens/typography.ts` | ✅ |
-| shadows | `src/design/tokens/shadows.ts` | ✅ |
-| motion | `src/design/tokens/motion.ts` | ✅ |
-| z-index | `src/design/tokens/z-index.ts` | ✅ |
+| Token      | File                              | Trạng thái |
+| ---------- | --------------------------------- | ---------- |
+| colors     | `src/design/tokens/colors.ts`     | ✅         |
+| spacing    | `src/design/tokens/spacing.ts`    | ✅         |
+| radius     | `src/design/tokens/radius.ts`     | ✅         |
+| typography | `src/design/tokens/typography.ts` | ✅         |
+| shadows    | `src/design/tokens/shadows.ts`    | ✅         |
+| motion     | `src/design/tokens/motion.ts`     | ✅         |
+| z-index    | `src/design/tokens/z-index.ts`    | ✅         |
 
 **Scale spacing hiện tại:** `2 · 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48 · 64` (px)
 
@@ -59,36 +59,36 @@ Ví dụ: Session migrate cần `spacing=18` → **không thêm** → sửa layo
 
 ### Primitives chính thức (frozen)
 
-| Component | File | API |
-|-----------|------|-----|
-| Box | `ui/Box.tsx` | layout box |
-| Stack | `ui/Stack.tsx` | `spacing={SpacingKey}` |
-| Grid | `ui/Grid.tsx` | `spacing`, `columns` |
-| Row | `ui/Row.tsx` | `spacing`, `align` — layout ngang |
-| Card | `ui/card.tsx` | `tone`, `elevation` |
-| Text | `ui/Text.tsx` | `variant`, `muted`, `emphasis`, `accent` |
-| Button | `ui/button.tsx` | `variant`, `size` — `size="icon"` = IconButton |
-| Badge | `ui/badge.tsx` | `variant`, `size` |
-| Divider | `ui/Divider.tsx` | alias Separator |
-| Input | `ui/input.tsx` | form text |
-| Tooltip | `ui/tooltip.tsx` | TooltipProvider, InfoTip |
+| Component | File             | API                                            |
+| --------- | ---------------- | ---------------------------------------------- |
+| Box       | `ui/Box.tsx`     | layout box                                     |
+| Stack     | `ui/Stack.tsx`   | `spacing={SpacingKey}`                         |
+| Grid      | `ui/Grid.tsx`    | `spacing`, `columns`                           |
+| Row       | `ui/Row.tsx`     | `spacing`, `align` — layout ngang              |
+| Card      | `ui/card.tsx`    | `tone`, `elevation`                            |
+| Text      | `ui/Text.tsx`    | `variant`, `muted`, `emphasis`, `accent`       |
+| Button    | `ui/button.tsx`  | `variant`, `size` — `size="icon"` = IconButton |
+| Badge     | `ui/badge.tsx`   | `variant`, `size`                              |
+| Divider   | `ui/Divider.tsx` | alias Separator                                |
+| Input     | `ui/input.tsx`   | form text                                      |
+| Tooltip   | `ui/tooltip.tsx` | TooltipProvider, InfoTip                       |
 
 ### Chưa có primitive riêng — deferred until evidence
 
-| Primitive | Hiện trạng | Quyết định |
-|-----------|------------|------------|
-| Select | `FilterField` dùng `<select>` styled bằng token | Thêm `Select` primitive khi ≥2 màn cần dropdown ngoài FilterField |
-| Textarea | Chưa có | Thêm khi Improve/Notes cần multi-line form chuẩn |
-| IconButton | `Button size="icon"` | Không tách component — một API Button |
+| Primitive  | Hiện trạng                                      | Quyết định                                                        |
+| ---------- | ----------------------------------------------- | ----------------------------------------------------------------- |
+| Select     | `FilterField` dùng `<select>` styled bằng token | Thêm `Select` primitive khi ≥2 màn cần dropdown ngoài FilterField |
+| Textarea   | Chưa có                                         | Thêm khi Improve/Notes cần multi-line form chuẩn                  |
+| IconButton | `Button size="icon"`                            | Không tách component — một API Button                             |
 
 ### App-level (không thuộc DS primitive)
 
-| File | Lý do |
-|------|-------|
-| `ui/checkbox.tsx` | Form control — giữ, không mở rộng thêm variant |
-| `ui/label.tsx` | Form label |
-| `ui/action-toast.tsx` | App feedback |
-| `ui/coming-soon-toast.tsx` | App feedback |
+| File                       | Lý do                                          |
+| -------------------------- | ---------------------------------------------- |
+| `ui/checkbox.tsx`          | Form control — giữ, không mở rộng thêm variant |
+| `ui/label.tsx`             | Form label                                     |
+| `ui/action-toast.tsx`      | App feedback                                   |
+| `ui/coming-soon-toast.tsx` | App feedback                                   |
 
 ### Cấm sau freeze
 
@@ -104,22 +104,22 @@ GlassButton · OutlineCard · ModernCard · FancyCard · …
 
 Catalog frozen (`src/components/product/`):
 
-| Component | Mục đích |
-|-----------|----------|
-| Page | Root layout màn hình |
-| PageSection | Section có tiêu đề |
-| SectionHeader | Tiêu đề + mô tả trang |
-| HeroCard | Reflection / hero insight |
-| MetricCard | Số liệu, KPI, stat box |
-| InfoPanel | Insight card có action |
-| EmptyState | Không có dữ liệu — **reuse, không *Empty riêng** |
-| StatusChip | Trạng thái / confidence |
-| Drawer | Panel trượt (Compare, …) |
-| FolderTile | Collection folder |
-| ActionMenu | Menu hành động (Export, …) |
-| SearchField | Search với icon |
-| FilterField | Label + select |
-| NumberFilterField | Label + number input |
+| Component         | Mục đích                                          |
+| ----------------- | ------------------------------------------------- |
+| Page              | Root layout màn hình                              |
+| PageSection       | Section có tiêu đề                                |
+| SectionHeader     | Tiêu đề + mô tả trang                             |
+| HeroCard          | Reflection / hero insight                         |
+| MetricCard        | Số liệu, KPI, stat box                            |
+| InfoPanel         | Insight card có action                            |
+| EmptyState        | Không có dữ liệu — **reuse, không \*Empty riêng** |
+| StatusChip        | Trạng thái / confidence                           |
+| Drawer            | Panel trượt (Compare, …)                          |
+| FolderTile        | Collection folder                                 |
+| ActionMenu        | Menu hành động (Export, …)                        |
+| SearchField       | Search với icon                                   |
+| FilterField       | Label + select                                    |
+| NumberFilterField | Label + number input                              |
 
 Sau freeze: **workspace chỉ compose** product components (+ Button khi cần hành động trực tiếp).
 
@@ -141,14 +141,14 @@ Một API rõ ràng — không boolean rải rác:
 <Card warning yellow outlined />
 ```
 
-| Primitive | Props frozen |
-|-----------|--------------|
-| Card | `tone`: default · highlight · accent · warning · danger · dashed |
-| Card | `elevation`: 0 · 1 · 2 · popup · overlay |
-| Button | `variant`: default · secondary · outline · ghost · destructive · link |
-| Button | `size`: default · sm · lg · icon |
-| Text | `variant`: display · h1 · h2 · h3 · body · small · caption · mono · metric |
-| StatusChip | `tone`: muted · warning · success · success-strong · danger |
+| Primitive  | Props frozen                                                               |
+| ---------- | -------------------------------------------------------------------------- |
+| Card       | `tone`: default · highlight · accent · warning · danger · dashed           |
+| Card       | `elevation`: 0 · 1 · 2 · popup · overlay                                   |
+| Button     | `variant`: default · secondary · outline · ghost · destructive · link      |
+| Button     | `size`: default · sm · lg · icon                                           |
+| Text       | `variant`: display · h1 · h2 · h3 · body · small · caption · mono · metric |
+| StatusChip | `tone`: muted · warning · success · success-strong · danger                |
 
 ---
 
@@ -156,12 +156,12 @@ Một API rõ ràng — không boolean rải rác:
 
 Quy ước: **{Purpose}{Kind}** — Kind ∈ {Card, Panel, Chip, Field, Tile, Menu, State}
 
-| ✅ Đúng | ❌ Không dùng |
-|---------|---------------|
-| MetricCard | StatisticsCard, DataCard |
-| HeroCard | HeroMetric |
-| InfoPanel | InsightPanel |
-| EmptyState | LibraryEmpty, SessionEmpty |
+| ✅ Đúng     | ❌ Không dùng                |
+| ----------- | ---------------------------- |
+| MetricCard  | StatisticsCard, DataCard     |
+| HeroCard    | HeroMetric                   |
+| InfoPanel   | InsightPanel                 |
+| EmptyState  | LibraryEmpty, SessionEmpty   |
 | FilterField | FilterSelect, StatusDropdown |
 
 **Grep repo:** không phát hiện tên vi phạm.
@@ -172,10 +172,10 @@ Quy ước: **{Purpose}{Kind}** — Kind ∈ {Card, Panel, Chip, Field, Tile, Me
 
 ### Pilot PASS
 
-| Màn | `className=` trong Screen | Hardcode `text-2xl` / `rounded-xl` / `shadow-md` |
-|-----|---------------------------|-----------------------------------------------------|
-| Insights | 0 | 0 |
-| Library (Screen) | 5 (semantic token + icon size only) | 0 |
+| Màn              | `className=` trong Screen           | Hardcode `text-2xl` / `rounded-xl` / `shadow-md` |
+| ---------------- | ----------------------------------- | ------------------------------------------------ |
+| Insights         | 0                                   | 0                                                |
+| Library (Screen) | 5 (semantic token + icon size only) | 0                                                |
 
 Library sub-components (`SessionLibraryCard`, `SessionComparePanel`) vẫn có layout `className` — chấp nhận ở tầng feature card cho đến khi extract product `SessionCard` (deferred).
 
@@ -226,4 +226,4 @@ Thêm component product mới → **bắt buộc** thêm section vào Playground
 
 ---
 
-*Review tiếp theo: sau Session rollout hoặc khi có yêu cầu mở token mới.*
+_Review tiếp theo: sau Session rollout hoặc khi có yêu cầu mở token mới._

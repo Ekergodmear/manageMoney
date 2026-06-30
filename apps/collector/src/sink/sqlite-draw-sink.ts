@@ -40,7 +40,7 @@ function drawToParams(draw: DrawResult): Record<string, unknown> {
 function rowToDraw(row: Record<string, unknown>): DrawResult {
   let rawResponse: RawHttpResponse | null = null;
   const rawResponseJson = row['rawResponse'] as string | null;
-  if (rawResponseJson !== null && rawResponseJson !== undefined) {
+  if (rawResponseJson !== null) {
     try {
       rawResponse = JSON.parse(rawResponseJson) as RawHttpResponse;
     } catch {
@@ -134,25 +134,25 @@ export class SqliteDrawSink implements DrawSink {
     });
   }
 
-  async findLatest(): Promise<DrawResult | null> {
+  findLatest(): Promise<DrawResult | null> {
     const row = this.db
       .prepare(`SELECT ${SELECT_DRAW_COLUMNS} FROM draw_results ORDER BY draw_at DESC LIMIT 1`)
       .get() as Record<string, unknown> | undefined;
-    return row !== undefined ? rowToDraw(row) : null;
+    return Promise.resolve(row !== undefined ? rowToDraw(row) : null);
   }
 
-  async findByDrawKey(drawKey: string): Promise<DrawResult | null> {
+  findByDrawKey(drawKey: string): Promise<DrawResult | null> {
     const row = this.db
       .prepare(`SELECT ${SELECT_DRAW_COLUMNS} FROM draw_results WHERE draw_key = ?`)
       .get(drawKey) as Record<string, unknown> | undefined;
-    return row !== undefined ? rowToDraw(row) : null;
+    return Promise.resolve(row !== undefined ? rowToDraw(row) : null);
   }
 
-  async count(): Promise<number> {
+  count(): Promise<number> {
     const row = this.db.prepare(`SELECT COUNT(*) AS c FROM draw_results`).get() as {
       c: number;
     };
-    return row.c;
+    return Promise.resolve(row.c);
   }
 
   async getLastDrawKey(): Promise<string | null> {
@@ -160,17 +160,36 @@ export class SqliteDrawSink implements DrawSink {
     return latest?.drawKey ?? null;
   }
 
-  async getTodayDrawRows(
+  getTodayDrawRows(
     datePrefix: string,
   ): Promise<readonly { total: number; flower: string | null }[]> {
     const like = `${datePrefix}%`;
     const rows = this.db
       .prepare(`SELECT total, flower FROM draw_results WHERE draw_at LIKE ? ORDER BY draw_at ASC`)
       .all(like) as Array<{ total: number; flower: string | null }>;
-    return rows;
+    return Promise.resolve(rows);
   }
 
-  async loadCollectorState(): Promise<CollectorState> {
+  findRecent(limit: number): Promise<readonly DrawResult[]> {
+    const capped = Math.max(1, Math.min(limit, 50_000));
+    const rows = this.db
+      .prepare(`SELECT ${SELECT_DRAW_COLUMNS} FROM draw_results ORDER BY draw_at DESC LIMIT ?`)
+      .all(capped) as Array<Record<string, unknown>>;
+    return Promise.resolve(rows.map(rowToDraw).reverse());
+  }
+
+  findBetween(fromIso: string, toIso: string): Promise<readonly DrawResult[]> {
+    const rows = this.db
+      .prepare(
+        `SELECT ${SELECT_DRAW_COLUMNS} FROM draw_results
+         WHERE draw_at >= ? AND draw_at <= ?
+         ORDER BY draw_at ASC`,
+      )
+      .all(fromIso, toIso) as Array<Record<string, unknown>>;
+    return Promise.resolve(rows.map(rowToDraw));
+  }
+
+  loadCollectorState(): Promise<CollectorState> {
     const row = this.db
       .prepare(
         `SELECT last_draw_key AS lastDrawKey, last_draw_json AS lastDrawJson,
@@ -192,7 +211,7 @@ export class SqliteDrawSink implements DrawSink {
       | undefined;
 
     if (row === undefined) {
-      return initialCollectorState();
+      return Promise.resolve(initialCollectorState());
     }
 
     let lastDraw: DrawResult | null = null;
@@ -209,7 +228,7 @@ export class SqliteDrawSink implements DrawSink {
         ? row.status
         : 'stopped';
 
-    return {
+    return Promise.resolve({
       lastDrawKey: row.lastDrawKey ?? lastDraw?.drawKey ?? null,
       lastDraw,
       lastSuccessAt: row.lastSuccessAt,
@@ -217,7 +236,7 @@ export class SqliteDrawSink implements DrawSink {
       failureCount: row.failureCount,
       averageLatencyMs: row.averageLatencyMs,
       status,
-    };
+    });
   }
 
   async saveCollectorState(state: CollectorState): Promise<void> {
@@ -246,8 +265,9 @@ export class SqliteDrawSink implements DrawSink {
     });
   }
 
-  async close(): Promise<void> {
+  close(): Promise<void> {
     this.db.close();
+    return Promise.resolve();
   }
 }
 

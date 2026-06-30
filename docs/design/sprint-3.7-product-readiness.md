@@ -15,11 +15,11 @@
 
 ## Scores
 
-| Area | Score | Notes |
-| ---- | ----- | ----- |
-| Core SDK | 10/10 | Production-ready |
-| Optimization | 9.5/10 | RFC + property + differential verification |
-| Public API | 9/10 | Consumer-validated; capability-oriented |
+| Area              | Score  | Notes                                       |
+| ----------------- | ------ | ------------------------------------------- |
+| Core SDK          | 10/10  | Production-ready                            |
+| Optimization      | 9.5/10 | RFC + property + differential verification  |
+| Public API        | 9/10   | Consumer-validated; capability-oriented     |
 | Product Readiness | 8.5/10 | Gap is developer experience, not algorithms |
 
 ---

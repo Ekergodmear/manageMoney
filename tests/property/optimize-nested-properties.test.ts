@@ -10,16 +10,17 @@ import * as candidateBuilders from '@/core/optimization/candidates';
 import { optimize } from '@/core/optimization';
 import { OptimizationReasons } from '@/core/optimization/models/optimization-explanation';
 import * as publicApi from '@/public/capabilities';
-import { validCalculationRequest } from '../validation/fixtures';
+import { validCalculationRequest } from '../unit/validation/fixtures';
 import {
   canonicalNestedEvaluationOrder,
   makeOptimizationRequest,
   profitFromRequest,
   profitSearchGranularity,
   profitSearchIntent,
-} from '../../support/optimization-test-helpers';
+} from '../support/optimization-test-helpers';
+import { getPropertyRuns } from '../support/property-runs';
 
-const PROPERTY_RUNS = 100;
+const PROPERTY_RUNS = getPropertyRuns();
 
 const bankrollMin = 300_000;
 const bankrollMax = 1_600_000;

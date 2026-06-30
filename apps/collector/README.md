@@ -27,12 +27,12 @@ COLLECTOR_ADAPTER=bingo18 pnpm collector:start
 
 HTTP read API (Dashboard Lite):
 
-| Endpoint | Mô tả |
-|----------|--------|
-| `GET /dashboard` | **Game Monitor** — health + latest + today (1 request) |
-| `GET /health` | Collector health (debug) |
-| `GET /draws/latest` | Kỳ quay mới nhất (debug) |
-| `GET /stats/today` | Phân bố tổng + hoa hôm nay (debug) |
+| Endpoint            | Mô tả                                                  |
+| ------------------- | ------------------------------------------------------ |
+| `GET /dashboard`    | **Game Monitor** — health + latest + today (1 request) |
+| `GET /health`       | Collector health (debug)                               |
+| `GET /draws/latest` | Kỳ quay mới nhất (debug)                               |
+| `GET /stats/today`  | Phân bố tổng + hoa hôm nay (debug)                     |
 
 Mặc định: `http://localhost:8788`
 
@@ -48,7 +48,10 @@ Reverse-engineered từ `bingo18.top/script.js` → `GET /data/data.json`:
 
 `COLLECTOR_BINGO18_API_URL` override URL nếu cần.
 
-Lần chạy đầu: chỉ lưu kỳ mới nhất. Sau restart: catch-up các kỳ mới hơn `lastDraw`.
+**Lần đầu (DB trống):** import **toàn bộ** `gbingoDraws` từ `data.json` (~vài chục nghìn kỳ).  
+**Sau đó / deploy Vercel:** chỉ append kỳ mới hơn `lastDrawKey` (realtime).
+
+Muốn import lại từ đầu: xóa `data/draws.db` rồi restart collector.
 
 ## Cấu trúc
 

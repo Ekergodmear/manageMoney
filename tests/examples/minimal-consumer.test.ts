@@ -12,21 +12,17 @@ const EXAMPLE = join(ROOT, 'examples', 'minimal-consumer', 'index.ts');
 const TSCONFIG = join(ROOT, 'examples', 'minimal-consumer', 'tsconfig.json');
 
 function runExample(): { status: number | null; stdout: string; stderr: string } {
-  const result = spawnSync(
-    'pnpm',
-    ['exec', 'tsx', '--tsconfig', TSCONFIG, EXAMPLE],
-    {
-      cwd: ROOT,
-      shell: process.platform === 'win32',
-      encoding: 'utf-8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    },
-  );
+  const result = spawnSync('pnpm', ['exec', 'tsx', '--tsconfig', TSCONFIG, EXAMPLE], {
+    cwd: ROOT,
+    shell: process.platform === 'win32',
+    encoding: 'utf-8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
 
   return {
     status: result.status,
-    stdout: result.stdout ?? '',
-    stderr: result.stderr ?? '',
+    stdout: result.stdout,
+    stderr: result.stderr,
   };
 }
 

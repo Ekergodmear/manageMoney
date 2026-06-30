@@ -1,4 +1,8 @@
-import { generatePlan, type GenerateResult, type PlannerFormValues } from '@/features/planner/plan-service';
+import {
+  generatePlan,
+  type GenerateResult,
+  type PlannerFormValues,
+} from '@/features/planner/plan-service';
 
 import type { Experiment, ExperimentLabSnapshot } from '@/features/experiment/experiment-types';
 
@@ -14,8 +18,8 @@ export function runScenarioForm(form: PlannerFormValues): {
   readonly error: string | null;
 } {
   const outcome = generatePlan(form);
-  if (outcome.fieldErrors !== undefined) {
-    const first = Object.values(outcome.fieldErrors).find((m) => m !== undefined && m !== '');
+  if ('fieldErrors' in outcome) {
+    const first = Object.values(outcome.fieldErrors).find((m) => m !== '');
     return { result: null, error: first ?? 'Giá trị không hợp lệ.' };
   }
   if (outcome.result === undefined) {
@@ -61,10 +65,7 @@ function nextExperimentName(nonBaselineCount: number): string {
   return `Experiment ${letter}`;
 }
 
-export function createBaselineExperiment(
-  form: PlannerFormValues,
-  presetId: string,
-): Experiment {
+export function createBaselineExperiment(form: PlannerFormValues, presetId: string): Experiment {
   const { result, error } = runScenarioForm(form);
   return {
     id: crypto.randomUUID(),
@@ -145,14 +146,16 @@ export function updateExperimentForm(
   };
 }
 
-export function updateExperimentNotes(
-  experiment: Experiment,
-  notes: string,
-): Experiment {
+export function updateExperimentNotes(experiment: Experiment, notes: string): Experiment {
   return { ...experiment, notes };
 }
 
-export function restoreLabFromSnapshot(snapshot: ExperimentLabSnapshot & { branches?: ExperimentLabSnapshot['experiments'] }): {
+export function restoreLabFromSnapshot(
+  snapshot: Omit<ExperimentLabSnapshot, 'experiments'> & {
+    readonly experiments?: ExperimentLabSnapshot['experiments'];
+    readonly branches?: ExperimentLabSnapshot['experiments'];
+  },
+): {
   baseline: Experiment;
   experiments: Experiment[];
 } {

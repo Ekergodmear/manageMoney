@@ -8,6 +8,11 @@ import type { Experiment, ExperimentLabSnapshot } from '@/features/experiment/ex
 const RECENT_KEY = 'stake-planner-recent-scenarios';
 const MAX_RECENT = 5;
 
+interface StoredRecentScenario extends Omit<ExperimentLabSnapshot, 'experiments'> {
+  readonly experiments?: ExperimentLabSnapshot['experiments'];
+  readonly branches?: ExperimentLabSnapshot['experiments'];
+}
+
 export function formToGamePolicyDraft(form: PlannerFormValues, name: string): GamePolicyDraft {
   const tax = form.winTaxEnabled;
   return {
@@ -39,16 +44,14 @@ export function promoteExperimentToPreset(
 /** @deprecated Use promoteExperimentToPreset */
 export const promoteBranchToPreset = promoteExperimentToPreset;
 
-export function labToSnapshot(
-  lab: {
-    id: string;
-    name: string;
-    presetId: string;
-    baseline: Experiment | null;
-    experiments: readonly Experiment[];
-    createdAt: string;
-  },
-): ExperimentLabSnapshot | null {
+export function labToSnapshot(lab: {
+  id: string;
+  name: string;
+  presetId: string;
+  baseline: Experiment | null;
+  experiments: readonly Experiment[];
+  createdAt: string;
+}): ExperimentLabSnapshot | null {
   if (lab.baseline === null) {
     return null;
   }
@@ -74,7 +77,7 @@ export function loadRecentScenarios(): ExperimentLabSnapshot[] {
     if (raw === null) {
       return [];
     }
-    const parsed = JSON.parse(raw) as (ExperimentLabSnapshot & { branches?: ExperimentLabSnapshot['experiments'] })[];
+    const parsed = JSON.parse(raw) as StoredRecentScenario[];
     if (!Array.isArray(parsed)) {
       return [];
     }

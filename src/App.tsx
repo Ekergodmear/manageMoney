@@ -1,4 +1,3 @@
-import { simulateWinAtRound } from '@stake/constraint-engine';
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 
 import { ActionToast } from '@/components/ui/action-toast';
@@ -15,15 +14,14 @@ import { createPromoteCandidateToSessionUseCase } from '@/features/capital/promo
 import { createContinuePlanUseCase } from '@/features/continue/continue-plan-use-case';
 import type { CapitalPlannerInput } from '@/features/capital/capital-planner-types';
 import { DashboardScreen } from '@/features/dashboard/DashboardScreen';
+import { useAutoSettlement } from '@/features/game-data/hooks/use-auto-settlement';
+import { useGameStatistics } from '@/features/game-data/hooks/use-game-statistics';
+import type { SettlementAlert } from '@/features/game-data/alerts/settlement-alerts';
 import { GameMonitorScreen } from '@/features/game-monitor/GameMonitorScreen';
 import { DEFAULT_PRESET_ID } from '@/features/game-designer/builtin-presets';
 import { GameDesignerScreen } from '@/features/game-designer/GameDesignerScreen';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
-import {
-  applyPresetToForm,
-  findPreset,
-  mergePresets,
-} from '@/features/game-designer/preset-utils';
+import { applyPresetToForm, findPreset, mergePresets } from '@/features/game-designer/preset-utils';
 import {
   duplicateSession,
   toggleSessionArchived,
@@ -54,26 +52,31 @@ import { PlanningDraftRepository } from '@/services/storage/repositories/plannin
 import { PlanCandidateRepository } from '@/services/storage/repositories/plan-candidate-repository';
 import { SessionRepository } from '@/services/storage/repositories/session-repository';
 import { RecommendationSetRepository } from '@/services/storage/repositories/recommendation-set-repository';
-import { FormRightPanel, PlanRightPanel, PlayingProgressPanel } from '@/features/planner/RightPanel';
+import {
+  FormRightPanel,
+  PlanRightPanel,
+  PlayingProgressPanel,
+} from '@/features/planner/RightPanel';
 import type { WorkspaceId } from '@/features/navigation/workspace-nav';
 import {
   getCurrentPlan,
-  placeBetOnPlan,
-  setBetProgressOnPlan,
   startCurrentPlan,
   stopSession,
-  undoBetOnPlan,
   updateSessionNotes,
   updateSessionTitle,
-  winCurrentPlan,
   type Session,
   type SessionView,
 } from '@/features/session/session-domain';
-import { exportFullSessionJson, exportLibraryJson, exportSessionPrint } from '@/features/session/session-export';
-import { loadPersistedState, savePersistedState } from '@/features/session/session-persistence';
+import {
+  exportFullSessionJson,
+  exportLibraryJson,
+  exportSessionPrint,
+} from '@/features/session/session-export';
 import { SessionPlannerScreen } from '@/features/session/SessionPlannerScreen';
 import type { PersistedAppState } from '@/features/session/session-types';
 import { EMPTY_PERSISTED_STATE } from '@/features/session/session-types';
+import { useNotificationCenter } from '@/features/notifications/hooks/use-notification-center';
+import type { NotificationState } from '@/features/notifications/notification-types';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
 import { createGenerateExperimentRecommendationsUseCase } from '@/features/experiment/generate-experiment-recommendations-use-case';
 import type { Experiment } from '@/features/experiment/experiment-types';
@@ -174,12 +177,7 @@ function AppRoot(): JSX.Element {
         events: services.events,
         clock: services.clock,
       }),
-    [
-      recommendationSetRepository,
-      planCandidateRepository,
-      services.events,
-      services.clock,
-    ],
+    [recommendationSetRepository, planCandidateRepository, services.events, services.clock],
   );
   const createCandidateFromRecommendation = useMemo(
     () =>
@@ -189,12 +187,7 @@ function AppRoot(): JSX.Element {
         events: services.events,
         clock: services.clock,
       }),
-    [
-      recommendationSetRepository,
-      planCandidateRepository,
-      services.events,
-      services.clock,
-    ],
+    [recommendationSetRepository, planCandidateRepository, services.events, services.clock],
   );
   const promoteCandidateToSession = useMemo(
     () =>
@@ -223,12 +216,7 @@ function AppRoot(): JSX.Element {
         events: services.events,
         clock: services.clock,
       }),
-    [
-      recommendationSetRepository,
-      planCandidateRepository,
-      services.events,
-      services.clock,
-    ],
+    [recommendationSetRepository, planCandidateRepository, services.events, services.clock],
   );
 
   const [hydrated, setHydrated] = useState(false);
@@ -245,23 +233,30 @@ function AppRoot(): JSX.Element {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const activeSession = findSession(persisted.sessions, persisted.activeSessionId);
-  const displayedSession =
-    findSession(persisted.sessions, viewingSessionId) ?? activeSession;
+  const displayedSession = findSession(persisted.sessions, viewingSessionId) ?? activeSession;
   const allPresets = useMemo(
     () => mergePresets(persisted.customGamePresets),
     [persisted.customGamePresets],
   );
   const activePreset = findPreset(allPresets, persisted.activePresetId);
+  const statisticsPreset =
+    activeSession !== null ? findPreset(allPresets, activeSession.presetId) : activePreset;
+  const {
+    snapshot: gameStatistics,
+    loading: gameStatisticsLoading,
+    error: gameStatisticsError,
+  } = useGameStatistics(statisticsPreset);
   const continuePolicy =
     activePreset !== undefined
       ? activePreset.continuePolicy
       : { maximumRounds: 5000, presets: [1000, 1500, 2000, 5000] };
   const currentPlan = activeSession !== null ? getCurrentPlan(activeSession) : null;
   const capitalOverview = useMemo(() => computeCapitalOverview(persisted), [persisted]);
-  const readOnlySession = viewingSessionId !== null && viewingSessionId !== persisted.activeSessionId;
+  const readOnlySession =
+    viewingSessionId !== null && viewingSessionId !== persisted.activeSessionId;
 
   useEffect(() => {
-    void loadPersistedState().then((state) => {
+    void services.storage.load().then((state) => {
       setPersisted(state);
       const presets = mergePresets(state.customGamePresets);
       const preset = findPreset(presets, state.activePresetId);
@@ -269,10 +264,7 @@ function AppRoot(): JSX.Element {
       setLiveForm(preset !== undefined ? applyPresetToForm(base, preset) : base);
       const hasActive = state.activeSessionId !== null;
       const restoredSession = findSession(state.sessions, state.activeSessionId);
-      if (
-        state.planCandidate !== null &&
-        isNewSessionCandidate(state.planCandidate)
-      ) {
+      if (state.planCandidate !== null && isNewSessionCandidate(state.planCandidate)) {
         setActiveWorkspace('capital');
         setCapitalReviewOpen(true);
       } else {
@@ -291,7 +283,7 @@ function AppRoot(): JSX.Element {
       setPlanningView(state.planningDraft !== null ? 'decision' : 'form');
       setHydrated(true);
     });
-  }, []);
+  }, [services.storage]);
 
   const persist = useCallback((next: PersistedAppState) => {
     setPersisted(next);
@@ -299,9 +291,9 @@ function AppRoot(): JSX.Element {
       clearTimeout(saveTimer.current);
     }
     saveTimer.current = setTimeout(() => {
-      void savePersistedState(next);
+      void services.storage.save(next);
     }, 250);
-  }, []);
+  }, [services.storage]);
 
   const updateSession = useCallback((sessionId: string, updater: (s: Session) => Session) => {
     setPersisted((prev) => {
@@ -318,15 +310,17 @@ function AppRoot(): JSX.Element {
         clearTimeout(saveTimer.current);
       }
       saveTimer.current = setTimeout(() => {
-        void savePersistedState(next);
+        void services.storage.save(next);
       }, 250);
       return next;
     });
-  }, []);
+  }, [services.storage]);
 
   useEffect(() => {
     document.querySelector('main')?.scrollTo({ top: 0, behavior: 'instant' });
   }, [activeWorkspace, sessionView]);
+
+  const showToastRef = useRef<(message: string) => void>(() => {});
 
   function showToast(message: string, actionLabel?: string, onAction?: () => void): void {
     setToast({
@@ -334,8 +328,101 @@ function AppRoot(): JSX.Element {
       ...(actionLabel !== undefined ? { actionLabel } : {}),
       ...(onAction !== undefined ? { onAction } : {}),
     });
-    setTimeout(() => setToast(null), 4000);
+    setTimeout(() => {
+      setToast(null);
+    }, 4000);
   }
+  showToastRef.current = (message: string) => {
+    showToast(message);
+  };
+
+  const notificationState: NotificationState = useMemo(
+    () => ({
+      notifications: persisted.notifications,
+      preferences: persisted.notificationPreferences,
+    }),
+    [persisted.notifications, persisted.notificationPreferences],
+  );
+
+  const handleNotificationStateChange = useCallback((next: NotificationState) => {
+    setPersisted((prev) => {
+      const updated: PersistedAppState = {
+        ...prev,
+        notifications: next.notifications,
+        notificationPreferences: next.preferences,
+      };
+      void services.storage.save(updated);
+      return updated;
+    });
+  }, [services.storage]);
+
+  const {
+    unreadCount: notificationUnreadCount,
+    ingestSettlementAlerts,
+    markRead: markNotificationRead,
+    markAllRead: markAllNotificationsRead,
+    clearAll: clearAllNotifications,
+    updatePreferences: updateNotificationPreferences,
+  } = useNotificationCenter({
+    state: notificationState,
+    onStateChange: handleNotificationStateChange,
+    onToast: (message) => {
+      showToastRef.current(message);
+    },
+  });
+
+  const activeSessionRef = useRef(activeSession);
+  activeSessionRef.current = activeSession;
+
+  const ingestSettlementAlertsRef = useRef(ingestSettlementAlerts);
+  ingestSettlementAlertsRef.current = ingestSettlementAlerts;
+
+  const settlementCallbacks = useMemo(
+    () => ({
+      onSessionUpdate: (session: Session) => {
+        setPersisted((prev) => {
+          const next = {
+            ...prev,
+            sessions: upsertSession(prev.sessions, session),
+          };
+          void services.storage.save(next);
+          return next;
+        });
+      },
+      onAlerts: (alerts: readonly SettlementAlert[]) => {
+        const session = activeSessionRef.current;
+        const plan = session !== null ? getCurrentPlan(session) : null;
+        if (session !== null && plan !== null) {
+          ingestSettlementAlertsRef.current(alerts, {
+            sessionId: session.id,
+            planLabel: plan.label,
+          });
+        }
+      },
+      onWin: (session: Session) => {
+        setPersisted((prev) => {
+          const next = {
+            ...prev,
+            activeSessionId: null,
+            sessions: upsertSession(prev.sessions, session),
+          };
+          void services.storage.save(next);
+          return next;
+        });
+        setSessionView('overview');
+        setActiveWorkspace('session');
+      },
+    }),
+    [],
+  );
+
+  const latestDraw = useAutoSettlement(
+    persisted.activeSessionId !== null && activeSession?.status === 'playing'
+      ? activeSession
+      : null,
+    activeSession !== null ? findPreset(allPresets, activeSession.presetId) : undefined,
+    settlementCallbacks,
+  );
 
   async function handlePromoteDraft(startPlaying: boolean): Promise<void> {
     const result = await promotePlanningDraftUseCase.execute();
@@ -382,8 +469,12 @@ function AppRoot(): JSX.Element {
       return (
         <DecisionScreen
           generated={draft.generated}
-          onEdit={() => setPlanningView('form')}
-          onViewPlan={() => setPlanningView('plan')}
+          onEdit={() => {
+            setPlanningView('form');
+          }}
+          onViewPlan={() => {
+            setPlanningView('plan');
+          }}
           onStartPlaying={() => {
             void handlePromoteDraft(true);
           }}
@@ -393,7 +484,13 @@ function AppRoot(): JSX.Element {
     if (planningView === 'plan' && draft !== null) {
       return (
         <div className="space-y-4">
-          <Button variant="ghost" size="sm" onClick={() => setPlanningView('decision')}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setPlanningView('decision');
+            }}
+          >
             ← Kết quả
           </Button>
           <PlanTableScreen
@@ -401,7 +498,9 @@ function AppRoot(): JSX.Element {
             completedThroughRound={0}
             onToggleRound={() => undefined}
             onResetProgress={() => undefined}
-            onEdit={() => setPlanningView('form')}
+            onEdit={() => {
+              setPlanningView('form');
+            }}
             hideContinue
           />
           <Button size="lg" onClick={() => void handlePromoteDraft(true)}>
@@ -463,93 +562,6 @@ function AppRoot(): JSX.Element {
 
   function startPlan(): void {
     mutateActive((s) => startCurrentPlan(s));
-  }
-
-  function setBetProgress(targetRound: number): void {
-    if (persisted.activeSessionId === null) {
-      return;
-    }
-    const session = findSession(persisted.sessions, persisted.activeSessionId);
-    if (session === null) {
-      return;
-    }
-    const plan = getCurrentPlan(session);
-    const readySession =
-      plan !== null && plan.status === 'ready' ? startCurrentPlan(session) : session;
-    const updated = setBetProgressOnPlan(readySession, targetRound);
-    if (updated === null) {
-      return;
-    }
-    updateSession(persisted.activeSessionId, () => updated);
-    const planAfter = getCurrentPlan(updated);
-    const at = planAfter?.completedThroughRound ?? targetRound;
-    if (at > 0) {
-      showToast(`Đã ghi đến vòng ${String(at)}`, 'Hoàn tác', () => undoBet());
-    } else {
-      showToast('Đã đặt lại tiến độ cược');
-    }
-  }
-
-  function placeBet(roundIndex: number): void {
-    if (persisted.activeSessionId === null) {
-      return;
-    }
-    const session = findSession(persisted.sessions, persisted.activeSessionId);
-    if (session === null) {
-      return;
-    }
-    const plan = getCurrentPlan(session);
-    const readySession =
-      plan !== null && plan.status === 'ready' ? startCurrentPlan(session) : session;
-    const updated = placeBetOnPlan(readySession, roundIndex);
-    if (updated === null) {
-      return;
-    }
-    updateSession(persisted.activeSessionId, () => updated);
-    showToast('Đã lưu cược', 'Hoàn tác', () => undoBet());
-  }
-
-  function undoBet(): void {
-    if (persisted.activeSessionId === null) {
-      return;
-    }
-    const session = findSession(persisted.sessions, persisted.activeSessionId);
-    if (session === null) {
-      return;
-    }
-    const updated = undoBetOnPlan(session);
-    if (updated === null) {
-      return;
-    }
-    updateSession(persisted.activeSessionId, () => updated);
-    showToast('Đã hoàn tác cược');
-  }
-
-  function winAtRound(roundIndex: number): void {
-    if (persisted.activeSessionId === null) {
-      return;
-    }
-    setPersisted((prev) => {
-      const session = findSession(prev.sessions, prev.activeSessionId);
-      if (session === null) {
-        return prev;
-      }
-      const plan = getCurrentPlan(session);
-      const sim =
-        plan !== null ? simulateWinAtRound(plan.generated.strategy, roundIndex) : null;
-      const profit = sim?.kind === 'success' ? sim.value.profitAmount : null;
-      const updated = winCurrentPlan(session, roundIndex, profit);
-      const next = {
-        ...prev,
-        activeSessionId: null,
-        sessions: upsertSession(prev.sessions, updated),
-      };
-      void savePersistedState(next);
-      return next;
-    });
-    showToast('Session kết thúc — thắng!');
-    setSessionView('overview');
-    setActiveWorkspace('session');
   }
 
   async function handleContinue(targetRoundCount: number): Promise<void> {
@@ -614,13 +626,9 @@ function AppRoot(): JSX.Element {
   async function handleDiscardCandidate(): Promise<void> {
     const candidate = persisted.planCandidate;
     const isCapital =
-      candidate !== null &&
-      isNewSessionCandidate(candidate) &&
-      candidate.source === 'capital';
+      candidate !== null && isNewSessionCandidate(candidate) && candidate.source === 'capital';
     const isScenario =
-      candidate !== null &&
-      isNewSessionCandidate(candidate) &&
-      candidate.source === 'scenario';
+      candidate !== null && isNewSessionCandidate(candidate) && candidate.source === 'scenario';
     await planCandidateRepository.clear();
     persist({ ...persisted, planCandidate: null });
     if (isCapital) {
@@ -667,13 +675,14 @@ function AppRoot(): JSX.Element {
           strategy: input.strategy,
           risk: input.risk,
           presetId: input.presetId,
+          marketId: input.baseForm.marketId,
         },
       };
       if (saveTimer.current !== null) {
         clearTimeout(saveTimer.current);
       }
       saveTimer.current = setTimeout(() => {
-        void savePersistedState(next);
+        void services.storage.save(next);
       }, 250);
       return next;
     });
@@ -766,10 +775,14 @@ function AppRoot(): JSX.Element {
         : null;
 
     if (capitalCandidate !== null && capitalReviewOpen) {
+      const capitalPreset = findPreset(allPresets, capitalCandidate.presetId);
       return (
         <ImproveCandidateReviewScreen
           candidate={capitalCandidate}
-          onBack={() => setCapitalReviewOpen(false)}
+          {...(capitalPreset !== undefined ? { preset: capitalPreset } : {})}
+          onBack={() => {
+            setCapitalReviewOpen(false);
+          }}
           onPromote={() => void handlePromoteNewSessionCandidate()}
           onDiscard={() => void handleDiscardCandidate()}
           promoteLabel="Bắt đầu session"
@@ -779,12 +792,21 @@ function AppRoot(): JSX.Element {
       );
     }
 
+    const savedMarketId =
+      persisted.recommendationSet?.marketId ?? persisted.capitalPlanner?.marketId;
+
     return (
       <div className="space-y-4">
         {capitalCandidate !== null ? (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
             <span>Phương án Capital đang chờ xác nhận</span>
-            <Button size="sm" variant="outline" onClick={() => setCapitalReviewOpen(true)}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setCapitalReviewOpen(true);
+              }}
+            >
               Xem lại phương án
             </Button>
           </div>
@@ -792,10 +814,11 @@ function AppRoot(): JSX.Element {
         <CapitalPlannerScreen
           presets={allPresets}
           activePresetId={persisted.activePresetId}
-          initialBankroll={(
-            persisted.recommendationSet?.totalBankroll ??
-            persisted.capitalPlanner?.totalBankroll
-          )?.toLocaleString('vi-VN') ?? liveForm.userBankroll}
+          initialBankroll={
+            (
+              persisted.recommendationSet?.totalBankroll ?? persisted.capitalPlanner?.totalBankroll
+            )?.toLocaleString('vi-VN') ?? liveForm.userBankroll
+          }
           initialStrategy={
             persisted.recommendationSet?.strategy ??
             persisted.capitalPlanner?.strategy ??
@@ -804,6 +827,7 @@ function AppRoot(): JSX.Element {
           initialRisk={
             persisted.recommendationSet?.risk ?? persisted.capitalPlanner?.risk ?? 'normal'
           }
+          {...(savedMarketId !== undefined ? { initialMarketId: savedMarketId } : {})}
           recommendationSet={persisted.recommendationSet}
           onPresetSelect={handlePresetSelect}
           onGenerate={handleGenerateCapital}
@@ -822,10 +846,14 @@ function AppRoot(): JSX.Element {
         : null;
 
     if (scenarioCandidate !== null && scenarioReviewOpen) {
+      const scenarioPreset = findPreset(allPresets, scenarioCandidate.presetId);
       return (
         <ImproveCandidateReviewScreen
           candidate={scenarioCandidate}
-          onBack={() => setScenarioReviewOpen(false)}
+          {...(scenarioPreset !== undefined ? { preset: scenarioPreset } : {})}
+          onBack={() => {
+            setScenarioReviewOpen(false);
+          }}
           onPromote={() => void handlePromoteNewSessionCandidate()}
           onDiscard={() => void handleDiscardCandidate()}
           promoteLabel="Bắt đầu session"
@@ -840,7 +868,13 @@ function AppRoot(): JSX.Element {
         {scenarioCandidate !== null ? (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
             <span>Experiment đang chờ xác nhận</span>
-            <Button size="sm" variant="outline" onClick={() => setScenarioReviewOpen(true)}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setScenarioReviewOpen(true);
+              }}
+            >
               Xem lại phương án
             </Button>
           </div>
@@ -871,7 +905,7 @@ function AppRoot(): JSX.Element {
         activeSessionId: null,
         sessions: upsertSession(prev.sessions, updated),
       };
-      void savePersistedState(next);
+      void services.storage.save(next);
       return next;
     });
     showToast('Session đã dừng — xem trong Library');
@@ -894,7 +928,9 @@ function AppRoot(): JSX.Element {
           <button
             type="button"
             className="text-sm font-medium text-primary underline"
-            onClick={() => setActiveWorkspace('capital')}
+            onClick={() => {
+              setActiveWorkspace('capital');
+            }}
           >
             Mở Capital Planner
           </button>
@@ -915,12 +951,9 @@ function AppRoot(): JSX.Element {
         view={sessionView}
         continuePolicy={continuePolicy}
         planCandidate={persisted.planCandidate}
+        latestDraw={latestDraw}
         onViewChange={setSessionView}
         onStartPlan={isReadOnly ? () => undefined : startPlan}
-        onPlaceBet={isReadOnly ? () => undefined : placeBet}
-        onSetBetProgress={isReadOnly ? () => undefined : setBetProgress}
-        onUndoBet={isReadOnly ? () => undefined : undoBet}
-        onWin={isReadOnly ? () => undefined : winAtRound}
         onContinue={isReadOnly ? () => undefined : (target) => void handleContinue(target)}
         onSelectImproveOption={
           isReadOnly ? () => undefined : (option) => void handleSelectImproveOption(option)
@@ -951,6 +984,19 @@ function AppRoot(): JSX.Element {
         return (
           <DashboardScreen
             activeSession={activeSession}
+            preset={
+              activeSession !== null ? findPreset(allPresets, activeSession.presetId) : undefined
+            }
+            presets={allPresets}
+            recommendationSet={persisted.recommendationSet}
+            gameStatistics={gameStatistics}
+            gameStatisticsLoading={gameStatisticsLoading}
+            gameStatisticsError={gameStatisticsError}
+            notifications={persisted.notifications}
+            onOpenNotifications={() => {
+              setActiveWorkspace('settings');
+            }}
+            latestDraw={latestDraw}
             capitalOverview={capitalOverview}
             onOpenSession={() => {
               setViewingSessionId(null);
@@ -960,7 +1006,9 @@ function AppRoot(): JSX.Element {
               setViewingSessionId(null);
               setActiveWorkspace('capital');
             }}
-            onOpenCapitalPlanner={() => setActiveWorkspace('capital')}
+            onOpenCapitalPlanner={() => {
+              setActiveWorkspace('capital');
+            }}
           />
         );
       case 'game-monitor':
@@ -994,7 +1042,10 @@ function AppRoot(): JSX.Element {
             sessions={persisted.sessions}
             presets={allPresets}
             capitalPlanner={persisted.capitalPlanner}
-            onNavigate={(ws) => setActiveWorkspace(ws)}
+            gameStatistics={gameStatistics}
+            onNavigate={(ws) => {
+              setActiveWorkspace(ws);
+            }}
             onOpenSession={(id) => {
               setViewingSessionId(id);
               setSessionView('overview');
@@ -1074,9 +1125,11 @@ function AppRoot(): JSX.Element {
         return (
           <SettingsScreen
             theme={persisted.theme}
-            onThemeChange={(dark) =>
-              persist({ ...persisted, theme: dark ? 'dark' : 'light' })
-            }
+            onThemeChange={(dark) => {
+              persist({ ...persisted, theme: dark ? 'dark' : 'light' });
+            }}
+            notificationPreferences={persisted.notificationPreferences}
+            onNotificationPreferencesChange={updateNotificationPreferences}
             onExportHistory={() => {
               exportLibraryJson(persisted.sessions);
               showToast('Đã xuất Session Library JSON');
@@ -1089,8 +1142,7 @@ function AppRoot(): JSX.Element {
   }
 
   const showRightPanel =
-    activeWorkspace === 'planning' ||
-    (activeWorkspace === 'session' && sessionView === 'playing');
+    activeWorkspace === 'planning' || (activeWorkspace === 'session' && sessionView === 'playing');
 
   const rightPanel =
     activeWorkspace === 'planning' ? (
@@ -1121,17 +1173,31 @@ function AppRoot(): JSX.Element {
           setActiveWorkspace(ws);
         }}
         theme={persisted.theme}
-        onThemeChange={(dark) => persist({ ...persisted, theme: dark ? 'dark' : 'light' })}
+        onThemeChange={(dark) => {
+          persist({ ...persisted, theme: dark ? 'dark' : 'light' });
+        }}
         showRightPanel={showRightPanel}
         main={renderMain()}
         rightPanel={rightPanel}
+        notifications={persisted.notifications}
+        notificationUnreadCount={notificationUnreadCount}
+        onNotificationMarkRead={markNotificationRead}
+        onNotificationMarkAllRead={markAllNotificationsRead}
+        onNotificationClearAll={clearAllNotifications}
+        onNotificationOpenSession={(id) => {
+          setViewingSessionId(id);
+          setSessionView('overview');
+          setActiveWorkspace('session');
+        }}
       />
       {toast !== null ? (
         <ActionToast
           message={toast.message}
           {...(toast.actionLabel !== undefined ? { actionLabel: toast.actionLabel } : {})}
           {...(toast.onAction !== undefined ? { onAction: toast.onAction } : {})}
-          onClose={() => setToast(null)}
+          onClose={() => {
+            setToast(null);
+          }}
         />
       ) : null}
     </ThemeProvider>

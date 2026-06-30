@@ -24,9 +24,7 @@ import { formatAmount } from '@/lib/money-format';
 
 export function insightsEligibleSessions(sessions: readonly Session[]): Session[] {
   return sessions.filter(
-    (s) =>
-      !s.archived &&
-      (s.status === 'won' || s.status === 'lost' || s.status === 'stopped'),
+    (s) => !s.archived && (s.status === 'won' || s.status === 'lost' || s.status === 'stopped'),
   );
 }
 
@@ -56,7 +54,9 @@ export function buildSessionMetrics(
   });
 }
 
-export function aggregateMetrics(metrics: readonly SessionInsightMetrics[]): AggregatedInsightMetrics {
+export function aggregateMetrics(
+  metrics: readonly SessionInsightMetrics[],
+): AggregatedInsightMetrics {
   const totalCompleted = metrics.length;
   const winCount = metrics.filter((m) => m.won).length;
 
@@ -82,7 +82,8 @@ export function aggregateMetrics(metrics: readonly SessionInsightMetrics[]): Agg
   let avgRoundsBeforeContinue: number | null = null;
   if (continueSessions.length > 0) {
     const sum = continueSessions.reduce((a, m) => {
-      const perContinue = m.continueCount > 0 ? m.roundsPlayed / (m.continueCount + 1) : m.roundsPlayed;
+      const perContinue =
+        m.continueCount > 0 ? m.roundsPlayed / (m.continueCount + 1) : m.roundsPlayed;
       return a + perContinue;
     }, 0);
     avgRoundsBeforeContinue = Math.round(sum / continueSessions.length);
@@ -207,12 +208,11 @@ export function generateQuickSessionInsights(
           : agg.avgCapitalUsage > 90
             ? 'Bạn thường dùng gần hết vốn kế hoạch mỗi phiên.'
             : `Mức dùng vốn trung bình ${String(agg.avgCapitalUsage)}% — khá cân bằng.`,
-      conclusion:
-        unused >= 20
-          ? '→ Có thể tăng mục tiêu hoặc chia thêm một phiên.'
-          : agg.avgCapitalUsage > 90
-            ? '→ Cân nhắc tăng bankroll trước phiên tiếp theo.'
-            : undefined,
+      ...(unused >= 20
+        ? { conclusion: '→ Có thể tăng mục tiêu hoặc chia thêm một phiên.' }
+        : agg.avgCapitalUsage > 90
+          ? { conclusion: '→ Cân nhắc tăng bankroll trước phiên tiếp theo.' }
+          : {}),
       confidence,
       ...(exemplar !== null
         ? {
@@ -241,12 +241,13 @@ export function generateQuickSessionInsights(
       emoji: '🎯',
       title: 'Continue',
       body: continuePhrase,
-      conclusion:
-        agg.avgRoundsBeforeContinue !== null && agg.avgContinue >= 1
-          ? `→ Thường cần thêm vòng sau khoảng ${String(agg.avgRoundsBeforeContinue)} vòng đầu.`
-          : agg.avgContinue < 0.5
-            ? '→ Kế hoạch ban đầu thường đủ dài cho cách chơi của bạn.'
-            : undefined,
+      ...(agg.avgRoundsBeforeContinue !== null && agg.avgContinue >= 1
+        ? {
+            conclusion: `→ Thường cần thêm vòng sau khoảng ${String(agg.avgRoundsBeforeContinue)} vòng đầu.`,
+          }
+        : agg.avgContinue < 0.5
+          ? { conclusion: '→ Kế hoạch ban đầu thường đủ dài cho cách chơi của bạn.' }
+          : {}),
       confidence,
       ...(exemplar !== null && exemplar.continueCount > 0
         ? {
@@ -263,9 +264,7 @@ export function generateQuickSessionInsights(
   return cards;
 }
 
-export function generateRecords(
-  metrics: readonly SessionInsightMetrics[],
-): InsightRecord[] {
+export function generateRecords(metrics: readonly SessionInsightMetrics[]): InsightRecord[] {
   if (metrics.length === 0) {
     return [];
   }
@@ -312,24 +311,24 @@ export function generateRecords(
       emoji: '🏆',
       label: 'Phiên dài nhất',
       value: `${String(longestRounds)} vòng`,
-      detail: longestTitle,
-      sessionId: longestId,
+      ...(longestTitle !== undefined ? { detail: longestTitle } : {}),
+      ...(longestId !== undefined ? { sessionId: longestId } : {}),
     },
     {
       id: 'record-highest-bet',
       emoji: '💸',
       label: 'Cược cao nhất',
       value: `${formatAmount(highestBet)} đ`,
-      detail: highestBetTitle,
-      sessionId: highestBetId,
+      ...(highestBetTitle !== undefined ? { detail: highestBetTitle } : {}),
+      ...(highestBetId !== undefined ? { sessionId: highestBetId } : {}),
     },
     {
       id: 'record-continues',
       emoji: '↩️',
       label: 'Nhiều Continue nhất',
       value: `${String(mostContinues)} lần`,
-      detail: mostContinuesTitle,
-      sessionId: mostContinuesId,
+      ...(mostContinuesTitle !== undefined ? { detail: mostContinuesTitle } : {}),
+      ...(mostContinuesId !== undefined ? { sessionId: mostContinuesId } : {}),
     },
   ];
 
@@ -339,8 +338,8 @@ export function generateRecords(
       emoji: '💰',
       label: 'Lợi nhuận lớn nhất',
       value: `+${formatAmount(largestProfit)} đ`,
-      detail: largestProfitTitle,
-      sessionId: largestProfitId,
+      ...(largestProfitTitle !== undefined ? { detail: largestProfitTitle } : {}),
+      ...(largestProfitId !== undefined ? { sessionId: largestProfitId } : {}),
     });
   }
 
@@ -361,10 +360,9 @@ export function strategyQuickInsight(
       emoji: '🔥',
       title: 'Strategy',
       body: `${label} là hướng bạn chọn gần nhất trong Capital Planner.`,
-      conclusion:
-        agg.winCount > 0
-          ? '→ Đây là khung strategy bạn đang theo khi lập kế hoạch.'
-          : undefined,
+      ...(agg.winCount > 0
+        ? { conclusion: '→ Đây là khung strategy bạn đang theo khi lập kế hoạch.' }
+        : {}),
       confidence,
     };
   }

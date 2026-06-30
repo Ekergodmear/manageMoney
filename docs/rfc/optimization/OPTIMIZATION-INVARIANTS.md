@@ -99,13 +99,13 @@ Tests: `tests/unit/optimization/optimize-profit-search.test.ts`
 
 ## Formal verification (Sprint 3.3 — frozen)
 
-| ID | Property | Test |
-| -- | -------- | ---- |
-| O-P1 | Determinism | `optimize-formal-properties.test.ts` |
+| ID   | Property                                | Test                                 |
+| ---- | --------------------------------------- | ------------------------------------ |
+| O-P1 | Determinism                             | `optimize-formal-properties.test.ts` |
 | O-P2 | Minimal change (lexicographic, bounded) | `optimize-formal-properties.test.ts` |
-| O-P3 | Explanation consistency | `optimize-formal-properties.test.ts` |
-| O-P4 | Failure completeness (bounded) | `optimize-formal-properties.test.ts` |
-| O-D1 | Differential vs brute-force | `optimize.differential.test.ts` |
+| O-P3 | Explanation consistency                 | `optimize-formal-properties.test.ts` |
+| O-P4 | Failure completeness (bounded)          | `optimize-formal-properties.test.ts` |
+| O-D1 | Differential vs brute-force             | `optimize.differential.test.ts`      |
 
 See `docs/design/optimization-formal-verification.md`.
 

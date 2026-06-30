@@ -29,5 +29,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist-app',
+    // Main bundle ~864 kB minified; default 500 kB limit is too low for this app.
+    chunkSizeWarningLimit: 900,
   },
 });

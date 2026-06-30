@@ -42,7 +42,7 @@ function fileImportsPattern(filePath: string, pattern: RegExp): boolean {
 describe('Architecture — features/ must not read import.meta.env', () => {
   for (const file of filesUnder('features')) {
     const rel = relative(ROOT, file).replace(/\\/g, '/');
-    it(`${rel}`, () => {
+    it(rel, () => {
       expect(fileImportsPattern(file, /import\.meta\.env/)).toBe(false);
     });
   }
@@ -97,7 +97,7 @@ describe('Architecture — features/ must not import storage drivers or logger s
 describe('Architecture — telemetry/ must not import React', () => {
   for (const file of filesUnder('services/telemetry')) {
     const rel = relative(ROOT, file).replace(/\\/g, '/');
-    it(`${rel}`, () => {
+    it(rel, () => {
       expect(fileImportsPattern(file, /from ['"]react['"]/)).toBe(false);
     });
   }
@@ -106,7 +106,7 @@ describe('Architecture — telemetry/ must not import React', () => {
 describe('Architecture — logger/ must not import React', () => {
   for (const file of filesUnder('services/logger')) {
     const rel = relative(ROOT, file).replace(/\\/g, '/');
-    it(`${rel}`, () => {
+    it(rel, () => {
       expect(fileImportsPattern(file, /from ['"]react['"]/)).toBe(false);
     });
   }
@@ -115,7 +115,7 @@ describe('Architecture — logger/ must not import React', () => {
 describe('Architecture — health/ must not import React', () => {
   for (const file of filesUnder('services/health')) {
     const rel = relative(ROOT, file).replace(/\\/g, '/');
-    it(`${rel}`, () => {
+    it(rel, () => {
       expect(fileImportsPattern(file, /from ['"]react['"]/)).toBe(false);
     });
   }

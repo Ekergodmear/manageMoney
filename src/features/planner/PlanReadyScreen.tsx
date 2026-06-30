@@ -32,8 +32,7 @@ export function PlanReadyScreen({
   const targetAmount =
     request.targetProfit.mode === 'fixedAmount' ? request.targetProfit.amount : null;
   const winRate = computeTargetWinRatePercent(statistics);
-  const bankrollShort =
-    userBankroll !== null && userBankroll < statistics.requiredBankrollAmount;
+  const bankrollShort = userBankroll !== null && userBankroll < statistics.requiredBankrollAmount;
 
   return (
     <div className="w-full max-w-3xl space-y-5">
@@ -46,7 +45,11 @@ export function PlanReadyScreen({
 
       <Card className="shadow-md">
         <CardContent className="grid gap-4 p-5 sm:grid-cols-2">
-          <Metric icon={<Wallet className="h-4 w-4" />} label="Vốn cần" value={`${formatAmount(statistics.requiredBankrollAmount)} đ`} />
+          <Metric
+            icon={<Wallet className="h-4 w-4" />}
+            label="Vốn cần"
+            value={`${formatAmount(statistics.requiredBankrollAmount)} đ`}
+          />
           <Metric
             icon={<Target className="h-4 w-4" />}
             label="Mục tiêu"
@@ -71,7 +74,7 @@ export function PlanReadyScreen({
             <p className="text-sm">
               Thiếu{' '}
               <strong>
-                {formatAmount(statistics.requiredBankrollAmount - (userBankroll ?? 0))} đ
+                {formatAmount(statistics.requiredBankrollAmount - userBankroll)} đ
               </strong>{' '}
               so với vốn hiện có.
             </p>
@@ -133,7 +136,10 @@ function Metric({
 }): ReactNode {
   return (
     <div className="rounded-lg border border-border bg-muted/30 p-3">
-      <div className="mb-1 flex items-center gap-2 text-muted-foreground">{icon}<span className="text-xs">{label}</span></div>
+      <div className="mb-1 flex items-center gap-2 text-muted-foreground">
+        {icon}
+        <span className="text-xs">{label}</span>
+      </div>
       <p className="text-lg font-bold">{value}</p>
     </div>
   );

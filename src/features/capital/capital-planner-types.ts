@@ -1,3 +1,5 @@
+import type { GenerateResult, PlannerFormValues } from '@/features/planner/plan-service';
+
 export type CapitalGoal = 'max-profit' | 'longest-play' | 'lowest-bet' | 'balanced';
 
 export type RiskProfile = 'conservative' | 'normal' | 'aggressive';
@@ -7,14 +9,15 @@ export type SafetyLevel = 'safe' | 'tight' | 'risky';
 export interface CapitalSessionRecommendation {
   readonly id: string;
   readonly label: string;
+  readonly marketId: string;
   readonly allocatedCapital: number;
   readonly targetProfit: number;
   readonly roundCount: number;
   readonly requiredBankroll: number;
   readonly maxBet: number;
   readonly safety: SafetyLevel;
-  readonly formValues: import('@/features/planner/plan-service').PlannerFormValues;
-  readonly result: import('@/features/planner/plan-service').GenerateResult;
+  readonly formValues: PlannerFormValues;
+  readonly result: GenerateResult;
 }
 
 export interface CapitalPlannerResult {
@@ -24,6 +27,7 @@ export interface CapitalPlannerResult {
   readonly strategy: CapitalGoal;
   readonly risk: RiskProfile;
   readonly presetId: string;
+  readonly marketId: string;
   readonly recommendations: readonly CapitalSessionRecommendation[];
   readonly totalTargetProfit: number;
   readonly singleBest: CapitalSessionRecommendation | null;
@@ -32,7 +36,7 @@ export interface CapitalPlannerResult {
 export interface CapitalPlannerInput {
   readonly bankroll: number;
   readonly presetId: string;
-  readonly baseForm: import('@/features/planner/plan-service').PlannerFormValues;
+  readonly baseForm: PlannerFormValues;
   readonly strategy: CapitalGoal;
   readonly risk: RiskProfile;
 }
@@ -48,6 +52,7 @@ export interface CapitalPlannerSnapshot {
   readonly strategy: CapitalGoal;
   readonly risk: RiskProfile;
   readonly presetId: string;
+  readonly marketId: string;
 }
 
 export const CAPITAL_GOAL_LABELS: Record<CapitalGoal, string> = {

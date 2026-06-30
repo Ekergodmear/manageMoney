@@ -3,10 +3,7 @@
  */
 
 import type { CalculationRequest, TargetProfit } from '@/application/dto';
-import {
-  encodeRewardMultiplier,
-  rewardFromBet,
-} from '@/core/monetary/reward-multiplier-encoding';
+import { encodeRewardMultiplier, rewardFromBet } from '@/core/monetary/reward-multiplier-encoding';
 import { resolveTarget } from '@/core/solver/resolve-target';
 import { solve } from '@/core/solver';
 import type { Strategy } from '@/core/models';

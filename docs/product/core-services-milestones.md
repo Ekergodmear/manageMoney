@@ -2,9 +2,9 @@
 
 > Mini platform với **Definition of Done** — không scaffold hàng loạt một commit.
 
-| Doc | Nội dung |
-|-----|----------|
-| `core-services.md` | Tổng quan |
+| Doc                                        | Nội dung                     |
+| ------------------------------------------ | ---------------------------- |
+| `core-services.md`                         | Tổng quan                    |
 | `../adr/0005-domain-event-architecture.md` | Event taxonomy · subscribers |
 
 ---
@@ -75,9 +75,9 @@ interface AppConfig {
 ### Flags
 
 ```ts
-flags.isEnabled('cloud')      // false default
-flags.isEnabled('telemetry') // true default
-flags.isEnabled('playwright') // true in test env
+flags.isEnabled('cloud'); // false default
+flags.isEnabled('telemetry'); // true default
+flags.isEnabled('playwright'); // true in test env
 ```
 
 ### DoD M3.1 ✅
@@ -177,4 +177,4 @@ useFlags().isEnabled('telemetry');
 
 ---
 
-*M4 hoàn tất — rollout Session tiếp theo.*
+_M4 hoàn tất — rollout Session tiếp theo._

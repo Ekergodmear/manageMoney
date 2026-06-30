@@ -5,10 +5,7 @@
 
 import type { ValidatedCalculationRequest } from '@/application/dto';
 import type { Round, Strategy } from '@/core/models';
-import {
-  encodeRewardMultiplier,
-  rewardFromBet,
-} from '@/core/monetary/reward-multiplier-encoding';
+import { encodeRewardMultiplier, rewardFromBet } from '@/core/monetary/reward-multiplier-encoding';
 
 import { solve } from '@/core/solver';
 import { resolveTarget } from '@/core/solver/resolve-target';

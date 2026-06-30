@@ -13,10 +13,12 @@ export function readGitCommitSha(): string {
 
 export function readGitBranch(): string {
   try {
-    return execSync('git branch --show-current', {
-      encoding: 'utf-8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim() || 'HEAD';
+    return (
+      execSync('git branch --show-current', {
+        encoding: 'utf-8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+      }).trim() || 'HEAD'
+    );
   } catch {
     return 'unknown';
   }

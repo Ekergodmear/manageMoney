@@ -2,10 +2,7 @@ import type { NewSessionPlanCandidate } from '@/features/planning/plan-candidate
 import type { PlanningDraft } from '@/features/planning/planning-types';
 import type { GenerateResult, PlannerFormValues } from '@/features/planner/plan-service';
 import type { Session } from '@/features/session/session-domain';
-import {
-  buildPlanAddedEvent,
-  createInitialPlan,
-} from '@/features/session/plan-factory';
+import { buildPlanAddedEvent, createInitialPlan } from '@/features/session/plan-factory';
 
 export function createSessionFromDraft(
   draft: PlanningDraft,
@@ -30,16 +27,15 @@ export function createSessionFromDraft(
     status: 'draft',
     plans: [plan],
     currentPlanId: draft.planId,
-    timeline: [
-      { at, type: 'session-created' },
-      buildPlanAddedEvent(plan, at, 'Generate'),
-    ],
+    timeline: [{ at, type: 'session-created' }, buildPlanAddedEvent(plan, at, 'Generate')],
     notes: '',
     startedAt: null,
     profitAmount: null,
     favorite: false,
     archived: false,
     tags: [],
+    lastSettledDrawKey: null,
+    playedRounds: [],
     originDraftId: draft.draftId,
     createdAt: at,
     updatedAt: at,
@@ -69,16 +65,15 @@ export function createSessionFromCandidate(
     status: 'draft',
     plans: [plan],
     currentPlanId: plan.id,
-    timeline: [
-      { at, type: 'session-created' },
-      buildPlanAddedEvent(plan, at, candidate.label),
-    ],
+    timeline: [{ at, type: 'session-created' }, buildPlanAddedEvent(plan, at, candidate.label)],
     notes: '',
     startedAt: null,
     profitAmount: null,
     favorite: false,
     archived: false,
     tags: [],
+    lastSettledDrawKey: null,
+    playedRounds: [],
     ...(candidate.recommendationId !== undefined
       ? { originRecommendationId: candidate.recommendationId }
       : {}),
@@ -112,16 +107,15 @@ export function createSessionFromGenerate(
     status: 'draft',
     plans: [plan],
     currentPlanId: plan.id,
-    timeline: [
-      { at, type: 'session-created' },
-      buildPlanAddedEvent(plan, at, 'Generate'),
-    ],
+    timeline: [{ at, type: 'session-created' }, buildPlanAddedEvent(plan, at, 'Generate')],
     notes: '',
     startedAt: null,
     profitAmount: null,
     favorite: false,
     archived: false,
     tags: [],
+    lastSettledDrawKey: null,
+    playedRounds: [],
     createdAt: at,
     updatedAt: at,
   };

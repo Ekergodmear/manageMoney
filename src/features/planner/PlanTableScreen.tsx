@@ -7,11 +7,14 @@ import {
 } from '@tanstack/react-table';
 import {
   ArrowUp,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Clock,
   Filter,
   RefreshCw,
   Search,
+  XCircle,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -20,10 +23,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import type { PlayedRound } from '@/features/game-data/entities/played-round';
 import type { GenerateResult } from '@/features/planner/plan-service';
-import {
-  accumulatedAtRound,
-} from '@/features/planner/plan-display';
+import { accumulatedAtRound } from '@/features/planner/plan-display';
 import type { Round } from '@stake/constraint-engine';
 import { formatAmount } from '@/lib/money-format';
 import { cn } from '@/lib/utils';
@@ -45,6 +47,8 @@ interface PlanTableScreenProps {
   readonly completedThroughRound: number;
   readonly sessionNumber?: number;
   readonly sessionStatus?: 'playing' | 'won' | 'lost';
+  readonly playedRounds?: readonly PlayedRound[];
+  readonly autoSettlement?: boolean;
   readonly onToggleRound: (roundIndex: number, checked: boolean) => void;
   readonly onJumpToRound?: (roundIndex: number) => void;
   readonly onResetProgress: () => void;
@@ -58,6 +62,8 @@ export function PlanTableScreen({
   completedThroughRound,
   sessionNumber = 1,
   sessionStatus = 'playing',
+  playedRounds = [],
+  autoSettlement = false,
   onToggleRound,
   onJumpToRound,
   onResetProgress,
@@ -72,9 +78,7 @@ export function PlanTableScreen({
 
   const accumulated = accumulatedAtRound(strategy.rounds, completedThroughRound);
   const lastBet =
-    completedThroughRound > 0
-      ? (strategy.rounds[completedThroughRound - 1]?.betAmount ?? 0)
-      : 0;
+    completedThroughRound > 0 ? (strategy.rounds[completedThroughRound - 1]?.betAmount ?? 0) : 0;
   const allRoundsDone =
     completedThroughRound >= strategy.rounds.length && sessionStatus === 'playing';
   const [continueTarget, setContinueTarget] = useState('');
@@ -90,12 +94,15 @@ export function PlanTableScreen({
     if (main === null) {
       return;
     }
+    const scrollRoot = main;
     function onScroll(): void {
-      setShowScrollTop(main.scrollTop > 200);
+      setShowScrollTop(scrollRoot.scrollTop > 200);
     }
     onScroll();
-    main.addEventListener('scroll', onScroll, { passive: true });
-    return () => main.removeEventListener('scroll', onScroll);
+    scrollRoot.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      scrollRoot.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   const data = useMemo<PlanRow[]>(
@@ -123,21 +130,62 @@ export function PlanTableScreen({
     return rows;
   }, [data, roundFilter, search]);
 
+  const playedByRound = useMemo(() => {
+    const map = new Map<number, PlayedRound>();
+    for (const pr of playedRounds) {
+      map.set(pr.round, pr);
+    }
+    return map;
+  }, [playedRounds]);
+
+  const currentRoundIndex = completedThroughRound + 1;
+
+  function roundOutcome(index: number): 'win' | 'lose' | 'waiting' | 'pending' | 'legacy' {
+    const played = playedByRound.get(index);
+    if (played !== undefined) {
+      return played.won ? 'win' : 'lose';
+    }
+    if (autoSettlement && sessionStatus === 'playing' && index === currentRoundIndex) {
+      return 'waiting';
+    }
+    if (index <= completedThroughRound) {
+      return autoSettlement ? 'pending' : 'legacy';
+    }
+    return 'pending';
+  }
+
   const columns = useMemo(
     () => [
       columnHelper.display({
         id: 'done',
         header: '',
-        cell: ({ row }) => (
-          <Checkbox
-            checked={row.original.completed}
-            disabled={sessionStatus !== 'playing'}
-            aria-label={`Đã cược đến vòng ${String(row.original.index)}`}
-            onCheckedChange={(checked) =>
-              onToggleRound(row.original.index, checked === true)
+        cell: ({ row }) => {
+          const outcome = roundOutcome(row.original.index);
+          if (autoSettlement) {
+            if (outcome === 'win') {
+              return (
+                <CheckCircle2 className="h-4 w-4 text-success-foreground" aria-label="Thắng" />
+              );
             }
-          />
-        ),
+            if (outcome === 'lose') {
+              return <XCircle className="h-4 w-4 text-destructive" aria-label="Thua" />;
+            }
+            if (outcome === 'waiting') {
+              return <Clock className="h-4 w-4 text-muted-foreground" aria-label="Đang chờ" />;
+            }
+            return <span className="inline-block h-4 w-4" />;
+          }
+          return (
+            <Checkbox
+              checked={row.original.completed}
+              disabled={sessionStatus !== 'playing'}
+              aria-label={`Đã cược đến vòng ${String(row.original.index)}`}
+              onCheckedChange={(checked) => {
+                onToggleRound(row.original.index, checked === true);
+              }}
+            />
+          );
+        },
       }),
       columnHelper.accessor('index', { header: 'Vòng' }),
       columnHelper.accessor('betAmount', {
@@ -151,15 +199,25 @@ export function PlanTableScreen({
       columnHelper.display({
         id: 'status',
         header: 'Trạng thái',
-        cell: ({ row }) =>
-          row.original.completed ? (
-            <Badge variant="success">Đã chọn</Badge>
-          ) : (
-            <Badge variant="muted">Chưa chọn</Badge>
-          ),
+        cell: ({ row }) => {
+          const outcome = roundOutcome(row.original.index);
+          if (outcome === 'win') {
+            return <Badge variant="success">Thắng</Badge>;
+          }
+          if (outcome === 'lose') {
+            return <Badge variant="destructive">Thua</Badge>;
+          }
+          if (outcome === 'waiting') {
+            return <Badge variant="secondary">Chờ kỳ</Badge>;
+          }
+          if (outcome === 'legacy' && row.original.completed) {
+            return <Badge variant="success">Đã chọn</Badge>;
+          }
+          return <Badge variant="muted">Chưa chơi</Badge>;
+        },
       }),
     ],
-    [onToggleRound, sessionStatus],
+    [onToggleRound, sessionStatus, autoSettlement, playedByRound, currentRoundIndex],
   );
 
   const table = useReactTable({
@@ -191,12 +249,13 @@ export function PlanTableScreen({
             Đã chơi <strong className="text-foreground">{completedThroughRound}</strong> /{' '}
             {strategy.rounds.length} · Đã chi {formatAmount(accumulated)} đ
             {lastBet > 0 ? ` · Cược gần nhất ${formatAmount(lastBet)} đ` : ''}
-            {sessionStatus === 'playing' ? (
+            {sessionStatus === 'playing' && !autoSettlement ? (
               <>
                 {' '}
                 · Tick vòng <strong className="text-foreground">N</strong> = đã cược đến vòng N
               </>
             ) : null}
+            {autoSettlement ? <> · Auto settlement</> : null}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -241,7 +300,9 @@ export function PlanTableScreen({
                     inputMode="numeric"
                     placeholder="Vòng"
                     value={jumpRound}
-                    onChange={(e) => setJumpRound(e.target.value.replace(/\D/g, ''))}
+                    onChange={(e) => {
+                      setJumpRound(e.target.value.replace(/\D/g, ''));
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         const n = Number(jumpRound);
@@ -308,20 +369,20 @@ export function PlanTableScreen({
                     row.original.index === completedThroughRound &&
                     completedThroughRound > 0;
                   return (
-                  <tr
-                    key={row.id}
-                    className={cn(
-                      'border-b border-border/70 transition-colors',
-                      row.original.completed && 'bg-success/30',
-                      isCurrent && 'ring-1 ring-inset ring-primary/40',
-                    )}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-4 py-2.5">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    ))}
-                  </tr>
+                    <tr
+                      key={row.id}
+                      className={cn(
+                        'border-b border-border/70 transition-colors',
+                        row.original.completed && 'bg-success/30',
+                        isCurrent && 'ring-1 ring-inset ring-primary/40',
+                      )}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id} className="px-4 py-2.5">
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                      ))}
+                    </tr>
                   );
                 })}
               </tbody>
@@ -334,7 +395,9 @@ export function PlanTableScreen({
               <select
                 className="h-8 rounded-md border border-border bg-card px-2 text-foreground"
                 value={pageSize}
-                onChange={(e) => table.setPageSize(Number(e.target.value))}
+                onChange={(e) => {
+                  table.setPageSize(Number(e.target.value));
+                }}
               >
                 {PAGE_SIZES.map((size) => (
                   <option key={size} value={size}>
@@ -351,7 +414,9 @@ export function PlanTableScreen({
                 size="icon"
                 className="h-8 w-8"
                 disabled={!table.getCanPreviousPage()}
-                onClick={() => table.previousPage()}
+                onClick={() => {
+                  table.previousPage();
+                }}
                 aria-label="Trang trước"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -373,21 +438,23 @@ export function PlanTableScreen({
                     variant={pageIndex === page ? 'default' : 'outline'}
                     size="sm"
                     className="h-8 min-w-8 px-2"
-                    onClick={() => table.setPageIndex(page)}
+                    onClick={() => {
+                      table.setPageIndex(page);
+                    }}
                   >
                     {page + 1}
                   </Button>
                 );
               })}
-              {pageCount > 5 && pageIndex < pageCount - 3 ? (
-                <span className="px-1">…</span>
-              ) : null}
+              {pageCount > 5 && pageIndex < pageCount - 3 ? <span className="px-1">…</span> : null}
               <Button
                 variant="outline"
                 size="icon"
                 className="h-8 w-8"
                 disabled={!table.getCanNextPage()}
-                onClick={() => table.nextPage()}
+                onClick={() => {
+                  table.nextPage();
+                }}
                 aria-label="Trang sau"
               >
                 <ChevronRight className="h-4 w-4" />
@@ -428,7 +495,9 @@ export function PlanTableScreen({
                 variant={selectedContinue === -1 ? 'default' : 'outline'}
                 size="sm"
                 type="button"
-                onClick={() => setSelectedContinue(-1)}
+                onClick={() => {
+                  setSelectedContinue(-1);
+                }}
               >
                 Custom
               </Button>
@@ -439,7 +508,9 @@ export function PlanTableScreen({
                 min={strategy.rounds.length + 1}
                 placeholder={`Ví dụ: ${String(strategy.rounds.length + 100)}`}
                 value={continueTarget}
-                onChange={(e) => setContinueTarget(e.target.value)}
+                onChange={(e) => {
+                  setContinueTarget(e.target.value);
+                }}
               />
             ) : null}
             <Button

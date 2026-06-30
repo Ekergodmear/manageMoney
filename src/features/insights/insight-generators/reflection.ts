@@ -74,18 +74,13 @@ export function generateReflection(
   };
 }
 
-function buildClosingLine(
-  recent: readonly SessionInsightMetrics[],
-  avgContinue: number,
-): string {
+function buildClosingLine(recent: readonly SessionInsightMetrics[], avgContinue: number): string {
   const winRate = winRateIn(recent);
   const usageValues = recent
     .map((m) => m.capitalUsagePercent)
     .filter((v): v is number => v !== null);
   const avgUsage =
-    usageValues.length > 0
-      ? usageValues.reduce((a, b) => a + b, 0) / usageValues.length
-      : null;
+    usageValues.length > 0 ? usageValues.reduce((a, b) => a + b, 0) / usageValues.length : null;
 
   if (
     winRate >= 50 &&
@@ -114,10 +109,7 @@ function buildClosingLine(
   return '=> Tiếp tục theo dõi — pattern đang hình thành rõ dần.';
 }
 
-function presetShareIn(
-  metrics: readonly SessionInsightMetrics[],
-  presetId: string | null,
-): number {
+function presetShareIn(metrics: readonly SessionInsightMetrics[], presetId: string | null): number {
   if (presetId === null || metrics.length === 0) {
     return 0;
   }

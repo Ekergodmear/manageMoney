@@ -8,15 +8,15 @@ Generate chỉ chiếm ~5% giá trị sản phẩm.
 
 ## 7 Module
 
-| Module | Workspace | Mô tả |
-|--------|-----------|--------|
-| **Dashboard** | Trang đầu | Tổng quan phiên, hành động nhanh, kế hoạch gần đây |
-| **Planning** | Kế hoạch | Tạo, xem sẵn sàng, Improve, Continue |
-| **Playing** | Phiên chơi | Bảng vòng, tick tiến độ, progress |
-| **Analysis** | Phân tích | Mô phỏng, thống kê, biểu đồ |
-| **Allocation** | Phân bổ tài khoản | Chia plan đa account |
-| **History** | Lịch sử | Lưu, lọc, mở lại phiên |
-| **Settings** | Cài đặt | Theme, preset game, export, format |
+| Module         | Workspace         | Mô tả                                              |
+| -------------- | ----------------- | -------------------------------------------------- |
+| **Dashboard**  | Trang đầu         | Tổng quan phiên, hành động nhanh, kế hoạch gần đây |
+| **Planning**   | Kế hoạch          | Tạo, xem sẵn sàng, Improve, Continue               |
+| **Playing**    | Phiên chơi        | Bảng vòng, tick tiến độ, progress                  |
+| **Analysis**   | Phân tích         | Mô phỏng, thống kê, biểu đồ                        |
+| **Allocation** | Phân bổ tài khoản | Chia plan đa account                               |
+| **History**    | Lịch sử           | Lưu, lọc, mở lại phiên                             |
+| **Settings**   | Cài đặt           | Theme, preset game, export, format                 |
 
 ---
 
@@ -42,7 +42,7 @@ Dashboard → Tạo kế hoạch → Kế hoạch sẵn sàng → Bắt đầu c
 ## Roadmap triển khai
 
 1. **Shell** — 7 workspace + Dashboard + luồng Planning → Ready → Playing ✅
-2. **Session hoàn chỉnh** — Playing UX, Undo, Win, Continue, Timeline, IndexedDB autosave *(hiện tại)* ✅
+2. **Session hoàn chỉnh** — Playing UX, Undo, Win, Continue, Timeline, IndexedDB autosave _(hiện tại)_ ✅
 3. **Planning** — Improve tích hợp engine
 4. **History + Analytics** — persist, filter, stats cards ✅ (cơ bản)
 5. **Simulation** — slider realtime ✅ (cơ bản)

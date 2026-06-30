@@ -89,12 +89,12 @@ interface GamePolicy {
 }
 ```
 
-| Field | Meaning |
-| ----- | ------- |
-| `minimumBet` | Floor bet per round |
-| `maximumBet` | Environment cap |
-| `betStep` | Bet lattice increment |
-| `reward` | Immutable reward policy (§2.2) |
+| Field        | Meaning                        |
+| ------------ | ------------------------------ |
+| `minimumBet` | Floor bet per round            |
+| `maximumBet` | Environment cap                |
+| `betStep`    | Bet lattice increment          |
+| `reward`     | Immutable reward policy (§2.2) |
 
 GamePolicy can become large. **Solver never imports this type.**
 
@@ -113,10 +113,10 @@ interface SolverConstraints {
 }
 ```
 
-| Concept | Role |
-| ------- | ---- |
-| `GamePolicy` | What the game *is* (Product / presets) |
-| `SolverConstraints` | What the solver *needs* (normalized, frozen) |
+| Concept             | Role                                         |
+| ------------------- | -------------------------------------------- |
+| `GamePolicy`        | What the game _is_ (Product / presets)       |
+| `SolverConstraints` | What the solver _needs_ (normalized, frozen) |
 
 When Game A becomes Game B with extra fields, only **Policy Translator** changes — not `solve()`.
 
@@ -178,10 +178,10 @@ interface RewardPolicy {
 
 **Contract:** solver calls **`netReward(bet)` only** — not `netReward(grossReward(bet))` as the public interface.
 
-| Approach | Verdict |
-| -------- | ------- |
-| `netReward(bet)` | ✅ **Chosen** — solver stays bet-centric |
-| `netReward(gross)` | ❌ Rejected as solver-facing API |
+| Approach           | Verdict                                  |
+| ------------------ | ---------------------------------------- |
+| `netReward(bet)`   | ✅ **Chosen** — solver stays bet-centric |
+| `netReward(gross)` | ❌ Rejected as solver-facing API         |
 
 Inside a tax implementation:
 
@@ -224,20 +224,20 @@ Validation runs on **`{ constraints: SolverConstraints, calculation: Calculation
 
 ### Environment — Validation owns (shape)
 
-| Rule | Layer | Check |
-| ---- | ----- | ----- |
-| Lattice | structural / business | `minimumBet > 0`, `betStep > 0`, `minimumBet % betStep === 0` |
-| Cap shape | business | `maximumBet ≥ minimumBet`, `maximumBet` on lattice |
-| Multiplier | structural | ≤ 2 decimal places (on reward policy config) |
-| Bundle | structural | `constraints` + `calculation` present and finite |
+| Rule       | Layer                 | Check                                                         |
+| ---------- | --------------------- | ------------------------------------------------------------- |
+| Lattice    | structural / business | `minimumBet > 0`, `betStep > 0`, `minimumBet % betStep === 0` |
+| Cap shape  | business              | `maximumBet ≥ minimumBet`, `maximumBet` on lattice            |
+| Multiplier | structural            | ≤ 2 decimal places (on reward policy config)                  |
+| Bundle     | structural            | `constraints` + `calculation` present and finite              |
 
 ### Feasibility — Solver owns
 
-| Situation | Owner | Outcome |
-| --------- | ----- | ------- |
-| `minimumBet > maximumBet` | **Validation** | Reject — impossible environment |
-| Round needs `b > maximumBet` | **Solver** | `NO_FEASIBLE_SOLUTION` / `MAXIMUM_BET_EXCEEDED` |
-| No plan under constraints + target | **Solver** | `NO_FEASIBLE_SOLUTION` |
+| Situation                          | Owner          | Outcome                                         |
+| ---------------------------------- | -------------- | ----------------------------------------------- |
+| `minimumBet > maximumBet`          | **Validation** | Reject — impossible environment                 |
+| Round needs `b > maximumBet`       | **Solver**     | `NO_FEASIBLE_SOLUTION` / `MAXIMUM_BET_EXCEEDED` |
+| No plan under constraints + target | **Solver**     | `NO_FEASIBLE_SOLUTION`                          |
 
 **ADR-027:** Validation rejects ill-shaped input. Solver reports infeasibility. Validation does **not** simulate full round loop.
 
@@ -267,22 +267,22 @@ interface ValidatedPlanningInput {
 
 ### What changes
 
-| Area | Change |
-| ---- | ------ |
-| Input | `ValidatedPlanningInput.constraints` — not `GamePolicy` |
-| Profit (I1) | `constraints.rewardPolicy.netReward(bet) − accumulatedSpent` |
-| Round (I5) | `rewardAmount = netReward(betAmount)` |
+| Area                 | Change                                                             |
+| -------------------- | ------------------------------------------------------------------ |
+| Input                | `ValidatedPlanningInput.constraints` — not `GamePolicy`            |
+| Profit (I1)          | `constraints.rewardPolicy.netReward(bet) − accumulatedSpent`       |
+| Round (I5)           | `rewardAmount = netReward(betAmount)`                              |
 | Minimal feasible bet | Re-derived for non-linear policies; linear keeps current structure |
-| Game names | **Never** in solver |
+| Game names           | **Never** in solver                                                |
 
 ### What does not change
 
-| Area | Change |
-| ---- | ------ |
+| Area           | Change                                |
+| -------------- | ------------------------------------- |
 | Trust boundary | Frozen validated input only (ADR-027) |
-| Output | `Strategy` / `Round` unchanged |
-| `optimize()` | Same `ValidatedPlanningInput` context |
-| Determinism | Same validated input → same strategy |
+| Output         | `Strategy` / `Round` unchanged        |
+| `optimize()`   | Same `ValidatedPlanningInput` context |
+| Determinism    | Same validated input → same strategy  |
 
 ### Rollout
 
@@ -339,10 +339,10 @@ optimize / simulate / buildStatistics
 
 ### 6.2 Default policy
 
-| API | Behavior |
-| --- | -------- |
-| `validatePlanning({ policy, calculation })` | **Preferred** — explicit policy |
-| `validateCalculationRequest(calculation)` | Legacy — default policy + translate internally |
+| API                                         | Behavior                                       |
+| ------------------------------------------- | ---------------------------------------------- |
+| `validatePlanning({ policy, calculation })` | **Preferred** — explicit policy                |
+| `validateCalculationRequest(calculation)`   | Legacy — default policy + translate internally |
 
 Stake Planner always uses explicit policy. Legacy path for SDK consumers + regression.
 
@@ -356,9 +356,9 @@ Additive evolution — extend `GamePolicy` / preset builders (minor). Breaking `
 
 ### 6.4 RewardPolicy
 
-| Method | Caller |
-| ------ | ------ |
-| `netReward(bet)` | Solver, Optimization |
+| Method             | Caller                                   |
+| ------------------ | ---------------------------------------- |
+| `netReward(bet)`   | Solver, Optimization                     |
 | `grossReward(bet)` | Product, Statistics (display / warnings) |
 
 Immutable value object. No mutation after validate.
@@ -367,23 +367,23 @@ Immutable value object. No mutation after validate.
 
 ### 6.5 Constraint ownership
 
-| Constraint | Validation | Solver |
-| ---------- | ---------- | ------ |
-| Lattice shape, `max ≥ min` | ✅ | — |
-| `bet ≤ maximumBet` per round | — | ✅ |
-| Plan exists | — | ✅ |
+| Constraint                   | Validation | Solver |
+| ---------------------------- | ---------- | ------ |
+| Lattice shape, `max ≥ min`   | ✅         | —      |
+| `bet ≤ maximumBet` per round | —          | ✅     |
+| Plan exists                  | —          | ✅     |
 
 ---
 
 ### 6.6 Downstream impact
 
-| Module | Impact |
-| ------ | ------ |
-| **Policy Translator** | New — `GamePolicy` → `SolverConstraints` |
-| **Validation** | `validatePlanning`; validates constraints + calculation |
-| **Solver** | `ValidatedPlanningInput`; no `GamePolicy` import |
-| **Optimization / Simulation** | Same validated input |
-| **Product** | Presets build `GamePolicy`; call translator via SDK |
+| Module                        | Impact                                                  |
+| ----------------------------- | ------------------------------------------------------- |
+| **Policy Translator**         | New — `GamePolicy` → `SolverConstraints`                |
+| **Validation**                | `validatePlanning`; validates constraints + calculation |
+| **Solver**                    | `ValidatedPlanningInput`; no `GamePolicy` import        |
+| **Optimization / Simulation** | Same validated input                                    |
+| **Product**                   | Presets build `GamePolicy`; call translator via SDK     |
 
 ---
 
@@ -404,22 +404,22 @@ Immutable value object. No mutation after validate.
 
 ## Out of scope
 
-| Topic | Where |
-| ----- | ----- |
+| Topic                  | Where                            |
+| ---------------------- | -------------------------------- |
 | **Allocation Planner** | Distribute Plan — separate brief |
-| Feature 1 #018 | Continues — independent lane |
-| Feature 2 Improve Plan | Unchanged scope |
-| Animation / UI polish | After Feature 2 |
+| Feature 1 #018         | Continues — independent lane     |
+| Feature 2 Improve Plan | Unchanged scope                  |
+| Animation / UI polish  | After Feature 2                  |
 
 ---
 
 ## Summary
 
-| Do | Don't |
-| -- | ----- |
+| Do                                                  | Don't                            |
+| --------------------------------------------------- | -------------------------------- |
 | `GamePolicy` → **Translator** → `SolverConstraints` | Pass `GamePolicy` into `solve()` |
-| Immutable `RewardPolicy` | Mutate policy after validate |
-| Solver parametric on constraints | Hardcode game rules in solver |
-| Keep **#018** running | Pause usability for Platform |
+| Immutable `RewardPolicy`                            | Mutate policy after validate     |
+| Solver parametric on constraints                    | Hardcode game rules in solver    |
+| Keep **#018** running                               | Pause usability for Platform     |
 
 **Next step:** Phase 1 implementation — Translator + SolverConstraints + regression only.

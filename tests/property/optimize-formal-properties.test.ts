@@ -11,15 +11,19 @@ import type { OptimizationRequest } from '@/core/optimization/models/optimizatio
 import {
   hasNoBetterFeasibleCandidate,
   isExhaustiveFailure,
-} from '../../support/brute-force-optimization';
-import { smallFixedIntentArb } from '../../support/optimization-arbitraries';
-import { validCalculationRequest } from '../validation/fixtures';
-import { makeOptimizationRequest } from '../../support/optimization-test-helpers';
+} from '../support/brute-force-optimization';
+import { smallFixedIntentArb } from '../support/optimization-arbitraries';
+import { getDeterminismRuns, getPropertyRuns } from '../support/property-runs';
+import { validCalculationRequest } from '../unit/validation/fixtures';
+import { makeOptimizationRequest } from '../support/optimization-test-helpers';
 
-const PROPERTY_RUNS = 200;
-const DETERMINISM_RUNS = 1_000;
+const PROPERTY_RUNS = getPropertyRuns();
+const DETERMINISM_RUNS = getDeterminismRuns();
 
-function assertExplanationConsistency(request: OptimizationRequest, result: ReturnType<typeof optimize>): void {
+function assertExplanationConsistency(
+  request: OptimizationRequest,
+  result: ReturnType<typeof optimize>,
+): void {
   if (result.kind !== 'success') {
     return;
   }
@@ -101,6 +105,9 @@ describe('Optimization — formal properties (Sprint 3.3B)', () => {
 
   it('O-P3 — explanation consistency: identity fixture', () => {
     const result = optimize(makeOptimizationRequest(validCalculationRequest, 10_000_000));
-    assertExplanationConsistency(makeOptimizationRequest(validCalculationRequest, 10_000_000), result);
+    assertExplanationConsistency(
+      makeOptimizationRequest(validCalculationRequest, 10_000_000),
+      result,
+    );
   });
 });

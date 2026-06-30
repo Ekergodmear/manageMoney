@@ -1,4 +1,5 @@
 import { generateCapitalRecommendations } from '@/features/insights/insight-generators/capital';
+import { generateGameStatisticsInsights } from '@/features/insights/insight-generators/game-statistics';
 import { buildInsightsUpdatedMeta } from '@/features/insights/insight-confidence';
 import { generateOutliers } from '@/features/insights/insight-generators/outlier';
 import { generateReflection } from '@/features/insights/insight-generators/reflection';
@@ -13,7 +14,11 @@ import {
   insightsEligibleSessions,
   strategyQuickInsight,
 } from '@/features/insights/insight-generators/session';
-import type { InsightCard, InsightEngineInput, InsightsSnapshot } from '@/features/insights/insight-types';
+import type {
+  InsightCard,
+  InsightEngineInput,
+  InsightsSnapshot,
+} from '@/features/insights/insight-types';
 
 export function generateInsights(input: InsightEngineInput): InsightsSnapshot {
   const eligible = insightsEligibleSessions(input.sessions);
@@ -23,8 +28,10 @@ export function generateInsights(input: InsightEngineInput): InsightsSnapshot {
   const reflection = generateReflection(metrics, agg, input.capitalPlanner);
 
   const strategyQuick = strategyQuickInsight(agg, input.capitalPlanner);
+  const gameStatCards = generateGameStatisticsInsights(input.gameStatistics);
   const quick = [
     ...generateQuickSessionInsights(agg, metrics),
+    ...gameStatCards.filter((c) => c.layer === 'quick'),
     ...(strategyQuick !== null ? [strategyQuick] : []),
   ];
 
@@ -37,12 +44,13 @@ export function generateInsights(input: InsightEngineInput): InsightsSnapshot {
   return {
     reflection,
     quick,
+    observations: gameStatCards.filter((c) => c.layer === 'trend'),
     recommendations,
     outliers: generateOutliers(metrics),
     trends: generateTrends(metrics),
     records: generateRecords(metrics),
     updated: buildInsightsUpdatedMeta(metrics),
-    hasData: eligible.length > 0,
+    hasData: eligible.length > 0 || gameStatCards.length > 0,
   };
 }
 

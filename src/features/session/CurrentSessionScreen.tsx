@@ -56,7 +56,10 @@ export function CurrentSessionScreen({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
-            <Stat label="Đã chơi" value={`${String(completedThroughRound)} / ${String(strategy.rounds.length)} vòng`} />
+            <Stat
+              label="Đã chơi"
+              value={`${String(completedThroughRound)} / ${String(strategy.rounds.length)} vòng`}
+            />
             <Stat label="Đã chi" value={`${formatAmount(accumulated)} đ`} />
             <Stat
               label="Lần cược gần nhất"
@@ -71,7 +74,10 @@ export function CurrentSessionScreen({
               value={targetAmount !== null ? `${formatAmount(targetAmount)} đ` : '—'}
             />
             <Stat label="Còn lại cần chi" value={`${formatAmount(remaining)} đ`} highlight />
-            <Stat label="Trạng thái" value={completedThroughRound < strategy.rounds.length ? 'Chưa thắng' : 'Hết vòng'} />
+            <Stat
+              label="Trạng thái"
+              value={completedThroughRound < strategy.rounds.length ? 'Chưa thắng' : 'Hết vòng'}
+            />
           </div>
 
           <div className="flex flex-wrap gap-2 border-t border-border pt-4">
@@ -81,7 +87,9 @@ export function CurrentSessionScreen({
             </Button>
             <Button
               variant="outline"
-              onClick={() => onComingSoon('Hoàn thành phiên — sắp ra mắt trong bản cập nhật tới.')}
+              onClick={() => {
+                onComingSoon('Hoàn thành phiên — sắp ra mắt trong bản cập nhật tới.');
+              }}
             >
               <CheckCircle2 className="h-4 w-4" />
               Hoàn thành
@@ -92,7 +100,9 @@ export function CurrentSessionScreen({
             </Button>
             <Button
               variant="outline"
-              onClick={() => onComingSoon('Xuất file — sắp ra mắt trong bản cập nhật tới.')}
+              onClick={() => {
+                onComingSoon('Xuất file — sắp ra mắt trong bản cập nhật tới.');
+              }}
             >
               <Download className="h-4 w-4" />
               Xuất file

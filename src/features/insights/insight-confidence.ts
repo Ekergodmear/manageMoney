@@ -1,4 +1,8 @@
-import type { InsightConfidence, InsightsUpdatedMeta, SessionInsightMetrics } from '@/features/insights/insight-types';
+import type {
+  InsightConfidence,
+  InsightsUpdatedMeta,
+  SessionInsightMetrics,
+} from '@/features/insights/insight-types';
 
 export type { InsightsUpdatedMeta };
 
@@ -26,9 +30,13 @@ export function buildInsightsUpdatedMeta(
   if (metrics.length === 0) {
     return { relativeLabel: '—', sessionCount: 0 };
   }
-  const latest = [...metrics].sort((a, b) =>
+  const sorted = [...metrics].sort((a, b) =>
     b.session.updatedAt.localeCompare(a.session.updatedAt),
-  )[0]!;
+  );
+  const latest = sorted[0];
+  if (latest === undefined) {
+    return { relativeLabel: '—', sessionCount: 0 };
+  }
   return {
     relativeLabel: formatRelativeUpdated(latest.session.updatedAt),
     sessionCount: metrics.length,
@@ -60,16 +68,12 @@ export interface ReflectionScope {
   readonly recent: readonly SessionInsightMetrics[];
 }
 
-export function pickReflectionScope(
-  metrics: readonly SessionInsightMetrics[],
-): ReflectionScope {
+export function pickReflectionScope(metrics: readonly SessionInsightMetrics[]): ReflectionScope {
   const sorted = [...metrics].sort((a, b) =>
     b.session.updatedAt.localeCompare(a.session.updatedAt),
   );
   const cutoff30 = Date.now() - 30 * DAY_MS;
-  const in30Days = sorted.filter(
-    (m) => new Date(m.session.updatedAt).getTime() >= cutoff30,
-  );
+  const in30Days = sorted.filter((m) => new Date(m.session.updatedAt).getTime() >= cutoff30);
 
   if (in30Days.length >= 3) {
     return {
@@ -92,10 +96,12 @@ export function exemplarSessionByContinue(
   if (metrics.length === 0) {
     return null;
   }
-  return [...metrics].sort(
-    (a, b) =>
-      Math.abs(a.continueCount - targetContinue) - Math.abs(b.continueCount - targetContinue),
-  )[0] ?? null;
+  return (
+    [...metrics].sort(
+      (a, b) =>
+        Math.abs(a.continueCount - targetContinue) - Math.abs(b.continueCount - targetContinue),
+    )[0] ?? null
+  );
 }
 
 export function exemplarSessionByCapitalUsage(
@@ -106,11 +112,13 @@ export function exemplarSessionByCapitalUsage(
   if (withUsage.length === 0) {
     return null;
   }
-  return [...withUsage].sort((a, b) => {
-    const av = a.capitalUsagePercent ?? 0;
-    const bv = b.capitalUsagePercent ?? 0;
-    return mode === 'lowest' ? av - bv : bv - av;
-  })[0] ?? null;
+  return (
+    [...withUsage].sort((a, b) => {
+      const av = a.capitalUsagePercent ?? 0;
+      const bv = b.capitalUsagePercent ?? 0;
+      return mode === 'lowest' ? av - bv : bv - av;
+    })[0] ?? null
+  );
 }
 
 export function mostRecentLostSession(
@@ -126,7 +134,5 @@ export function mostRecentLostSession(
 export function sessionWithMostContinues(
   metrics: readonly SessionInsightMetrics[],
 ): SessionInsightMetrics | null {
-  return (
-    [...metrics].sort((a, b) => b.continueCount - a.continueCount)[0] ?? null
-  );
+  return [...metrics].sort((a, b) => b.continueCount - a.continueCount)[0] ?? null;
 }

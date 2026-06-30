@@ -1,5 +1,6 @@
 import type { SafetyLevel } from '@/features/capital/capital-planner-types';
 import type { Experiment } from '@/features/experiment/experiment-types';
+import { DEFAULT_MARKET_ID } from '@/features/game-data/markets/market-definition';
 import type {
   RecommendationSet,
   StrategyRecommendation,
@@ -21,12 +22,16 @@ function safetyLevel(required: number, budget: number): SafetyLevel {
   return 'risky';
 }
 
-function toStrategyRecommendation(experiment: Experiment & { result: GenerateResult }): StrategyRecommendation {
+function toStrategyRecommendation(
+  experiment: Experiment & { result: GenerateResult },
+): StrategyRecommendation {
   const stats = experiment.result.statistics;
-  const bankroll = parseMoneyPositiveInt(experiment.formValues.userBankroll) ?? stats.requiredBankrollAmount;
+  const bankroll =
+    parseMoneyPositiveInt(experiment.formValues.userBankroll) ?? stats.requiredBankrollAmount;
   return {
     recommendationId: experiment.id,
     label: experiment.label,
+    marketId: experiment.formValues.marketId || DEFAULT_MARKET_ID,
     allocatedCapital: bankroll,
     targetProfit: stats.expectedProfitAmount,
     roundCount: stats.roundCount,
@@ -52,9 +57,14 @@ export function recommendationSetFromExperiments(
   }
 
   const baseline = withResult.find((e) => e.isBaseline) ?? withResult[0];
+  if (baseline === undefined) {
+    return null;
+  }
   const bankroll = parseMoneyPositiveInt(baseline.formValues.userBankroll) ?? 0;
   const recommendations = withResult.map(toStrategyRecommendation);
   const totalTargetProfit = recommendations.reduce((sum, r) => sum + r.targetProfit, 0);
+
+  const marketId = baseline.formValues.marketId || DEFAULT_MARKET_ID;
 
   return {
     setId: crypto.randomUUID(),
@@ -65,6 +75,7 @@ export function recommendationSetFromExperiments(
     strategy: 'balanced',
     risk: 'normal',
     presetId,
+    marketId,
     recommendations,
     totalTargetProfit,
     selectedRecommendationId: null,

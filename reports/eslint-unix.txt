@@ -1,0 +1,8 @@
+﻿node : The unix formatter is no longer part of core ESLint. Install it manually with `npm install -D 
+eslint-formatter-unix`
+At C:\Users\Admin\AppData\Local\Temp\ps-script-98e3b2aa-7436-4e3e-ab14-2b577566d98b.ps1:81 char:49
++ ... earnmoney"; node node_modules/eslint/bin/eslint.js . --format unix 2> ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (The unix format...formatter-unix`:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 

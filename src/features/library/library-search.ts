@@ -104,9 +104,7 @@ export function partitionLibrarySessions(sessions: readonly Session[]): {
 }
 
 export function archivedSessions(sessions: readonly Session[]): Session[] {
-  return sessions
-    .filter((s) => s.archived)
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  return sessions.filter((s) => s.archived).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
 export function allTagsFromSessions(sessions: readonly Session[]): string[] {

@@ -8,12 +8,12 @@
 
 ## Platform
 
-| | |
-| --- | --- |
-| **Package** | `@stake/constraint-engine` |
-| **Version** | `v1.0.0-rc.1` |
-| **Status** | **Stable** — decimal multiplier shipped (`28d5800`) |
-| **Proof** | 380+ tests, property + differential, regression M=20, arithmetic migration brief |
+|             |                                                                                  |
+| ----------- | -------------------------------------------------------------------------------- |
+| **Package** | `@stake/constraint-engine`                                                       |
+| **Version** | `v1.0.0-rc.1`                                                                    |
+| **Status**  | **Stable** — decimal multiplier shipped (`28d5800`)                              |
+| **Proof**   | 380+ tests, property + differential, regression M=20, arithmetic migration brief |
 
 Platform work is **complete** for current product needs. Further changes require SemVer gate — see [`PUBLIC_API.md`](../PUBLIC_API.md).
 
@@ -21,12 +21,12 @@ Platform work is **complete** for current product needs. Further changes require
 
 ## Product
 
-| | |
-| --- | --- |
-| **Name** | Stake Planner |
-| **Status** | **Feature 1 — awaiting user evidence** |
-| **Spec** | [feature-1-generate-plan.md](product/feature-1-generate-plan.md) |
-| **App** | [`stake-planner.vercel.app`](https://stake-planner.vercel.app) · local `pnpm dev` |
+|            |                                                                                   |
+| ---------- | --------------------------------------------------------------------------------- |
+| **Name**   | Stake Planner                                                                     |
+| **Status** | **Feature 1 — awaiting user evidence**                                            |
+| **Spec**   | [feature-1-generate-plan.md](product/feature-1-generate-plan.md)                  |
+| **App**    | [`stake-planner.vercel.app`](https://stake-planner.vercel.app) · local `pnpm dev` |
 
 ---
 
@@ -60,14 +60,14 @@ Full roadmap: [`ROADMAP.md`](../ROADMAP.md)
 
 ## Quick links
 
-| Topic | Document |
-| ----- | -------- |
-| Feature 1 dogfood + #018 script | [`product/feature-1-dogfood-notes.md`](product/feature-1-dogfood-notes.md) |
-| Arithmetic migration | [`design/arithmetic-migration-brief.md`](design/arithmetic-migration-brief.md) |
-| Game policy (Platform) | [`design/game-policy-brief.md`](design/game-policy-brief.md) |
-| Product problem | [`rfc/product/RFC-101-user-problem.md`](rfc/product/RFC-101-user-problem.md) |
-| User journey | [`rfc/product/RFC-102-user-journey.md`](rfc/product/RFC-102-user-journey.md) |
-| SDK cookbook | [`cookbook/README.md`](cookbook/README.md) |
+| Topic                           | Document                                                                       |
+| ------------------------------- | ------------------------------------------------------------------------------ |
+| Feature 1 dogfood + #018 script | [`product/feature-1-dogfood-notes.md`](product/feature-1-dogfood-notes.md)     |
+| Arithmetic migration            | [`design/arithmetic-migration-brief.md`](design/arithmetic-migration-brief.md) |
+| Game policy (Platform)          | [`design/game-policy-brief.md`](design/game-policy-brief.md)                   |
+| Product problem                 | [`rfc/product/RFC-101-user-problem.md`](rfc/product/RFC-101-user-problem.md)   |
+| User journey                    | [`rfc/product/RFC-102-user-journey.md`](rfc/product/RFC-102-user-journey.md)   |
+| SDK cookbook                    | [`cookbook/README.md`](cookbook/README.md)                                     |
 
 ---
 

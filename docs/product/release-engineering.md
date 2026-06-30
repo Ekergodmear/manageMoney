@@ -142,4 +142,4 @@ Manifest · icon · offline shell — sau E2E green.
 
 ---
 
-*Roadmap chi tiết: `personal-roadmap.md`*
+_Roadmap chi tiết: `personal-roadmap.md`_

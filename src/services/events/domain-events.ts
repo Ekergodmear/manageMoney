@@ -28,7 +28,9 @@ export class EventBus {
 
   /** Logger — subscribe mọi event type trong catalog */
   subscribeLogger(handler: (event: AppEvent) => void, types: readonly AppEventType[]): Unsubscribe {
-    const unsubscribes = types.map((type) => this.subscribe(type, handler as AppEventHandler<typeof type>));
+    const unsubscribes = types.map((type) =>
+      this.subscribe(type, handler as AppEventHandler<typeof type>),
+    );
     return () => {
       for (const unsub of unsubscribes) {
         unsub();
@@ -70,11 +72,11 @@ export function isAppEvent(value: unknown): value is AppEvent {
   if (value === null || typeof value !== 'object') {
     return false;
   }
-  const candidate = value as AppEvent;
+  const record = value as Record<string, unknown>;
   return (
-    typeof candidate.type === 'string' &&
-    candidate.schemaVersion === EVENT_SCHEMA_VERSION &&
-    candidate.occurredAt instanceof Date
+    typeof record.type === 'string' &&
+    record.schemaVersion === EVENT_SCHEMA_VERSION &&
+    record.occurredAt instanceof Date
   );
 }
 

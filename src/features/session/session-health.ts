@@ -34,10 +34,7 @@ export function computeCapitalUsagePercent(plan: Plan): number | null {
   if (bankroll === null || bankroll <= 0) {
     return null;
   }
-  const spent = accumulatedAtRound(
-    plan.generated.strategy.rounds,
-    plan.completedThroughRound,
-  );
+  const spent = accumulatedAtRound(plan.generated.strategy.rounds, plan.completedThroughRound);
   return Math.min(100, Math.round((spent / bankroll) * 100));
 }
 

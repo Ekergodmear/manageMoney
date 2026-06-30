@@ -1,15 +1,7 @@
 import type { SessionTimelineEvent } from '@/features/session/session-domain';
 import { formatSessionTime } from '@/features/session/session-domain';
 import { cn } from '@/lib/utils';
-import {
-  Check,
-  Circle,
-  Flag,
-  Play,
-  RotateCcw,
-  Sparkles,
-  Trophy,
-} from 'lucide-react';
+import { Check, Circle, Flag, Play, RotateCcw, Sparkles, Trophy } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 export type TimelineNavigateTarget =
@@ -29,6 +21,7 @@ const ICONS: Partial<Record<SessionTimelineEvent['type'], ReactNode>> = {
   improve: <Sparkles className="h-3.5 w-3.5" />,
   continue: <Play className="h-3.5 w-3.5" />,
   'note-updated': <Circle className="h-3.5 w-3.5" />,
+  'round-settled': <Check className="h-3.5 w-3.5" />,
 };
 
 function labelForEvent(event: SessionTimelineEvent): string {
@@ -54,6 +47,7 @@ function labelForEvent(event: SessionTimelineEvent): string {
     improve: 'Cải thiện',
     continue: 'Continue',
     'note-updated': 'Ghi chú',
+    'round-settled': 'Kết quả kỳ',
   };
   return defaults[event.type] ?? event.type.replace(/-/g, ' ');
 }
@@ -100,14 +94,12 @@ function EventBody({
         {labelForEvent(event)}
       </p>
       {event.betAmount !== undefined ? (
-        <p className="text-xs text-muted-foreground">
-          {event.betAmount.toLocaleString('vi-VN')} đ
-        </p>
+        <p className="text-xs text-muted-foreground">{event.betAmount.toLocaleString('vi-VN')} đ</p>
       ) : null}
     </>
   );
 
-  if (!clickable || target === null) {
+  if (!clickable) {
     return <div className="pb-5 pt-0.5">{content}</div>;
   }
 
@@ -115,7 +107,9 @@ function EventBody({
     <button
       type="button"
       className="group pb-5 pt-0.5 text-left transition-colors hover:opacity-90"
-      onClick={() => onNavigate(target)}
+      onClick={() => {
+        onNavigate(target);
+      }}
     >
       {content}
     </button>
@@ -163,7 +157,7 @@ export function SessionTimeline({
                 <span className="my-1 w-px flex-1 min-h-[20px] bg-border" aria-hidden />
               ) : null}
             </div>
-            <EventBody event={event} onNavigate={onNavigate} />
+            <EventBody event={event} {...(onNavigate !== undefined ? { onNavigate } : {})} />
           </li>
         ))}
       </ol>
@@ -178,10 +172,12 @@ export function SessionTimeline({
           const clickable = target !== null && onNavigate !== undefined;
           return (
             <li key={`${event.at}-${event.type}-${String(index)}`} className="flex items-center">
-              {clickable && target !== null ? (
+              {clickable ? (
                 <button
                   type="button"
-                  onClick={() => onNavigate(target)}
+                  onClick={() => {
+                    onNavigate(target);
+                  }}
                   className={cn(
                     'flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors hover:border-primary/50',
                     (event.type === 'session-won' || event.type === 'plan-won') &&

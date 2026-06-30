@@ -6,6 +6,13 @@ export function collectorLog(message: string): void {
 
 export function collectorError(message: string, err?: unknown): void {
   const ts = new Date().toISOString();
-  const detail = err instanceof Error ? err.message : err !== undefined ? String(err) : '';
+  const detail =
+    err === undefined
+      ? ''
+      : err instanceof Error
+        ? err.message
+        : typeof err === 'string'
+          ? err
+          : JSON.stringify(err);
   console.error(`[Collector] ${ts} ${message}${detail ? ` — ${detail}` : ''}`);
 }

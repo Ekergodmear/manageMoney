@@ -8,7 +8,7 @@
 
 ## Product features
 
-Each feature answers: *What does the user want?* *What gets worse if we skip it?*
+Each feature answers: _What does the user want?_ _What gets worse if we skip it?_
 
 ```text
 Feature 1  Generate Plan
@@ -42,7 +42,7 @@ Enter reward multiplier, rounds, bets, target profit → see required bankroll a
 
 **Goal:** When bankroll is not enough, user still gets a feasible option.
 
-**Success:** User understands a *suggested plan* exists and can accept it.
+**Success:** User understands a _suggested plan_ exists and can accept it.
 
 **Platform:** `optimize` + structured `explanation`
 
@@ -52,7 +52,7 @@ Enter reward multiplier, rounds, bets, target profit → see required bankroll a
 
 **Goal:** User trusts the plan.
 
-Simulation + explanation — user knows *why* this plan fits their situation.
+Simulation + explanation — user knows _why_ this plan fits their situation.
 
 **Success:** User proceeds with confidence, not blind acceptance.
 
@@ -100,10 +100,10 @@ CLI is a **dogfooding tool**, not a product. Two commands, plain output, then mo
 
 `@stake/constraint-engine` — no feature roadmap here.
 
-| Milestone | Status |
-| --------- | ------ |
-| Core SDK v1 + public API | ✅ `v1.0.0-rc.1` |
-| Optimization engine + export | ✅ Production ready |
+| Milestone                      | Status               |
+| ------------------------------ | -------------------- |
+| Core SDK v1 + public API       | ✅ `v1.0.0-rc.1`     |
+| Optimization engine + export   | ✅ Production ready  |
 | Consumer validation + cookbook | ✅ Sprint 3 complete |
 
 Platform changes: SemVer, [`PUBLIC_API.md`](PUBLIC_API.md), [`docs/CORE-STABILITY.md`](docs/CORE-STABILITY.md).

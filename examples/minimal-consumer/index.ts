@@ -70,8 +70,7 @@ console.log('');
 
 if (optimization.kind === 'success') {
   const { request, explanation } = optimization;
-  const profit =
-    request.targetProfit.mode === 'fixedAmount' ? request.targetProfit.amount : 0;
+  const profit = request.targetProfit.mode === 'fixedAmount' ? request.targetProfit.amount : 0;
 
   console.log(`Profit target: ${formatAmount(profit)}`);
   console.log(`Rounds: ${request.roundCount}`);

@@ -26,11 +26,11 @@ Benchmarks measure **consumer experience** via public API only. They are **not**
 
 **Branch:** `optimization-v1` — not part of Core SDK public API.
 
-| Component              | Time | Space | Notes                                      |
-| ---------------------- | ---- | ----- | ------------------------------------------ |
-| `SearchPolicy.nextProfit`      | O(1) | O(1)  | Single arithmetic step; no loops           |
-| `SearchPolicy.nextRoundCount`  | O(1) | O(1)  | Single decrement; no loops                 |
-| `optimize()` search loop       | O(P) | O(1)  | P = profit steps; one pipeline eval / step |
+| Component                     | Time | Space | Notes                                      |
+| ----------------------------- | ---- | ----- | ------------------------------------------ |
+| `SearchPolicy.nextProfit`     | O(1) | O(1)  | Single arithmetic step; no loops           |
+| `SearchPolicy.nextRoundCount` | O(1) | O(1)  | Single decrement; no loops                 |
+| `optimize()` search loop      | O(P) | O(1)  | P = profit steps; one pipeline eval / step |
 
 Policy is **O(1)** per call. The engine owns the loop. Nested search (3.2C) adds round dimension: **O(P × R)** total evaluations.
 

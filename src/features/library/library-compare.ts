@@ -57,7 +57,10 @@ export function compareSessions(left: Session, right: Session): SessionCompareRe
     {
       id: 'continue',
       label: 'Continue',
-      values: [String(leftStats.continueCount), String(rightStats.continueCount)] as [string, string],
+      values: [String(leftStats.continueCount), String(rightStats.continueCount)] as [
+        string,
+        string,
+      ],
       delta: deltaLabel(leftStats.continueCount, rightStats.continueCount, 'continue'),
     },
     {
@@ -69,10 +72,10 @@ export function compareSessions(left: Session, right: Session): SessionCompareRe
     {
       id: 'highest-bet',
       label: 'Cược cao nhất',
-      values: [
-        formatMoneyShort(leftStats.highestBet),
-        formatMoneyShort(rightStats.highestBet),
-      ] as [string, string],
+      values: [formatMoneyShort(leftStats.highestBet), formatMoneyShort(rightStats.highestBet)] as [
+        string,
+        string,
+      ],
       delta: deltaLabel(leftStats.highestBet, rightStats.highestBet, 'highest-bet'),
     },
     {

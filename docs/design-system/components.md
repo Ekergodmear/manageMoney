@@ -9,19 +9,19 @@ Playground: Settings → Design System · `src/design/playground/DesignPlaygroun
 
 ## Tầng primitive — `src/components/ui/`
 
-| Component | Khi dùng |
-|-----------|----------|
-| `Box` | Wrapper layout |
-| `Stack` | Layout dọc — `spacing={SpacingKey}` |
-| `Row` | Layout ngang — `spacing`, `align` |
-| `Grid` | Lưới responsive — `columns`, `spacing` |
-| `Text` | Mọi typography — `variant="h1"` … `metric` |
-| `Card` | Container — `tone`, `elevation` |
-| `Button` | Hành động — `variant`, `size` (`size="icon"` = icon button) |
-| `Badge` | Nhãn inline |
-| `Divider` | Phân cách |
-| `Input` | Form text |
-| `Tooltip` | TooltipProvider, InfoTip |
+| Component | Khi dùng                                                    |
+| --------- | ----------------------------------------------------------- |
+| `Box`     | Wrapper layout                                              |
+| `Stack`   | Layout dọc — `spacing={SpacingKey}`                         |
+| `Row`     | Layout ngang — `spacing`, `align`                           |
+| `Grid`    | Lưới responsive — `columns`, `spacing`                      |
+| `Text`    | Mọi typography — `variant="h1"` … `metric`                  |
+| `Card`    | Container — `tone`, `elevation`                             |
+| `Button`  | Hành động — `variant`, `size` (`size="icon"` = icon button) |
+| `Badge`   | Nhãn inline                                                 |
+| `Divider` | Phân cách                                                   |
+| `Input`   | Form text                                                   |
+| `Tooltip` | TooltipProvider, InfoTip                                    |
 
 **Deferred (evidence required):** `Select`, `Textarea` — xem freeze-report.
 
@@ -31,22 +31,22 @@ Playground: Settings → Design System · `src/design/playground/DesignPlaygroun
 
 ## Tầng product — `src/components/product/`
 
-| Component | Khi dùng |
-|-----------|----------|
-| `Page` | Root layout màn hình |
-| `PageSection` | Section có tiêu đề |
-| `SectionHeader` | Tiêu đề trang + mô tả |
-| `HeroCard` | Reflection / hero insight |
-| `InfoPanel` | Insight card có action |
-| `MetricCard` | Số liệu, KPI, stat box |
-| `EmptyState` | Không có dữ liệu — **reuse** |
-| `StatusChip` | Confidence, trạng thái session |
-| `Drawer` | Panel trượt (Compare, …) |
-| `FolderTile` | Collection folder |
-| `ActionMenu` | Menu hành động dropdown |
-| `SearchField` | Search có icon |
-| `FilterField` | Label + select |
-| `NumberFilterField` | Label + number input |
+| Component           | Khi dùng                       |
+| ------------------- | ------------------------------ |
+| `Page`              | Root layout màn hình           |
+| `PageSection`       | Section có tiêu đề             |
+| `SectionHeader`     | Tiêu đề trang + mô tả          |
+| `HeroCard`          | Reflection / hero insight      |
+| `InfoPanel`         | Insight card có action         |
+| `MetricCard`        | Số liệu, KPI, stat box         |
+| `EmptyState`        | Không có dữ liệu — **reuse**   |
+| `StatusChip`        | Confidence, trạng thái session |
+| `Drawer`            | Panel trượt (Compare, …)       |
+| `FolderTile`        | Collection folder              |
+| `ActionMenu`        | Menu hành động dropdown        |
+| `SearchField`       | Search có icon                 |
+| `FilterField`       | Label + select                 |
+| `NumberFilterField` | Label + number input           |
 
 ---
 

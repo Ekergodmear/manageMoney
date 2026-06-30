@@ -1,12 +1,19 @@
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
+import { buildBingo18Markets } from '@/features/game-data/markets/bingo18-markets';
 
 export const DEFAULT_PRESET_ID = 'bingo-120';
+
+const BINGO18_TIER_TAX = { type: 'tier-tax' as const, threshold: '10.000.000', ratePercent: '10' };
+const BINGO18_MARKETS = buildBingo18Markets(BINGO18_TIER_TAX);
 
 export const BUILTIN_GAME_PRESETS: readonly GamePolicyPreset[] = [
   {
     id: 'bingo-120',
     name: 'Bingo ×120',
     category: 'Casino',
+    gameId: 'bingo18',
+    marketVersion: 1,
+    markets: BINGO18_MARKETS,
     rewardMultiplier: '120',
     minimumBet: '10.000',
     maximumBet: '1.000.000',
@@ -19,6 +26,9 @@ export const BUILTIN_GAME_PRESETS: readonly GamePolicyPreset[] = [
     id: 'bingo-20',
     name: 'Bingo ×20',
     category: 'Casino',
+    gameId: 'bingo18',
+    marketVersion: 1,
+    markets: buildBingo18Markets({ type: 'no-tax' }),
     rewardMultiplier: '20',
     minimumBet: '10.000',
     maximumBet: '500.000',

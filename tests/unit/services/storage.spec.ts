@@ -29,8 +29,8 @@ describe('Storage — PersistenceService', () => {
     const driver = new MemoryStorageDriver();
     const storage = new PersistenceService(driver);
     await storage.save({ ...EMPTY_PERSISTED_STATE, theme: 'dark' });
-    const raw = await driver.get<typeof EMPTY_PERSISTED_STATE>(APP_STATE_STORAGE_KEY);
-    expect(raw?.theme).toBe('dark');
+    const raw = await driver.get(APP_STATE_STORAGE_KEY);
+    expect((raw as typeof EMPTY_PERSISTED_STATE | null)?.theme).toBe('dark');
   });
 
   it('migrates legacy v2 shape on load', async () => {
@@ -46,7 +46,7 @@ describe('Storage — PersistenceService', () => {
     });
     const storage = new PersistenceService(driver);
     const state = await storage.load();
-    expect(state.version).toBe(3);
+    expect(state.version).toBe(6);
     expect(state.sessions).toEqual([]);
   });
 });

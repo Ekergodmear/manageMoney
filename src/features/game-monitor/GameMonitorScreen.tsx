@@ -12,17 +12,20 @@ const POLL_MS = 15_000;
 
 function formatDrawClock(drawAt: string): string {
   const m = drawAt.match(/T(\d{2}):(\d{2})/);
-  return m !== null ? `${m[1]}:${m[2]}` : drawAt;
+  if (m === null || m[1] === undefined || m[2] === undefined) {
+    return drawAt;
+  }
+  return `${m[1]}:${m[2]}`;
 }
 
 function formatRelative(iso: string | null): string {
   if (iso === null) return '—';
   const sec = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
-  if (sec < 60) return `${sec}s trước`;
+  if (sec < 60) return `${String(sec)}s trước`;
   const min = Math.floor(sec / 60);
-  if (min < 60) return `${min} phút trước`;
+  if (min < 60) return `${String(min)} phút trước`;
   const hr = Math.floor(min / 60);
-  return `${hr} giờ trước`;
+  return `${String(hr)} giờ trước`;
 }
 
 function smallLargeLabel(v: 'small' | 'tie' | 'large'): string {
@@ -35,7 +38,10 @@ function statusDot(status: string | undefined): ReactNode {
   const ok = status === 'running' || status === 'healthy';
   return (
     <span
-      className={cn('inline-block h-2.5 w-2.5 rounded-full', ok ? 'bg-emerald-500' : 'bg-amber-500')}
+      className={cn(
+        'inline-block h-2.5 w-2.5 rounded-full',
+        ok ? 'bg-emerald-500' : 'bg-amber-500',
+      )}
       aria-hidden
     />
   );
@@ -54,27 +60,25 @@ export function GameMonitorScreen(): ReactNode {
   useEffect(() => {
     void refresh();
     const id = setInterval(() => void refresh(), POLL_MS);
-    return () => clearInterval(id);
+    return () => {
+      clearInterval(id);
+    };
   }, [refresh]);
 
-  const draw = snapshot?.latest;
-  const health = snapshot?.health;
-  const today = snapshot?.today;
-  const collectorVersion = snapshot?.collector;
+  const draw = snapshot?.latest ?? null;
+  const health = snapshot?.health ?? null;
+  const today = snapshot?.today ?? null;
+  const collectorVersion = snapshot?.collector ?? null;
   const totals =
-    today !== null
-      ? today.totals.map((t) => ({
-          label: String(t.value),
-          value: t.count,
-        }))
-      : [];
+    today?.totals.map((t) => ({
+      label: String(t.value),
+      value: t.count,
+    })) ?? [];
   const flowers =
-    today !== null
-      ? today.flowers.map((f) => ({
-          label: String(f.value),
-          value: f.count,
-        }))
-      : [];
+    today?.flowers.map((f) => ({
+      label: String(f.value),
+      value: f.count,
+    })) ?? [];
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
@@ -83,11 +87,10 @@ export function GameMonitorScreen(): ReactNode {
           <h2 className="text-2xl font-bold tracking-tight">Game Monitor</h2>
           <p className="text-sm text-muted-foreground">
             Đọc từ Collector HTTP — một request /dashboard mỗi {POLL_MS / 1000}s
-            {collectorVersion !== null && (
+            {collectorVersion != null && (
               <span className="ml-2 font-mono text-xs">
                 v{collectorVersion.version}
-                {collectorVersion.commit !== null &&
-                  ` · ${collectorVersion.commit.slice(0, 7)}`}
+                {collectorVersion.commit !== null && ` · ${collectorVersion.commit.slice(0, 7)}`}
               </span>
             )}
           </p>
@@ -98,12 +101,15 @@ export function GameMonitorScreen(): ReactNode {
         </Button>
       </div>
 
-      {snapshot?.error !== null && snapshot?.error !== undefined && (
+      {snapshot?.error != null && (
         <Card className="border-destructive/40 bg-destructive/5">
           <CardContent className="p-4 text-sm text-destructive">
             {snapshot.error}
             <p className="mt-2 text-xs text-muted-foreground">
-              Chạy: <code className="rounded bg-muted px-1">COLLECTOR_ADAPTER=bingo18 pnpm collector:start</code>
+              Chạy:{' '}
+              <code className="rounded bg-muted px-1">
+                COLLECTOR_ADAPTER=bingo18 pnpm collector:start
+              </code>
             </p>
           </CardContent>
         </Card>
@@ -180,9 +186,7 @@ export function GameMonitorScreen(): ReactNode {
                   </div>
                   <div>
                     <dt className="text-muted-foreground">Latency avg</dt>
-                    <dd className="font-medium">
-                      {Math.round(health.averageLatencyMs / 1000)}s
-                    </dd>
+                    <dd className="font-medium">{Math.round(health.averageLatencyMs / 1000)}s</dd>
                   </div>
                   <div>
                     <dt className="text-muted-foreground">Failures</dt>
@@ -204,7 +208,7 @@ export function GameMonitorScreen(): ReactNode {
           <CardHeader className="pb-2">
             <CardTitle className="text-base">
               Today — Tổng 3–18
-              {today !== null && (
+              {today != null && (
                 <span className="ml-2 text-xs font-normal text-muted-foreground">
                   {today.date} ({today.drawCount} kỳ)
                 </span>
@@ -234,7 +238,7 @@ export function GameMonitorScreen(): ReactNode {
         </Card>
       </div>
 
-      {snapshot !== null && snapshot.error === null && (
+      {snapshot != null && snapshot.error == null && (
         <p className="text-center text-xs text-muted-foreground">
           Snapshot {formatRelative(snapshot.generatedAt)} · {today?.drawCount ?? 0} kỳ hôm nay
         </p>

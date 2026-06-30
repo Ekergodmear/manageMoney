@@ -41,9 +41,7 @@ export function ImproveScreen({
   onBack,
 }: ImproveScreenProps): ReactNode {
   const [activeMode, setActiveMode] = useState<ImproveMode>('fit-bankroll');
-  const [maxBetInput, setMaxBetInput] = useState(
-    String(generated.statistics.maximumBetAmount),
-  );
+  const [maxBetInput, setMaxBetInput] = useState(String(generated.statistics.maximumBetAmount));
 
   const maxBetLimit = useMemo(() => {
     const parsed = Number(maxBetInput.replace(/\D/g, ''));
@@ -60,10 +58,7 @@ export function ImproveScreen({
   );
 
   const allOptions = useMemo(() => runAllImproveOptions(context), [context]);
-  const modeOption = useMemo(
-    () => runImproveForMode(context, activeMode),
-    [context, activeMode],
-  );
+  const modeOption = useMemo(() => runImproveForMode(context, activeMode), [context, activeMode]);
 
   const shortfall = bankrollShortfall(generated);
   const { statistics, userBankroll } = generated;
@@ -116,7 +111,13 @@ export function ImproveScreen({
 
       <div className="flex flex-wrap gap-2">
         {MODES.map((mode) => (
-          <button key={mode.id} type="button" onClick={() => setActiveMode(mode.id)}>
+          <button
+            key={mode.id}
+            type="button"
+            onClick={() => {
+              setActiveMode(mode.id);
+            }}
+          >
             <Badge
               variant={activeMode === mode.id ? 'default' : 'outline'}
               className="cursor-pointer px-3 py-1.5"
@@ -133,14 +134,22 @@ export function ImproveScreen({
           <Input
             id="max-bet-limit"
             value={maxBetInput}
-            onChange={(e) => setMaxBetInput(e.target.value)}
+            onChange={(e) => {
+              setMaxBetInput(e.target.value);
+            }}
             placeholder="500.000"
           />
         </div>
       ) : null}
 
       {modeOption !== null ? (
-        <OptionCard option={modeOption} highlighted onSelect={() => onSelectOption(modeOption)} />
+        <OptionCard
+          option={modeOption}
+          highlighted
+          onSelect={() => {
+            onSelectOption(modeOption);
+          }}
+        />
       ) : (
         <Card className="border-dashed">
           <CardContent className="p-5 text-sm text-muted-foreground">
@@ -161,7 +170,9 @@ export function ImproveScreen({
                 key={`${option.id}-${String(option.result.request.roundCount)}`}
                 option={option}
                 highlighted={false}
-                onSelect={() => onSelectOption(option)}
+                onSelect={() => {
+                  onSelectOption(option);
+                }}
               />
             ))}
           </div>

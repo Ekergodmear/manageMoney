@@ -26,9 +26,7 @@ export function SessionCard({
   const targetAmount =
     request.targetProfit.mode === 'fixedAmount' ? request.targetProfit.amount : null;
   const lastBet =
-    completedThroughRound > 0
-      ? (strategy.rounds[completedThroughRound - 1]?.betAmount ?? 0)
-      : 0;
+    completedThroughRound > 0 ? (strategy.rounds[completedThroughRound - 1]?.betAmount ?? 0) : 0;
   const isActive = completedThroughRound < totalRounds;
   const timeLabel = startedAt.toLocaleTimeString('vi-VN', {
     hour: '2-digit',
@@ -36,12 +34,7 @@ export function SessionCard({
   });
 
   return (
-    <div
-      className={cn(
-        'rounded-xl border border-border bg-card px-4 py-3 shadow-sm',
-        className,
-      )}
-    >
+    <div className={cn('rounded-xl border border-border bg-card px-4 py-3 shadow-sm', className)}>
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-2">
         <div className="flex items-center gap-2">
           <span
@@ -71,9 +64,7 @@ export function SessionCard({
         </div>
         <div>
           <p className="text-xs text-muted-foreground">Lần cược gần nhất</p>
-          <p className="font-medium">
-            {lastBet > 0 ? `${formatAmount(lastBet)} đ` : '—'}
-          </p>
+          <p className="font-medium">{lastBet > 0 ? `${formatAmount(lastBet)} đ` : '—'}</p>
         </div>
         <div>
           <p className="text-xs text-muted-foreground">Mục tiêu</p>

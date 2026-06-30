@@ -1,0 +1,152 @@
+﻿
+> @stake/constraint-engine@1.0.0-rc.1 typecheck C:\Users\Admin\OneDrive\Desktop\earnmoney
+> tsc --noEmit
+
+src/components/product/ActionMenu.tsx(72,56): error TS2322: Type '0' is not assignable to type '2 | 24 | 20 | 4 | 8 | 12 | 16 | 32 | 40 | 48 | 64'.
+src/design/playground/DesignPlayground.tsx(126,15): error TS2352: Conversion of type 'string[]' to type '(2 | 24 | 20 | 4 | 8 | 12 | 16 | 32 | 40 | 48 | 64)[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'string' is not comparable to type '2 | 24 | 20 | 4 | 8 | 12 | 16 | 32 | 40 | 48 | 64'.
+src/design/playground/DesignPlayground.tsx(155,24): error TS2322: Type '{ label: string; }' is not assignable to type 'IntrinsicAttributes & { content: string; }'.
+  Property 'label' does not exist on type 'IntrinsicAttributes & { content: string; }'.
+src/features/capital/promote-candidate-to-session-use-case.ts(67,54): error TS2379: Argument of type '{ sessionId: string; planId: string; originRecommendationId: string | undefined; }' is not assignable to parameter of type 'Omit<SessionCreatedEvent, "type" | "schemaVersion" | "occurredAt">' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'originRecommendationId' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/experiment/experiment-recommendation-mapper.ts(57,42): error TS18048: 'baseline' is possibly 'undefined'.
+src/features/experiment/experiment-recommendation-mapper.ts(61,20): error TS18048: 'baseline' is possibly 'undefined'.
+src/features/game-data/settlement/apply-settlement-use-case.ts(97,34): error TS2379: Argument of type '{ draw: CollectorDrawResult; roundIndex: number; bet: number; accumulatedSpentBefore: number; market: MarketDefinition; winTax: WinTax | undefined; }' is not assignable to parameter of type 'SettlementInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'winTax' are incompatible.
+    Type 'WinTax | undefined' is not assignable to type 'WinTax'.
+      Type 'undefined' is not assignable to type 'WinTax'.
+src/features/game-designer/builtin-presets.ts(1,15): error TS2300: Duplicate identifier 'GamePolicyPreset'.
+src/features/game-designer/builtin-presets.ts(3,15): error TS2300: Duplicate identifier 'GamePolicyPreset'.
+src/features/game-designer/builtin-presets.ts(5,1): error TS6133: 'DEFAULT_MARKET_ID' is declared but its value is never read.
+src/features/game-designer/GameDesignerScreen.tsx(171,12): error TS2375: Type '{ markets: readonly MarketDefinition[]; observedStats: readonly MarketFrequencyStat[] | undefined; readOnly: boolean; }' is not assignable to type 'MarketsPanelProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'observedStats' are incompatible.
+    Type 'readonly MarketFrequencyStat[] | undefined' is not assignable to type 'readonly MarketFrequencyStat[]'.
+      Type 'undefined' is not assignable to type 'readonly MarketFrequencyStat[]'.
+src/features/game-designer/preset-utils.ts(82,3): error TS2375: Type '{ name: string; category: string; gameId: string | undefined; marketVersion: number | undefined; markets: MarketDefinition[]; rewardMultiplier: string; minimumBet: string; maximumBet: string; betStep: string; rewardPolicy: RewardPolicyConfig; continuePolicy: ContinuePolicyConfig; }' is not assignable to type 'GamePolicyDraft' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ name: string; category: string; gameId: string | undefined; marketVersion: number | undefined; markets: MarketDefinition[]; rewardMultiplier: string; minimumBet: string; maximumBet: string; betStep: string; rewardPolicy: RewardPolicyConfig; continuePolicy: ContinuePolicyConfig; }' is not assignable to type 'Omit<GamePolicyPreset, "id" | "createdAt" | "builtin">' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'gameId' are incompatible.
+      Type 'string | undefined' is not assignable to type 'string'.
+        Type 'undefined' is not assignable to type 'string'.
+src/features/game-designer/preset-utils.ts(102,3): error TS2375: Type '{ builtin?: true; id: string; name: string; category: string; gameId: string | undefined; marketVersion: number | undefined; markets: MarketDefinition[] | undefined; ... 6 more ...; createdAt: string; }' is not assignable to type 'GamePolicyPreset' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'gameId' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/improve/create-improvement-candidate-use-case.ts(10,10): error TS6133: 'findPlan' is declared but its value is never read.
+src/features/insights/insight-generators/session.ts(199,16): error TS2379: Argument of type '{ action?: { label: string; target: "session"; sessionId: string; }; id: string; layer: "quick"; emoji: string; title: string; body: string; conclusion: string | undefined; confidence: InsightConfidence; }' is not assignable to parameter of type 'InsightCard' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'conclusion' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/insights/insight-generators/session.ts(238,16): error TS2379: Argument of type '{ action?: { label: string; target: "session"; sessionId: string; }; id: string; layer: "quick"; emoji: string; title: string; body: string; conclusion: string | undefined; confidence: InsightConfidence; }' is not assignable to parameter of type 'InsightCard' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'conclusion' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/insights/insight-generators/session.ts(310,5): error TS2375: Type '{ id: string; emoji: string; label: string; value: string; detail: string | undefined; sessionId: string | undefined; }' is not assignable to type 'InsightRecord' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'detail' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/insights/insight-generators/session.ts(318,5): error TS2375: Type '{ id: string; emoji: string; label: string; value: string; detail: string | undefined; sessionId: string | undefined; }' is not assignable to type 'InsightRecord' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'detail' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/insights/insight-generators/session.ts(326,5): error TS2375: Type '{ id: string; emoji: string; label: string; value: string; detail: string | undefined; sessionId: string | undefined; }' is not assignable to type 'InsightRecord' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'detail' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/insights/insight-generators/session.ts(337,18): error TS2379: Argument of type '{ id: string; emoji: string; label: string; value: string; detail: string | undefined; sessionId: string | undefined; }' is not assignable to parameter of type 'InsightRecord' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'detail' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/insights/insight-generators/session.ts(358,5): error TS2375: Type '{ id: string; layer: "quick"; emoji: string; title: string; body: string; conclusion: string | undefined; confidence: InsightConfidence; }' is not assignable to type 'InsightCard' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'conclusion' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/library/library-actions.ts(104,9): error TS2322: Type '{ id: string; parentPlanId: string | null; status: "ready"; completedThroughRound: number; createdAt: string; finishedAt: undefined; label: string; origin: PlanOrigin; marketId: string; formValues: PlannerFormValues; generated: GenerateResult; }[]' is not assignable to type 'Plan[]'.
+  Type '{ id: string; parentPlanId: string | null; status: "ready"; completedThroughRound: number; createdAt: string; finishedAt: undefined; label: string; origin: PlanOrigin; marketId: string; formValues: PlannerFormValues; generated: GenerateResult; }' is not assignable to type 'Plan' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'finishedAt' are incompatible.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/library/library-actions.ts(133,7): error TS2375: Type '{ at: string; type: "plan-added"; planId: string | undefined; label: string; }' is not assignable to type 'SessionTimelineEvent' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'planId' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/library/library-types.ts(2,36): error TS6133: 'getCurrentPlan' is declared but its value is never read.
+src/features/library/SessionComparePanel.tsx(20,14): error TS2322: Type '0' is not assignable to type '2 | 24 | 20 | 4 | 8 | 12 | 16 | 32 | 40 | 48 | 64'.
+src/features/notifications/hooks/use-notification-center.ts(46,9): error TS2379: Argument of type '{ onToast: ((message: string) => void) | undefined; }' is not assignable to parameter of type 'NotificationPresentHandlers' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'onToast' are incompatible.
+    Type '((message: string) => void) | undefined' is not assignable to type '(message: string) => void'.
+      Type 'undefined' is not assignable to type '(message: string) => void'.
+src/features/notifications/hooks/use-notification-center.ts(79,9): error TS2379: Argument of type '{ onToast: ((message: string) => void) | undefined; }' is not assignable to parameter of type 'NotificationPresentHandlers' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'onToast' are incompatible.
+    Type '((message: string) => void) | undefined' is not assignable to type '(message: string) => void'.
+      Type 'undefined' is not assignable to type '(message: string) => void'.
+src/features/notifications/hooks/use-notification-center.ts(107,13): error TS2379: Argument of type '{ onToast: ((message: string) => void) | undefined; }' is not assignable to parameter of type 'NotificationPresentHandlers' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'onToast' are incompatible.
+    Type '((message: string) => void) | undefined' is not assignable to type '(message: string) => void'.
+      Type 'undefined' is not assignable to type '(message: string) => void'.
+src/features/notifications/hooks/use-notification-center.ts(120,13): error TS2379: Argument of type '{ onToast: ((message: string) => void) | undefined; }' is not assignable to parameter of type 'NotificationPresentHandlers' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'onToast' are incompatible.
+    Type '((message: string) => void) | undefined' is not assignable to type '(message: string) => void'.
+      Type 'undefined' is not assignable to type '(message: string) => void'.
+src/features/notifications/notification-center.ts(62,28): error TS2379: Argument of type '{ kind: "win"; emoji: string; title: string; body: string; sessionId: string; amount: number | undefined; }' is not assignable to parameter of type '{ kind: NotificationKind; title: string; body: string; emoji: string; sessionId?: string; amount?: number; createdAt?: string; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'amount' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+src/features/notifications/notification-service.ts(37,7): error TS2322: Type 'NotificationState' is not assignable to type '{ notifications: AppNotification[]; preferences: NotificationPreferences; }'.
+  Types of property 'notifications' are incompatible.
+    The type 'readonly AppNotification[]' is 'readonly' and cannot be assigned to the mutable type 'AppNotification[]'.
+src/features/planner/PlanTableScreen.tsx(102,24): error TS18047: 'main' is possibly 'null'.
+src/features/planning/generate-plan-use-case.ts(3,15): error TS2300: Duplicate identifier 'PlanningDraftRepository'.
+src/features/planning/generate-plan-use-case.ts(4,15): error TS2300: Duplicate identifier 'PlanningDraftRepository'.
+src/features/planning/generate-plan-use-case.ts(25,19): error TS2304: Cannot find name 'PlanningDraft'.
+src/features/planning/generate-plan-use-case.ts(64,18): error TS2304: Cannot find name 'PlanningDraft'.
+src/features/playing/PlayingSessionScreen.tsx(1,10): error TS6133: 'AnimatePresence' is declared but its value is never read.
+src/features/playing/PlayingSessionScreen.tsx(298,12): error TS2375: Type '{ events: readonly SessionTimelineEvent[]; compact: true; variant: "horizontal"; onNavigate: undefined; }' is not assignable to type 'SessionTimelineProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'onNavigate' are incompatible.
+    Type 'undefined' is not assignable to type '(target: TimelineNavigateTarget) => void'.
+src/features/session/session-migration.ts(290,36): error TS2322: Type '5' is not assignable to type '6'.
+src/features/session/session-migration.ts(304,7): error TS2322: Type '5' is not assignable to type '6'.
+src/features/session/session-migration.ts(322,5): error TS2322: Type '5' is not assignable to type '6'.
+src/features/session/SessionPlannerScreen.tsx(170,6): error TS2375: Type '{ session: Session; preset: GamePolicyPreset | undefined; stats: SessionStatistics; readOnly: boolean; onStartPlaying: () => void; onNavigateToRound: (roundIndex: number) => void; ... 6 more ...; onTitleChange: ((title: string) => void) | undefined; }' is not assignable to type 'SessionCockpitProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'onSimulate' are incompatible.
+    Type '(() => void) | undefined' is not assignable to type '() => void'.
+      Type 'undefined' is not assignable to type '() => void'.
+src/features/session/SessionTimeline.tsx(168,14): error TS2375: Type '{ event: SessionTimelineEvent; onNavigate: ((target: TimelineNavigateTarget) => void) | undefined; }' is not assignable to type '{ event: SessionTimelineEvent; onNavigate?: (target: TimelineNavigateTarget) => void; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'onNavigate' are incompatible.
+    Type '((target: TimelineNavigateTarget) => void) | undefined' is not assignable to type '(target: TimelineNavigateTarget) => void'.
+      Type 'undefined' is not assignable to type '(target: TimelineNavigateTarget) => void'.
+src/services/events/subscribers.ts(1,15): error TS2724: '"@/services/events/event-types"' has no exported member named 'DomainEventHandler'. Did you mean 'AppEventHandler'?
+src/services/feature-flags/Flags.ts(2,1): error TS6133: 'Environment' is declared but its value is never read.
+src/services/index.ts(12,3): error TS2724: '"@/services/events/event-types"' has no exported member named 'DomainEventHandler'. Did you mean 'AppEventHandler'?
+src/services/telemetry/telemetry-store.ts(21,22): error TS6138: Property 'bus' is declared but its value is never read.
+tests/support/brute-force-optimization.ts(149,5): error TS2322: Type '"PROFIT_AND_ROUNDS_REDUCED"' is not assignable to type '"IDENTITY"'.
+tests/support/brute-force-optimization.ts(151,5): error TS2322: Type '"PROFIT_REDUCED"' is not assignable to type '"IDENTITY"'.
+tests/support/brute-force-optimization.ts(153,5): error TS2322: Type '"ROUNDS_REDUCED"' is not assignable to type '"IDENTITY"'.
+tests/support/optimization-arbitraries.ts(14,14): error TS2322: Type 'Arbitrary<OptimizationRequest>' is not assignable to type 'Arbitrary<CalculationRequest>'.
+  Type 'OptimizationRequest' is missing the following properties from type 'CalculationRequest': rewardMultiplier, roundCount, minimumBet, betStep, targetProfit
+tests/unit/game-data/soak-market-matrix.test.ts(76,3): error TS2739: Type '{ id: string; title: string; presetId: string; status: "playing"; profitAmount: null; favorite: false; archived: false; tags: never[]; notes: string; lastSettledDrawKey: null; playedRounds: never[]; plans: { ...; }[]; timeline: never[]; createdAt: string; updatedAt: string; }' is missing the following properties from type 'Session': sessionNumber, currentPlanId, startedAt
+tests/unit/game-data/statistics.test.ts(59,47): error TS2339: Property 'id' does not exist on type 'MarketFrequencyStat'.
+tests/unit/improve/session-rollout-s3.spec.ts(261,33): error TS2339: Property 'mode' does not exist on type 'PlanCandidate'.
+  Property 'mode' does not exist on type 'NewSessionPlanCandidate'.
+tests/unit/optimization/optimize-formal-properties.test.ts(59,32): error TS2345: Argument of type 'CalculationRequest' is not assignable to parameter of type 'OptimizationRequest'.
+  Type 'CalculationRequest' is missing the following properties from type 'OptimizationRequest': intent, bankrollLimit, allowRoundReduction, profitGranularity
+tests/unit/optimization/optimize-formal-properties.test.ts(60,33): error TS2345: Argument of type 'CalculationRequest' is not assignable to parameter of type 'OptimizationRequest'.
+  Type 'CalculationRequest' is missing the following properties from type 'OptimizationRequest': intent, bankrollLimit, allowRoundReduction, profitGranularity
+tests/unit/optimization/optimize-formal-properties.test.ts(70,33): error TS2345: Argument of type 'CalculationRequest' is not assignable to parameter of type 'OptimizationRequest'.
+  Type 'CalculationRequest' is missing the following properties from type 'OptimizationRequest': intent, bankrollLimit, allowRoundReduction, profitGranularity
+tests/unit/optimization/optimize-formal-properties.test.ts(71,45): error TS2345: Argument of type 'CalculationRequest' is not assignable to parameter of type 'OptimizationRequest'.
+  Type 'CalculationRequest' is missing the following properties from type 'OptimizationRequest': intent, bankrollLimit, allowRoundReduction, profitGranularity
+tests/unit/optimization/optimize-formal-properties.test.ts(80,33): error TS2345: Argument of type 'CalculationRequest' is not assignable to parameter of type 'OptimizationRequest'.
+  Type 'CalculationRequest' is missing the following properties from type 'OptimizationRequest': intent, bankrollLimit, allowRoundReduction, profitGranularity
+tests/unit/optimization/optimize-formal-properties.test.ts(82,40): error TS2345: Argument of type 'CalculationRequest' is not assignable to parameter of type 'OptimizationRequest'.
+  Type 'CalculationRequest' is missing the following properties from type 'OptimizationRequest': intent, bankrollLimit, allowRoundReduction, profitGranularity
+tests/unit/optimization/optimize-formal-properties.test.ts(95,33): error TS2345: Argument of type 'CalculationRequest' is not assignable to parameter of type 'OptimizationRequest'.
+  Type 'CalculationRequest' is missing the following properties from type 'OptimizationRequest': intent, bankrollLimit, allowRoundReduction, profitGranularity
+tests/unit/optimization/optimize-formal-properties.test.ts(96,36): error TS2345: Argument of type 'CalculationRequest' is not assignable to parameter of type 'OptimizationRequest'.
+  Type 'CalculationRequest' is missing the following properties from type 'OptimizationRequest': intent, bankrollLimit, allowRoundReduction, profitGranularity
+tests/unit/optimization/optimize.differential.test.ts(41,33): error TS2345: Argument of type 'CalculationRequest' is not assignable to parameter of type 'OptimizationRequest'.
+  Type 'CalculationRequest' is missing the following properties from type 'OptimizationRequest': intent, bankrollLimit, allowRoundReduction, profitGranularity
+tests/unit/optimization/optimize.differential.test.ts(42,43): error TS2345: Argument of type 'CalculationRequest' is not assignable to parameter of type 'OptimizationRequest'.
+  Type 'CalculationRequest' is missing the following properties from type 'OptimizationRequest': intent, bankrollLimit, allowRoundReduction, profitGranularity
+tests/unit/optimization/search-policy.test.ts(162,43): error TS2353: Object literal may only specify known properties, and 'percent' does not exist in type '{ readonly mode: "percentage"; readonly percentage: number; }'.
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 2.

@@ -2,9 +2,9 @@
 
 > Mini platform v0.8 — **4 milestone** với DoD rõ. Không scaffold 8 thư mục một commit.
 
-| Doc | Nội dung |
-|-----|----------|
-| `core-services-milestones.md` | Milestone 1–4 · DoD · status |
+| Doc                                        | Nội dung                             |
+| ------------------------------------------ | ------------------------------------ |
+| `core-services-milestones.md`              | Milestone 1–4 · DoD · status         |
 | `../adr/0005-domain-event-architecture.md` | Event bus · past tense · subscribers |
 
 Chi tiết release: `docs/product/release-engineering.md`
@@ -13,13 +13,13 @@ Chi tiết release: `docs/product/release-engineering.md`
 
 ## Status (2026-06-25)
 
-| Milestone | Trạng thái |
-|-----------|------------|
-| M1 Runtime Foundation | ✅ storage · clock · events · registry |
-| M2 Operational Services | ✅ telemetry · logger · health |
-| M3.1 Runtime Configuration | ✅ config · flags · buildInfo |
-| M3.2 Cloud Sync Stub | ⏳ trước v0.9 (CloudSyncService) |
-| M4 Planning Pilot | ✅ GeneratePlanUseCase |
+| Milestone                  | Trạng thái                             |
+| -------------------------- | -------------------------------------- |
+| M1 Runtime Foundation      | ✅ storage · clock · events · registry |
+| M2 Operational Services    | ✅ telemetry · logger · health         |
+| M3.1 Runtime Configuration | ✅ config · flags · buildInfo          |
+| M3.2 Cloud Sync Stub       | ⏳ trước v0.9 (CloudSyncService)       |
+| M4 Planning Pilot          | ✅ GeneratePlanUseCase                 |
 
 ---
 
@@ -92,10 +92,10 @@ Workspace **không** import Supabase. Không gọi `logger` + `telemetry` rải 
 Thay vì mỗi nơi:
 
 ```ts
-saveSession()
-logger.info()
-telemetry.track()
-sync.markDirty()
+saveSession();
+logger.info();
+telemetry.track();
+sync.markDirty();
 ```
 
 Chỉ:
@@ -106,7 +106,7 @@ DomainEvents.emit({
   sessionId,
   planId,
   occurredAt: clock.now(),
-})
+});
 ```
 
 **Không dùng string rời** — mỗi event là interface typed:
@@ -128,22 +128,22 @@ type DomainEvent =
 
 Subscribers filter theo `event.type` — Telemetry, Logger, Sync không import nhau.
 
-| Subscriber | Ví dụ `SessionWon` |
-|------------|-------------------|
-| Telemetry | Ghi event vào event-store |
-| Logger | `logger.info(event)` → ConsoleSink |
-| Sync | `markDirty(sessionId)` |
+| Subscriber     | Ví dụ `SessionWon`                       |
+| -------------- | ---------------------------------------- |
+| Telemetry      | Ghi event vào event-store                |
+| Logger         | `logger.info(event)` → ConsoleSink       |
+| Sync           | `markDirty(sessionId)`                   |
 | Insights cache | Invalidate / schedule refresh (optional) |
 
 ### Quy tắc đặt tên — **past tense**
 
 Domain event mô tả **điều đã xảy ra**, không phải mệnh lệnh:
 
-| Không | Có |
-|-------|-----|
-| `GeneratePlan` | `PlanGenerated` |
-| `Continue` | `ContinuationCreated` |
-| `SessionWin` | `SessionWon` |
+| Không          | Có                    |
+| -------------- | --------------------- |
+| `GeneratePlan` | `PlanGenerated`       |
+| `Continue`     | `ContinuationCreated` |
+| `SessionWin`   | `SessionWon`          |
 
 ### Domain events (không phải page views)
 
@@ -231,10 +231,10 @@ Không `console.log` trong `features/`.
 ## Feature flags
 
 ```ts
-flags.isEnabled('cloud')   // không ENABLE_CLOUD hardcode
-flags.isEnabled('share')
-flags.isEnabled('realtime')
-flags.isEnabled('ai')
+flags.isEnabled('cloud'); // không ENABLE_CLOUD hardcode
+flags.isEnabled('share');
+flags.isEnabled('realtime');
+flags.isEnabled('ai');
 ```
 
 Nguồn: default object → override `localStorage` → sau này remote config.
@@ -299,15 +299,15 @@ Features không gọi Telemetry/Logger/Sync trực tiếp.
 
 ## Ranh giới
 
-| Làm | Không làm |
-|-----|-----------|
-| Event bus decouple | `telemetry.track()` mọi nơi |
-| Storage trước logger | Logger trước persistence |
+| Làm                        | Không làm                         |
+| -------------------------- | --------------------------------- |
+| Event bus decouple         | `telemetry.track()` mọi nơi       |
+| Storage trước logger       | Logger trước persistence          |
 | Domain events (past tense) | `GeneratePlan`, `Opened Planning` |
-| `Clock` abstraction | `new Date()` rải rác |
-| `flags.isEnabled()` | `#define ENABLE_*` rải rác |
-| Local core trước cloud | Supabase trong v0.8 |
+| `Clock` abstraction        | `new Date()` rải rác              |
+| `flags.isEnabled()`        | `#define ENABLE_*` rải rác        |
+| Local core trước cloud     | Supabase trong v0.8               |
 
 ---
 
-*Wire point: sau Foundation Freeze, trước Session migrate.*
+_Wire point: sau Foundation Freeze, trước Session migrate._

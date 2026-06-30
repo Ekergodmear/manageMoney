@@ -64,7 +64,10 @@ export function distanceVector(
   const candidateProfit =
     candidate.targetProfit.mode === 'fixedAmount' ? candidate.targetProfit.amount : originalProfit;
 
-  return [Math.max(0, originalProfit - candidateProfit), original.roundCount - candidate.roundCount];
+  return [
+    Math.max(0, originalProfit - candidateProfit),
+    original.roundCount - candidate.roundCount,
+  ];
 }
 
 export function isLexicographicallyBetter(
@@ -123,9 +126,7 @@ export function enumerateSearchCandidates(request: OptimizationRequest): Calcula
 
   for (const rounds of roundLevels(intent, allowRoundReduction)) {
     for (const profit of profitLevels(intent, profitGranularity)) {
-      candidates.push(
-        createProfitCandidate(createRoundCandidate(intent, rounds), profit),
-      );
+      candidates.push(createProfitCandidate(createRoundCandidate(intent, rounds), profit));
     }
   }
 
@@ -144,7 +145,8 @@ function buildExplanation(
   const profitReducedBy = Math.max(0, originalProfit - candidateProfit);
   const roundsReducedBy = Math.max(0, originalRounds - candidate.roundCount);
 
-  let reason = OptimizationReasons.IDENTITY;
+  let reason: (typeof OptimizationReasons)[keyof typeof OptimizationReasons] =
+    OptimizationReasons.IDENTITY;
   if (profitReducedBy > 0 && roundsReducedBy > 0) {
     reason = OptimizationReasons.PROFIT_AND_ROUNDS_REDUCED;
   } else if (profitReducedBy > 0) {
@@ -198,8 +200,20 @@ export function bruteForceOptimize(request: OptimizationRequest): OptimizationRe
     };
   }
 
-  let best = feasible[0]!;
-  for (const candidate of feasible.slice(1)) {
+  const [firstBest, ...remainingFeasible] = feasible;
+  if (firstBest === undefined) {
+    return {
+      kind: 'failure',
+      code: OptimizationErrorCodes.NO_FEASIBLE_SOLUTION,
+      explanation: {
+        reason: OptimizationReasons.NO_FEASIBLE_SOLUTION,
+        profitReducedBy: 0,
+        roundsReducedBy: 0,
+      },
+    };
+  }
+  let best = firstBest;
+  for (const candidate of remainingFeasible) {
     if (
       isLexicographicallyBetter(distanceVector(intent, candidate), distanceVector(intent, best))
     ) {
@@ -237,7 +251,10 @@ export function hasNoBetterFeasibleCandidate(
 }
 
 /** True when failure means zero feasible candidates in the bounded search space. */
-export function isExhaustiveFailure(request: OptimizationRequest, result: OptimizationResult): boolean {
+export function isExhaustiveFailure(
+  request: OptimizationRequest,
+  result: OptimizationResult,
+): boolean {
   if (!isWithinBruteForceBounds(request) || result.kind !== 'failure') {
     return true;
   }

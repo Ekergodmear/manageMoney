@@ -45,8 +45,7 @@ const sizeRadius: Record<NonNullable<VariantProps<typeof buttonVariants>['size']
 };
 
 export interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 

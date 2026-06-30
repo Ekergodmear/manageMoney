@@ -7,29 +7,29 @@
 
 ## Đã ship (không thêm module trước Internal RC)
 
-| Area | Trạng thái |
-| ---- | ---------- |
-| Architecture v1 | ✅ |
-| Design System | ✅ |
-| Planning · Session · Improve · Continue | ✅ |
-| Capital · Experiment | ✅ |
-| Library · Insights | ✅ |
+| Area                                    | Trạng thái |
+| --------------------------------------- | ---------- |
+| Architecture v1                         | ✅         |
+| Design System                           | ✅         |
+| Planning · Session · Improve · Continue | ✅         |
+| Capital · Experiment                    | ✅         |
+| Library · Insights                      | ✅         |
 
 ---
 
 ## Đã đóng băng (không đổi semantics)
 
-| Abstraction | Ghi chú |
-| ----------- | ------- |
-| `PlanningDraft` | Staging trước Session |
-| `Session` | **Aggregate root** — mọi workflow xoay quanh đây |
-| `PlanFactory` | 3 entry: initial · fromCandidate · continuation |
-| `RecommendationSet` | Pipeline Capital / Experiment |
-| `PlanCandidate` | Review trước promote |
-| `Continue` | Session → ContinuationContext → Plan, không Candidate |
-| `GamePolicy` | Preset + ContinuationPolicy |
-| `EventBus` | Domain + system events |
-| `UseCase` pattern | Planning · Capital · Improve · Continue · Experiment |
+| Abstraction         | Ghi chú                                               |
+| ------------------- | ----------------------------------------------------- |
+| `PlanningDraft`     | Staging trước Session                                 |
+| `Session`           | **Aggregate root** — mọi workflow xoay quanh đây      |
+| `PlanFactory`       | 3 entry: initial · fromCandidate · continuation       |
+| `RecommendationSet` | Pipeline Capital / Experiment                         |
+| `PlanCandidate`     | Review trước promote                                  |
+| `Continue`          | Session → ContinuationContext → Plan, không Candidate |
+| `GamePolicy`        | Preset + ContinuationPolicy                           |
+| `EventBus`          | Domain + system events                                |
+| `UseCase` pattern   | Planning · Capital · Improve · Continue · Experiment  |
 
 ---
 
@@ -37,17 +37,17 @@
 
 Thiết kế chi tiết: [`cloud-backend.md`](cloud-backend.md)
 
-| Quyết định | Ghi chú |
-| ---------- | ------- |
-| Hono + Prisma + Supabase Auth + Pino | Cloud Layer mỏng |
-| `packages/contracts` | DTO only — không `Session` · `Plan` domain |
-| `SessionRecord` opaque `payload` | Backend không biết domain version |
-| `CloudAdapter` | SyncService → Adapter → API; đổi provider không đổi Persistence |
-| `SessionStore` CRUD only | `list` · `load` · `save` · `delete` — không domain methods |
-| Không Domain Events trên server | Chỉ HTTP / conflict / storage logs |
-| Telemetry local only | Không sync cloud |
-| Deploy | Supabase DB + Hono trên Railway/Fly/Render |
-| Scaffold | **Sau Internal RC** — một milestone |
+| Quyết định                           | Ghi chú                                                         |
+| ------------------------------------ | --------------------------------------------------------------- |
+| Hono + Prisma + Supabase Auth + Pino | Cloud Layer mỏng                                                |
+| `packages/contracts`                 | DTO only — không `Session` · `Plan` domain                      |
+| `SessionRecord` opaque `payload`     | Backend không biết domain version                               |
+| `CloudAdapter`                       | SyncService → Adapter → API; đổi provider không đổi Persistence |
+| `SessionStore` CRUD only             | `list` · `load` · `save` · `delete` — không domain methods      |
+| Không Domain Events trên server      | Chỉ HTTP / conflict / storage logs                              |
+| Telemetry local only                 | Không sync cloud                                                |
+| Deploy                               | Supabase DB + Hono trên Railway/Fly/Render                      |
+| Scaffold                             | **Sau Internal RC** — một milestone                             |
 
 **Quy tắc từ giờ:**
 

@@ -5,10 +5,7 @@
  */
 
 import type { WinTax } from '@/application/dto';
-import {
-  grossRewardFromBet,
-  profitIfWinAtBet,
-} from '@/core/monetary/net-reward';
+import { grossRewardFromBet, profitIfWinAtBet } from '@/core/monetary/net-reward';
 import type { EncodedRewardMultiplier } from '@/core/monetary/reward-multiplier-encoding';
 import { scaledProfitMargin } from '@/core/monetary/reward-multiplier-encoding';
 
@@ -22,11 +19,7 @@ function linearMinimalBet(
   betStep: number,
 ): number {
   const numerator = (accumulatedSpentBefore + pStar) * encodedRewardMultiplier.scale;
-  const candidate = ceilToStep(
-    numerator,
-    scaledProfitMargin(encodedRewardMultiplier),
-    betStep,
-  );
+  const candidate = ceilToStep(numerator, scaledProfitMargin(encodedRewardMultiplier), betStep);
   return Math.max(minimumBet, candidate);
 }
 
@@ -66,12 +59,8 @@ function solveWithTierTax(
   const untaxedGross = grossRewardFromBet(untaxedCandidate, encodedRewardMultiplier);
   if (
     untaxedGross < winTax.threshold &&
-    profitIfWinAtBet(
-      untaxedCandidate,
-      accumulatedSpentBefore,
-      encodedRewardMultiplier,
-      winTax,
-    ) >= pStar
+    profitIfWinAtBet(untaxedCandidate, accumulatedSpentBefore, encodedRewardMultiplier, winTax) >=
+      pStar
   ) {
     candidates.push(untaxedCandidate);
   }
@@ -86,25 +75,17 @@ function solveWithTierTax(
 
   if (taxedMargin > 0) {
     const numerator = (accumulatedSpentBefore + pStar) * encodedRewardMultiplier.scale * 100;
-    const taxedCandidate = Math.max(
-      taxEntryBet,
-      ceilToStep(numerator, taxedMargin, betStep),
-    );
+    const taxedCandidate = Math.max(taxEntryBet, ceilToStep(numerator, taxedMargin, betStep));
     if (
-      profitIfWinAtBet(
-        taxedCandidate,
-        accumulatedSpentBefore,
-        encodedRewardMultiplier,
-        winTax,
-      ) >= pStar
+      profitIfWinAtBet(taxedCandidate, accumulatedSpentBefore, encodedRewardMultiplier, winTax) >=
+      pStar
     ) {
       candidates.push(taxedCandidate);
     }
   }
 
   if (
-    profitIfWinAtBet(taxEntryBet, accumulatedSpentBefore, encodedRewardMultiplier, winTax) >=
-    pStar
+    profitIfWinAtBet(taxEntryBet, accumulatedSpentBefore, encodedRewardMultiplier, winTax) >= pStar
   ) {
     candidates.push(taxEntryBet);
   }
@@ -120,9 +101,7 @@ function solveWithTierTax(
     accumulatedSpentBefore + pStar + winTax.threshold,
   );
   while (bet <= searchCap) {
-    if (
-      profitIfWinAtBet(bet, accumulatedSpentBefore, encodedRewardMultiplier, winTax) >= pStar
-    ) {
+    if (profitIfWinAtBet(bet, accumulatedSpentBefore, encodedRewardMultiplier, winTax) >= pStar) {
       return bet;
     }
     bet += betStep;

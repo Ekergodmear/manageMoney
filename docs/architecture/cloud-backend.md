@@ -68,11 +68,11 @@ stake-planner/
 
 ## Ba lớp type (tách biệt)
 
-| Lớp | Thuộc | Ví dụ |
-| --- | ----- | ----- |
-| **Domain model** | Client (`apps/web`) | `Session`, `Plan`, `RecommendationSet`, `GamePolicy` |
-| **API contract** | `packages/contracts` | `SessionDto`, `UpdateSessionRequest`, `UpdateSessionResponse` |
-| **Engine types** | `packages/sdk` / constraint-engine | `CalculationRequest`, `Strategy`, `Statistics` |
+| Lớp              | Thuộc                              | Ví dụ                                                         |
+| ---------------- | ---------------------------------- | ------------------------------------------------------------- |
+| **Domain model** | Client (`apps/web`)                | `Session`, `Plan`, `RecommendationSet`, `GamePolicy`          |
+| **API contract** | `packages/contracts`               | `SessionDto`, `UpdateSessionRequest`, `UpdateSessionResponse` |
+| **Engine types** | `packages/sdk` / constraint-engine | `CalculationRequest`, `Strategy`, `Statistics`                |
 
 Backend **không biết domain version** — chỉ biết `SessionRecord`:
 
@@ -80,9 +80,9 @@ Backend **không biết domain version** — chỉ biết `SessionRecord`:
 interface SessionRecord {
   id: string;
   userId: string;
-  version: number;        // optimistic lock — không phải domain version
-  schemaVersion: number;  // client payload shape — server không interpret
-  payload: unknown;       // opaque JSON — không deserialize
+  version: number; // optimistic lock — không phải domain version
+  schemaVersion: number; // client payload shape — server không interpret
+  payload: unknown; // opaque JSON — không deserialize
   updatedAt: Date;
 }
 ```
@@ -127,19 +127,19 @@ Phase 1: `HonoCloudAdapter` implement interface chung (sessions · presets · se
 
 ## Stack
 
-| Layer | Công nghệ |
-| ----- | --------- |
-| API | **Hono** (`/api/v1`) |
-| Runtime | Node.js |
-| ORM | Prisma (`apps/api/prisma/migrations/`) |
-| DB (prod) | **Supabase Database** (managed PostgreSQL) |
-| DB (dev) | Docker Postgres (`docker/postgres/`) |
-| API host | Railway · Fly.io · Render (chọn khi deploy) |
-| Auth | **Supabase Auth** — API chỉ verify JWT; không login endpoint |
-| Log | **Pino** (`hono-pino` hoặc middleware tương đương) |
-| Infra | `docker/compose.yaml` (không để Docker ở root) |
-| Docs | OpenAPI `/api/docs` |
-| CI | GitHub Actions (lint + test) |
+| Layer     | Công nghệ                                                    |
+| --------- | ------------------------------------------------------------ |
+| API       | **Hono** (`/api/v1`)                                         |
+| Runtime   | Node.js                                                      |
+| ORM       | Prisma (`apps/api/prisma/migrations/`)                       |
+| DB (prod) | **Supabase Database** (managed PostgreSQL)                   |
+| DB (dev)  | Docker Postgres (`docker/postgres/`)                         |
+| API host  | Railway · Fly.io · Render (chọn khi deploy)                  |
+| Auth      | **Supabase Auth** — API chỉ verify JWT; không login endpoint |
+| Log       | **Pino** (`hono-pino` hoặc middleware tương đương)           |
+| Infra     | `docker/compose.yaml` (không để Docker ở root)               |
+| Docs      | OpenAPI `/api/docs`                                          |
+| CI        | GitHub Actions (lint + test)                                 |
 
 **Không dùng:** NestJS, Firebase, tự viết JWT/password, Solver trên server, Supabase Functions thay backend đầy đủ.
 
@@ -313,14 +313,14 @@ Server **không** validate:
 
 ## API Phase 1 (giới hạn rõ)
 
-| Nhóm | Endpoints |
-| ---- | --------- |
-| Auth | `GET /api/v1/auth/me` (từ token) |
-| Session | CRUD + sync via `PATCH` với version |
-| Preset | CRUD |
-| Settings | `GET` · `PATCH` |
-| Health | `GET /health` · `GET /ready` · `GET /live` |
-| Docs | OpenAPI `/api/docs` |
+| Nhóm     | Endpoints                                  |
+| -------- | ------------------------------------------ |
+| Auth     | `GET /api/v1/auth/me` (từ token)           |
+| Session  | CRUD + sync via `PATCH` với version        |
+| Preset   | CRUD                                       |
+| Settings | `GET` · `PATCH`                            |
+| Health   | `GET /health` · `GET /ready` · `GET /live` |
+| Docs     | OpenAPI `/api/docs`                        |
 
 **Hết Phase 1.** Không Share, Devices API, Realtime, Telemetry API, Logger API, AI, Solver API.
 
@@ -347,10 +347,10 @@ DELETE /api/v1/presets/:id
 
 ### Sync / conflict
 
-| Điều kiện | Kết quả |
-| --------- | ------- |
+| Điều kiện                    | Kết quả             |
+| ---------------------------- | ------------------- |
 | `body.version == db.version` | 200 OK, `version++` |
-| `body.version != db.version` | **409 Conflict** |
+| `body.version != db.version` | **409 Conflict**    |
 
 Không merge. Không CRDT. Client resolve.
 
@@ -358,10 +358,10 @@ Không merge. Không CRDT. Client resolve.
 
 ## Backend logging — không Domain Events
 
-| Client EventBus | Backend |
-| --------------- | ------- |
-| `PlanGenerated` · `SessionCreated` · `PlanPromoted` | **Không có** |
-| Telemetry · Insights đọc Session local | **Không sync telemetry** |
+| Client EventBus                                     | Backend                  |
+| --------------------------------------------------- | ------------------------ |
+| `PlanGenerated` · `SessionCreated` · `PlanPromoted` | **Không có**             |
+| Telemetry · Insights đọc Session local              | **Không sync telemetry** |
 
 Backend chỉ log (Pino):
 
@@ -414,12 +414,12 @@ Không `docker-compose.yml` ở root — sau này thêm Redis sạch hơn.
 
 ## Không sync (client local only)
 
-| State | Lý do |
-| ----- | ----- |
-| `RecommendationSet` | Staging |
-| `PlanCandidate` | Staging |
-| `PlanningDraft` | Phase 1: local; sync sau nếu cần |
-| Telemetry / usage metrics | Local only — không sync cloud |
+| State                     | Lý do                            |
+| ------------------------- | -------------------------------- |
+| `RecommendationSet`       | Staging                          |
+| `PlanCandidate`           | Staging                          |
+| `PlanningDraft`           | Phase 1: local; sync sau nếu cần |
+| Telemetry / usage metrics | Local only — không sync cloud    |
 
 ---
 

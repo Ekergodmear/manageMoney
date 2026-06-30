@@ -42,8 +42,8 @@ export interface CreateAppServicesOptions {
 
 function createNoopOperational(clock: Clock): Pick<AppServices, 'telemetry' | 'logger' | 'health'> {
   const noopTelemetry = {
-    append: async () => undefined,
-    readAll: async () => [],
+    append: () => Promise.resolve(),
+    readAll: () => Promise.resolve([]),
     dispose: () => undefined,
   } as unknown as TelemetryStore;
   const noopLogger = { log: () => undefined, dispose: () => undefined } as unknown as Logger;

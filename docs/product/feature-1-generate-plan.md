@@ -21,12 +21,12 @@ User enters how they want to play and gets a **clear plan** — especially **how
 
 ### Success metric
 
-| Metric | Target |
-| ------ | ------ |
-| Time to first useful result | **< 30 seconds** (new user, no docs) |
-| Comprehension | User can state required bankroll, target profit, and max bet **without help** |
-| Validation recovery | User knows **which field** to fix on error |
-| Next step clarity | User knows to tap **View Plan** — no “what now?” moment |
+| Metric                      | Target                                                                        |
+| --------------------------- | ----------------------------------------------------------------------------- |
+| Time to first useful result | **< 30 seconds** (new user, no docs)                                          |
+| Comprehension               | User can state required bankroll, target profit, and max bet **without help** |
+| Validation recovery         | User knows **which field** to fix on error                                    |
+| Next step clarity           | User knows to tap **View Plan** — no “what now?” moment                       |
 
 ### Out of scope (Feature 1)
 
@@ -41,15 +41,15 @@ User enters how they want to play and gets a **clear plan** — especially **how
 
 ## UX decisions
 
-| Question | Decision | Rationale |
-| -------- | -------- | --------- |
-| First screen purpose? | Collect **intent** — “I want to play like this” | RFC-102: Generate is entry point |
-| Primary CTA label? | **Generate Plan** | Product language; not “Calculate” or “Solve” |
-| What shows first after Generate? | **Decision screen** — 3 numbers + clear next step | Answers “what should I do now?” — not just data dump |
-| Stats on decision screen? | **Only 3:** required bankroll, expected profit, maximum bet | Enough to decide; rest in View Plan |
-| Validation errors? | **Inline** on the field | DoD: user knows what to fix immediately |
-| Required bankroll > budget? | **Message only** — no Improve Plan button yet | Feature 2; optional bankroll field enables self-check |
-| Engine terms in UI? | **Never** — no Strategy, Statistics, Solver | User-facing copy only |
+| Question                         | Decision                                                    | Rationale                                             |
+| -------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------- |
+| First screen purpose?            | Collect **intent** — “I want to play like this”             | RFC-102: Generate is entry point                      |
+| Primary CTA label?               | **Generate Plan**                                           | Product language; not “Calculate” or “Solve”          |
+| What shows first after Generate? | **Decision screen** — 3 numbers + clear next step           | Answers “what should I do now?” — not just data dump  |
+| Stats on decision screen?        | **Only 3:** required bankroll, expected profit, maximum bet | Enough to decide; rest in View Plan                   |
+| Validation errors?               | **Inline** on the field                                     | DoD: user knows what to fix immediately               |
+| Required bankroll > budget?      | **Message only** — no Improve Plan button yet               | Feature 2; optional bankroll field enables self-check |
+| Engine terms in UI?              | **Never** — no Strategy, Statistics, Solver                 | User-facing copy only                                 |
 
 ### Optional input (Feature 1)
 
@@ -101,7 +101,7 @@ Inline error example (field-level):
 
 ### Screen B — Decision (plan generated)
 
-Shown immediately after successful Generate. **Decision screen** — answers *“Bây giờ tôi nên làm gì?”* Not a passive summary.
+Shown immediately after successful Generate. **Decision screen** — answers _“Bây giờ tôi nên làm gì?”_ Not a passive summary.
 
 **Only 3 numbers** — required bankroll **hero** (larger), divider, then expected profit and maximum bet:
 
@@ -207,21 +207,21 @@ Screen A (form)
 
 ## Input copy
 
-| Field | Placeholder | Helper text | Notes |
-| ----- | ----------- | ----------- | ----- |
+| Field        | Placeholder             | Helper text                         | Notes                                                                                                                                                                                                                                               |
+| ------------ | ----------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Hệ số thưởng | `Ví dụ: 20, 19.6, 1.95` | `Hỗ trợ tối đa 2 chữ số thập phân.` | Placeholder + helper có thể ship trước Lane A (copy only). Input thập phân hoạt động sau [Arithmetic Migration Brief](../design/arithmetic-migration-brief.md). SDK sẽ reject combo không tương thích (vd. `betStep` × `M` không ra reward nguyên). |
 
 ---
 
 ## Implementation notes (for step 3)
 
-| UI label | SDK source |
-| -------- | ---------- |
-| Vốn cần | `statistics.requiredBankrollAmount` |
-| Lợi nhuận mục tiêu | `statistics.expectedProfitAmount` |
-| Cược lớn nhất | `statistics.maximumBetAmount` |
-| Bảng vòng | `strategy.rounds[]` — `betAmount`, `accumulatedSpent` |
-| Validation | `validateCalculationRequest` → map `error.path` to fields |
+| UI label           | SDK source                                                |
+| ------------------ | --------------------------------------------------------- |
+| Vốn cần            | `statistics.requiredBankrollAmount`                       |
+| Lợi nhuận mục tiêu | `statistics.expectedProfitAmount`                         |
+| Cược lớn nhất      | `statistics.maximumBetAmount`                             |
+| Bảng vòng          | `strategy.rounds[]` — `betAmount`, `accumulatedSpent`     |
+| Validation         | `validateCalculationRequest` → map `error.path` to fields |
 
 Keep state local (React `useState`). No router required for three screens — simple step enum is enough.
 

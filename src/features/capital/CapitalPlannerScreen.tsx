@@ -11,13 +11,18 @@ import type {
   CapitalPlannerInput,
   RiskProfile,
 } from '@/features/capital/capital-planner-types';
-import {
-  CAPITAL_GOAL_LABELS,
-  RISK_LABELS,
-} from '@/features/capital/capital-planner-types';
+import { CAPITAL_GOAL_LABELS, RISK_LABELS } from '@/features/capital/capital-planner-types';
 import { PresetPicker } from '@/features/game-designer/PresetPicker';
+import { MarketPicker } from '@/features/game-designer/MarketPicker';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
-import { applyPresetToForm } from '@/features/game-designer/preset-utils';
+import { applyMarketToForm, applyPresetToForm } from '@/features/game-designer/preset-utils';
+import {
+  marketLabelFromPreset,
+  resolvePresetMarkets,
+} from '@/features/game-data/markets/market-catalog';
+import { DEFAULT_MARKET_ID } from '@/features/game-data/markets/market-definition';
+import { findMarketById } from '@/features/game-data/markets/market-resolver';
+import { formatExpectedReturn, formatHouseEdge } from '@/features/game-data/markets/market-metrics';
 import type {
   RecommendationSet,
   StrategyRecommendation,
@@ -25,6 +30,7 @@ import type {
 import { DEFAULT_PLANNER_FORM } from '@/features/planner/plan-service';
 import { formatMoneyFieldValue } from '@/features/planner/schema';
 import { formatAmount, parseMoneyPositiveInt } from '@/lib/money-format';
+import { formatPercent } from '@/features/planner/plan-display';
 import { cn } from '@/lib/utils';
 
 const GOALS: CapitalGoal[] = ['max-profit', 'longest-play', 'lowest-bet', 'balanced'];
@@ -42,6 +48,7 @@ interface CapitalPlannerScreenProps {
   readonly initialBankroll?: string;
   readonly initialStrategy?: CapitalGoal;
   readonly initialRisk?: RiskProfile;
+  readonly initialMarketId?: string | undefined;
   readonly recommendationSet: RecommendationSet | null;
   readonly onPresetSelect: (preset: GamePolicyPreset) => void;
   readonly onGenerate: (input: CapitalPlannerInput) => Promise<RecommendationSet | null>;
@@ -70,16 +77,16 @@ function RadioGroup<T extends string>({
             key={option}
             className={cn(
               'flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors',
-              value === option
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:bg-muted/40',
+              value === option ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/40',
             )}
           >
             <input
               type="radio"
               name={label}
               checked={value === option}
-              onChange={() => onChange(option)}
+              onChange={() => {
+                onChange(option);
+              }}
               className="accent-primary"
             />
             {renderLabel(option)}
@@ -96,6 +103,7 @@ export function CapitalPlannerScreen({
   initialBankroll = '30.000.000',
   initialStrategy = 'balanced',
   initialRisk = 'normal',
+  initialMarketId,
   recommendationSet,
   onPresetSelect,
   onGenerate,
@@ -104,6 +112,9 @@ export function CapitalPlannerScreen({
   const [bankrollInput, setBankrollInput] = useState(initialBankroll);
   const [strategy, setStrategy] = useState<CapitalGoal>(initialStrategy);
   const [risk, setRisk] = useState<RiskProfile>(initialRisk);
+  const [marketId, setMarketId] = useState(
+    initialMarketId ?? recommendationSet?.marketId ?? DEFAULT_MARKET_ID,
+  );
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
 
@@ -111,9 +122,28 @@ export function CapitalPlannerScreen({
     setBankrollInput(initialBankroll);
     setStrategy(initialStrategy);
     setRisk(initialRisk);
-  }, [initialBankroll, initialStrategy, initialRisk]);
+    if (initialMarketId !== undefined) {
+      setMarketId(initialMarketId);
+    }
+  }, [initialBankroll, initialStrategy, initialRisk, initialMarketId]);
+
+  useEffect(() => {
+    if (recommendationSet?.marketId !== undefined) {
+      setMarketId(recommendationSet.marketId);
+    }
+  }, [recommendationSet?.setId, recommendationSet?.marketId]);
 
   const activePreset = presets.find((p) => p.id === activePresetId);
+
+  useEffect(() => {
+    if (activePreset === undefined) {
+      return;
+    }
+    const markets = resolvePresetMarkets(activePreset);
+    if (!markets.some((m) => m.id === marketId)) {
+      setMarketId(DEFAULT_MARKET_ID);
+    }
+  }, [activePresetId, activePreset, marketId]);
 
   function handleGenerate(): void {
     const bankroll = parseMoneyPositiveInt(bankrollInput);
@@ -131,9 +161,10 @@ export function CapitalPlannerScreen({
 
     void (async () => {
       try {
-        const baseForm = applyPresetToForm(
-          { ...DEFAULT_PLANNER_FORM, userBankroll: bankrollInput },
+        const baseForm = applyMarketToForm(
+          applyPresetToForm({ ...DEFAULT_PLANNER_FORM, userBankroll: bankrollInput }, activePreset),
           activePreset,
+          marketId,
         );
         const set = await onGenerate({
           bankroll,
@@ -174,9 +205,9 @@ export function CapitalPlannerScreen({
               id="capital-bankroll"
               inputMode="numeric"
               value={bankrollInput}
-              onChange={(e) =>
-                setBankrollInput(formatMoneyFieldValue('userBankroll', e.target.value))
-              }
+              onChange={(e) => {
+                setBankrollInput(formatMoneyFieldValue('userBankroll', e.target.value));
+              }}
               placeholder="30.000.000"
             />
           </div>
@@ -185,6 +216,9 @@ export function CapitalPlannerScreen({
             activePresetId={activePresetId}
             onSelect={onPresetSelect}
           />
+          {activePreset !== undefined ? (
+            <MarketPicker preset={activePreset} value={marketId} onChange={setMarketId} />
+          ) : null}
         </CardContent>
       </Card>
 
@@ -213,7 +247,11 @@ export function CapitalPlannerScreen({
       </Card>
 
       {recommendationSet !== null ? (
-        <RecommendationSetPanel set={recommendationSet} onUseRecommendation={onUseRecommendation} />
+        <RecommendationSetPanel
+          set={recommendationSet}
+          presets={presets}
+          onUseRecommendation={onUseRecommendation}
+        />
       ) : null}
     </div>
   );
@@ -221,15 +259,29 @@ export function CapitalPlannerScreen({
 
 function RecommendationSetPanel({
   set,
+  presets,
   onUseRecommendation,
 }: {
   set: RecommendationSet;
+  presets: readonly GamePolicyPreset[];
   onUseRecommendation: (recommendationId: string) => void;
 }): ReactNode {
+  const preset = presets.find((p) => p.id === set.presetId);
+  const market =
+    preset !== undefined ? findMarketById(resolvePresetMarkets(preset), set.marketId) : undefined;
+
   return (
     <Card className="border-primary/20">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">Khuyến nghị</CardTitle>
+        {market !== undefined ? (
+          <p className="text-sm text-muted-foreground">
+            {CAPITAL_GOAL_LABELS[set.strategy]} ·{' '}
+            <strong className="text-foreground">{market.label}</strong> · ×{market.multiplier} ·{' '}
+            {formatAmount(set.recommendations[0]?.requiredBankroll ?? 0)} đ ·{' '}
+            {set.recommendations[0]?.roundCount ?? 0} kỳ
+          </p>
+        ) : null}
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-3">
@@ -245,9 +297,7 @@ function RecommendationSetPanel({
               : '1 session'}
             {' · '}
             Tổng lợi nhuận mục tiêu{' '}
-            <strong className="text-foreground">
-              {formatAmount(set.totalTargetProfit)} đ
-            </strong>
+            <strong className="text-foreground">{formatAmount(set.totalTargetProfit)} đ</strong>
           </p>
         </div>
 
@@ -256,7 +306,10 @@ function RecommendationSetPanel({
             <RecommendationCard
               key={rec.recommendationId}
               rec={rec}
-              onUse={() => onUseRecommendation(rec.recommendationId)}
+              preset={preset}
+              onUse={() => {
+                onUseRecommendation(rec.recommendationId);
+              }}
             />
           ))}
         </div>
@@ -276,26 +329,48 @@ function SummaryStat({ label, value }: { label: string; value: string }): ReactN
 
 function RecommendationCard({
   rec,
+  preset,
   onUse,
 }: {
   rec: StrategyRecommendation;
+  preset: GamePolicyPreset | undefined;
   onUse: () => void;
 }): ReactNode {
+  const market =
+    preset !== undefined ? findMarketById(resolvePresetMarkets(preset), rec.marketId) : undefined;
+
   return (
     <div className="rounded-xl border border-border p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <p className="font-medium">{rec.label}</p>
-          <p className="mt-1 text-sm text-muted-foreground">
+          {market !== undefined ? (
+            <p className="mt-1 text-sm font-medium text-primary">
+              {market.label} · ×{market.multiplier}
+            </p>
+          ) : preset !== undefined ? (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {marketLabelFromPreset(preset, rec.marketId)}
+            </p>
+          ) : null}
+          <p className="mt-0.5 text-sm text-muted-foreground">
             Phân bổ {formatAmount(rec.allocatedCapital)} đ
           </p>
         </div>
         <Badge
-          variant={rec.safety === 'safe' ? 'default' : rec.safety === 'tight' ? 'secondary' : 'outline'}
+          variant={
+            rec.safety === 'safe' ? 'default' : rec.safety === 'tight' ? 'secondary' : 'outline'
+          }
         >
           {SAFETY_LABELS[rec.safety]}
         </Badge>
       </div>
+      {market !== undefined ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          P {formatPercent(market.probability * 100)}% · EV{' '}
+          {formatExpectedReturn(market.expectedReturn)} · Edge {formatHouseEdge(market.houseEdge)}
+        </p>
+      ) : null}
       <div className="mt-3 grid gap-2 text-sm sm:grid-cols-4">
         <div>
           <p className="text-xs text-muted-foreground">Lợi nhuận</p>
