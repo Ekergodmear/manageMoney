@@ -11,6 +11,7 @@ docs-api/
 # Test
 coverage/
 benchmarks/results/latest.json
+reports/.tmp-vitest.json
 .pack/
 tests/consumer/.pack
 tests/consumer/node_modules

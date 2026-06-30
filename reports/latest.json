@@ -1,0 +1,16 @@
+{
+  "date": "2026-06-30T04:48:27.463Z",
+  "commit": "07c6f80dd80ebe0e1389722062c27f73b16bfca9",
+  "branch": "release/internal-rc",
+  "status": "FAIL",
+  "tests": {
+    "typecheck": "FAIL",
+    "lint": "SKIP",
+    "unit": "SKIP",
+    "architecture": "SKIP",
+    "gameData": "SKIP",
+    "notifications": "SKIP",
+    "build": "SKIP"
+  },
+  "durationMs": 8293
+}
