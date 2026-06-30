@@ -11,7 +11,8 @@ export type WorkspaceId =
   | 'analysis'
   | 'allocation'
   | 'history'
-  | 'settings';
+  | 'settings'
+  | 'diagnostics';
 
 export interface WorkspaceItem {
   readonly id: WorkspaceId;
@@ -31,6 +32,7 @@ export const WORKSPACE_LABELS: Record<WorkspaceId, string> = {
   allocation: 'Account Planner',
   history: 'Session Library',
   settings: 'Settings',
+  diagnostics: 'Diagnostics',
 };
 
 export function buildWorkspaces(icons: Record<WorkspaceId, ReactNode>): readonly WorkspaceItem[] {

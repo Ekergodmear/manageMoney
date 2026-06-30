@@ -41,6 +41,7 @@ describe('CommandPalette', () => {
 
     await user.keyboard('{Control>}k{/Control}');
     const input = screen.getByRole('textbox', { name: 'Search commands' });
+    await user.clear(input);
     await user.type(input, 'plan');
     expect(screen.getByRole('option', { name: /Generate Plan/i })).toBeInTheDocument();
 
@@ -50,6 +51,24 @@ describe('CommandPalette', () => {
     expect(runtime.actionHistory.recent(1)[0]).toEqual(
       expect.objectContaining({ commandId: 'planning.generate', outcome: 'success' }),
     );
+  });
+
+  it('shows recent commands when opened with an empty query', async () => {
+    const user = userEvent.setup();
+    const runtime = createShellRuntime();
+    runtime.registerCommand(planningCommand(async () => undefined));
+    runtime.actionHistory.recordSuccess('planning.generate');
+    runtime.actionHistory.recordFailure('planning.export');
+
+    render(
+      <ShellProvider runtime={runtime} appContext={createAppContext()}>
+        <div />
+      </ShellProvider>,
+    );
+
+    await user.keyboard('{Control>}k{/Control}');
+    expect(screen.getByText('Recent')).toBeInTheDocument();
+    expect(screen.getByText('Generate Plan')).toBeInTheDocument();
   });
 
   it('closes on Escape', async () => {

@@ -44,5 +44,17 @@ export function registerShellCommands(
     },
   });
 
+  shell.registerCommand({
+    id: 'navigation.open-diagnostics',
+    title: 'Open Diagnostics',
+    category: 'Developer',
+    keywords: ['diagnostics', 'health', 'status'],
+    visible: () => true,
+    enabled: () => true,
+    execute: async (ctx) => {
+      ctx.navigate('diagnostics');
+    },
+  });
+
   shell.bindShortcut('Ctrl+K', 'shell.open-palette');
 }

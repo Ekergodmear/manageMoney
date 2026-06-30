@@ -2,13 +2,21 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { zIndexClass } from '@/design/tokens/z-index';
 import { cn } from '@/lib/utils';
-import type { CommandSearchResult } from '@/product-shell/types/command';
 
 import { useShell } from '@/product-shell/ui/shell-context';
+import {
+  buildPaletteRows,
+  listSelectableItems,
+  type PaletteRow,
+} from '@/product-shell/ui/palette/palette-items';
 
 export interface CommandPaletteProps {
   readonly open: boolean;
   readonly onClose: () => void;
+}
+
+function outcomeGlyph(outcome: 'success' | 'failure'): string {
+  return outcome === 'success' ? '✓' : '✕';
 }
 
 export function CommandPalette({ open, onClose }: CommandPaletteProps): ReactNode {
@@ -18,15 +26,19 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps): ReactNod
   const [executing, setExecuting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const results = useMemo((): readonly CommandSearchResult[] => {
+  const rows = useMemo((): readonly PaletteRow[] => {
     if (!open) {
       return [];
     }
-    if (query.trim().length === 0) {
-      return runtime.searchCommands('', appContext).slice(0, 12);
-    }
-    return runtime.searchCommands(query, appContext);
+    return buildPaletteRows({
+      query,
+      recent: runtime.actionHistory.recent(10),
+      visibleCommands: runtime.searchCommands('', appContext).map((entry) => entry.command),
+      resolveCommandTitle: (commandId) => runtime.commands.get(commandId)?.title,
+    });
   }, [appContext, open, query, runtime]);
+
+  const selectableItems = useMemo(() => listSelectableItems(rows), [rows]);
 
   useEffect(() => {
     if (!open) {
@@ -47,14 +59,15 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps): ReactNod
     setSelectedIndex(0);
   }, [query]);
 
-  async function runCommandAt(index: number): Promise<void> {
-    const selected = results[index];
+  async function runSelectedItem(): Promise<void> {
+    const selected = selectableItems[selectedIndex];
     if (selected === undefined || executing) {
       return;
     }
     setExecuting(true);
     try {
-      await runtime.executeCommand(selected.command.id, appContext);
+      const commandId = selected.kind === 'recent' ? selected.commandId : selected.command.id;
+      await runtime.executeCommand(commandId, appContext);
       onClose();
     } catch {
       // Failure is recorded in action history; palette stays open.
@@ -63,13 +76,11 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps): ReactNod
     }
   }
 
-  async function runSelected(): Promise<void> {
-    await runCommandAt(selectedIndex);
-  }
-
   if (!open) {
     return null;
   }
+
+  let selectableCursor = -1;
 
   return (
     <div
@@ -94,7 +105,9 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps): ReactNod
           }
           if (event.key === 'ArrowDown') {
             event.preventDefault();
-            setSelectedIndex((index) => Math.min(index + 1, Math.max(results.length - 1, 0)));
+            setSelectedIndex((index) =>
+              Math.min(index + 1, Math.max(selectableItems.length - 1, 0)),
+            );
             return;
           }
           if (event.key === 'ArrowUp') {
@@ -104,7 +117,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps): ReactNod
           }
           if (event.key === 'Enter') {
             event.preventDefault();
-            void runSelected();
+            void runSelectedItem();
           }
         }}
       >
@@ -122,33 +135,59 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps): ReactNod
           />
         </div>
         <ul className="max-h-80 overflow-y-auto py-2" role="listbox">
-          {results.length === 0 ? (
+          {rows.length === 0 ? (
             <li className="px-4 py-3 text-sm text-muted-foreground">No matching commands</li>
           ) : (
-            results.map((entry, index) => (
-              <li key={entry.command.id} role="presentation">
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={index === selectedIndex}
-                  className={cn(
-                    'flex w-full flex-col items-start px-4 py-2 text-left text-sm transition-colors',
-                    index === selectedIndex ? 'bg-accent text-accent-foreground' : 'hover:bg-muted',
-                  )}
-                  onMouseEnter={() => {
-                    setSelectedIndex(index);
-                  }}
-                  onClick={() => {
-                    void runCommandAt(index);
-                  }}
-                >
-                  <span className="font-medium">{entry.command.title}</span>
-                  {entry.command.description !== undefined ? (
-                    <span className="text-xs text-muted-foreground">{entry.command.description}</span>
-                  ) : null}
-                </button>
-              </li>
-            ))
+            rows.map((row, index) => {
+              if (row.kind === 'header') {
+                return (
+                  <li
+                    key={`header-${row.label}-${index}`}
+                    className="px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
+                  >
+                    {row.label}
+                  </li>
+                );
+              }
+
+              selectableCursor += 1;
+              const active = selectableCursor === selectedIndex;
+              const label = row.kind === 'recent' ? row.title : row.command.title;
+              const description = row.kind === 'command' ? row.command.description : undefined;
+
+              return (
+                <li key={row.kind === 'recent' ? `recent-${row.commandId}` : row.command.id} role="presentation">
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={active}
+                    className={cn(
+                      'flex w-full items-start gap-2 px-4 py-2 text-left text-sm transition-colors',
+                      active ? 'bg-accent text-accent-foreground' : 'hover:bg-muted',
+                    )}
+                    onMouseEnter={() => {
+                      setSelectedIndex(selectableCursor);
+                    }}
+                    onClick={() => {
+                      setSelectedIndex(selectableCursor);
+                      void runSelectedItem();
+                    }}
+                  >
+                    {row.kind === 'recent' ? (
+                      <span aria-hidden className="mt-0.5 w-4 shrink-0 text-xs">
+                        {outcomeGlyph(row.outcome)}
+                      </span>
+                    ) : null}
+                    <span className="flex min-w-0 flex-col">
+                      <span className="font-medium">{label}</span>
+                      {description !== undefined ? (
+                        <span className="text-xs text-muted-foreground">{description}</span>
+                      ) : null}
+                    </span>
+                  </button>
+                </li>
+              );
+            })
           )}
         </ul>
       </div>

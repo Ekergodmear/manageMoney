@@ -82,6 +82,7 @@ import { createGenerateExperimentRecommendationsUseCase } from '@/features/exper
 import type { Experiment } from '@/features/experiment/experiment-types';
 import { ScenarioPlannerScreen } from '@/features/experiment/ScenarioPlannerScreen';
 import { AppLayout } from '@/layout/AppLayout';
+import { createAppDiagnosticsPorts } from '@/app/diagnostics-ports';
 import { createAppContext, createShellRuntime } from '@/product-shell';
 import {
   BuildStatusProvider,
@@ -90,12 +91,17 @@ import {
   SessionStatusProvider,
   ShellProvider,
   StatusBar,
+  createDiagnosticCapabilities,
+  DiagnosticsPage,
+  DiagnosticsProvider,
   type BuildStatusSnapshot,
   type CloudStatusSnapshot,
   type CollectorStatusSnapshot,
   type SessionStatusSnapshot,
   type StatusTone,
 } from '@/product-shell/ui';
+import type { CollectorHealthResponse } from '@/features/game-monitor/collector-api-types';
+import { getCollectorApiBase } from '@/features/game-monitor/collector-endpoint';
 
 interface ToastState {
   readonly message: string;
@@ -358,9 +364,6 @@ function AppRoot(): JSX.Element {
     () =>
       createAppContext({
         navigate: (workspaceId) => {
-          if (workspaceId === 'diagnostics') {
-            return;
-          }
           if (workspaceId !== 'session') {
             setViewingSessionId(null);
           }
@@ -491,6 +494,47 @@ function AppRoot(): JSX.Element {
       showToastRef.current(message);
     },
   });
+
+  const diagnosticCapabilities = useMemo(
+    () =>
+      createDiagnosticCapabilities(
+        createAppDiagnosticsPorts({
+          fetchCollectorHealth: async (): Promise<CollectorHealthResponse | null> => {
+            try {
+              const response = await fetch(`${getCollectorApiBase()}/health`, {
+                headers: { Accept: 'application/json' },
+              });
+              if (!response.ok) {
+                return null;
+              }
+              return (await response.json()) as CollectorHealthResponse;
+            } catch {
+              return null;
+            }
+          },
+          sessionCount: persisted.sessions.length,
+          notificationCount: persisted.notifications.length,
+          unreadNotificationCount: notificationUnreadCount,
+          statisticsError: gameStatisticsError,
+          statisticsLoading: gameStatisticsLoading,
+          statisticsDrawCount: gameDraws.length > 0 ? gameDraws.length : null,
+          cloudEnabled: services.flags.isEnabled('cloud'),
+          buildVersion: services.config.build.buildVersion,
+          runtimeHealthy: services.health.getSnapshot().status === 'ok',
+        }),
+      ),
+    [
+      gameDraws.length,
+      gameStatisticsError,
+      gameStatisticsLoading,
+      notificationUnreadCount,
+      persisted.notifications.length,
+      persisted.sessions.length,
+      services.config.build.buildVersion,
+      services.flags,
+      services.health,
+    ],
+  );
 
   const activeSessionRef = useRef(activeSession);
   activeSessionRef.current = activeSession;
@@ -1243,6 +1287,12 @@ function AppRoot(): JSX.Element {
               showToast(`Collection "${collection.name}" đã thêm`);
             }}
           />
+        );
+      case 'diagnostics':
+        return (
+          <DiagnosticsProvider capabilities={diagnosticCapabilities}>
+            <DiagnosticsPage />
+          </DiagnosticsProvider>
         );
       case 'settings':
         return (

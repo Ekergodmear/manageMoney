@@ -19,6 +19,33 @@ export { CloudStatusProvider, useCloudStatus } from '@/product-shell/ui/status/C
 export { SessionStatusProvider, useSessionStatus } from '@/product-shell/ui/status/SessionStatusProvider';
 export { BuildStatusProvider, useBuildStatus } from '@/product-shell/ui/status/BuildStatusProvider';
 
+export {
+  buildPaletteRows,
+  listSelectableItems,
+} from '@/product-shell/ui/palette/palette-items';
+export {
+  groupCommandsByCategory,
+  matchesPaletteCategory,
+  parsePaletteQuery,
+  sortRankedCommands,
+  uiRankScore,
+  PALETTE_CATEGORY_LABELS,
+  PALETTE_CATEGORY_ORDER,
+} from '@/product-shell/ui/palette/palette-query';
+
+export {
+  DiagnosticsProvider,
+  useDiagnostics,
+  DiagnosticCard,
+  DiagnosticsPage,
+  createDiagnosticCapabilities,
+} from '@/product-shell/ui/diagnostics';
+export type {
+  DiagnosticsPorts,
+  DiagnosticsContextValue,
+  DiagnosticCardProps,
+} from '@/product-shell/ui/diagnostics';
+
 export type {
   BuildStatusSnapshot,
   CloudStatusSnapshot,

@@ -12,6 +12,7 @@ import {
   Moon,
   Settings,
   SlidersHorizontal,
+  Stethoscope,
   Sun,
   Target,
   Users,
@@ -46,6 +47,7 @@ const WORKSPACE_ICONS: Record<WorkspaceId, ReactNode> = {
   allocation: <Users className="h-4 w-4" />,
   history: <History className="h-4 w-4" />,
   settings: <Settings className="h-4 w-4" />,
+  diagnostics: <Stethoscope className="h-4 w-4" />,
 };
 
 export interface AppLayoutProps {
