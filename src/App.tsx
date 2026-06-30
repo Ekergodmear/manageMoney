@@ -82,6 +82,20 @@ import { createGenerateExperimentRecommendationsUseCase } from '@/features/exper
 import type { Experiment } from '@/features/experiment/experiment-types';
 import { ScenarioPlannerScreen } from '@/features/experiment/ScenarioPlannerScreen';
 import { AppLayout } from '@/layout/AppLayout';
+import { createAppContext, createShellRuntime } from '@/product-shell';
+import {
+  BuildStatusProvider,
+  CloudStatusProvider,
+  CollectorStatusProvider,
+  SessionStatusProvider,
+  ShellProvider,
+  StatusBar,
+  type BuildStatusSnapshot,
+  type CloudStatusSnapshot,
+  type CollectorStatusSnapshot,
+  type SessionStatusSnapshot,
+  type StatusTone,
+} from '@/product-shell/ui';
 
 interface ToastState {
   readonly message: string;
@@ -243,8 +257,10 @@ function AppRoot(): JSX.Element {
     activeSession !== null ? findPreset(allPresets, activeSession.presetId) : activePreset;
   const {
     snapshot: gameStatistics,
+    draws: gameDraws,
     loading: gameStatisticsLoading,
     error: gameStatisticsError,
+    refresh: refreshGameStatistics,
   } = useGameStatistics(statisticsPreset);
   const continuePolicy =
     activePreset !== undefined
@@ -335,6 +351,111 @@ function AppRoot(): JSX.Element {
   showToastRef.current = (message: string) => {
     showToast(message);
   };
+
+  const shellRuntime = useMemo(() => createShellRuntime(), []);
+
+  const shellAppContext = useMemo(
+    () =>
+      createAppContext({
+        navigate: (workspaceId) => {
+          if (workspaceId === 'diagnostics') {
+            return;
+          }
+          if (workspaceId !== 'session') {
+            setViewingSessionId(null);
+          }
+          setActiveWorkspace(workspaceId);
+        },
+        notifications: {
+          notify: (message) => {
+            showToastRef.current(message);
+          },
+        },
+        flags: {
+          onPlanningWorkspace: activeWorkspace === 'planning',
+          planReady: planningView === 'plan',
+          cloud: services.flags.isEnabled('cloud'),
+        },
+        services: {},
+      }),
+    [activeWorkspace, planningView, services.flags],
+  );
+
+  const collectorStatusSnapshot = useMemo((): CollectorStatusSnapshot => {
+    let tone: StatusTone = 'ok';
+    let label = 'Collector 🟢';
+    if (gameStatisticsError) {
+      tone = 'error';
+      label = 'Collector 🔴';
+    } else if (gameStatisticsLoading) {
+      tone = 'warning';
+      label = 'Collector 🟡';
+    }
+    return {
+      id: 'collector',
+      label,
+      tone,
+      onClick: () => {
+        setActiveWorkspace('game-monitor');
+      },
+    };
+  }, [gameStatisticsError, gameStatisticsLoading]);
+
+  const sessionStatusSnapshot = useMemo((): SessionStatusSnapshot => {
+    const openSession = () => {
+      setActiveWorkspace('session');
+    };
+    if (activeSession === null) {
+      return {
+        id: 'session',
+        label: '—',
+        tone: 'neutral',
+        onClick: openSession,
+      };
+    }
+    const plan = getCurrentPlan(activeSession);
+    const totalRounds = plan?.generated.strategy.rounds.length;
+    const roundsLeft =
+      plan !== null && totalRounds !== undefined
+        ? Math.max(0, totalRounds - plan.completedThroughRound)
+        : undefined;
+    const statusLabel =
+      activeSession.status === 'playing'
+        ? 'Playing'
+        : activeSession.status === 'draft'
+          ? 'Draft'
+          : activeSession.status;
+    return {
+      id: 'session',
+      label: statusLabel,
+      ...(roundsLeft !== undefined ? { detail: `${roundsLeft} rounds left` } : {}),
+      tone: activeSession.status === 'playing' ? 'ok' : 'neutral',
+      onClick: openSession,
+    };
+  }, [activeSession]);
+
+  const cloudStatusSnapshot = useMemo((): CloudStatusSnapshot => {
+    const cloudEnabled = services.flags.isEnabled('cloud');
+    return {
+      id: 'cloud',
+      label: cloudEnabled ? 'Cloud ON' : 'Cloud OFF',
+      tone: cloudEnabled ? 'ok' : 'disabled',
+      onClick: () => {
+        setActiveWorkspace('settings');
+      },
+    };
+  }, [services.flags]);
+
+  const buildStatusSnapshot = useMemo((): BuildStatusSnapshot => {
+    return {
+      id: 'build',
+      label: `v${services.config.build.buildVersion}`,
+      tone: 'neutral',
+      onClick: () => {
+        setActiveWorkspace('settings');
+      },
+    };
+  }, [services.config.build.buildVersion]);
 
   const notificationState: NotificationState = useMemo(
     () => ({
@@ -990,8 +1111,10 @@ function AppRoot(): JSX.Element {
             presets={allPresets}
             recommendationSet={persisted.recommendationSet}
             gameStatistics={gameStatistics}
+            gameDraws={gameDraws}
             gameStatisticsLoading={gameStatisticsLoading}
             gameStatisticsError={gameStatisticsError}
+            onRefreshGameStatistics={refreshGameStatistics}
             notifications={persisted.notifications}
             onOpenNotifications={() => {
               setActiveWorkspace('settings');
@@ -1163,43 +1286,54 @@ function AppRoot(): JSX.Element {
     );
 
   return (
-    <ThemeProvider mode={persisted.theme}>
-      <AppLayout
-        activeWorkspace={activeWorkspace}
-        onWorkspaceSelect={(ws) => {
-          if (ws !== 'session') {
-            setViewingSessionId(null);
-          }
-          setActiveWorkspace(ws);
-        }}
-        theme={persisted.theme}
-        onThemeChange={(dark) => {
-          persist({ ...persisted, theme: dark ? 'dark' : 'light' });
-        }}
-        showRightPanel={showRightPanel}
-        main={renderMain()}
-        rightPanel={rightPanel}
-        notifications={persisted.notifications}
-        notificationUnreadCount={notificationUnreadCount}
-        onNotificationMarkRead={markNotificationRead}
-        onNotificationMarkAllRead={markAllNotificationsRead}
-        onNotificationClearAll={clearAllNotifications}
-        onNotificationOpenSession={(id) => {
-          setViewingSessionId(id);
-          setSessionView('overview');
-          setActiveWorkspace('session');
-        }}
-      />
-      {toast !== null ? (
-        <ActionToast
-          message={toast.message}
-          {...(toast.actionLabel !== undefined ? { actionLabel: toast.actionLabel } : {})}
-          {...(toast.onAction !== undefined ? { onAction: toast.onAction } : {})}
-          onClose={() => {
-            setToast(null);
-          }}
-        />
-      ) : null}
-    </ThemeProvider>
+    <ShellProvider runtime={shellRuntime} appContext={shellAppContext}>
+      <CollectorStatusProvider value={collectorStatusSnapshot}>
+        <CloudStatusProvider value={cloudStatusSnapshot}>
+          <SessionStatusProvider value={sessionStatusSnapshot}>
+            <BuildStatusProvider value={buildStatusSnapshot}>
+              <ThemeProvider mode={persisted.theme}>
+                <AppLayout
+                  activeWorkspace={activeWorkspace}
+                  onWorkspaceSelect={(ws) => {
+                    if (ws !== 'session') {
+                      setViewingSessionId(null);
+                    }
+                    setActiveWorkspace(ws);
+                  }}
+                  theme={persisted.theme}
+                  onThemeChange={(dark) => {
+                    persist({ ...persisted, theme: dark ? 'dark' : 'light' });
+                  }}
+                  showRightPanel={showRightPanel}
+                  main={renderMain()}
+                  rightPanel={rightPanel}
+                  statusBar={<StatusBar />}
+                  notifications={persisted.notifications}
+                  notificationUnreadCount={notificationUnreadCount}
+                  onNotificationMarkRead={markNotificationRead}
+                  onNotificationMarkAllRead={markAllNotificationsRead}
+                  onNotificationClearAll={clearAllNotifications}
+                  onNotificationOpenSession={(id) => {
+                    setViewingSessionId(id);
+                    setSessionView('overview');
+                    setActiveWorkspace('session');
+                  }}
+                />
+                {toast !== null ? (
+                  <ActionToast
+                    message={toast.message}
+                    {...(toast.actionLabel !== undefined ? { actionLabel: toast.actionLabel } : {})}
+                    {...(toast.onAction !== undefined ? { onAction: toast.onAction } : {})}
+                    onClose={() => {
+                      setToast(null);
+                    }}
+                  />
+                ) : null}
+              </ThemeProvider>
+            </BuildStatusProvider>
+          </SessionStatusProvider>
+        </CloudStatusProvider>
+      </CollectorStatusProvider>
+    </ShellProvider>
   );
 }

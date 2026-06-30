@@ -62,6 +62,7 @@ export interface AppLayoutProps {
   readonly onNotificationMarkAllRead?: () => void;
   readonly onNotificationClearAll?: () => void;
   readonly onNotificationOpenSession?: (sessionId: string) => void;
+  readonly statusBar?: ReactNode;
 }
 
 export function AppLayout({
@@ -78,6 +79,7 @@ export function AppLayout({
   onNotificationMarkAllRead,
   onNotificationClearAll,
   onNotificationOpenSession,
+  statusBar,
 }: AppLayoutProps): ReactNode {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
@@ -267,6 +269,7 @@ export function AppLayout({
                 </aside>
               ) : null}
             </div>
+            {statusBar}
           </div>
         </div>
       </div>
