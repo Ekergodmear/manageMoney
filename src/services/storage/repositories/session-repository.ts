@@ -79,4 +79,15 @@ export class SessionRepository {
     await this.saveState(next);
     return next;
   }
+
+  async addDuplicatedSession(session: Session): Promise<PersistedAppState> {
+    const state = await this.loadState();
+    const next: PersistedAppState = {
+      ...state,
+      nextSessionNumber: state.nextSessionNumber + 1,
+      sessions: upsertSession(state.sessions, session),
+    };
+    await this.saveState(next);
+    return next;
+  }
 }

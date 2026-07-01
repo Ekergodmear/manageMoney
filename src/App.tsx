@@ -23,11 +23,14 @@ import { GameDesignerScreen } from '@/features/game-designer/GameDesignerScreen'
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
 import { applyPresetToForm, findPreset, mergePresets } from '@/features/game-designer/preset-utils';
 import {
-  duplicateSession,
   toggleSessionArchived,
   toggleSessionFavorite,
   updateSessionTags,
 } from '@/features/library/library-actions';
+import {
+  createAddLibraryCollectionUseCase,
+  createDuplicateLibrarySessionUseCase,
+} from '@/features/library/use-cases';
 import type { LibraryCollection } from '@/features/library/library-types';
 import { SessionLibraryScreen } from '@/features/library/SessionLibraryScreen';
 import { ImproveCandidateReviewScreen } from '@/features/improve/ImproveCandidateReviewScreen';
@@ -51,6 +54,7 @@ import { isNewSessionCandidate } from '@/features/planning/plan-candidate-types'
 import { PlanningDraftRepository } from '@/services/storage/repositories/planning-draft-repository';
 import { PlanCandidateRepository } from '@/services/storage/repositories/plan-candidate-repository';
 import { SessionRepository } from '@/services/storage/repositories/session-repository';
+import { LibraryRepository } from '@/services/storage/repositories/library-repository';
 import {
   createSavePlayingSessionUseCase,
   createStartPlanUseCase,
@@ -146,6 +150,10 @@ function AppRoot(): JSX.Element {
   );
   const sessionRepository = useMemo(
     () => new SessionRepository(services.storage),
+    [services.storage],
+  );
+  const libraryRepository = useMemo(
+    () => new LibraryRepository(services.storage),
     [services.storage],
   );
   const planCandidateRepository = useMemo(
@@ -254,6 +262,14 @@ function AppRoot(): JSX.Element {
     () => createUpdateSessionUseCase({ sessions: sessionRepository }),
     [sessionRepository],
   );
+  const duplicateLibrarySessionUseCase = useMemo(
+    () => createDuplicateLibrarySessionUseCase({ sessions: sessionRepository }),
+    [sessionRepository],
+  );
+  const addLibraryCollectionUseCase = useMemo(
+    () => createAddLibraryCollectionUseCase({ library: libraryRepository }),
+    [libraryRepository],
+  );
   const generateExperimentRecommendations = useMemo(
     () =>
       createGenerateExperimentRecommendationsUseCase({
@@ -347,26 +363,16 @@ function AppRoot(): JSX.Element {
     setPersisted(next);
   }, []);
 
-  const updateLibrarySession = useCallback((sessionId: string, updater: (s: Session) => Session) => {
-    setPersisted((prev) => {
-      const target = findSession(prev.sessions, sessionId);
-      if (target === null) {
-        return prev;
-      }
-      const updated = updater(target);
-      const next = {
-        ...prev,
-        sessions: upsertSession(prev.sessions, updated),
-      };
-      if (saveTimer.current !== null) {
-        clearTimeout(saveTimer.current);
-      }
-      saveTimer.current = setTimeout(() => {
-        void services.storage.save(next);
-      }, 250);
-      return next;
-    });
-  }, [services.storage]);
+  const runLibrarySessionMutation = useCallback(
+    (sessionId: string, updater: (session: Session) => Session) => {
+      void updateSessionUseCase.execute(sessionId, updater).then((next) => {
+        if (next !== null) {
+          applyPersistedState(next);
+        }
+      });
+    },
+    [applyPersistedState, updateSessionUseCase],
+  );
 
   useEffect(() => {
     document.querySelector('main')?.scrollTo({ top: 0, behavior: 'instant' });
@@ -1235,30 +1241,22 @@ function AppRoot(): JSX.Element {
               setActiveWorkspace('session');
             }}
             onToggleFavorite={(id) => {
-              updateLibrarySession(id, (s) => toggleSessionFavorite(s));
+              runLibrarySessionMutation(id, (s) => toggleSessionFavorite(s));
             }}
             onToggleArchive={(id) => {
-              updateLibrarySession(id, (s) => toggleSessionArchived(s));
+              runLibrarySessionMutation(id, (s) => toggleSessionArchived(s));
             }}
             onDuplicate={(id) => {
-              const source = findSession(persisted.sessions, id);
-              if (source === null) {
-                return;
-              }
-              const copy = duplicateSession(
-                source,
-                persisted.nextSessionNumber,
-                persisted.sessions,
-              );
-              persist({
-                ...persisted,
-                nextSessionNumber: persisted.nextSessionNumber + 1,
-                sessions: upsertSession(persisted.sessions, copy),
+              void duplicateLibrarySessionUseCase.execute(id).then((result) => {
+                if (!result.ok) {
+                  return;
+                }
+                applyPersistedState(result.nextState);
+                setViewingSessionId(result.session.id);
+                setSessionView('overview');
+                setActiveWorkspace('session');
+                showToast('Đặt tên session mới');
               });
-              setViewingSessionId(copy.id);
-              setSessionView('overview');
-              setActiveWorkspace('session');
-              showToast('Đặt tên session mới');
             }}
             onExportJson={(id) => {
               const session = findSession(persisted.sessions, id);
@@ -1275,16 +1273,15 @@ function AppRoot(): JSX.Element {
               exportSessionPrint(session, preset?.name ?? session.presetId);
             }}
             onTagAdd={(id, tag) => {
-              updateLibrarySession(id, (s) =>
+              runLibrarySessionMutation(id, (s) =>
                 s.tags.includes(tag) ? s : updateSessionTags(s, [...s.tags, tag]),
               );
             }}
             onAddCollection={(collection: LibraryCollection) => {
-              persist({
-                ...persisted,
-                libraryCollections: [...persisted.libraryCollections, collection],
+              void addLibraryCollectionUseCase.execute(collection).then((result) => {
+                applyPersistedState(result.nextState);
+                showToast(`Collection "${collection.name}" đã thêm`);
               });
-              showToast(`Collection "${collection.name}" đã thêm`);
             }}
           />
         );
