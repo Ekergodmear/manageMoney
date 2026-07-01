@@ -92,7 +92,7 @@ import { createGenerateExperimentRecommendationsUseCase } from '@/features/exper
 import type { Experiment } from '@/features/experiment/experiment-types';
 import { ScenarioPlannerScreen } from '@/features/experiment/ScenarioPlannerScreen';
 import { AppLayout } from '@/layout/AppLayout';
-import { createAppDiagnosticsPorts } from '@/app/diagnostics-ports';
+import { createAppDiagnosticsPorts } from '@/product-shell/ui/diagnostics/app-diagnostics-ports';
 import { createAppContext, createShellRuntime } from '@/product-shell';
 import {
   BuildStatusProvider,
@@ -463,7 +463,7 @@ function AppRoot(): JSX.Element {
     return {
       id: 'session',
       label: statusLabel,
-      ...(roundsLeft !== undefined ? { detail: `${roundsLeft} rounds left` } : {}),
+      ...(roundsLeft !== undefined ? { detail: `${String(roundsLeft)} rounds left` } : {}),
       tone: activeSession.status === 'playing' ? 'ok' : 'neutral',
       onClick: openSession,
     };

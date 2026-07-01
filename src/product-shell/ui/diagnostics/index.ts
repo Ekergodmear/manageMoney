@@ -11,6 +11,10 @@ export {
 } from '@/product-shell/ui/diagnostics/create-capabilities';
 export type { DiagnosticsPorts } from '@/product-shell/ui/diagnostics/create-capabilities';
 export { refreshPersistenceCapability } from '@/product-shell/ui/diagnostics/persistence-capability';
+export {
+  createAppDiagnosticsPorts,
+  type AppDiagnosticsDeps,
+} from '@/product-shell/ui/diagnostics/app-diagnostics-ports';
 
 export {
   SEVERITY_BADGE_CLASS,

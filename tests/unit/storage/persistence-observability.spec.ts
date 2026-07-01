@@ -16,7 +16,7 @@ import {
 } from '@/services/registry/app-services';
 import { IndexedDbDriver } from '@/services/storage/IndexedDbDriver';
 import { createDiagnosticCapabilities } from '@/product-shell/ui/diagnostics/create-capabilities';
-import { createAppDiagnosticsPorts } from '@/app/diagnostics-ports';
+import { createAppDiagnosticsPorts } from '@/product-shell/ui/diagnostics/app-diagnostics-ports';
 
 describe('R2.4 — Persistence Observability', () => {
   afterEach(() => {
@@ -111,7 +111,7 @@ describe('R2.4 — Persistence Observability', () => {
 
       const capabilities = createDiagnosticCapabilities(
         createAppDiagnosticsPorts({
-          fetchCollectorHealth: async () => null,
+          fetchCollectorHealth: () => Promise.resolve(null),
           notificationCount: 0,
           unreadNotificationCount: 0,
           statisticsError: null,
@@ -125,8 +125,11 @@ describe('R2.4 — Persistence Observability', () => {
 
       const storageCapability = capabilities.find((entry) => entry.id === 'storage');
       expect(storageCapability).toBeDefined();
+      if (storageCapability === undefined) {
+        return;
+      }
 
-      const snapshot = await storageCapability!.refresh();
+      const snapshot = await storageCapability.refresh();
       expect(snapshot.rows.some((row) => row.label === 'Schema Version' && row.value === '6')).toBe(
         true,
       );

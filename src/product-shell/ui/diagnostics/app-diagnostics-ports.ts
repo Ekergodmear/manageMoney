@@ -67,57 +67,67 @@ export function createAppDiagnosticsPorts(deps: AppDiagnosticsDeps): Diagnostics
 
     refreshStorage: refreshPersistenceCapability,
 
-    refreshRuntime: async () =>
-      snapshot(
-        deps.runtimeHealthy ? 'info' : 'warning',
-        deps.runtimeHealthy ? 'Product Shell runtime healthy' : 'Runtime reported warnings',
-        [
-          { label: 'Build', value: deps.buildVersion },
-          { label: 'Shell', value: 'product-shell-v0.5+' },
-        ],
-        deps.runtimeHealthy ? 'ok' : 'warning',
+    refreshRuntime: () =>
+      Promise.resolve(
+        snapshot(
+          deps.runtimeHealthy ? 'info' : 'warning',
+          deps.runtimeHealthy ? 'Product Shell runtime healthy' : 'Runtime reported warnings',
+          [
+            { label: 'Build', value: deps.buildVersion },
+            { label: 'Shell', value: 'product-shell-v0.5+' },
+          ],
+          deps.runtimeHealthy ? 'ok' : 'warning',
+        ),
       ),
 
-    refreshNotifications: async () =>
-      snapshot('info', `${deps.unreadNotificationCount} unread notifications`, [
-        { label: 'Total', value: String(deps.notificationCount) },
-        { label: 'Unread', value: String(deps.unreadNotificationCount) },
-      ]),
+    refreshNotifications: () =>
+      Promise.resolve(
+        snapshot('info', `${String(deps.unreadNotificationCount)} unread notifications`, [
+          { label: 'Total', value: String(deps.notificationCount) },
+          { label: 'Unread', value: String(deps.unreadNotificationCount) },
+        ]),
+      ),
 
-    refreshStatistics: async () => {
+    refreshStatistics: () => {
       if (deps.statisticsError !== null) {
-        return snapshot(
-          'critical',
-          'Statistics unavailable',
-          [{ label: 'Error', value: deps.statisticsError }],
-          'error',
+        return Promise.resolve(
+          snapshot(
+            'critical',
+            'Statistics unavailable',
+            [{ label: 'Error', value: deps.statisticsError }],
+            'error',
+          ),
         );
       }
       if (deps.statisticsLoading) {
-        return snapshot('warning', 'Statistics refresh in progress', [
-          { label: 'State', value: 'loading' },
-        ]);
+        return Promise.resolve(
+          snapshot('warning', 'Statistics refresh in progress', [{ label: 'State', value: 'loading' }]),
+        );
       }
-      return snapshot(
-        'info',
-        deps.statisticsDrawCount !== null
-          ? `${deps.statisticsDrawCount.toLocaleString()} draws in statistics cache`
-          : 'Statistics ready',
-        [
-          {
-            label: 'Draw count',
-            value: deps.statisticsDrawCount !== null ? String(deps.statisticsDrawCount) : '—',
-          },
-        ],
+      return Promise.resolve(
+        snapshot(
+          'info',
+          deps.statisticsDrawCount !== null
+            ? `${deps.statisticsDrawCount.toLocaleString()} draws in statistics cache`
+            : 'Statistics ready',
+          [
+            {
+              label: 'Draw count',
+              value: deps.statisticsDrawCount !== null ? String(deps.statisticsDrawCount) : '—',
+            },
+          ],
+        ),
       );
     },
 
-    refreshCloud: async () =>
-      snapshot(
-        'info',
-        deps.cloudEnabled ? 'Cloud enabled' : 'Cloud disabled',
-        [{ label: 'Phase', value: deps.cloudEnabled ? 'enabled' : 'disabled (Product Evolution)' }],
-        deps.cloudEnabled ? 'ok' : 'disabled',
+    refreshCloud: () =>
+      Promise.resolve(
+        snapshot(
+          'info',
+          deps.cloudEnabled ? 'Cloud enabled' : 'Cloud disabled',
+          [{ label: 'Phase', value: deps.cloudEnabled ? 'enabled' : 'disabled (Product Evolution)' }],
+          deps.cloudEnabled ? 'ok' : 'disabled',
+        ),
       ),
   };
 }
