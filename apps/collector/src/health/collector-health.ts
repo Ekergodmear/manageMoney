@@ -1,6 +1,7 @@
-import type { CollectorState } from '../types/collector-state.js';
+import type { CollectorState, ResumeState } from '../types/collector-state.js';
 import type { DrawResult } from '../types/draw-result.js';
 import { loadRetryObservabilitySnapshot } from '../retry/retry-state.js';
+import { formatResumeStateLabel } from '../resume/resume-state.js';
 import { formatRetryObservabilityLines } from './retry-observability.js';
 
 export type HealthStatus = 'healthy' | 'unhealthy';
@@ -12,6 +13,9 @@ export interface CollectorHealth {
   readonly averageLatencyMs: number;
   readonly failureCount: number;
   readonly duplicatesSkipped: number;
+  readonly resumeState: ResumeState;
+  readonly catchUpCount: number;
+  readonly resumedFromDrawKey: string | null;
   readonly activeAdapterId: string;
   readonly drawCount: number;
   readonly lastDrawKey: string | null;
@@ -43,6 +47,9 @@ export function buildCollectorHealth(
     averageLatencyMs: state.averageLatencyMs,
     failureCount: state.failureCount,
     duplicatesSkipped: state.duplicatesSkipped,
+    resumeState: state.resumeState,
+    catchUpCount: state.catchUpCount,
+    resumedFromDrawKey: state.resumedFromDrawKey,
     activeAdapterId: adapterId,
     drawCount,
     lastDrawKey: state.lastDrawKey ?? latestDraw?.drawKey ?? null,
@@ -124,6 +131,11 @@ export function formatHealthReport(report: HealthReport): string {
   );
   lines.push(`Failure Count: ${String(report.health.failureCount)}`);
   lines.push(`Duplicates Skipped: ${String(report.health.duplicatesSkipped)}`);
+  lines.push(`Resume State: ${formatResumeStateLabel(report.health.resumeState)}`);
+  if (report.health.resumedFromDrawKey !== null) {
+    lines.push(`Resumed From: ${report.health.resumedFromDrawKey}`);
+  }
+  lines.push(`Catch-up Count: ${String(report.health.catchUpCount)}`);
   lines.push('');
   lines.push('Retry:');
   for (const line of formatRetryObservabilityLines(loadRetryObservabilitySnapshot())) {

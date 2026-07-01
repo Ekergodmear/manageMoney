@@ -34,6 +34,9 @@ CREATE TABLE IF NOT EXISTS collector_state (
   failure_count       INTEGER NOT NULL DEFAULT 0,
   average_latency_ms  INTEGER NOT NULL DEFAULT 0,
   duplicates_skipped  INTEGER NOT NULL DEFAULT 0,
+  resume_state        TEXT NOT NULL DEFAULT 'fresh',
+  catch_up_count      INTEGER NOT NULL DEFAULT 0,
+  resumed_from_draw_key TEXT,
   status              TEXT NOT NULL DEFAULT 'stopped'
 );
 

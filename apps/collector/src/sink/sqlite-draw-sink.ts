@@ -8,6 +8,7 @@ import {
   initialCollectorState,
   type CollectorState,
   type CollectorStatus,
+  type ResumeState,
 } from '../types/collector-state.js';
 import type { DrawResult, RawHttpResponse } from '../types/draw-result.js';
 import { isSqliteBusyError, withSqliteRetry } from '../util/retry.js';
@@ -82,6 +83,13 @@ function isUniqueConstraintError(err: unknown): boolean {
   return code === 'SQLITE_CONSTRAINT_UNIQUE' || code === 'SQLITE_CONSTRAINT';
 }
 
+function parseResumeState(value: string | undefined): ResumeState {
+  if (value === 'resumed' || value === 'catch-up' || value === 'fresh') {
+    return value;
+  }
+  return 'fresh';
+}
+
 export class SqliteDrawSink implements DrawSink {
   private readonly db: Database.Database;
   private readonly insertDrawIgnore: Database.Statement;
@@ -111,11 +119,24 @@ export class SqliteDrawSink implements DrawSink {
     const columns = this.db.prepare(`PRAGMA table_info(collector_state)`).all() as Array<{
       name: string;
     }>;
-    const hasDuplicatesSkipped = columns.some((column) => column.name === 'duplicates_skipped');
-    if (!hasDuplicatesSkipped) {
+    const names = new Set(columns.map((column) => column.name));
+    if (!names.has('duplicates_skipped')) {
       this.db.exec(
         `ALTER TABLE collector_state ADD COLUMN duplicates_skipped INTEGER NOT NULL DEFAULT 0`,
       );
+    }
+    if (!names.has('resume_state')) {
+      this.db.exec(
+        `ALTER TABLE collector_state ADD COLUMN resume_state TEXT NOT NULL DEFAULT 'fresh'`,
+      );
+    }
+    if (!names.has('catch_up_count')) {
+      this.db.exec(
+        `ALTER TABLE collector_state ADD COLUMN catch_up_count INTEGER NOT NULL DEFAULT 0`,
+      );
+    }
+    if (!names.has('resumed_from_draw_key')) {
+      this.db.exec(`ALTER TABLE collector_state ADD COLUMN resumed_from_draw_key TEXT`);
     }
   }
 
@@ -255,6 +276,9 @@ export class SqliteDrawSink implements DrawSink {
                 last_success_at AS lastSuccessAt, last_poll_at AS lastPollAt,
                 failure_count AS failureCount, average_latency_ms AS averageLatencyMs,
                 duplicates_skipped AS duplicatesSkipped,
+                resume_state AS resumeState,
+                catch_up_count AS catchUpCount,
+                resumed_from_draw_key AS resumedFromDrawKey,
                 status
          FROM collector_state WHERE id = 1`,
       )
@@ -267,6 +291,9 @@ export class SqliteDrawSink implements DrawSink {
           failureCount: number;
           averageLatencyMs: number;
           duplicatesSkipped?: number;
+          resumeState?: string;
+          catchUpCount?: number;
+          resumedFromDrawKey?: string | null;
           status: string;
         }
       | undefined;
@@ -297,6 +324,9 @@ export class SqliteDrawSink implements DrawSink {
       failureCount: row.failureCount,
       averageLatencyMs: row.averageLatencyMs,
       duplicatesSkipped: row.duplicatesSkipped ?? 0,
+      resumeState: parseResumeState(row.resumeState),
+      catchUpCount: row.catchUpCount ?? 0,
+      resumedFromDrawKey: row.resumedFromDrawKey ?? null,
       status,
     });
   }
@@ -313,6 +343,9 @@ export class SqliteDrawSink implements DrawSink {
             failure_count = @failureCount,
             average_latency_ms = @averageLatencyMs,
             duplicates_skipped = @duplicatesSkipped,
+            resume_state = @resumeState,
+            catch_up_count = @catchUpCount,
+            resumed_from_draw_key = @resumedFromDrawKey,
             status = @status
            WHERE id = 1`,
         )
@@ -324,6 +357,9 @@ export class SqliteDrawSink implements DrawSink {
           failureCount: state.failureCount,
           averageLatencyMs: state.averageLatencyMs,
           duplicatesSkipped: state.duplicatesSkipped,
+          resumeState: state.resumeState,
+          catchUpCount: state.catchUpCount,
+          resumedFromDrawKey: state.resumedFromDrawKey,
           status: state.status,
         });
     });

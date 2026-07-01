@@ -2,18 +2,17 @@ import { Bingo18DrawSourceAdapter } from './adapter/bingo18-adapter.js';
 import type { DrawSourceAdapter } from './adapter/draw-source-adapter.js';
 import { MockDrawSourceAdapter } from './adapter/mock-adapter.js';
 import { collectorError, collectorLog } from './log/collector-log.js';
-import {
-  isBingo18BatchPayload,
-  parseBingo18DrawBatch,
-  parseDrawPayload,
-} from './parser/parse-draw.js';
 import { prepareDrawsForIngest } from './dedupe/ingest-dedupe.js';
+import {
+  deriveResumeStateOnStart,
+  finalizeResumeSession,
+  resolveCatchUpDraws,
+} from './resume/index.js';
 import type { DrawSink } from './sink/draw-sink.js';
 import { AdaptivePollStrategy } from './strategy/adaptive-poll-strategy.js';
 import type { PollStrategy } from './strategy/poll-strategy.js';
 import { initialCollectorState, type CollectorState } from './types/collector-state.js';
-import type { DrawResult, RawHttpResponse } from './types/draw-result.js';
-import { dedupeDrawsByKey } from './util/dedupe.js';
+import type { DrawResult } from './types/draw-result.js';
 import { syncFullDrawHistory, type SyncHistoryResult } from './sync/sync-full-history.js';
 
 export interface CollectorOptions {
@@ -42,6 +41,7 @@ export class Collector {
   private running = false;
   private timer: ReturnType<typeof setTimeout> | null = null;
   private consecutiveAdapterFailures = 0;
+  private resumeSessionActive = false;
 
   constructor(private readonly options: CollectorOptions) {
     this.pollStrategy = options.pollStrategy ?? new AdaptivePollStrategy();
@@ -55,13 +55,16 @@ export class Collector {
   async start(): Promise<void> {
     if (this.running) return;
     this.running = true;
-    this.state = await this.options.sink.loadCollectorState();
-    this.state = { ...this.state, status: 'running' };
+    const loaded = await this.options.sink.loadCollectorState();
+    const resume = deriveResumeStateOnStart(loaded);
+    this.resumeSessionActive = loaded.lastDrawKey !== null;
+    this.state = {
+      ...loaded,
+      ...resume,
+      status: 'running',
+    };
     await this.persistState();
     collectorLog(`Started (adapter=${this.options.adapter.id})`);
-    if (this.state.lastDrawKey !== null) {
-      collectorLog(`Resumed after draw key ${this.state.lastDrawKey}`);
-    }
     this.scheduleNext(0);
   }
 
@@ -98,64 +101,11 @@ export class Collector {
     return Math.min(backoff, 120_000);
   }
 
-  private async resolveNewDraws(
-    rawPayload: unknown,
-    source: string,
-    rawResponse: RawHttpResponse | null,
-  ): Promise<{ draws: DrawResult[]; errors: string[]; skippedDuplicates: number }> {
-    const parseOptions = { rawResponse };
-
-    if (isBingo18BatchPayload(rawPayload)) {
-      const batch = parseBingo18DrawBatch(rawPayload, source, parseOptions);
-      const unique = dedupeDrawsByKey(batch.draws);
-      const skippedInBatch = batch.draws.length - unique.length;
-      const storedCount = await this.options.sink.count();
-      const lastKey = await this.options.sink.getLastDrawKey();
-
-      // DB trống → import toàn bộ lịch sử từ data.json (một lần).
-      if (storedCount === 0 || lastKey === null) {
-        collectorLog(`Initial backfill: ${String(unique.length)} draws from source`);
-        return { draws: unique, errors: batch.errors, skippedDuplicates: skippedInBatch };
-      }
-
-      // DB thiếu so với nguồn → gap-fill toàn bộ batch (SQLite UNIQUE bỏ qua trùng).
-      if (unique.length > storedCount) {
-        collectorLog(
-          `Gap-fill: source ${String(unique.length)} draws, DB ${String(storedCount)} — merging missing`,
-        );
-        return { draws: unique, errors: batch.errors, skippedDuplicates: skippedInBatch };
-      }
-
-      const lastAt = new Date(
-        (await this.options.sink.findByDrawKey(lastKey))?.drawAt ??
-          this.state.lastDraw?.drawAt ??
-          lastKey,
-      ).getTime();
-      const newer = unique.filter((d) => new Date(d.drawAt).getTime() > lastAt);
-      const skippedOlder = unique.length - newer.length;
-      return {
-        draws: newer,
-        errors: batch.errors,
-        skippedDuplicates: skippedInBatch + skippedOlder,
-      };
-    }
-
-    const parsed = parseDrawPayload(rawPayload, source, parseOptions);
-    if (!parsed.success || parsed.draw === undefined) {
-      return { draws: [], errors: parsed.errors, skippedDuplicates: 0 };
-    }
-
-    const lastKey = await this.options.sink.getLastDrawKey();
-    if (lastKey === parsed.draw.drawKey) {
-      return { draws: [], errors: [], skippedDuplicates: 1 };
-    }
-
-    const existing = await this.options.sink.findByDrawKey(parsed.draw.drawKey);
-    if (existing !== null) {
-      return { draws: [], errors: [], skippedDuplicates: 1 };
-    }
-
-    return { draws: [parsed.draw], errors: [], skippedDuplicates: 0 };
+  private completeResumeSession(insertedCount: number): void {
+    if (!this.resumeSessionActive) return;
+    const resumeUpdate = finalizeResumeSession(this.state, insertedCount);
+    this.state = { ...this.state, ...resumeUpdate };
+    this.resumeSessionActive = false;
   }
 
   private async tick(): Promise<void> {
@@ -185,11 +135,13 @@ export class Collector {
       this.consecutiveAdapterFailures = 0;
 
       const { draws: candidates, errors, skippedDuplicates: resolveSkipped } =
-        await this.resolveNewDraws(
-        fetch.rawPayload,
-        this.options.adapter.id,
-        fetch.rawResponse,
-      );
+        await resolveCatchUpDraws(
+          this.options.sink,
+          this.state,
+          fetch.rawPayload,
+          this.options.adapter.id,
+          fetch.rawResponse,
+        );
 
       if (errors.length > 0) {
         collectorError(`Parse warnings: ${errors.join('; ')}`);
@@ -201,8 +153,9 @@ export class Collector {
             ...this.state,
             duplicatesSkipped: this.state.duplicatesSkipped + resolveSkipped,
           };
-          await this.persistState();
         }
+        this.completeResumeSession(0);
+        await this.persistState();
         const delay = this.pollStrategy.nextDelayMs(this.state);
         this.scheduleNext(delay);
         return;
@@ -228,8 +181,9 @@ export class Collector {
             ...this.state,
             duplicatesSkipped: this.state.duplicatesSkipped + preFilterSkipped,
           };
-          await this.persistState();
         }
+        this.completeResumeSession(0);
+        await this.persistState();
         const delay = this.pollStrategy.nextDelayMs(this.state);
         this.scheduleNext(delay);
         return;
@@ -244,8 +198,9 @@ export class Collector {
             ...this.state,
             duplicatesSkipped: this.state.duplicatesSkipped + skipped,
           };
-          await this.persistState();
         }
+        this.completeResumeSession(0);
+        await this.persistState();
         const delay = this.pollStrategy.nextDelayMs(this.state);
         this.scheduleNext(delay);
         return;
@@ -264,6 +219,7 @@ export class Collector {
         duplicatesSkipped: this.state.duplicatesSkipped + skipped,
         status: 'running',
       };
+      this.completeResumeSession(appendResult.inserted);
       await this.persistState();
 
       if (appendResult.inserted > 1) {
