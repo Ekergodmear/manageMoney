@@ -748,11 +748,7 @@ function AppRoot(): JSX.Element {
       showToast(result.message ?? 'Không tiếp tục được session');
       return;
     }
-    persist({
-      ...persisted,
-      sessions: upsertSession(persisted.sessions, result.session),
-      activeSessionId: result.session.id,
-    });
+    applyPersistedState(result.nextState);
     showToast(`Plan mới đến ${String(targetRoundCount)} vòng`);
     setSessionView('playing');
   }

@@ -5,6 +5,7 @@ import { buildContinuationContext } from '@/features/continue/continuation-conte
 import { continuePlan } from '@/features/planner/plan-service';
 import type { Session } from '@/features/session/session-domain';
 import { getCurrentPlan } from '@/features/session/session-domain';
+import type { PersistedAppState } from '@/features/session/session-types';
 import {
   buildPlanAddedEvent,
   createContinuationPlan,
@@ -32,6 +33,7 @@ export type ContinuePlanSuccess = {
   readonly ok: true;
   readonly session: Session;
   readonly planId: string;
+  readonly nextState: PersistedAppState;
 };
 
 export type ContinuePlanFailure = {
@@ -110,8 +112,9 @@ export class ContinuePlanUseCase {
       updatedAt: at,
     };
 
-    const nextState = {
+    const nextState: PersistedAppState = {
       ...state,
+      activeSessionId: updatedSession.id,
       sessions: state.sessions.map((s) => (s.id === session.id ? updatedSession : s)),
     };
     await this.deps.sessions.saveState(nextState);
@@ -132,7 +135,7 @@ export class ContinuePlanUseCase {
       }),
     );
 
-    return { ok: true, session: updatedSession, planId: newPlan.id };
+    return { ok: true, session: updatedSession, planId: newPlan.id, nextState };
   }
 }
 
