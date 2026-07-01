@@ -1,11 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, Suspense, type JSX } from 'react';
 
 import { ActionToast } from '@/components/ui/action-toast';
 import { Button } from '@/components/ui/button';
 import { ThemeProvider } from '@/design/theme/provider';
 import { AppServicesProvider, useServices } from '@/services/registry/AppServicesProvider';
-import { InsightsScreen } from '@/features/insights/InsightsScreen';
-import { AllocationScreen } from '@/features/allocation/AllocationScreen';
 import { computeCapitalOverview } from '@/features/capital/capital-overview';
 import { CapitalPlannerScreen } from '@/features/capital/CapitalPlannerScreen';
 import { createCandidateFromRecommendationUseCase } from '@/features/capital/create-candidate-from-recommendation-use-case';
@@ -13,13 +11,10 @@ import { createGenerateCapitalRecommendationsUseCase } from '@/features/capital/
 import { createPromoteCandidateToSessionUseCase } from '@/features/capital/promote-candidate-to-session-use-case';
 import { createContinuePlanUseCase } from '@/features/continue/continue-plan-use-case';
 import type { CapitalPlannerInput } from '@/features/capital/capital-planner-types';
-import { DashboardScreen } from '@/features/dashboard/DashboardScreen';
 import { useAutoSettlement } from '@/features/game-data/hooks/use-auto-settlement';
 import { useGameStatistics } from '@/features/game-data/hooks/use-game-statistics';
 import type { SettlementAlert } from '@/features/game-data/alerts/settlement-alerts';
-import { GameMonitorScreen } from '@/features/game-monitor/GameMonitorScreen';
 import { DEFAULT_PRESET_ID } from '@/features/game-designer/builtin-presets';
-import { GameDesignerScreen } from '@/features/game-designer/GameDesignerScreen';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
 import { applyPresetToForm, findPreset, mergePresets } from '@/features/game-designer/preset-utils';
 import {
@@ -32,7 +27,6 @@ import {
   createDuplicateLibrarySessionUseCase,
 } from '@/features/library/use-cases';
 import type { LibraryCollection } from '@/features/library/library-types';
-import { SessionLibraryScreen } from '@/features/library/SessionLibraryScreen';
 import { ImproveCandidateReviewScreen } from '@/features/improve/ImproveCandidateReviewScreen';
 import { createImprovementCandidateUseCase } from '@/features/improve/create-improvement-candidate-use-case';
 import type { ImproveOption } from '@/features/improve/improve-service';
@@ -87,11 +81,21 @@ import type { PersistedAppState } from '@/features/session/session-types';
 import { EMPTY_PERSISTED_STATE } from '@/features/session/session-types';
 import { useNotificationCenter } from '@/features/notifications/hooks/use-notification-center';
 import type { NotificationState } from '@/features/notifications/notification-types';
-import { SettingsScreen } from '@/features/settings/SettingsScreen';
 import { createGenerateExperimentRecommendationsUseCase } from '@/features/experiment/generate-experiment-recommendations-use-case';
 import type { Experiment } from '@/features/experiment/experiment-types';
 import { ScenarioPlannerScreen } from '@/features/experiment/ScenarioPlannerScreen';
 import { AppLayout } from '@/layout/AppLayout';
+import {
+  LazyAllocationScreen,
+  LazyDashboardScreen,
+  LazyDiagnosticsPage,
+  LazyGameDesignerScreen,
+  LazyGameMonitorScreen,
+  LazyInsightsScreen,
+  LazySessionLibraryScreen,
+  LazySettingsScreen,
+  WorkspaceLoadingFallback,
+} from '@/layout/lazy-workspaces';
 import { createAppDiagnosticsPorts } from '@/product-shell/ui/diagnostics/app-diagnostics-ports';
 import { createAppContext, createShellRuntime } from '@/product-shell';
 import {
@@ -102,7 +106,6 @@ import {
   ShellProvider,
   StatusBar,
   createDiagnosticCapabilities,
-  DiagnosticsPage,
   DiagnosticsProvider,
   type BuildStatusSnapshot,
   type CloudStatusSnapshot,
@@ -1097,10 +1100,18 @@ function AppRoot(): JSX.Element {
       );
     }
 
+    return (
+      <Suspense fallback={<WorkspaceLoadingFallback />}>
+        {renderWorkspaceBody()}
+      </Suspense>
+    );
+  }
+
+  function renderWorkspaceBody(): JSX.Element {
     switch (activeWorkspace) {
       case 'dashboard':
         return (
-          <DashboardScreen
+          <LazyDashboardScreen
             activeSession={activeSession}
             preset={
               activeSession !== null ? findPreset(allPresets, activeSession.presetId) : undefined
@@ -1132,10 +1143,10 @@ function AppRoot(): JSX.Element {
           />
         );
       case 'game-monitor':
-        return <GameMonitorScreen />;
+        return <LazyGameMonitorScreen />;
       case 'game-designer':
         return (
-          <GameDesignerScreen
+          <LazyGameDesignerScreen
             customPresets={persisted.customGamePresets}
             activePresetId={persisted.activePresetId}
             onSavePreset={handleSaveGamePreset}
@@ -1158,7 +1169,7 @@ function AppRoot(): JSX.Element {
         return renderPlanningWorkspace();
       case 'analysis':
         return (
-          <InsightsScreen
+          <LazyInsightsScreen
             sessions={persisted.sessions}
             presets={allPresets}
             capitalPlanner={persisted.capitalPlanner}
@@ -1174,10 +1185,10 @@ function AppRoot(): JSX.Element {
           />
         );
       case 'allocation':
-        return <AllocationScreen />;
+        return <LazyAllocationScreen />;
       case 'history':
         return (
-          <SessionLibraryScreen
+          <LazySessionLibraryScreen
             sessions={persisted.sessions}
             activeSessionId={persisted.activeSessionId}
             presets={allPresets}
@@ -1235,12 +1246,12 @@ function AppRoot(): JSX.Element {
       case 'diagnostics':
         return (
           <DiagnosticsProvider capabilities={diagnosticCapabilities}>
-            <DiagnosticsPage />
+            <LazyDiagnosticsPage />
           </DiagnosticsProvider>
         );
       case 'settings':
         return (
-          <SettingsScreen
+          <LazySettingsScreen
             theme={persisted.theme}
             onThemeChange={(dark) => {
               persist({ ...persisted, theme: dark ? 'dark' : 'light' });
