@@ -1,5 +1,7 @@
 import type { CollectorState } from '../types/collector-state.js';
 import type { DrawResult } from '../types/draw-result.js';
+import { loadRetryObservabilitySnapshot } from '../retry/retry-state.js';
+import { formatRetryObservabilityLines } from './retry-observability.js';
 
 export type HealthStatus = 'healthy' | 'unhealthy';
 
@@ -119,6 +121,11 @@ export function formatHealthReport(report: HealthReport): string {
     `Average Latency: ${String(Math.round(report.health.averageLatencyMs / 1000))}s`,
   );
   lines.push(`Failure Count: ${String(report.health.failureCount)}`);
+  lines.push('');
+  lines.push('Retry:');
+  for (const line of formatRetryObservabilityLines(loadRetryObservabilitySnapshot())) {
+    lines.push(`  ${line}`);
+  }
   lines.push('');
   lines.push('Checks:');
   for (const check of report.checks) {
