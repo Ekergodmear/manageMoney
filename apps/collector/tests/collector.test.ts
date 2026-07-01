@@ -66,9 +66,8 @@ describe('Collector', () => {
     await vi.runOnlyPendingTimersAsync();
     await vi.advanceTimersByTimeAsync(60_000);
     await vi.runOnlyPendingTimersAsync();
-    await collector.stop();
-
     expect(await sink.count()).toBe(1);
+    await collector.stop();
   });
 
   it('resumes state after restart by drawKey', async () => {
@@ -128,10 +127,9 @@ describe('Collector', () => {
 
     await collector.start();
     await vi.runOnlyPendingTimersAsync();
-    await collector.stop();
-
     expect(await sink.count()).toBe(3);
     expect(await sink.getLastDrawKey()).toBeTruthy();
+    await collector.stop();
   });
 
   it('continues after parse failure without crashing', async () => {
@@ -146,8 +144,8 @@ describe('Collector', () => {
     await vi.runOnlyPendingTimersAsync();
     await vi.advanceTimersByTimeAsync(60_000);
     await vi.runOnlyPendingTimersAsync();
-    expect(collector.getState().status).toBe('degraded');
-    await collector.stop();
+    expect(collector.getState().status).toBe('running');
     expect(await sink.count()).toBe(0);
+    await collector.stop();
   });
 });

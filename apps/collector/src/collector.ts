@@ -7,12 +7,14 @@ import {
   parseBingo18DrawBatch,
   parseDrawPayload,
 } from './parser/parse-draw.js';
+import { prepareDrawsForIngest } from './dedupe/ingest-dedupe.js';
 import type { DrawSink } from './sink/draw-sink.js';
 import { AdaptivePollStrategy } from './strategy/adaptive-poll-strategy.js';
 import type { PollStrategy } from './strategy/poll-strategy.js';
 import { initialCollectorState, type CollectorState } from './types/collector-state.js';
 import type { DrawResult, RawHttpResponse } from './types/draw-result.js';
-import { dedupeDrawsByKey, filterNewDraws } from './util/dedupe.js';
+import { dedupeDrawsByKey } from './util/dedupe.js';
+import { syncFullDrawHistory, type SyncHistoryResult } from './sync/sync-full-history.js';
 
 export interface CollectorOptions {
   readonly sink: DrawSink;
@@ -63,6 +65,11 @@ export class Collector {
     this.scheduleNext(0);
   }
 
+  /** One-shot merge of full bingo18 history into SQLite. */
+  async syncFullHistory(): Promise<SyncHistoryResult> {
+    return syncFullDrawHistory(this.options.sink, this.options.adapter);
+  }
+
   async stop(): Promise<void> {
     this.running = false;
     if (this.timer !== null) {
@@ -95,19 +102,28 @@ export class Collector {
     rawPayload: unknown,
     source: string,
     rawResponse: RawHttpResponse | null,
-  ): Promise<{ draws: DrawResult[]; errors: string[] }> {
+  ): Promise<{ draws: DrawResult[]; errors: string[]; skippedDuplicates: number }> {
     const parseOptions = { rawResponse };
 
     if (isBingo18BatchPayload(rawPayload)) {
       const batch = parseBingo18DrawBatch(rawPayload, source, parseOptions);
       const unique = dedupeDrawsByKey(batch.draws);
+      const skippedInBatch = batch.draws.length - unique.length;
       const storedCount = await this.options.sink.count();
       const lastKey = await this.options.sink.getLastDrawKey();
 
       // DB trống → import toàn bộ lịch sử từ data.json (một lần).
       if (storedCount === 0 || lastKey === null) {
         collectorLog(`Initial backfill: ${String(unique.length)} draws from source`);
-        return { draws: unique, errors: batch.errors };
+        return { draws: unique, errors: batch.errors, skippedDuplicates: skippedInBatch };
+      }
+
+      // DB thiếu so với nguồn → gap-fill toàn bộ batch (SQLite UNIQUE bỏ qua trùng).
+      if (unique.length > storedCount) {
+        collectorLog(
+          `Gap-fill: source ${String(unique.length)} draws, DB ${String(storedCount)} — merging missing`,
+        );
+        return { draws: unique, errors: batch.errors, skippedDuplicates: skippedInBatch };
       }
 
       const lastAt = new Date(
@@ -116,25 +132,30 @@ export class Collector {
           lastKey,
       ).getTime();
       const newer = unique.filter((d) => new Date(d.drawAt).getTime() > lastAt);
-      return { draws: newer, errors: batch.errors };
+      const skippedOlder = unique.length - newer.length;
+      return {
+        draws: newer,
+        errors: batch.errors,
+        skippedDuplicates: skippedInBatch + skippedOlder,
+      };
     }
 
     const parsed = parseDrawPayload(rawPayload, source, parseOptions);
     if (!parsed.success || parsed.draw === undefined) {
-      return { draws: [], errors: parsed.errors };
+      return { draws: [], errors: parsed.errors, skippedDuplicates: 0 };
     }
 
     const lastKey = await this.options.sink.getLastDrawKey();
     if (lastKey === parsed.draw.drawKey) {
-      return { draws: [], errors: [] };
+      return { draws: [], errors: [], skippedDuplicates: 1 };
     }
 
     const existing = await this.options.sink.findByDrawKey(parsed.draw.drawKey);
     if (existing !== null) {
-      return { draws: [], errors: [] };
+      return { draws: [], errors: [], skippedDuplicates: 1 };
     }
 
-    return { draws: [parsed.draw], errors: [] };
+    return { draws: [parsed.draw], errors: [], skippedDuplicates: 0 };
   }
 
   private async tick(): Promise<void> {
@@ -163,7 +184,8 @@ export class Collector {
 
       this.consecutiveAdapterFailures = 0;
 
-      const { draws: candidates, errors } = await this.resolveNewDraws(
+      const { draws: candidates, errors, skippedDuplicates: resolveSkipped } =
+        await this.resolveNewDraws(
         fetch.rawPayload,
         this.options.adapter.id,
         fetch.rawResponse,
@@ -174,34 +196,63 @@ export class Collector {
       }
 
       if (candidates.length === 0) {
+        if (resolveSkipped > 0) {
+          this.state = {
+            ...this.state,
+            duplicatesSkipped: this.state.duplicatesSkipped + resolveSkipped,
+          };
+          await this.persistState();
+        }
         const delay = this.pollStrategy.nextDelayMs(this.state);
         this.scheduleNext(delay);
         return;
       }
 
-      let newDraws: DrawResult[];
-      if (candidates.length > 200) {
-        // Backfill / catch-up lớn — UNIQUE constraint lo trùng, tránh N query findByDrawKey.
-        newDraws = candidates;
-      } else {
-        const known = new Set<string>();
+      const known = new Set<string>();
+      if (candidates.length <= 200) {
         for (const draw of candidates) {
           const existing = await this.options.sink.findByDrawKey(draw.drawKey);
           if (existing !== null) known.add(draw.drawKey);
         }
-        newDraws = filterNewDraws(candidates, known);
       }
 
-      if (newDraws.length === 0) {
+      const { draws: toInsert, skippedDuplicates: preSkipped } = prepareDrawsForIngest(
+        candidates,
+        known,
+      );
+      const preFilterSkipped = resolveSkipped + preSkipped;
+
+      if (toInsert.length === 0) {
+        if (preFilterSkipped > 0) {
+          this.state = {
+            ...this.state,
+            duplicatesSkipped: this.state.duplicatesSkipped + preFilterSkipped,
+          };
+          await this.persistState();
+        }
         const delay = this.pollStrategy.nextDelayMs(this.state);
         this.scheduleNext(delay);
         return;
       }
 
-      await this.options.sink.appendMany(newDraws);
+      const appendResult = await this.options.sink.appendMany(toInsert);
+      const skipped = preFilterSkipped + appendResult.skipped;
 
-      const latest = newDraws[newDraws.length - 1];
-      const avg = computeAverageLatency(this.state.averageLatencyMs, newDraws);
+      if (appendResult.inserted === 0) {
+        if (skipped > 0) {
+          this.state = {
+            ...this.state,
+            duplicatesSkipped: this.state.duplicatesSkipped + skipped,
+          };
+          await this.persistState();
+        }
+        const delay = this.pollStrategy.nextDelayMs(this.state);
+        this.scheduleNext(delay);
+        return;
+      }
+
+      const latest = (await this.options.sink.findLatest()) ?? toInsert[toInsert.length - 1];
+      const avg = computeAverageLatency(this.state.averageLatencyMs, toInsert);
 
       this.state = {
         ...this.state,
@@ -210,18 +261,18 @@ export class Collector {
         lastSuccessAt: now,
         failureCount: 0,
         averageLatencyMs: avg,
+        duplicatesSkipped: this.state.duplicatesSkipped + skipped,
         status: 'running',
       };
       await this.persistState();
 
-      if (newDraws.length > 1) {
+      if (appendResult.inserted > 1) {
         collectorLog(
-          `Saved ${String(newDraws.length)} draws (${newDraws[0].drawKey} … ${latest.drawKey})`,
+          `Saved ${String(appendResult.inserted)} draws (${toInsert[0].drawKey} … ${latest.drawKey})`,
         );
       } else {
-        const draw = newDraws[0];
         collectorLog(
-          `New draw ${draw.drawKey} — Saved — Latency ${String(Math.round(draw.latencyMs / 1000))}s`,
+          `New draw ${latest.drawKey} — Saved — Latency ${String(Math.round(latest.latencyMs / 1000))}s`,
         );
       }
     } catch (err) {

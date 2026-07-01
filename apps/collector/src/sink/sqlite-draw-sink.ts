@@ -11,7 +11,7 @@ import {
 } from '../types/collector-state.js';
 import type { DrawResult, RawHttpResponse } from '../types/draw-result.js';
 import { isSqliteBusyError, withSqliteRetry } from '../util/retry.js';
-import type { DrawSink } from './draw-sink.js';
+import type { AppendResult, DrawSink } from './draw-sink.js';
 
 const packageDir = dirname(fileURLToPath(import.meta.url));
 
@@ -84,7 +84,7 @@ function isUniqueConstraintError(err: unknown): boolean {
 
 export class SqliteDrawSink implements DrawSink {
   private readonly db: Database.Database;
-  private readonly insertDraw: Database.Statement;
+  private readonly insertDrawIgnore: Database.Statement;
 
   constructor(dbPath: string) {
     mkdirSync(dirname(dbPath), { recursive: true });
@@ -93,44 +93,64 @@ export class SqliteDrawSink implements DrawSink {
     this.db.pragma('busy_timeout = 5000');
     const schemaPath = join(packageDir, '..', '..', 'schema.sql');
     this.db.exec(readFileSync(schemaPath, 'utf8'));
-    this.insertDraw = this.db.prepare(`
-      INSERT INTO draw_results (
+    const insertColumns = `
         draw_key, game_id, market_version, draw_at, published_at,
         published_estimated, collected_at, latency_ms, dice_1, dice_2, dice_3,
-        total, flower, small_large, source, raw_payload, raw_response
-      ) VALUES (
+        total, flower, small_large, source, raw_payload, raw_response`;
+    const insertValues = `
         @drawKey, @gameId, @marketVersion, @drawAt, @publishedAt,
         @publishedEstimated, @collectedAt, @latencyMs, @d1, @d2, @d3,
-        @total, @flower, @smallLarge, @source, @rawPayload, @rawResponse
-      )
-    `);
+        @total, @flower, @smallLarge, @source, @rawPayload, @rawResponse`;
+    this.insertDrawIgnore = this.db.prepare(
+      `INSERT OR IGNORE INTO draw_results (${insertColumns}) VALUES (${insertValues})`,
+    );
+    this.ensureCollectorStateSchema();
   }
 
-  private runInsert(draw: DrawResult): boolean {
-    try {
-      this.insertDraw.run(drawToParams(draw));
-      return true;
-    } catch (err) {
-      if (isUniqueConstraintError(err)) return false;
-      throw err;
+  private ensureCollectorStateSchema(): void {
+    const columns = this.db.prepare(`PRAGMA table_info(collector_state)`).all() as Array<{
+      name: string;
+    }>;
+    const hasDuplicatesSkipped = columns.some((column) => column.name === 'duplicates_skipped');
+    if (!hasDuplicatesSkipped) {
+      this.db.exec(
+        `ALTER TABLE collector_state ADD COLUMN duplicates_skipped INTEGER NOT NULL DEFAULT 0`,
+      );
     }
   }
 
-  async append(draw: DrawResult): Promise<void> {
-    await withSqliteRetry(() => {
-      this.runInsert(draw);
+  private countInsertResult(changes: number): AppendResult {
+    return {
+      inserted: changes,
+      skipped: changes === 0 ? 1 : 0,
+    };
+  }
+  async append(draw: DrawResult): Promise<AppendResult> {
+    return withSqliteRetry(() => {
+      const result = this.insertDrawIgnore.run(drawToParams(draw));
+      return this.countInsertResult(result.changes);
     });
   }
 
-  async appendMany(draws: readonly DrawResult[]): Promise<void> {
-    if (draws.length === 0) return;
-    await withSqliteRetry(() => {
+  async appendMany(draws: readonly DrawResult[]): Promise<AppendResult> {
+    if (draws.length === 0) {
+      return { inserted: 0, skipped: 0 };
+    }
+    return withSqliteRetry(() => {
+      let inserted = 0;
+      let skipped = 0;
       const runBatch = this.db.transaction((items: readonly DrawResult[]) => {
         for (const draw of items) {
-          this.runInsert(draw);
+          const result = this.insertDrawIgnore.run(drawToParams(draw));
+          if (result.changes > 0) {
+            inserted += 1;
+          } else {
+            skipped += 1;
+          }
         }
       });
       runBatch(draws);
+      return { inserted, skipped };
     });
   }
 
@@ -189,12 +209,52 @@ export class SqliteDrawSink implements DrawSink {
     return Promise.resolve(rows.map(rowToDraw));
   }
 
+  findBetweenDrawKeys(fromKey: string, toKey: string): Promise<readonly DrawResult[]> {
+    const rows = this.db
+      .prepare(
+        `SELECT ${SELECT_DRAW_COLUMNS} FROM draw_results
+         WHERE draw_key >= ? AND draw_key <= ?
+         ORDER BY draw_key ASC`,
+      )
+      .all(fromKey, toKey) as Array<Record<string, unknown>>;
+    return Promise.resolve(rows.map(rowToDraw));
+  }
+
+  findByGameDay(dayCompact: string): Promise<readonly DrawResult[]> {
+    const rows = this.db
+      .prepare(
+        `SELECT ${SELECT_DRAW_COLUMNS} FROM draw_results
+         WHERE substr(draw_key, 1, 8) = ?
+         ORDER BY draw_key ASC`,
+      )
+      .all(dayCompact) as Array<Record<string, unknown>>;
+    return Promise.resolve(rows.map(rowToDraw));
+  }
+
+  countByGameDay(): Promise<Readonly<Record<string, number>>> {
+    const rows = this.db
+      .prepare(
+        `SELECT substr(draw_key, 1, 4) || '-' || substr(draw_key, 5, 2) || '-' || substr(draw_key, 7, 2) AS day_key,
+                COUNT(*) AS c
+         FROM draw_results
+         GROUP BY day_key
+         ORDER BY day_key ASC`,
+      )
+      .all() as Array<{ day_key: string; c: number }>;
+    const out: Record<string, number> = {};
+    for (const row of rows) {
+      out[row.day_key] = row.c;
+    }
+    return Promise.resolve(out);
+  }
+
   loadCollectorState(): Promise<CollectorState> {
     const row = this.db
       .prepare(
         `SELECT last_draw_key AS lastDrawKey, last_draw_json AS lastDrawJson,
                 last_success_at AS lastSuccessAt, last_poll_at AS lastPollAt,
                 failure_count AS failureCount, average_latency_ms AS averageLatencyMs,
+                duplicates_skipped AS duplicatesSkipped,
                 status
          FROM collector_state WHERE id = 1`,
       )
@@ -206,6 +266,7 @@ export class SqliteDrawSink implements DrawSink {
           lastPollAt: string | null;
           failureCount: number;
           averageLatencyMs: number;
+          duplicatesSkipped?: number;
           status: string;
         }
       | undefined;
@@ -235,6 +296,7 @@ export class SqliteDrawSink implements DrawSink {
       lastPollAt: row.lastPollAt,
       failureCount: row.failureCount,
       averageLatencyMs: row.averageLatencyMs,
+      duplicatesSkipped: row.duplicatesSkipped ?? 0,
       status,
     });
   }
@@ -250,6 +312,7 @@ export class SqliteDrawSink implements DrawSink {
             last_poll_at = @lastPollAt,
             failure_count = @failureCount,
             average_latency_ms = @averageLatencyMs,
+            duplicates_skipped = @duplicatesSkipped,
             status = @status
            WHERE id = 1`,
         )
@@ -260,6 +323,7 @@ export class SqliteDrawSink implements DrawSink {
           lastPollAt: state.lastPollAt,
           failureCount: state.failureCount,
           averageLatencyMs: state.averageLatencyMs,
+          duplicatesSkipped: state.duplicatesSkipped,
           status: state.status,
         });
     });

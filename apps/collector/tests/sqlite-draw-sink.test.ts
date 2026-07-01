@@ -62,9 +62,30 @@ describe('SqliteDrawSink', () => {
     const dir = mkdtempSync(join(tmpdir(), 'collector-test-'));
     const dbPath = join(dir, 'test.db');
     const sink = new SqliteDrawSink(dbPath);
-    await sink.append(sampleDraw('dup', '2026-01-01T12:00:00Z'));
-    await sink.append({ ...sampleDraw('dup', '2026-01-01T12:00:00Z'), dice: [4, 4, 4] });
+    const first = await sink.append(sampleDraw('dup', '2026-01-01T12:00:00Z'));
+    const second = await sink.append({
+      ...sampleDraw('dup', '2026-01-01T12:00:00Z'),
+      dice: [4, 4, 4],
+    });
+    expect(first).toEqual({ inserted: 1, skipped: 0 });
+    expect(second).toEqual({ inserted: 0, skipped: 1 });
     expect(await sink.count()).toBe(1);
+    await sink.close();
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('persists duplicates_skipped in collector state', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'collector-test-'));
+    const dbPath = join(dir, 'test.db');
+    const sink = new SqliteDrawSink(dbPath);
+    const state = {
+      ...initialCollectorState(),
+      duplicatesSkipped: 42,
+      status: 'running' as const,
+    };
+    await sink.saveCollectorState(state);
+    const loaded = await sink.loadCollectorState();
+    expect(loaded.duplicatesSkipped).toBe(42);
     await sink.close();
     rmSync(dir, { recursive: true, force: true });
   });

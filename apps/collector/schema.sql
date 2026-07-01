@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS collector_state (
   last_poll_at        TEXT,
   failure_count       INTEGER NOT NULL DEFAULT 0,
   average_latency_ms  INTEGER NOT NULL DEFAULT 0,
+  duplicates_skipped  INTEGER NOT NULL DEFAULT 0,
   status              TEXT NOT NULL DEFAULT 'stopped'
 );
 

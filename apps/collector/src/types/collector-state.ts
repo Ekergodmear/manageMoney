@@ -9,6 +9,7 @@ export interface CollectorState {
   readonly lastPollAt: string | null;
   readonly failureCount: number;
   readonly averageLatencyMs: number;
+  readonly duplicatesSkipped: number;
   readonly status: CollectorStatus;
 }
 
@@ -20,6 +21,7 @@ export function initialCollectorState(): CollectorState {
     lastPollAt: null,
     failureCount: 0,
     averageLatencyMs: 0,
+    duplicatesSkipped: 0,
     status: 'running',
   };
 }

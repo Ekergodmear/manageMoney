@@ -11,6 +11,7 @@ export interface CollectorHealth {
   readonly lastSuccessAt: string | null;
   readonly averageLatencyMs: number;
   readonly failureCount: number;
+  readonly duplicatesSkipped: number;
   readonly activeAdapterId: string;
   readonly drawCount: number;
   readonly lastDrawKey: string | null;
@@ -41,6 +42,7 @@ export function buildCollectorHealth(
     lastSuccessAt: state.lastSuccessAt,
     averageLatencyMs: state.averageLatencyMs,
     failureCount: state.failureCount,
+    duplicatesSkipped: state.duplicatesSkipped,
     activeAdapterId: adapterId,
     drawCount,
     lastDrawKey: state.lastDrawKey ?? latestDraw?.drawKey ?? null,
@@ -121,6 +123,7 @@ export function formatHealthReport(report: HealthReport): string {
     `Average Latency: ${String(Math.round(report.health.averageLatencyMs / 1000))}s`,
   );
   lines.push(`Failure Count: ${String(report.health.failureCount)}`);
+  lines.push(`Duplicates Skipped: ${String(report.health.duplicatesSkipped)}`);
   lines.push('');
   lines.push('Retry:');
   for (const line of formatRetryObservabilityLines(loadRetryObservabilitySnapshot())) {
