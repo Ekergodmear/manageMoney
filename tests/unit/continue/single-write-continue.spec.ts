@@ -87,8 +87,12 @@ describe('R2.2.3 single write continue', () => {
     const reloaded = await deps.storage.load();
     expect(reloaded.activeSessionId).toBe(session.id);
     const saved = reloaded.sessions.find((s) => s.id === session.id);
-    expect(getCurrentPlan(saved!)?.origin).toBe('continue');
-    expect(getCurrentPlan(saved!)?.generated.strategy.rounds).toHaveLength(100);
+    expect(saved).toBeDefined();
+    if (saved === undefined) {
+      return;
+    }
+    expect(getCurrentPlan(saved)?.origin).toBe('continue');
+    expect(getCurrentPlan(saved)?.generated.strategy.rounds).toHaveLength(100);
   });
 
   it('one domain mutation → one PersistenceService.save()', async () => {

@@ -7,7 +7,6 @@ export {
   DEFAULT_RETRY_POLICY,
   executeWithRetry,
   retryDelayMs,
-  withRetry,
   type RetryPolicyOptions,
 } from './retry-policy.js';
 export {

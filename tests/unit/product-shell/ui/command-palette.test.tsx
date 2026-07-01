@@ -16,9 +16,7 @@ function planningCommand(execute: () => Promise<void>): AppCommand {
     keywords: ['plan', 'generate'],
     visible: () => true,
     enabled: () => true,
-    execute: async () => {
-      await execute();
-    },
+    execute: () => execute(),
   };
 }
 
@@ -30,7 +28,7 @@ describe('CommandPalette', () => {
   it('searches commands and executes on Enter', async () => {
     const user = userEvent.setup();
     const runtime = createShellRuntime();
-    const execute = vi.fn(async () => undefined);
+    const execute = vi.fn(() => Promise.resolve());
     runtime.registerCommand(planningCommand(execute));
 
     render(
@@ -56,7 +54,7 @@ describe('CommandPalette', () => {
   it('shows recent commands when opened with an empty query', async () => {
     const user = userEvent.setup();
     const runtime = createShellRuntime();
-    runtime.registerCommand(planningCommand(async () => undefined));
+    runtime.registerCommand(planningCommand(() => Promise.resolve()));
     runtime.actionHistory.recordSuccess('planning.generate');
     runtime.actionHistory.recordFailure('planning.export');
 

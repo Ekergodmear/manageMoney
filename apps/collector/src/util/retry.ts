@@ -1,4 +1,4 @@
-import { executeWithRetry, type RetryPolicyOptions as PolicyOptions } from '../retry/retry-policy.js';
+import { executeWithRetry } from '../retry/retry-policy.js';
 
 export interface RetryOptions {
   readonly maxAttempts?: number;
@@ -7,7 +7,7 @@ export interface RetryOptions {
 }
 
 export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
-  return executeWithRetry(fn, options as PolicyOptions);
+  return executeWithRetry(fn, options);
 }
 
 export function isSqliteBusyError(err: unknown): boolean {

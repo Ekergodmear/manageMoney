@@ -112,7 +112,12 @@ describe('R2.2.5b single write improve', () => {
     const reloaded = await deps.storage.load();
     expect(reloaded.planCandidate).toBeNull();
     expect(reloaded.sessions[0]?.plans).toHaveLength(2);
-    expect(getCurrentPlan(reloaded.sessions[0]!)?.origin).toBe('improve');
+    const reloadedSession = reloaded.sessions[0];
+    expect(reloadedSession).toBeDefined();
+    if (reloadedSession === undefined) {
+      return;
+    }
+    expect(getCurrentPlan(reloadedSession)?.origin).toBe('improve');
   });
 
   it('one domain mutation → one PersistenceService.save()', async () => {

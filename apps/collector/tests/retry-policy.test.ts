@@ -29,7 +29,7 @@ describe('retry policy', () => {
   });
 
   it('succeeds on first attempt', async () => {
-    const fn = vi.fn(async () => 'ok');
+    const fn = vi.fn(() => Promise.resolve('ok'));
     await expect(executeWithRetry(fn)).resolves.toBe('ok');
     expect(fn).toHaveBeenCalledOnce();
   });
@@ -37,12 +37,12 @@ describe('retry policy', () => {
   it('succeeds on second attempt after one failure', async () => {
     vi.useFakeTimers();
     let attempts = 0;
-    const fn = vi.fn(async () => {
+    const fn = vi.fn(() => {
       attempts += 1;
       if (attempts < 2) {
-        throw new CollectorRequestError('network', 'temporary');
+        return Promise.reject(new CollectorRequestError('network', 'temporary'));
       }
-      return 'ok';
+      return Promise.resolve('ok');
     });
 
     const promise = executeWithRetry(fn, { baseDelayMs: 1_000 });
@@ -62,9 +62,7 @@ describe('retry policy', () => {
     expect(retryDelayMs(3)).toBe(4_000);
 
     vi.useFakeTimers();
-    const fn = vi.fn(async () => {
-      throw new CollectorRequestError('network', 'down');
-    });
+    const fn = vi.fn(() => Promise.reject(new CollectorRequestError('network', 'down')));
 
     const promise = executeWithRetry(fn, { maxAttempts: 3, baseDelayMs: 1_000 });
     const rejection = expect(promise).rejects.toThrow('down');
@@ -88,13 +86,15 @@ describe('retry policy', () => {
 
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => ({
-        ok: false,
-        status: 500,
-        statusText: 'Internal Server Error',
-        text: async () => 'fail',
-        headers: new Headers(),
-      })),
+      vi.fn(() =>
+        Promise.resolve({
+          ok: false,
+          status: 500,
+          statusText: 'Internal Server Error',
+          text: () => Promise.resolve('fail'),
+          headers: new Headers(),
+        }),
+      ),
     );
     await expect(
       fetchJsonWithTimeout('https://example.test', (text) => JSON.parse(text) as unknown, 10_000),
@@ -102,13 +102,15 @@ describe('retry policy', () => {
 
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => ({
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        text: async () => '{not-json',
-        headers: new Headers(),
-      })),
+      vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          status: 200,
+          statusText: 'OK',
+          text: () => Promise.resolve('{not-json'),
+          headers: new Headers(),
+        }),
+      ),
     );
     await expect(
       fetchJsonWithTimeout('https://example.test', (text) => JSON.parse(text) as unknown, 10_000),
@@ -123,18 +125,18 @@ describe('retry policy', () => {
 
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => {
+      vi.fn(() => {
         attempts += 1;
         if (attempts < 2) {
-          throw new Error('network down');
+          return Promise.reject(new Error('network down'));
         }
-        return {
+        return Promise.resolve({
           ok: true,
           status: 200,
           statusText: 'OK',
-          text: async () => JSON.stringify(payload),
+          text: () => Promise.resolve(JSON.stringify(payload)),
           headers: new Headers(),
-        };
+        });
       }),
     );
 
@@ -157,9 +159,7 @@ describe('retry policy', () => {
 
   it('surfaces retry state in doctor health report', async () => {
     vi.useFakeTimers();
-    const fn = vi.fn(async () => {
-      throw new CollectorRequestError('network', 'down');
-    });
+    const fn = vi.fn(() => Promise.reject(new CollectorRequestError('network', 'down')));
     const promise = executeWithRetry(fn, { maxAttempts: 2, baseDelayMs: 1 });
     const rejection = expect(promise).rejects.toThrow('down');
     await vi.runAllTimersAsync();

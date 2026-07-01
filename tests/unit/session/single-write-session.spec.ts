@@ -152,7 +152,11 @@ describe('R2.1 single write session', () => {
     expect(saved?.status).toBe('won');
     expect(saved?.lastSettledDrawKey).toBe(draw.drawKey);
     expect(saved?.playedRounds).toHaveLength(1);
-    expect(getCurrentPlan(saved!)?.status).toBe('won');
+    expect(saved).toBeDefined();
+    if (saved === undefined) {
+      return;
+    }
+    expect(getCurrentPlan(saved)?.status).toBe('won');
   });
 
   it('case 2: undo → reload → undo persisted', async () => {
@@ -179,7 +183,12 @@ describe('R2.1 single write session', () => {
 
     const reloaded = await deps.storage.load();
     expect(reloaded).toEqual(undone.nextState);
-    expect(getCurrentPlan(reloaded.sessions[0]!)?.completedThroughRound).toBe(0);
+    const reloadedSession = reloaded.sessions[0];
+    expect(reloadedSession).toBeDefined();
+    if (reloadedSession === undefined) {
+      return;
+    }
+    expect(getCurrentPlan(reloadedSession)?.completedThroughRound).toBe(0);
   });
 
   it('case 3: stop session → reload → state identical', async () => {
@@ -212,9 +221,16 @@ describe('R2.1 single write session', () => {
     expect(saveSpy).toHaveBeenCalledTimes(1);
 
     saveSpy.mockClear();
-    const playing = started.ok ? started.nextState.sessions[0]! : draft;
+    if (!started.ok) {
+      throw new Error('expected start plan to succeed');
+    }
+    const playingSession = started.nextState.sessions[0];
+    expect(playingSession).toBeDefined();
+    if (playingSession === undefined) {
+      return;
+    }
     const savePlaying = createSavePlayingSessionUseCase({ sessions: deps.sessions });
-    await savePlaying.execute(startCurrentPlan(playing));
+    await savePlaying.execute(startCurrentPlan(playingSession));
     expect(saveSpy).toHaveBeenCalledTimes(1);
 
     saveSpy.mockRestore();

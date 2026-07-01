@@ -15,8 +15,9 @@ export function registerShellCommands(
     keywords: ['palette', 'commands', 'search'],
     visible: () => true,
     enabled: () => true,
-    execute: async () => {
+    execute: () => {
       handlers.openPalette();
+      return Promise.resolve();
     },
   });
 
@@ -27,8 +28,9 @@ export function registerShellCommands(
     keywords: ['plan', 'planning', 'generate'],
     visible: () => true,
     enabled: () => true,
-    execute: async (ctx) => {
+    execute: (ctx) => {
       ctx.navigate('planning');
+      return Promise.resolve();
     },
   });
 
@@ -39,8 +41,9 @@ export function registerShellCommands(
     keywords: ['session', 'playing', 'continue'],
     visible: () => true,
     enabled: () => true,
-    execute: async (ctx) => {
+    execute: (ctx) => {
       ctx.navigate('session');
+      return Promise.resolve();
     },
   });
 
@@ -51,8 +54,9 @@ export function registerShellCommands(
     keywords: ['diagnostics', 'health', 'status'],
     visible: () => true,
     enabled: () => true,
-    execute: async (ctx) => {
+    execute: (ctx) => {
       ctx.navigate('diagnostics');
+      return Promise.resolve();
     },
   });
 

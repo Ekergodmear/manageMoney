@@ -33,7 +33,7 @@ function generatePlanCommand(executeFn?: (ctx: AppContext) => Promise<void>): Ap
     keywords: ['plan', 'generate'],
     visible: (ctx) => ctx.flags.onPlanningWorkspace === true,
     enabled: (ctx) => ctx.flags.planReady === true,
-    execute: executeFn ?? (async () => undefined),
+    execute: executeFn ?? (() => Promise.resolve()),
   };
 }
 
@@ -57,7 +57,9 @@ describe('workspace registry', () => {
   it('rejects duplicate workspace id', () => {
     const registry = createWorkspaceRegistry();
     registry.register(planningWorkspace());
-    expect(() => registry.register(planningWorkspace())).toThrow(DuplicateWorkspaceError);
+    expect(() => {
+      registry.register(planningWorkspace());
+    }).toThrow(DuplicateWorkspaceError);
   });
 
   it('unregisters a workspace', () => {
@@ -94,14 +96,16 @@ describe('workspace registry', () => {
 
   it('throws when unregistering unknown workspace', () => {
     const registry = createWorkspaceRegistry();
-    expect(() => registry.unregister('planning')).toThrow(WorkspaceNotFoundError);
+    expect(() => {
+      registry.unregister('planning');
+    }).toThrow(WorkspaceNotFoundError);
   });
 });
 
 describe('command registry', () => {
   it('registers and executes a command', async () => {
     const registry = createCommandRegistry();
-    const execute = vi.fn(async () => undefined);
+    const execute = vi.fn(() => Promise.resolve());
     const command = generatePlanCommand(execute);
     registry.register(command);
 
@@ -119,7 +123,7 @@ describe('command registry', () => {
       keywords: ['workspace'],
       visible: () => true,
       enabled: () => true,
-      execute: async () => undefined,
+      execute: () => Promise.resolve(),
     });
 
     const results = registry.search('plan');
@@ -141,7 +145,9 @@ describe('command registry', () => {
   it('rejects duplicate command id', () => {
     const registry = createCommandRegistry();
     registry.register(generatePlanCommand());
-    expect(() => registry.register(generatePlanCommand())).toThrow(DuplicateCommandError);
+    expect(() => {
+      registry.register(generatePlanCommand());
+    }).toThrow(DuplicateCommandError);
   });
 });
 
@@ -155,7 +161,9 @@ describe('shortcut registry', () => {
   it('rejects duplicate shortcut binding', () => {
     const registry = createShortcutRegistry();
     registry.bind('Ctrl+K', 'planning.generate');
-    expect(() => registry.bind('Ctrl+K', 'planning.open')).toThrow(DuplicateShortcutError);
+    expect(() => {
+      registry.bind('Ctrl+K', 'planning.open');
+    }).toThrow(DuplicateShortcutError);
   });
 
   it('unbinds a shortcut', () => {
@@ -258,9 +266,7 @@ describe('shell runtime facade', () => {
       ...generatePlanCommand(),
       enabled: () => true,
       visible: () => true,
-      execute: async () => {
-        throw new Error('export failed');
-      },
+      execute: () => Promise.reject(new Error('export failed')),
     });
     await expect(shell.executeCommand('planning.generate', planningCtx())).rejects.toThrow('export failed');
     expect(shell.actionHistory.recent(1)).toEqual([
@@ -272,7 +278,7 @@ describe('shell runtime facade', () => {
 describe('shell runtime integration', () => {
   it('wires workspace, command, shortcut, execute, and history via facade', async () => {
     const shell = createShellRuntime();
-    const execute = vi.fn(async () => undefined);
+    const execute = vi.fn(() => Promise.resolve());
 
     shell.registerWorkspace(planningWorkspace());
     shell.registerCommand(generatePlanCommand(execute));

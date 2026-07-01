@@ -142,7 +142,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps): ReactNod
               if (row.kind === 'header') {
                 return (
                   <li
-                    key={`header-${row.label}-${index}`}
+                    key={`header-${row.label}-${String(index)}`}
                     className="px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
                   >
                     {row.label}

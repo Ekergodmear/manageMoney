@@ -19,20 +19,22 @@ function snapshot(summary: string, severity: DiagnosticSnapshot['severity']): Di
   };
 }
 
+function refresh(summary: string, severity: DiagnosticSnapshot['severity']): () => Promise<DiagnosticSnapshot> {
+  return () => Promise.resolve(snapshot(summary, severity));
+}
+
 function renderDiagnostics(
   overrides: Partial<{
     refreshCollector: () => Promise<DiagnosticSnapshot>;
   }> = {},
 ): void {
   const capabilities = createDiagnosticCapabilities({
-    refreshCollector:
-      overrides.refreshCollector ??
-      (async () => snapshot('Collector unreachable', 'critical')),
-    refreshStorage: async () => snapshot('3 sessions stored locally', 'info'),
-    refreshRuntime: async () => snapshot('Runtime healthy', 'info'),
-    refreshNotifications: async () => snapshot('0 unread notifications', 'info'),
-    refreshStatistics: async () => snapshot('Statistics ready', 'info'),
-    refreshCloud: async () => snapshot('Cloud disabled', 'info'),
+    refreshCollector: overrides.refreshCollector ?? refresh('Collector unreachable', 'critical'),
+    refreshStorage: refresh('3 sessions stored locally', 'info'),
+    refreshRuntime: refresh('Runtime healthy', 'info'),
+    refreshNotifications: refresh('0 unread notifications', 'info'),
+    refreshStatistics: refresh('Statistics ready', 'info'),
+    refreshCloud: refresh('Cloud disabled', 'info'),
   });
 
   render(
@@ -80,7 +82,7 @@ describe('DiagnosticsProvider and page', () => {
 
   it('survives offline collector without crashing', async () => {
     renderDiagnostics({
-      refreshCollector: async () => snapshot('Collector unreachable', 'critical'),
+      refreshCollector: refresh('Collector unreachable', 'critical'),
     });
     await waitFor(() => {
       expect(screen.getByText('Collector unreachable')).toBeInTheDocument();

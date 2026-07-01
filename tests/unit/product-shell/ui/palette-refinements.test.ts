@@ -21,7 +21,7 @@ function command(
     keywords,
     visible: () => true,
     enabled: () => true,
-    execute: async () => undefined,
+    execute: () => Promise.resolve(),
   };
 }
 

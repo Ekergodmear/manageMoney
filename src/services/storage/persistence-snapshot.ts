@@ -1,5 +1,4 @@
 import type { PersistedAppState } from '@/features/session/session-types';
-import { PERSISTED_STATE_VERSION } from '@/services/storage/migration-runner';
 import { probeIndexedDbAvailability } from '@/services/storage/diagnostics/probe-indexeddb';
 import { readPersistedStateForDiagnostics } from '@/services/storage/diagnostics/read-persisted-state';
 import type {
@@ -69,9 +68,10 @@ function formatBytes(bytes: number): string {
 }
 
 async function estimateStorageSize(driver: StorageDriver): Promise<string | null> {
-  if (typeof navigator !== 'undefined' && 'storage' in navigator && navigator.storage.estimate) {
+  const storage = typeof navigator !== 'undefined' ? navigator.storage : undefined;
+  if (storage?.estimate !== undefined) {
     try {
-      const estimate = await navigator.storage.estimate();
+      const estimate = await storage.estimate();
       if (typeof estimate.usage === 'number') {
         return formatBytes(estimate.usage);
       }
@@ -148,7 +148,7 @@ export async function buildPersistenceSnapshot(
   return {
     status,
     driverLabel: resolveStorageDriverLabel(input.driver),
-    schemaVersion: state.version ?? PERSISTED_STATE_VERSION,
+    schemaVersion: state.version,
     lastMigration: input.health.lastMigration,
     lastSaveAt: input.health.lastSaveAt,
     lastLoadAt: input.health.lastLoadAt,

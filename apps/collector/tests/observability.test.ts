@@ -202,25 +202,17 @@ describe('R1.4 collector observability', () => {
       now,
     });
 
-    expect(snapshot).toMatchObject({
-      status: expect.any(String),
-      diagnosis: null,
-      summary: {
-        adapter: 'Mock',
-        retryCount: expect.any(Number),
-        catchUpCount: expect.any(Number),
-        duplicatesSkipped: expect.any(Number),
-      },
-      details: {
-        drawCount: 0,
-        failureCount: 0,
-        runtimeStatus: 'running',
-      },
-      freshness: {
-        lastDrawAgeLabel: expect.any(String),
-        stale: expect.any(Boolean),
-      },
-    });
+    expect(snapshot.status).toEqual(expect.any(String));
+    expect(snapshot.diagnosis).toBeNull();
+    expect(snapshot.summary.adapter).toEqual('Mock');
+    expect(snapshot.summary.retryCount).toEqual(expect.any(Number));
+    expect(snapshot.summary.catchUpCount).toEqual(expect.any(Number));
+    expect(snapshot.summary.duplicatesSkipped).toEqual(expect.any(Number));
+    expect(snapshot.details.drawCount).toBe(0);
+    expect(snapshot.details.failureCount).toBe(0);
+    expect(snapshot.details.runtimeStatus).toBe('running');
+    expect(snapshot.freshness.lastDrawAgeLabel).toEqual(expect.any(String));
+    expect(snapshot.freshness.stale).toEqual(expect.any(Boolean));
   });
 
   it('formatAgeLabel renders seconds', () => {

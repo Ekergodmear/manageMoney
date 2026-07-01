@@ -29,7 +29,7 @@ export function buildFreshnessView(
     };
   }
 
-  const anchor = latestDraw.collectedAt ?? latestDraw.drawAt;
+  const anchor = latestDraw.collectedAt;
   const lastDrawAgeMs = now - new Date(anchor).getTime();
   const stale = lastDrawAgeMs >= staleThresholdMs;
   const label = formatAgeLabel(lastDrawAgeMs);

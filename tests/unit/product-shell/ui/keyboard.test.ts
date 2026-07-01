@@ -23,7 +23,7 @@ describe('keyboard helpers', () => {
 
   it('resolves bound shortcuts through the runtime facade', async () => {
     const runtime = createShellRuntime();
-    const execute = vi.fn(async () => undefined);
+    const execute = vi.fn(() => Promise.resolve());
     runtime.registerCommand({
       id: 'navigation.open-planning',
       title: 'Open Planning',
@@ -31,15 +31,16 @@ describe('keyboard helpers', () => {
       keywords: ['plan'],
       visible: () => true,
       enabled: () => true,
-      execute: async () => {
-        await execute();
-      },
+      execute: () => execute(),
     });
     runtime.bindShortcut('Ctrl+Shift+P', 'navigation.open-planning');
 
     const commandId = runtime.shortcuts.resolve('Ctrl+Shift+P');
     expect(commandId).toBe('navigation.open-planning');
-    await runtime.executeCommand(commandId!, createAppContext());
+    if (commandId === undefined) {
+      throw new Error('Expected shortcut binding');
+    }
+    await runtime.executeCommand(commandId, createAppContext());
     expect(execute).toHaveBeenCalledOnce();
   });
 });
@@ -51,7 +52,7 @@ describe('global keyboard guard', () => {
     input.focus();
 
     const runtime = createShellRuntime();
-    const execute = vi.fn(async () => undefined);
+    const execute = vi.fn(() => Promise.resolve());
     runtime.registerCommand({
       id: 'navigation.open-planning',
       title: 'Open Planning',
@@ -59,9 +60,7 @@ describe('global keyboard guard', () => {
       keywords: ['plan'],
       visible: () => true,
       enabled: () => true,
-      execute: async () => {
-        await execute();
-      },
+      execute: () => execute(),
     });
     runtime.bindShortcut('Ctrl+Shift+P', 'navigation.open-planning');
 

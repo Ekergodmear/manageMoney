@@ -20,15 +20,15 @@ import { SessionRepository } from '@/services/storage/repositories/session-repos
 
 const FIXTURE_DIR = join(process.cwd(), 'tests', 'fixtures', 'persistence');
 
-function loadFixture<T>(name: string): T {
-  return JSON.parse(readFileSync(join(FIXTURE_DIR, name), 'utf8')) as T;
+function loadFixture(name: string): unknown {
+  return JSON.parse(readFileSync(join(FIXTURE_DIR, name), 'utf8')) as unknown;
 }
 
 describe('R2.3 — Migration Evidence', () => {
   describe('Case 1: v5 → migrate → v6 parity', () => {
     it('preserves identical business state', () => {
-      const v5 = loadFixture<unknown>('persisted-v5.json');
-      const expected = loadFixture<unknown>('persisted-v6.expected.json');
+      const v5 = loadFixture('persisted-v5.json');
+      const expected = loadFixture('persisted-v6.expected.json');
       const { state, migratedFrom } = runPersistedStateMigration(v5);
 
       expect(migratedFrom).toBe(5);
@@ -39,7 +39,7 @@ describe('R2.3 — Migration Evidence', () => {
 
   describe('Case 2: unknown optional field preserved', () => {
     it('keeps unrecognized fields through migration', () => {
-      const raw = loadFixture<Record<string, unknown>>('persisted-v5-unknown-field.json');
+      const raw = loadFixture('persisted-v5-unknown-field.json') as Record<string, unknown>;
       const migrated = migratePersistedState(raw);
 
       expect(migrated.version).toBe(PERSISTED_STATE_VERSION);
@@ -106,7 +106,7 @@ describe('R2.3 — Migration Evidence', () => {
 
   describe('Case 4: idempotent migration', () => {
     it('produces the same result when run twice', () => {
-      const v5 = loadFixture<unknown>('persisted-v5.json');
+      const v5 = loadFixture('persisted-v5.json');
       const once = migratePersistedState(v5);
       const twice = migratePersistedStateIdempotent(v5);
 
@@ -127,7 +127,7 @@ describe('R2.3 — Migration Evidence', () => {
       ['persisted-v2.json', 2],
       ['persisted-v5.json', 5],
     ] as const)('migrates %s forward-only to v%s', (fixture, fromVersion) => {
-      const raw = loadFixture<unknown>(fixture);
+      const raw = loadFixture(fixture);
       const { state, migratedFrom } = runPersistedStateMigration(raw);
 
       expect(migratedFrom).toBe(fromVersion);
@@ -161,8 +161,8 @@ describe('R2.3 — Migration Evidence', () => {
             winTaxThreshold: '10.000.000',
             winTaxRatePercent: '10',
           },
-          generated: loadFixture<{ planningDraft: { generated: unknown } }>(
-            'persisted-v5.json',
+          generated: (
+            loadFixture('persisted-v5.json') as { planningDraft: { generated: unknown } }
           ).planningDraft.generated,
           completedThroughRound: 0,
           timeline: [],

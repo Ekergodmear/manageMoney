@@ -14,19 +14,20 @@ export class UndoBetUseCase {
   constructor(private readonly deps: UndoBetUseCaseDeps) {}
 
   async execute(sessionId: string): Promise<UndoBetResult> {
-    let undone = false;
+    let blocked = false;
     const next = await this.deps.sessions.updateSession(sessionId, (session) => {
       const updated = undoBetOnPlan(session);
       if (updated === null) {
+        blocked = true;
         return session;
       }
-      undone = true;
       return updated;
     });
     if (next === null) {
       return { ok: false, reason: 'session-not-found' };
     }
-    if (!undone) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- mutator sets `blocked` via closure
+    if (blocked) {
       return { ok: false, reason: 'nothing-to-undo' };
     }
     return { ok: true, nextState: next };
