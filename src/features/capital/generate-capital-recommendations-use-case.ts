@@ -6,6 +6,7 @@ import { planCapitalStrategy } from '@/features/capital/capital-planner-service'
 import type { CapitalPlannerInput } from '@/features/capital/capital-planner-types';
 import { recommendationSetFromCapitalResult } from '@/features/capital/capital-recommendation-mapper';
 import type { RecommendationSet } from '@/features/recommendation/recommendation-set-types';
+import type { PersistedAppState } from '@/features/session/session-types';
 
 export interface GenerateCapitalRecommendationsUseCaseDeps {
   readonly recommendationSets: RecommendationSetRepository;
@@ -17,6 +18,7 @@ export interface GenerateCapitalRecommendationsUseCaseDeps {
 export type GenerateCapitalRecommendationsSuccess = {
   readonly ok: true;
   readonly recommendationSet: RecommendationSet;
+  readonly nextState: PersistedAppState;
 };
 
 export type GenerateCapitalRecommendationsFailure = {
@@ -39,8 +41,21 @@ export class GenerateCapitalRecommendationsUseCase {
 
     const generatedAt = this.deps.clock.now().toISOString();
     const recommendationSet = recommendationSetFromCapitalResult(planned, generatedAt);
-    await this.deps.candidates.clear();
-    await this.deps.recommendationSets.save(recommendationSet);
+    const state = await this.deps.candidates.loadState();
+    const nextState: PersistedAppState = {
+      ...state,
+      planCandidate: null,
+      recommendationSet,
+      activePresetId: input.presetId,
+      capitalPlanner: {
+        totalBankroll: input.bankroll,
+        strategy: input.strategy,
+        risk: input.risk,
+        presetId: input.presetId,
+        marketId: input.baseForm.marketId,
+      },
+    };
+    await this.deps.candidates.saveState(nextState);
 
     this.deps.events.emit(
       this.deps.events.createEvent('RecommendationGenerated', {
@@ -51,7 +66,7 @@ export class GenerateCapitalRecommendationsUseCase {
       }),
     );
 
-    return { ok: true, recommendationSet };
+    return { ok: true, recommendationSet, nextState };
   }
 }
 

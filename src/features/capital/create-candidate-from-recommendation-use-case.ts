@@ -7,6 +7,7 @@ import {
   type PlanCandidate,
 } from '@/features/planning/plan-candidate-types';
 import { findRecommendation } from '@/features/recommendation/recommendation-set-types';
+import type { PersistedAppState } from '@/features/session/session-types';
 
 export interface CreateCandidateFromRecommendationUseCaseDeps {
   readonly recommendationSets: RecommendationSetRepository;
@@ -22,6 +23,7 @@ export interface CreateCandidateFromRecommendationInput {
 export type CreateCandidateFromRecommendationSuccess = {
   readonly ok: true;
   readonly candidate: PlanCandidate;
+  readonly nextState: PersistedAppState;
 };
 
 export type CreateCandidateFromRecommendationFailure = {
@@ -42,7 +44,8 @@ export class CreateCandidateFromRecommendationUseCase {
   async execute(
     input: CreateCandidateFromRecommendationInput,
   ): Promise<CreateCandidateFromRecommendationResult> {
-    const set = await this.deps.recommendationSets.get();
+    const state = await this.deps.candidates.loadState();
+    const set = state.recommendationSet;
     if (set === null) {
       return { ok: false, reason: 'no-recommendation-set' };
     }
@@ -51,8 +54,6 @@ export class CreateCandidateFromRecommendationUseCase {
     if (recommendation === undefined) {
       return { ok: false, reason: 'recommendation-not-found' };
     }
-
-    await this.deps.recommendationSets.select(input.recommendationId);
 
     const createdAt = this.deps.clock.now().toISOString();
     const candidate = createPlanCandidateFromRecommendation({
@@ -65,7 +66,15 @@ export class CreateCandidateFromRecommendationUseCase {
       createdAt,
     });
 
-    await this.deps.candidates.save(candidate);
+    const nextState: PersistedAppState = {
+      ...state,
+      planCandidate: candidate,
+      recommendationSet: {
+        ...set,
+        selectedRecommendationId: input.recommendationId,
+      },
+    };
+    await this.deps.candidates.saveState(nextState);
 
     this.deps.events.emit(
       this.deps.events.createEvent('RecommendationSelected', {
@@ -84,7 +93,7 @@ export class CreateCandidateFromRecommendationUseCase {
       }),
     );
 
-    return { ok: true, candidate };
+    return { ok: true, candidate, nextState };
   }
 }
 

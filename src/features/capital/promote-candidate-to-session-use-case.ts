@@ -3,15 +3,20 @@ import type { EventBus } from '@/services/events/domain-events';
 import type { PlanCandidateRepository } from '@/services/storage/repositories/plan-candidate-repository';
 import type { SessionRepository } from '@/services/storage/repositories/session-repository';
 import { isNewSessionCandidate } from '@/features/planning/plan-candidate-types';
+import { stopSession } from '@/features/session/session-domain';
 import type { PersistedAppState } from '@/features/session/session-types';
 import { createSessionFromCandidate } from '@/features/session/session-factory';
-import { getCurrentPlan } from '@/features/session/session-domain';
+import { getCurrentPlan, type Session } from '@/features/session/session-domain';
 
 export interface PromoteCandidateToSessionUseCaseDeps {
   readonly candidates: PlanCandidateRepository;
   readonly sessions: SessionRepository;
   readonly events: EventBus;
   readonly clock: Clock;
+}
+
+export interface PromoteCandidateToSessionExecuteInput {
+  readonly stopActivePlaying?: boolean;
 }
 
 export type PromoteCandidateToSessionSuccess = {
@@ -28,14 +33,25 @@ export type PromoteCandidateToSessionResult =
   | PromoteCandidateToSessionSuccess
   | PromoteCandidateToSessionFailure;
 
+function upsertSession(sessions: readonly Session[], session: Session): Session[] {
+  const index = sessions.findIndex((s) => s.id === session.id);
+  if (index < 0) {
+    return [session, ...sessions];
+  }
+  return sessions.map((s, i) => (i === index ? session : s));
+}
+
 /**
  * PlanCandidate (new-session) → SessionFactory → SessionCreated → PlanPromoted → clear candidate.
  */
 export class PromoteCandidateToSessionUseCase {
   constructor(private readonly deps: PromoteCandidateToSessionUseCaseDeps) {}
 
-  async execute(): Promise<PromoteCandidateToSessionResult> {
-    const candidate = await this.deps.candidates.get();
+  async execute(
+    input: PromoteCandidateToSessionExecuteInput = {},
+  ): Promise<PromoteCandidateToSessionResult> {
+    let state = await this.deps.sessions.loadState();
+    const candidate = state.planCandidate;
     if (candidate === null) {
       return { ok: false, reason: 'no-candidate' };
     }
@@ -43,7 +59,17 @@ export class PromoteCandidateToSessionUseCase {
       return { ok: false, reason: 'wrong-target' };
     }
 
-    const state = await this.deps.sessions.loadState();
+    if (input.stopActivePlaying === true && state.activeSessionId !== null) {
+      const current = state.sessions.find((s) => s.id === state.activeSessionId);
+      if (current !== undefined && current.status === 'playing') {
+        state = {
+          ...state,
+          activeSessionId: null,
+          sessions: upsertSession(state.sessions, stopSession(current)),
+        };
+      }
+    }
+
     const at = this.deps.clock.now().toISOString();
     const session = createSessionFromCandidate(candidate, state.nextSessionNumber, at);
     const plan = getCurrentPlan(session);
@@ -56,12 +82,11 @@ export class PromoteCandidateToSessionUseCase {
       nextSessionNumber: state.nextSessionNumber + 1,
       activeSessionId: session.id,
       activePresetId: candidate.presetId,
-      sessions: [session, ...state.sessions],
+      sessions: [session, ...state.sessions.filter((s) => s.id !== session.id)],
       planCandidate: null,
       recommendationSet: null,
     };
     await this.deps.sessions.saveState(nextState);
-    await this.deps.candidates.clear();
 
     this.deps.events.emit(
       this.deps.events.createEvent('SessionCreated', {

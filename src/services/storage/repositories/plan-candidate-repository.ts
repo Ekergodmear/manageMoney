@@ -1,27 +1,52 @@
 import type { PlanCandidate } from '@/features/planning/plan-candidate-types';
+import type { PersistedAppState } from '@/features/session/session-types';
 import type { PersistenceService } from '@/services/storage/PersistenceService';
 
+/**
+ * Persistence owner for the singleton `planCandidate` slot.
+ * Invariant: at most one active candidate — save always replaces the slot.
+ */
 export class PlanCandidateRepository {
   constructor(private readonly storage: PersistenceService) {}
 
+  async loadState(): Promise<PersistedAppState> {
+    return this.storage.load();
+  }
+
+  async saveState(state: PersistedAppState): Promise<void> {
+    return this.storage.save(state);
+  }
+
   async get(): Promise<PlanCandidate | null> {
-    const state = await this.storage.load();
+    const state = await this.loadState();
     return state.planCandidate;
   }
 
-  async save(candidate: PlanCandidate): Promise<void> {
-    const state = await this.storage.load();
-    await this.storage.save({
+  async saveCandidate(candidate: PlanCandidate): Promise<PersistedAppState> {
+    const state = await this.loadState();
+    const next: PersistedAppState = {
       ...state,
       planCandidate: candidate,
-    });
+    };
+    await this.saveState(next);
+    return next;
+  }
+
+  async save(candidate: PlanCandidate): Promise<void> {
+    await this.saveCandidate(candidate);
+  }
+
+  async clearCandidate(): Promise<PersistedAppState> {
+    const state = await this.loadState();
+    const next: PersistedAppState = {
+      ...state,
+      planCandidate: null,
+    };
+    await this.saveState(next);
+    return next;
   }
 
   async clear(): Promise<void> {
-    const state = await this.storage.load();
-    await this.storage.save({
-      ...state,
-      planCandidate: null,
-    });
+    await this.clearCandidate();
   }
 }

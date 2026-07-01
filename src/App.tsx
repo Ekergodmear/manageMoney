@@ -50,6 +50,7 @@ import {
   createPromotePlanningDraftUseCase,
   type PlanningView,
 } from '@/features/planning';
+import { createDeletePlanCandidateUseCase } from '@/features/planning/candidate-use-cases';
 import { isNewSessionCandidate } from '@/features/planning/plan-candidate-types';
 import { PlanningDraftRepository } from '@/services/storage/repositories/planning-draft-repository';
 import { PlanCandidateRepository } from '@/services/storage/repositories/plan-candidate-repository';
@@ -71,7 +72,6 @@ import {
 import type { WorkspaceId } from '@/features/navigation/workspace-nav';
 import {
   getCurrentPlan,
-  stopSession,
   updateSessionNotes,
   updateSessionTitle,
   type Session,
@@ -159,6 +159,10 @@ function AppRoot(): JSX.Element {
   const planCandidateRepository = useMemo(
     () => new PlanCandidateRepository(services.storage),
     [services.storage],
+  );
+  const deletePlanCandidateUseCase = useMemo(
+    () => createDeletePlanCandidateUseCase({ candidates: planCandidateRepository }),
+    [planCandidateRepository],
   );
   const recommendationSetRepository = useMemo(
     () => new RecommendationSetRepository(services.storage),
@@ -803,8 +807,11 @@ function AppRoot(): JSX.Element {
       candidate !== null && isNewSessionCandidate(candidate) && candidate.source === 'capital';
     const isScenario =
       candidate !== null && isNewSessionCandidate(candidate) && candidate.source === 'scenario';
-    await planCandidateRepository.clear();
-    persist({ ...persisted, planCandidate: null });
+    const result = await deletePlanCandidateUseCase.execute();
+    if (!result.ok) {
+      return;
+    }
+    applyPersistedState(result.nextState);
     if (isCapital) {
       setCapitalReviewOpen(false);
       setActiveWorkspace('capital');
@@ -823,12 +830,7 @@ function AppRoot(): JSX.Element {
       showToast('Không chọn được phương án');
       return;
     }
-    const updatedSet = await recommendationSetRepository.get();
-    persist({
-      ...persisted,
-      planCandidate: result.candidate,
-      recommendationSet: updatedSet ?? persisted.recommendationSet,
-    });
+    applyPersistedState(result.nextState);
     setCapitalReviewOpen(true);
   }
 
@@ -838,54 +840,19 @@ function AppRoot(): JSX.Element {
       return null;
     }
     setCapitalReviewOpen(false);
-    setPersisted((prev) => {
-      const next: PersistedAppState = {
-        ...prev,
-        activePresetId: input.presetId,
-        planCandidate: null,
-        recommendationSet: generated.recommendationSet,
-        capitalPlanner: {
-          totalBankroll: input.bankroll,
-          strategy: input.strategy,
-          risk: input.risk,
-          presetId: input.presetId,
-          marketId: input.baseForm.marketId,
-        },
-      };
-      if (saveTimer.current !== null) {
-        clearTimeout(saveTimer.current);
-      }
-      saveTimer.current = setTimeout(() => {
-        void services.storage.save(next);
-      }, 250);
-      return next;
-    });
+    applyPersistedState(generated.nextState);
     return generated.recommendationSet;
   }
 
   async function handlePromoteNewSessionCandidate(): Promise<void> {
-    let baseState = persisted;
-    if (persisted.activeSessionId !== null) {
-      const current = findSession(persisted.sessions, persisted.activeSessionId);
-      if (current !== null && current.status === 'playing') {
-        baseState = {
-          ...persisted,
-          activeSessionId: null,
-          sessions: upsertSession(persisted.sessions, stopSession(current)),
-        };
-        await sessionRepository.saveState(baseState);
-        setPersisted(baseState);
-      }
-    }
-
-    const result = await promoteCandidateToSession.execute();
+    const label = persisted.planCandidate?.label ?? 'Session mới';
+    const result = await promoteCandidateToSession.execute({ stopActivePlaying: true });
     if (!result.ok) {
       showToast('Không tạo được session');
       return;
     }
 
-    const label = baseState.planCandidate?.label ?? 'Session mới';
-    persist(result.nextState);
+    applyPersistedState(result.nextState);
     setCapitalReviewOpen(false);
     setScenarioReviewOpen(false);
     setViewingSessionId(null);
