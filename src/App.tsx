@@ -869,12 +869,7 @@ function AppRoot(): JSX.Element {
       return;
     }
 
-    const updatedSet = await recommendationSetRepository.get();
-    persist({
-      ...persisted,
-      planCandidate: result.candidate,
-      recommendationSet: updatedSet ?? generated.recommendationSet,
-    });
+    applyPersistedState(result.nextState);
     setScenarioReviewOpen(true);
   }
 
