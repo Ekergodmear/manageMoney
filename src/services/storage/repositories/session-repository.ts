@@ -10,6 +10,11 @@ function upsertSession(sessions: readonly Session[], session: Session): Session[
   return sessions.map((s, i) => (i === index ? session : s));
 }
 
+export interface SaveSessionOptions {
+  readonly clearActive?: boolean;
+  readonly setActive?: boolean;
+}
+
 export class SessionRepository {
   constructor(private readonly storage: PersistenceService) {}
 
@@ -26,6 +31,39 @@ export class SessionRepository {
     const next: PersistedAppState = {
       ...state,
       sessions: upsertSession(state.sessions, session),
+    };
+    await this.saveState(next);
+    return next;
+  }
+
+  async saveSession(
+    session: Session,
+    options: SaveSessionOptions = {},
+  ): Promise<PersistedAppState> {
+    const state = await this.loadState();
+    const next: PersistedAppState = {
+      ...state,
+      sessions: upsertSession(state.sessions, session),
+      ...(options.clearActive ? { activeSessionId: null } : {}),
+      ...(options.setActive ? { activeSessionId: session.id } : {}),
+    };
+    await this.saveState(next);
+    return next;
+  }
+
+  async updateSession(
+    sessionId: string,
+    mutator: (session: Session) => Session,
+  ): Promise<PersistedAppState | null> {
+    const state = await this.loadState();
+    const target = state.sessions.find((s) => s.id === sessionId);
+    if (target === undefined) {
+      return null;
+    }
+    const updated = mutator(target);
+    const next: PersistedAppState = {
+      ...state,
+      sessions: upsertSession(state.sessions, updated),
     };
     await this.saveState(next);
     return next;

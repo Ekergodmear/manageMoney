@@ -51,6 +51,13 @@ import { isNewSessionCandidate } from '@/features/planning/plan-candidate-types'
 import { PlanningDraftRepository } from '@/services/storage/repositories/planning-draft-repository';
 import { PlanCandidateRepository } from '@/services/storage/repositories/plan-candidate-repository';
 import { SessionRepository } from '@/services/storage/repositories/session-repository';
+import {
+  createSavePlayingSessionUseCase,
+  createStartPlanUseCase,
+  createStopSessionUseCase,
+  createUpdateSessionUseCase,
+  createWinSessionUseCase,
+} from '@/features/session/use-cases';
 import { RecommendationSetRepository } from '@/services/storage/repositories/recommendation-set-repository';
 import {
   FormRightPanel,
@@ -228,6 +235,26 @@ function AppRoot(): JSX.Element {
       }),
     [sessionRepository, services.events, services.clock],
   );
+  const startPlanUseCase = useMemo(
+    () => createStartPlanUseCase({ sessions: sessionRepository }),
+    [sessionRepository],
+  );
+  const stopSessionUseCase = useMemo(
+    () => createStopSessionUseCase({ sessions: sessionRepository }),
+    [sessionRepository],
+  );
+  const savePlayingSessionUseCase = useMemo(
+    () => createSavePlayingSessionUseCase({ sessions: sessionRepository }),
+    [sessionRepository],
+  );
+  const winSessionUseCase = useMemo(
+    () => createWinSessionUseCase({ sessions: sessionRepository }),
+    [sessionRepository],
+  );
+  const updateSessionUseCase = useMemo(
+    () => createUpdateSessionUseCase({ sessions: sessionRepository }),
+    [sessionRepository],
+  );
   const generateExperimentRecommendations = useMemo(
     () =>
       createGenerateExperimentRecommendationsUseCase({
@@ -317,7 +344,11 @@ function AppRoot(): JSX.Element {
     }, 250);
   }, [services.storage]);
 
-  const updateSession = useCallback((sessionId: string, updater: (s: Session) => Session) => {
+  const applyPersistedState = useCallback((next: PersistedAppState) => {
+    setPersisted(next);
+  }, []);
+
+  const updateLibrarySession = useCallback((sessionId: string, updater: (s: Session) => Session) => {
     setPersisted((prev) => {
       const target = findSession(prev.sessions, sessionId);
       if (target === null) {
@@ -545,14 +576,7 @@ function AppRoot(): JSX.Element {
   const settlementCallbacks = useMemo(
     () => ({
       onSessionUpdate: (session: Session) => {
-        setPersisted((prev) => {
-          const next = {
-            ...prev,
-            sessions: upsertSession(prev.sessions, session),
-          };
-          void services.storage.save(next);
-          return next;
-        });
+        void savePlayingSessionUseCase.execute(session).then(applyPersistedState);
       },
       onAlerts: (alerts: readonly SettlementAlert[]) => {
         const session = activeSessionRef.current;
@@ -565,20 +589,14 @@ function AppRoot(): JSX.Element {
         }
       },
       onWin: (session: Session) => {
-        setPersisted((prev) => {
-          const next = {
-            ...prev,
-            activeSessionId: null,
-            sessions: upsertSession(prev.sessions, session),
-          };
-          void services.storage.save(next);
-          return next;
+        void winSessionUseCase.execute(session).then((next) => {
+          applyPersistedState(next);
+          setSessionView('overview');
+          setActiveWorkspace('session');
         });
-        setSessionView('overview');
-        setActiveWorkspace('session');
       },
     }),
-    [],
+    [applyPersistedState, savePlayingSessionUseCase, winSessionUseCase],
   );
 
   const latestDraw = useAutoSettlement(
@@ -718,15 +736,15 @@ function AppRoot(): JSX.Element {
     showToast('Đã xóa preset');
   }
 
-  function mutateActive(updater: (s: Session) => Session): void {
+  function startPlan(): void {
     if (persisted.activeSessionId === null) {
       return;
     }
-    updateSession(persisted.activeSessionId, updater);
-  }
-
-  function startPlan(): void {
-    mutateActive((s) => startCurrentPlan(s));
+    void startPlanUseCase.execute(persisted.activeSessionId).then((result) => {
+      if (result.ok) {
+        applyPersistedState(result.nextState);
+      }
+    });
   }
 
   async function handleContinue(targetRoundCount: number): Promise<void> {
@@ -920,7 +938,11 @@ function AppRoot(): JSX.Element {
     if (id === null) {
       return;
     }
-    updateSession(id, (s) => updateSessionNotes(s, notes));
+    void updateSessionUseCase.execute(id, (s) => updateSessionNotes(s, notes)).then((next) => {
+      if (next !== null) {
+        applyPersistedState(next);
+      }
+    });
   }
 
   function handleTitleChange(title: string): void {
@@ -928,7 +950,11 @@ function AppRoot(): JSX.Element {
     if (id === null) {
       return;
     }
-    updateSession(id, (s) => updateSessionTitle(s, title));
+    void updateSessionUseCase.execute(id, (s) => updateSessionTitle(s, title)).then((next) => {
+      if (next !== null) {
+        applyPersistedState(next);
+      }
+    });
   }
 
   function renderCapitalWorkspace(): JSX.Element {
@@ -1056,25 +1082,14 @@ function AppRoot(): JSX.Element {
   }
 
   function handleStopSession(): void {
-    if (persisted.activeSessionId === null) {
-      return;
-    }
-    setPersisted((prev) => {
-      const session = findSession(prev.sessions, prev.activeSessionId);
-      if (session === null) {
-        return prev;
+    void stopSessionUseCase.execute().then((result) => {
+      if (!result.ok) {
+        return;
       }
-      const updated = stopSession(session);
-      const next = {
-        ...prev,
-        activeSessionId: null,
-        sessions: upsertSession(prev.sessions, updated),
-      };
-      void services.storage.save(next);
-      return next;
+      applyPersistedState(result.nextState);
+      showToast('Session đã dừng — xem trong Library');
+      setViewingSessionId(null);
     });
-    showToast('Session đã dừng — xem trong Library');
-    setViewingSessionId(null);
   }
 
   function handleExportSession(): void {
@@ -1235,10 +1250,10 @@ function AppRoot(): JSX.Element {
               setActiveWorkspace('session');
             }}
             onToggleFavorite={(id) => {
-              updateSession(id, (s) => toggleSessionFavorite(s));
+              updateLibrarySession(id, (s) => toggleSessionFavorite(s));
             }}
             onToggleArchive={(id) => {
-              updateSession(id, (s) => toggleSessionArchived(s));
+              updateLibrarySession(id, (s) => toggleSessionArchived(s));
             }}
             onDuplicate={(id) => {
               const source = findSession(persisted.sessions, id);
@@ -1275,7 +1290,7 @@ function AppRoot(): JSX.Element {
               exportSessionPrint(session, preset?.name ?? session.presetId);
             }}
             onTagAdd={(id, tag) => {
-              updateSession(id, (s) =>
+              updateLibrarySession(id, (s) =>
                 s.tags.includes(tag) ? s : updateSessionTags(s, [...s.tags, tag]),
               );
             }}
