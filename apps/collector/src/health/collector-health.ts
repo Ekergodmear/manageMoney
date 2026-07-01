@@ -1,10 +1,13 @@
+import { buildCollectorHealthSnapshot } from '../diagnostics/build-snapshot.js';
+import type { OperationalHealthStatus } from '../diagnostics/types.js';
 import type { CollectorState, ResumeState } from '../types/collector-state.js';
 import type { DrawResult } from '../types/draw-result.js';
 import { loadRetryObservabilitySnapshot } from '../retry/retry-state.js';
-import { formatResumeStateLabel } from '../resume/resume-state.js';
-import { formatRetryObservabilityLines } from './retry-observability.js';
+import { formatDoctorReport } from './format-doctor-report.js';
+import { deriveOperationalStatus } from './operational-status.js';
 
-export type HealthStatus = 'healthy' | 'unhealthy';
+/** @deprecated Use OperationalHealthStatus from diagnostics */
+export type HealthStatus = OperationalHealthStatus;
 
 export interface CollectorHealth {
   readonly status: CollectorState['status'];
@@ -24,7 +27,7 @@ export interface CollectorHealth {
 
 export interface HealthReport {
   readonly health: CollectorHealth;
-  readonly overall: HealthStatus;
+  readonly overall: OperationalHealthStatus;
   readonly checks: readonly HealthCheck[];
 }
 
@@ -61,91 +64,63 @@ export function assessHealth(
   health: CollectorHealth,
   options?: { maxFailureCount?: number; staleSuccessMs?: number },
 ): HealthReport {
-  const maxFailures = options?.maxFailureCount ?? 10;
-  const staleMs = options?.staleSuccessMs ?? 15 * 60_000;
+  const state: CollectorState = {
+    lastDrawKey: health.lastDrawKey,
+    lastDraw: health.latestDraw,
+    lastSuccessAt: health.lastSuccessAt,
+    lastPollAt: health.lastPollAt,
+    failureCount: health.failureCount,
+    averageLatencyMs: health.averageLatencyMs,
+    duplicatesSkipped: health.duplicatesSkipped,
+    resumeState: health.resumeState,
+    catchUpCount: health.catchUpCount,
+    resumedFromDrawKey: health.resumedFromDrawKey,
+    status: health.status,
+  };
+  const retry = loadRetryObservabilitySnapshot();
+  const overall = deriveOperationalStatus(state, retry, Date.now(), options);
 
-  const checks: HealthCheck[] = [];
-
-  checks.push({
-    name: 'Adapter',
-    ok: health.activeAdapterId.length > 0,
-    detail: health.activeAdapterId || 'none',
-  });
-
-  checks.push({
-    name: 'SQLite',
-    ok: true,
-    detail: `${String(health.drawCount)} draws stored`,
-  });
-
-  checks.push({
-    name: 'Failure Count',
-    ok: health.failureCount < maxFailures,
-    detail: String(health.failureCount),
-  });
-
-  const lastSuccessAge =
-    health.lastSuccessAt === null
-      ? Infinity
-      : Date.now() - new Date(health.lastSuccessAt).getTime();
-
-  checks.push({
-    name: 'Last Success',
-    ok: health.lastSuccessAt !== null && lastSuccessAge < staleMs,
-    detail: health.lastSuccessAt ?? 'never',
-  });
-
-  checks.push({
-    name: 'Last Draw Key',
-    ok: health.lastDrawKey !== null,
-    detail: health.lastDrawKey ?? 'none',
-  });
-
-  const overall: HealthStatus = checks.every((c) => c.ok) ? 'healthy' : 'unhealthy';
+  const checks: HealthCheck[] = [
+    {
+      name: 'Adapter',
+      ok: health.activeAdapterId.length > 0,
+      detail: health.activeAdapterId || 'none',
+    },
+    {
+      name: 'SQLite',
+      ok: true,
+      detail: `${String(health.drawCount)} draws stored`,
+    },
+    {
+      name: 'Operational Status',
+      ok: overall === 'healthy',
+      detail: overall,
+    },
+  ];
 
   return { health, overall, checks };
 }
 
 export function formatHealthReport(report: HealthReport): string {
-  const lines: string[] = ['Collector Health', ''];
-
-  const statusIcon = report.overall === 'healthy' ? 'OK' : 'UNHEALTHY';
-  lines.push(`Overall: ${statusIcon}`);
-  lines.push(`Status: ${report.health.status}`);
-  lines.push(`Adapter: ${report.health.activeAdapterId}`);
-  lines.push(`Draws in SQLite: ${String(report.health.drawCount)}`);
-  lines.push(`Latest Draw Key: ${report.health.lastDrawKey ?? 'none'}`);
-
-  const draw = report.health.latestDraw;
-  if (draw !== null) {
-    lines.push(`Draw At: ${draw.drawAt}`);
-    lines.push(`Published At: ${draw.publishedAt}`);
-    lines.push(`Collected At: ${draw.collectedAt}`);
-    lines.push(`Estimated Publish: ${draw.publishedEstimated ? 'Yes' : 'No'}`);
-  }
-
-  lines.push(`Last Poll: ${report.health.lastPollAt ?? 'never'}`);
-  lines.push(`Last Success: ${report.health.lastSuccessAt ?? 'never'}`);
-  lines.push(
-    `Average Latency: ${String(Math.round(report.health.averageLatencyMs / 1000))}s`,
-  );
-  lines.push(`Failure Count: ${String(report.health.failureCount)}`);
-  lines.push(`Duplicates Skipped: ${String(report.health.duplicatesSkipped)}`);
-  lines.push(`Resume State: ${formatResumeStateLabel(report.health.resumeState)}`);
-  if (report.health.resumedFromDrawKey !== null) {
-    lines.push(`Resumed From: ${report.health.resumedFromDrawKey}`);
-  }
-  lines.push(`Catch-up Count: ${String(report.health.catchUpCount)}`);
-  lines.push('');
-  lines.push('Retry:');
-  for (const line of formatRetryObservabilityLines(loadRetryObservabilitySnapshot())) {
-    lines.push(`  ${line}`);
-  }
-  lines.push('');
-  lines.push('Checks:');
-  for (const check of report.checks) {
-    lines.push(`  [${check.ok ? 'OK' : 'FAIL'}] ${check.name}: ${check.detail}`);
-  }
-
-  return lines.join('\n');
+  const snapshot = buildCollectorHealthSnapshot({
+    state: {
+      lastDrawKey: report.health.lastDrawKey,
+      lastDraw: report.health.latestDraw,
+      lastSuccessAt: report.health.lastSuccessAt,
+      lastPollAt: report.health.lastPollAt,
+      failureCount: report.health.failureCount,
+      averageLatencyMs: report.health.averageLatencyMs,
+      duplicatesSkipped: report.health.duplicatesSkipped,
+      resumeState: report.health.resumeState,
+      catchUpCount: report.health.catchUpCount,
+      resumedFromDrawKey: report.health.resumedFromDrawKey,
+      status: report.health.status,
+    },
+    adapterId: report.health.activeAdapterId,
+    drawCount: report.health.drawCount,
+    latestDraw: report.health.latestDraw,
+  });
+  return formatDoctorReport(snapshot);
 }
+
+export { buildCollectorHealthSnapshot, formatDoctorReport };

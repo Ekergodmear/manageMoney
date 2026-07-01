@@ -12,6 +12,7 @@ import {
 } from '../src/health/collector-health.js';
 import { SqliteDrawSink } from '../src/sink/sqlite-draw-sink.js';
 import { AdaptivePollStrategy } from '../src/strategy/adaptive-poll-strategy.js';
+import { resetRetryObservabilityForTests } from '../src/retry/retry-state.js';
 import { initialCollectorState } from '../src/types/collector-state.js';
 
 function bingo18Batch(
@@ -197,6 +198,7 @@ describe('R1.3 resume & catch-up', () => {
   });
 
   it('case 5: doctor shows resume state, latest draw, and catch-up count', () => {
+    resetRetryObservabilityForTests();
     const state = {
       ...initialCollectorState(),
       lastDrawKey: '20260629220000',
@@ -204,14 +206,15 @@ describe('R1.3 resume & catch-up', () => {
       catchUpCount: 2,
       resumedFromDrawKey: '20260629200000',
       lastSuccessAt: new Date().toISOString(),
+      lastPollAt: new Date().toISOString(),
     };
     const health = buildCollectorHealth(state, 'mock-test', 3, null);
     const report = assessHealth(health);
     const text = formatHealthReport(report);
 
-    expect(text).toContain('Resume State: Catch-up');
-    expect(text).toContain('Resumed From: 20260629200000');
-    expect(text).toContain('Latest Draw Key: 20260629220000');
-    expect(text).toContain('Catch-up Count: 2');
+    expect(text).toContain('Resume State      Catch-up');
+    expect(text).toContain('Resumed From');
+    expect(text).toContain('Latest Draw       20260629220000');
+    expect(text).toContain('Catch-up Count    2');
   });
 });

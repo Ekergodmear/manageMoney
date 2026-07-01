@@ -1,9 +1,6 @@
 import { createAdapterFromEnv } from '../collector.js';
-import {
-  assessHealth,
-  buildCollectorHealth,
-  formatHealthReport,
-} from '../health/collector-health.js';
+import { buildCollectorHealthSnapshot } from '../diagnostics/build-snapshot.js';
+import { formatDoctorReport } from '../health/format-doctor-report.js';
 import { SqliteDrawSink } from '../sink/sqlite-draw-sink.js';
 
 const dbPath = process.env['COLLECTOR_DB_PATH'] ?? './data/draws.db';
@@ -15,10 +12,14 @@ async function main(): Promise<void> {
     const state = await sink.loadCollectorState();
     const drawCount = await sink.count();
     const latestDraw = await sink.findLatest();
-    const health = buildCollectorHealth(state, adapter.id, drawCount, latestDraw);
-    const report = assessHealth(health);
-    console.log(formatHealthReport(report));
-    process.exit(report.overall === 'healthy' ? 0 : 1);
+    const snapshot = buildCollectorHealthSnapshot({
+      state,
+      adapterId: adapter.id,
+      drawCount,
+      latestDraw,
+    });
+    console.log(formatDoctorReport(snapshot));
+    process.exit(snapshot.status === 'healthy' ? 0 : 1);
   } finally {
     await sink.close();
   }

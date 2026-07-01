@@ -177,6 +177,6 @@ describe('R1.2 duplicate protection', () => {
     const health = buildCollectorHealth(state, 'mock', 3, null);
     const report = assessHealth(health);
     const text = formatHealthReport(report);
-    expect(text).toContain('Duplicates Skipped: 7');
+    expect(text).toContain('Duplicates Skip   7');
   });
 });
