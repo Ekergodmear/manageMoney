@@ -8,6 +8,7 @@ import {
   type PlannerField,
   type PlannerFormValues,
 } from '@/features/planner/plan-service';
+import type { PersistedAppState } from '@/features/session/session-types';
 
 export interface GeneratePlanUseCaseDeps {
   readonly planningDrafts: PlanningDraftRepository;
@@ -24,6 +25,7 @@ export type GeneratePlanExecuteSuccess = {
   readonly ok: true;
   readonly draft: PlanningDraft;
   readonly generated: GenerateResult;
+  readonly nextState: PersistedAppState;
 };
 
 export type GeneratePlanExecuteFailure = {
@@ -70,7 +72,7 @@ export class GeneratePlanUseCase {
       createdAt,
     };
 
-    await this.deps.planningDrafts.save(draft);
+    const nextState = await this.deps.planningDrafts.saveDraft(draft);
 
     this.deps.events.emit(
       this.deps.events.createEvent('PlanGenerated', {
@@ -85,7 +87,7 @@ export class GeneratePlanUseCase {
       }),
     );
 
-    return { ok: true, draft, generated: outcome.result };
+    return { ok: true, draft, generated: outcome.result, nextState };
   }
 }
 

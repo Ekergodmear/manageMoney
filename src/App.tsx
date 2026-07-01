@@ -67,7 +67,6 @@ import {
 import type { WorkspaceId } from '@/features/navigation/workspace-nav';
 import {
   getCurrentPlan,
-  startCurrentPlan,
   stopSession,
   updateSessionNotes,
   updateSessionTitle,
@@ -608,23 +607,13 @@ function AppRoot(): JSX.Element {
   );
 
   async function handlePromoteDraft(startPlaying: boolean): Promise<void> {
-    const result = await promotePlanningDraftUseCase.execute();
+    const result = await promotePlanningDraftUseCase.execute({ startPlaying });
     if (!result.ok) {
       showToast('Không có bản nháp kế hoạch');
       return;
     }
 
-    let session = result.session;
-    if (startPlaying) {
-      session = startCurrentPlan(session);
-    }
-
-    const nextState = {
-      ...result.nextState,
-      sessions: upsertSession(result.nextState.sessions, session),
-      activeSessionId: session.id,
-    };
-    persist(nextState);
+    applyPersistedState(result.nextState);
     setPlanningView('form');
     setViewingSessionId(null);
     setSessionView(startPlaying ? 'playing' : 'overview');
@@ -642,7 +631,7 @@ function AppRoot(): JSX.Element {
       return;
     }
     setFieldErrors({});
-    setPersisted((prev) => ({ ...prev, planningDraft: result.draft }));
+    applyPersistedState(result.nextState);
     setPlanningView('decision');
   }
 

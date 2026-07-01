@@ -2,7 +2,7 @@ import type { Clock } from '@/services/clock/clock';
 import type { EventBus } from '@/services/events/domain-events';
 import type { PlanningDraftRepository } from '@/services/storage/repositories/planning-draft-repository';
 import type { SessionRepository } from '@/services/storage/repositories/session-repository';
-import type { Session } from '@/features/session/session-domain';
+import { startCurrentPlan, type Session } from '@/features/session/session-domain';
 import type { PersistedAppState } from '@/features/session/session-types';
 import { createSessionFromDraft } from '@/features/session/session-factory';
 
@@ -11,6 +11,10 @@ export interface PromotePlanningDraftUseCaseDeps {
   readonly sessions: SessionRepository;
   readonly events: EventBus;
   readonly clock: Clock;
+}
+
+export interface PromotePlanningDraftExecuteInput {
+  readonly startPlaying?: boolean;
 }
 
 export type PromotePlanningDraftSuccess = {
@@ -32,7 +36,9 @@ export type PromotePlanningDraftResult = PromotePlanningDraftSuccess | PromotePl
 export class PromotePlanningDraftUseCase {
   constructor(private readonly deps: PromotePlanningDraftUseCaseDeps) {}
 
-  async execute(): Promise<PromotePlanningDraftResult> {
+  async execute(
+    input: PromotePlanningDraftExecuteInput = {},
+  ): Promise<PromotePlanningDraftResult> {
     const draft = await this.deps.planningDrafts.get();
     if (draft === null) {
       return { ok: false, reason: 'no-draft' };
@@ -40,7 +46,10 @@ export class PromotePlanningDraftUseCase {
 
     const state = await this.deps.sessions.loadState();
     const at = this.deps.clock.now().toISOString();
-    const session = createSessionFromDraft(draft, state.nextSessionNumber, at);
+    let session = createSessionFromDraft(draft, state.nextSessionNumber, at);
+    if (input.startPlaying === true) {
+      session = startCurrentPlan(session);
+    }
 
     const nextState: PersistedAppState = {
       ...state,
@@ -50,7 +59,6 @@ export class PromotePlanningDraftUseCase {
       planningDraft: null,
     };
     await this.deps.sessions.saveState(nextState);
-    await this.deps.planningDrafts.clear();
 
     this.deps.events.emit(
       this.deps.events.createEvent('SessionCreated', {
