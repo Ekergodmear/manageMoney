@@ -1,0 +1,6161 @@
+{
+  "version": 5,
+  "theme": "dark",
+  "nextSessionNumber": 2,
+  "activeSessionId": "sess-fixture-001",
+  "sessions": [
+    {
+      "id": "sess-fixture-001",
+      "sessionNumber": 1,
+      "title": "Session #1",
+      "presetId": "bingo-120",
+      "betMarketId": "total-4",
+      "status": "draft",
+      "plans": [
+        {
+          "id": "plan-fixture-001",
+          "label": "Plan A",
+          "origin": "generate",
+          "parentPlanId": null,
+          "formValues": {
+            "targetProfit": "100.000",
+            "roundCount": "500",
+            "rewardMultiplier": "120",
+            "minimumBet": "10.000",
+            "maximumBet": "1.000.000",
+            "betStep": "10.000",
+            "userBankroll": "30.000.000",
+            "winTaxEnabled": true,
+            "winTaxThreshold": "10.000.000",
+            "winTaxRatePercent": "10"
+          },
+          "generated": {
+            "strategy": {
+              "rounds": [
+                {
+                  "index": 1,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 10000
+                },
+                {
+                  "index": 2,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 20000
+                },
+                {
+                  "index": 3,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 30000
+                },
+                {
+                  "index": 4,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 40000
+                },
+                {
+                  "index": 5,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 50000
+                },
+                {
+                  "index": 6,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 60000
+                },
+                {
+                  "index": 7,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 70000
+                },
+                {
+                  "index": 8,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 80000
+                },
+                {
+                  "index": 9,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 90000
+                },
+                {
+                  "index": 10,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 100000
+                },
+                {
+                  "index": 11,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 110000
+                },
+                {
+                  "index": 12,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 120000
+                },
+                {
+                  "index": 13,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 130000
+                },
+                {
+                  "index": 14,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 140000
+                },
+                {
+                  "index": 15,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 150000
+                },
+                {
+                  "index": 16,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 160000
+                },
+                {
+                  "index": 17,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 170000
+                },
+                {
+                  "index": 18,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 180000
+                },
+                {
+                  "index": 19,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 190000
+                },
+                {
+                  "index": 20,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 200000
+                },
+                {
+                  "index": 21,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 210000
+                },
+                {
+                  "index": 22,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 220000
+                },
+                {
+                  "index": 23,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 230000
+                },
+                {
+                  "index": 24,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 240000
+                },
+                {
+                  "index": 25,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 250000
+                },
+                {
+                  "index": 26,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 260000
+                },
+                {
+                  "index": 27,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 270000
+                },
+                {
+                  "index": 28,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 280000
+                },
+                {
+                  "index": 29,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 290000
+                },
+                {
+                  "index": 30,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 300000
+                },
+                {
+                  "index": 31,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 310000
+                },
+                {
+                  "index": 32,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 320000
+                },
+                {
+                  "index": 33,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 330000
+                },
+                {
+                  "index": 34,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 340000
+                },
+                {
+                  "index": 35,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 350000
+                },
+                {
+                  "index": 36,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 360000
+                },
+                {
+                  "index": 37,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 370000
+                },
+                {
+                  "index": 38,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 380000
+                },
+                {
+                  "index": 39,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 390000
+                },
+                {
+                  "index": 40,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 400000
+                },
+                {
+                  "index": 41,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 410000
+                },
+                {
+                  "index": 42,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 420000
+                },
+                {
+                  "index": 43,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 430000
+                },
+                {
+                  "index": 44,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 440000
+                },
+                {
+                  "index": 45,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 450000
+                },
+                {
+                  "index": 46,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 460000
+                },
+                {
+                  "index": 47,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 470000
+                },
+                {
+                  "index": 48,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 480000
+                },
+                {
+                  "index": 49,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 490000
+                },
+                {
+                  "index": 50,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 500000
+                },
+                {
+                  "index": 51,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 510000
+                },
+                {
+                  "index": 52,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 520000
+                },
+                {
+                  "index": 53,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 530000
+                },
+                {
+                  "index": 54,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 540000
+                },
+                {
+                  "index": 55,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 550000
+                },
+                {
+                  "index": 56,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 560000
+                },
+                {
+                  "index": 57,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 570000
+                },
+                {
+                  "index": 58,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 580000
+                },
+                {
+                  "index": 59,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 590000
+                },
+                {
+                  "index": 60,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 600000
+                },
+                {
+                  "index": 61,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 610000
+                },
+                {
+                  "index": 62,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 620000
+                },
+                {
+                  "index": 63,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 630000
+                },
+                {
+                  "index": 64,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 640000
+                },
+                {
+                  "index": 65,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 650000
+                },
+                {
+                  "index": 66,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 660000
+                },
+                {
+                  "index": 67,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 670000
+                },
+                {
+                  "index": 68,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 680000
+                },
+                {
+                  "index": 69,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 690000
+                },
+                {
+                  "index": 70,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 700000
+                },
+                {
+                  "index": 71,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 710000
+                },
+                {
+                  "index": 72,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 720000
+                },
+                {
+                  "index": 73,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 730000
+                },
+                {
+                  "index": 74,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 740000
+                },
+                {
+                  "index": 75,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 750000
+                },
+                {
+                  "index": 76,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 760000
+                },
+                {
+                  "index": 77,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 770000
+                },
+                {
+                  "index": 78,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 780000
+                },
+                {
+                  "index": 79,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 790000
+                },
+                {
+                  "index": 80,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 800000
+                },
+                {
+                  "index": 81,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 810000
+                },
+                {
+                  "index": 82,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 820000
+                },
+                {
+                  "index": 83,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 830000
+                },
+                {
+                  "index": 84,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 840000
+                },
+                {
+                  "index": 85,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 850000
+                },
+                {
+                  "index": 86,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 860000
+                },
+                {
+                  "index": 87,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 870000
+                },
+                {
+                  "index": 88,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 880000
+                },
+                {
+                  "index": 89,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 890000
+                },
+                {
+                  "index": 90,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 900000
+                },
+                {
+                  "index": 91,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 910000
+                },
+                {
+                  "index": 92,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 920000
+                },
+                {
+                  "index": 93,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 930000
+                },
+                {
+                  "index": 94,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 940000
+                },
+                {
+                  "index": 95,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 950000
+                },
+                {
+                  "index": 96,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 960000
+                },
+                {
+                  "index": 97,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 970000
+                },
+                {
+                  "index": 98,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 980000
+                },
+                {
+                  "index": 99,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 990000
+                },
+                {
+                  "index": 100,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 1000000
+                },
+                {
+                  "index": 101,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 1010000
+                },
+                {
+                  "index": 102,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 1020000
+                },
+                {
+                  "index": 103,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 1030000
+                },
+                {
+                  "index": 104,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 1040000
+                },
+                {
+                  "index": 105,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 1050000
+                },
+                {
+                  "index": 106,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 1060000
+                },
+                {
+                  "index": 107,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 1070000
+                },
+                {
+                  "index": 108,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 1080000
+                },
+                {
+                  "index": 109,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 1090000
+                },
+                {
+                  "index": 110,
+                  "betAmount": 10000,
+                  "rewardAmount": 1200000,
+                  "accumulatedSpent": 1100000
+                },
+                {
+                  "index": 111,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1120000
+                },
+                {
+                  "index": 112,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1140000
+                },
+                {
+                  "index": 113,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1160000
+                },
+                {
+                  "index": 114,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1180000
+                },
+                {
+                  "index": 115,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1200000
+                },
+                {
+                  "index": 116,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1220000
+                },
+                {
+                  "index": 117,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1240000
+                },
+                {
+                  "index": 118,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1260000
+                },
+                {
+                  "index": 119,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1280000
+                },
+                {
+                  "index": 120,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1300000
+                },
+                {
+                  "index": 121,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1320000
+                },
+                {
+                  "index": 122,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1340000
+                },
+                {
+                  "index": 123,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1360000
+                },
+                {
+                  "index": 124,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1380000
+                },
+                {
+                  "index": 125,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1400000
+                },
+                {
+                  "index": 126,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1420000
+                },
+                {
+                  "index": 127,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1440000
+                },
+                {
+                  "index": 128,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1460000
+                },
+                {
+                  "index": 129,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1480000
+                },
+                {
+                  "index": 130,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1500000
+                },
+                {
+                  "index": 131,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1520000
+                },
+                {
+                  "index": 132,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1540000
+                },
+                {
+                  "index": 133,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1560000
+                },
+                {
+                  "index": 134,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1580000
+                },
+                {
+                  "index": 135,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1600000
+                },
+                {
+                  "index": 136,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1620000
+                },
+                {
+                  "index": 137,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1640000
+                },
+                {
+                  "index": 138,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1660000
+                },
+                {
+                  "index": 139,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1680000
+                },
+                {
+                  "index": 140,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1700000
+                },
+                {
+                  "index": 141,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1720000
+                },
+                {
+                  "index": 142,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1740000
+                },
+                {
+                  "index": 143,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1760000
+                },
+                {
+                  "index": 144,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1780000
+                },
+                {
+                  "index": 145,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1800000
+                },
+                {
+                  "index": 146,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1820000
+                },
+                {
+                  "index": 147,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1840000
+                },
+                {
+                  "index": 148,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1860000
+                },
+                {
+                  "index": 149,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1880000
+                },
+                {
+                  "index": 150,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1900000
+                },
+                {
+                  "index": 151,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1920000
+                },
+                {
+                  "index": 152,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1940000
+                },
+                {
+                  "index": 153,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1960000
+                },
+                {
+                  "index": 154,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 1980000
+                },
+                {
+                  "index": 155,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2000000
+                },
+                {
+                  "index": 156,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2020000
+                },
+                {
+                  "index": 157,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2040000
+                },
+                {
+                  "index": 158,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2060000
+                },
+                {
+                  "index": 159,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2080000
+                },
+                {
+                  "index": 160,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2100000
+                },
+                {
+                  "index": 161,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2120000
+                },
+                {
+                  "index": 162,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2140000
+                },
+                {
+                  "index": 163,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2160000
+                },
+                {
+                  "index": 164,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2180000
+                },
+                {
+                  "index": 165,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2200000
+                },
+                {
+                  "index": 166,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2220000
+                },
+                {
+                  "index": 167,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2240000
+                },
+                {
+                  "index": 168,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2260000
+                },
+                {
+                  "index": 169,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2280000
+                },
+                {
+                  "index": 170,
+                  "betAmount": 20000,
+                  "rewardAmount": 2400000,
+                  "accumulatedSpent": 2300000
+                },
+                {
+                  "index": 171,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2330000
+                },
+                {
+                  "index": 172,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2360000
+                },
+                {
+                  "index": 173,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2390000
+                },
+                {
+                  "index": 174,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2420000
+                },
+                {
+                  "index": 175,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2450000
+                },
+                {
+                  "index": 176,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2480000
+                },
+                {
+                  "index": 177,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2510000
+                },
+                {
+                  "index": 178,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2540000
+                },
+                {
+                  "index": 179,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2570000
+                },
+                {
+                  "index": 180,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2600000
+                },
+                {
+                  "index": 181,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2630000
+                },
+                {
+                  "index": 182,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2660000
+                },
+                {
+                  "index": 183,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2690000
+                },
+                {
+                  "index": 184,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2720000
+                },
+                {
+                  "index": 185,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2750000
+                },
+                {
+                  "index": 186,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2780000
+                },
+                {
+                  "index": 187,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2810000
+                },
+                {
+                  "index": 188,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2840000
+                },
+                {
+                  "index": 189,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2870000
+                },
+                {
+                  "index": 190,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2900000
+                },
+                {
+                  "index": 191,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2930000
+                },
+                {
+                  "index": 192,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2960000
+                },
+                {
+                  "index": 193,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 2990000
+                },
+                {
+                  "index": 194,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3020000
+                },
+                {
+                  "index": 195,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3050000
+                },
+                {
+                  "index": 196,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3080000
+                },
+                {
+                  "index": 197,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3110000
+                },
+                {
+                  "index": 198,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3140000
+                },
+                {
+                  "index": 199,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3170000
+                },
+                {
+                  "index": 200,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3200000
+                },
+                {
+                  "index": 201,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3230000
+                },
+                {
+                  "index": 202,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3260000
+                },
+                {
+                  "index": 203,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3290000
+                },
+                {
+                  "index": 204,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3320000
+                },
+                {
+                  "index": 205,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3350000
+                },
+                {
+                  "index": 206,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3380000
+                },
+                {
+                  "index": 207,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3410000
+                },
+                {
+                  "index": 208,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3440000
+                },
+                {
+                  "index": 209,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3470000
+                },
+                {
+                  "index": 210,
+                  "betAmount": 30000,
+                  "rewardAmount": 3600000,
+                  "accumulatedSpent": 3500000
+                },
+                {
+                  "index": 211,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 3540000
+                },
+                {
+                  "index": 212,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 3580000
+                },
+                {
+                  "index": 213,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 3620000
+                },
+                {
+                  "index": 214,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 3660000
+                },
+                {
+                  "index": 215,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 3700000
+                },
+                {
+                  "index": 216,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 3740000
+                },
+                {
+                  "index": 217,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 3780000
+                },
+                {
+                  "index": 218,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 3820000
+                },
+                {
+                  "index": 219,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 3860000
+                },
+                {
+                  "index": 220,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 3900000
+                },
+                {
+                  "index": 221,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 3940000
+                },
+                {
+                  "index": 222,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 3980000
+                },
+                {
+                  "index": 223,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4020000
+                },
+                {
+                  "index": 224,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4060000
+                },
+                {
+                  "index": 225,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4100000
+                },
+                {
+                  "index": 226,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4140000
+                },
+                {
+                  "index": 227,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4180000
+                },
+                {
+                  "index": 228,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4220000
+                },
+                {
+                  "index": 229,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4260000
+                },
+                {
+                  "index": 230,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4300000
+                },
+                {
+                  "index": 231,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4340000
+                },
+                {
+                  "index": 232,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4380000
+                },
+                {
+                  "index": 233,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4420000
+                },
+                {
+                  "index": 234,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4460000
+                },
+                {
+                  "index": 235,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4500000
+                },
+                {
+                  "index": 236,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4540000
+                },
+                {
+                  "index": 237,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4580000
+                },
+                {
+                  "index": 238,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4620000
+                },
+                {
+                  "index": 239,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4660000
+                },
+                {
+                  "index": 240,
+                  "betAmount": 40000,
+                  "rewardAmount": 4800000,
+                  "accumulatedSpent": 4700000
+                },
+                {
+                  "index": 241,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 4750000
+                },
+                {
+                  "index": 242,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 4800000
+                },
+                {
+                  "index": 243,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 4850000
+                },
+                {
+                  "index": 244,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 4900000
+                },
+                {
+                  "index": 245,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 4950000
+                },
+                {
+                  "index": 246,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5000000
+                },
+                {
+                  "index": 247,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5050000
+                },
+                {
+                  "index": 248,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5100000
+                },
+                {
+                  "index": 249,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5150000
+                },
+                {
+                  "index": 250,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5200000
+                },
+                {
+                  "index": 251,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5250000
+                },
+                {
+                  "index": 252,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5300000
+                },
+                {
+                  "index": 253,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5350000
+                },
+                {
+                  "index": 254,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5400000
+                },
+                {
+                  "index": 255,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5450000
+                },
+                {
+                  "index": 256,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5500000
+                },
+                {
+                  "index": 257,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5550000
+                },
+                {
+                  "index": 258,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5600000
+                },
+                {
+                  "index": 259,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5650000
+                },
+                {
+                  "index": 260,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5700000
+                },
+                {
+                  "index": 261,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5750000
+                },
+                {
+                  "index": 262,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5800000
+                },
+                {
+                  "index": 263,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5850000
+                },
+                {
+                  "index": 264,
+                  "betAmount": 50000,
+                  "rewardAmount": 6000000,
+                  "accumulatedSpent": 5900000
+                },
+                {
+                  "index": 265,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 5960000
+                },
+                {
+                  "index": 266,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6020000
+                },
+                {
+                  "index": 267,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6080000
+                },
+                {
+                  "index": 268,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6140000
+                },
+                {
+                  "index": 269,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6200000
+                },
+                {
+                  "index": 270,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6260000
+                },
+                {
+                  "index": 271,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6320000
+                },
+                {
+                  "index": 272,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6380000
+                },
+                {
+                  "index": 273,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6440000
+                },
+                {
+                  "index": 274,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6500000
+                },
+                {
+                  "index": 275,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6560000
+                },
+                {
+                  "index": 276,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6620000
+                },
+                {
+                  "index": 277,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6680000
+                },
+                {
+                  "index": 278,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6740000
+                },
+                {
+                  "index": 279,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6800000
+                },
+                {
+                  "index": 280,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6860000
+                },
+                {
+                  "index": 281,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6920000
+                },
+                {
+                  "index": 282,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 6980000
+                },
+                {
+                  "index": 283,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 7040000
+                },
+                {
+                  "index": 284,
+                  "betAmount": 60000,
+                  "rewardAmount": 7200000,
+                  "accumulatedSpent": 7100000
+                },
+                {
+                  "index": 285,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 7170000
+                },
+                {
+                  "index": 286,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 7240000
+                },
+                {
+                  "index": 287,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 7310000
+                },
+                {
+                  "index": 288,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 7380000
+                },
+                {
+                  "index": 289,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 7450000
+                },
+                {
+                  "index": 290,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 7520000
+                },
+                {
+                  "index": 291,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 7590000
+                },
+                {
+                  "index": 292,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 7660000
+                },
+                {
+                  "index": 293,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 7730000
+                },
+                {
+                  "index": 294,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 7800000
+                },
+                {
+                  "index": 295,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 7870000
+                },
+                {
+                  "index": 296,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 7940000
+                },
+                {
+                  "index": 297,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 8010000
+                },
+                {
+                  "index": 298,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 8080000
+                },
+                {
+                  "index": 299,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 8150000
+                },
+                {
+                  "index": 300,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 8220000
+                },
+                {
+                  "index": 301,
+                  "betAmount": 70000,
+                  "rewardAmount": 8400000,
+                  "accumulatedSpent": 8290000
+                },
+                {
+                  "index": 302,
+                  "betAmount": 80000,
+                  "rewardAmount": 9600000,
+                  "accumulatedSpent": 8370000
+                },
+                {
+                  "index": 303,
+                  "betAmount": 80000,
+                  "rewardAmount": 9600000,
+                  "accumulatedSpent": 8450000
+                },
+                {
+                  "index": 304,
+                  "betAmount": 80000,
+                  "rewardAmount": 9600000,
+                  "accumulatedSpent": 8530000
+                },
+                {
+                  "index": 305,
+                  "betAmount": 80000,
+                  "rewardAmount": 9600000,
+                  "accumulatedSpent": 8610000
+                },
+                {
+                  "index": 306,
+                  "betAmount": 80000,
+                  "rewardAmount": 9600000,
+                  "accumulatedSpent": 8690000
+                },
+                {
+                  "index": 307,
+                  "betAmount": 80000,
+                  "rewardAmount": 9600000,
+                  "accumulatedSpent": 8770000
+                },
+                {
+                  "index": 308,
+                  "betAmount": 80000,
+                  "rewardAmount": 9600000,
+                  "accumulatedSpent": 8850000
+                },
+                {
+                  "index": 309,
+                  "betAmount": 80000,
+                  "rewardAmount": 9600000,
+                  "accumulatedSpent": 8930000
+                },
+                {
+                  "index": 310,
+                  "betAmount": 80000,
+                  "rewardAmount": 9600000,
+                  "accumulatedSpent": 9010000
+                },
+                {
+                  "index": 311,
+                  "betAmount": 80000,
+                  "rewardAmount": 9600000,
+                  "accumulatedSpent": 9090000
+                },
+                {
+                  "index": 312,
+                  "betAmount": 80000,
+                  "rewardAmount": 9600000,
+                  "accumulatedSpent": 9170000
+                },
+                {
+                  "index": 313,
+                  "betAmount": 80000,
+                  "rewardAmount": 9600000,
+                  "accumulatedSpent": 9250000
+                },
+                {
+                  "index": 314,
+                  "betAmount": 80000,
+                  "rewardAmount": 9600000,
+                  "accumulatedSpent": 9330000
+                },
+                {
+                  "index": 315,
+                  "betAmount": 80000,
+                  "rewardAmount": 9600000,
+                  "accumulatedSpent": 9410000
+                },
+                {
+                  "index": 316,
+                  "betAmount": 80000,
+                  "rewardAmount": 9600000,
+                  "accumulatedSpent": 9490000
+                },
+                {
+                  "index": 317,
+                  "betAmount": 90000,
+                  "rewardAmount": 9720000,
+                  "accumulatedSpent": 9580000
+                },
+                {
+                  "index": 318,
+                  "betAmount": 100000,
+                  "rewardAmount": 10800000,
+                  "accumulatedSpent": 9680000
+                },
+                {
+                  "index": 319,
+                  "betAmount": 100000,
+                  "rewardAmount": 10800000,
+                  "accumulatedSpent": 9780000
+                },
+                {
+                  "index": 320,
+                  "betAmount": 100000,
+                  "rewardAmount": 10800000,
+                  "accumulatedSpent": 9880000
+                },
+                {
+                  "index": 321,
+                  "betAmount": 100000,
+                  "rewardAmount": 10800000,
+                  "accumulatedSpent": 9980000
+                },
+                {
+                  "index": 322,
+                  "betAmount": 100000,
+                  "rewardAmount": 10800000,
+                  "accumulatedSpent": 10080000
+                },
+                {
+                  "index": 323,
+                  "betAmount": 100000,
+                  "rewardAmount": 10800000,
+                  "accumulatedSpent": 10180000
+                },
+                {
+                  "index": 324,
+                  "betAmount": 100000,
+                  "rewardAmount": 10800000,
+                  "accumulatedSpent": 10280000
+                },
+                {
+                  "index": 325,
+                  "betAmount": 100000,
+                  "rewardAmount": 10800000,
+                  "accumulatedSpent": 10380000
+                },
+                {
+                  "index": 326,
+                  "betAmount": 100000,
+                  "rewardAmount": 10800000,
+                  "accumulatedSpent": 10480000
+                },
+                {
+                  "index": 327,
+                  "betAmount": 100000,
+                  "rewardAmount": 10800000,
+                  "accumulatedSpent": 10580000
+                },
+                {
+                  "index": 328,
+                  "betAmount": 100000,
+                  "rewardAmount": 10800000,
+                  "accumulatedSpent": 10680000
+                },
+                {
+                  "index": 329,
+                  "betAmount": 110000,
+                  "rewardAmount": 11880000,
+                  "accumulatedSpent": 10790000
+                },
+                {
+                  "index": 330,
+                  "betAmount": 110000,
+                  "rewardAmount": 11880000,
+                  "accumulatedSpent": 10900000
+                },
+                {
+                  "index": 331,
+                  "betAmount": 110000,
+                  "rewardAmount": 11880000,
+                  "accumulatedSpent": 11010000
+                },
+                {
+                  "index": 332,
+                  "betAmount": 110000,
+                  "rewardAmount": 11880000,
+                  "accumulatedSpent": 11120000
+                },
+                {
+                  "index": 333,
+                  "betAmount": 110000,
+                  "rewardAmount": 11880000,
+                  "accumulatedSpent": 11230000
+                },
+                {
+                  "index": 334,
+                  "betAmount": 110000,
+                  "rewardAmount": 11880000,
+                  "accumulatedSpent": 11340000
+                },
+                {
+                  "index": 335,
+                  "betAmount": 110000,
+                  "rewardAmount": 11880000,
+                  "accumulatedSpent": 11450000
+                },
+                {
+                  "index": 336,
+                  "betAmount": 110000,
+                  "rewardAmount": 11880000,
+                  "accumulatedSpent": 11560000
+                },
+                {
+                  "index": 337,
+                  "betAmount": 110000,
+                  "rewardAmount": 11880000,
+                  "accumulatedSpent": 11670000
+                },
+                {
+                  "index": 338,
+                  "betAmount": 110000,
+                  "rewardAmount": 11880000,
+                  "accumulatedSpent": 11780000
+                },
+                {
+                  "index": 339,
+                  "betAmount": 120000,
+                  "rewardAmount": 12960000,
+                  "accumulatedSpent": 11900000
+                },
+                {
+                  "index": 340,
+                  "betAmount": 120000,
+                  "rewardAmount": 12960000,
+                  "accumulatedSpent": 12020000
+                },
+                {
+                  "index": 341,
+                  "betAmount": 120000,
+                  "rewardAmount": 12960000,
+                  "accumulatedSpent": 12140000
+                },
+                {
+                  "index": 342,
+                  "betAmount": 120000,
+                  "rewardAmount": 12960000,
+                  "accumulatedSpent": 12260000
+                },
+                {
+                  "index": 343,
+                  "betAmount": 120000,
+                  "rewardAmount": 12960000,
+                  "accumulatedSpent": 12380000
+                },
+                {
+                  "index": 344,
+                  "betAmount": 120000,
+                  "rewardAmount": 12960000,
+                  "accumulatedSpent": 12500000
+                },
+                {
+                  "index": 345,
+                  "betAmount": 120000,
+                  "rewardAmount": 12960000,
+                  "accumulatedSpent": 12620000
+                },
+                {
+                  "index": 346,
+                  "betAmount": 120000,
+                  "rewardAmount": 12960000,
+                  "accumulatedSpent": 12740000
+                },
+                {
+                  "index": 347,
+                  "betAmount": 120000,
+                  "rewardAmount": 12960000,
+                  "accumulatedSpent": 12860000
+                },
+                {
+                  "index": 348,
+                  "betAmount": 130000,
+                  "rewardAmount": 14040000,
+                  "accumulatedSpent": 12990000
+                },
+                {
+                  "index": 349,
+                  "betAmount": 130000,
+                  "rewardAmount": 14040000,
+                  "accumulatedSpent": 13120000
+                },
+                {
+                  "index": 350,
+                  "betAmount": 130000,
+                  "rewardAmount": 14040000,
+                  "accumulatedSpent": 13250000
+                },
+                {
+                  "index": 351,
+                  "betAmount": 130000,
+                  "rewardAmount": 14040000,
+                  "accumulatedSpent": 13380000
+                },
+                {
+                  "index": 352,
+                  "betAmount": 130000,
+                  "rewardAmount": 14040000,
+                  "accumulatedSpent": 13510000
+                },
+                {
+                  "index": 353,
+                  "betAmount": 130000,
+                  "rewardAmount": 14040000,
+                  "accumulatedSpent": 13640000
+                },
+                {
+                  "index": 354,
+                  "betAmount": 130000,
+                  "rewardAmount": 14040000,
+                  "accumulatedSpent": 13770000
+                },
+                {
+                  "index": 355,
+                  "betAmount": 130000,
+                  "rewardAmount": 14040000,
+                  "accumulatedSpent": 13900000
+                },
+                {
+                  "index": 356,
+                  "betAmount": 140000,
+                  "rewardAmount": 15120000,
+                  "accumulatedSpent": 14040000
+                },
+                {
+                  "index": 357,
+                  "betAmount": 140000,
+                  "rewardAmount": 15120000,
+                  "accumulatedSpent": 14180000
+                },
+                {
+                  "index": 358,
+                  "betAmount": 140000,
+                  "rewardAmount": 15120000,
+                  "accumulatedSpent": 14320000
+                },
+                {
+                  "index": 359,
+                  "betAmount": 140000,
+                  "rewardAmount": 15120000,
+                  "accumulatedSpent": 14460000
+                },
+                {
+                  "index": 360,
+                  "betAmount": 140000,
+                  "rewardAmount": 15120000,
+                  "accumulatedSpent": 14600000
+                },
+                {
+                  "index": 361,
+                  "betAmount": 140000,
+                  "rewardAmount": 15120000,
+                  "accumulatedSpent": 14740000
+                },
+                {
+                  "index": 362,
+                  "betAmount": 140000,
+                  "rewardAmount": 15120000,
+                  "accumulatedSpent": 14880000
+                },
+                {
+                  "index": 363,
+                  "betAmount": 140000,
+                  "rewardAmount": 15120000,
+                  "accumulatedSpent": 15020000
+                },
+                {
+                  "index": 364,
+                  "betAmount": 150000,
+                  "rewardAmount": 16200000,
+                  "accumulatedSpent": 15170000
+                },
+                {
+                  "index": 365,
+                  "betAmount": 150000,
+                  "rewardAmount": 16200000,
+                  "accumulatedSpent": 15320000
+                },
+                {
+                  "index": 366,
+                  "betAmount": 150000,
+                  "rewardAmount": 16200000,
+                  "accumulatedSpent": 15470000
+                },
+                {
+                  "index": 367,
+                  "betAmount": 150000,
+                  "rewardAmount": 16200000,
+                  "accumulatedSpent": 15620000
+                },
+                {
+                  "index": 368,
+                  "betAmount": 150000,
+                  "rewardAmount": 16200000,
+                  "accumulatedSpent": 15770000
+                },
+                {
+                  "index": 369,
+                  "betAmount": 150000,
+                  "rewardAmount": 16200000,
+                  "accumulatedSpent": 15920000
+                },
+                {
+                  "index": 370,
+                  "betAmount": 150000,
+                  "rewardAmount": 16200000,
+                  "accumulatedSpent": 16070000
+                },
+                {
+                  "index": 371,
+                  "betAmount": 160000,
+                  "rewardAmount": 17280000,
+                  "accumulatedSpent": 16230000
+                },
+                {
+                  "index": 372,
+                  "betAmount": 160000,
+                  "rewardAmount": 17280000,
+                  "accumulatedSpent": 16390000
+                },
+                {
+                  "index": 373,
+                  "betAmount": 160000,
+                  "rewardAmount": 17280000,
+                  "accumulatedSpent": 16550000
+                },
+                {
+                  "index": 374,
+                  "betAmount": 160000,
+                  "rewardAmount": 17280000,
+                  "accumulatedSpent": 16710000
+                },
+                {
+                  "index": 375,
+                  "betAmount": 160000,
+                  "rewardAmount": 17280000,
+                  "accumulatedSpent": 16870000
+                },
+                {
+                  "index": 376,
+                  "betAmount": 160000,
+                  "rewardAmount": 17280000,
+                  "accumulatedSpent": 17030000
+                },
+                {
+                  "index": 377,
+                  "betAmount": 170000,
+                  "rewardAmount": 18360000,
+                  "accumulatedSpent": 17200000
+                },
+                {
+                  "index": 378,
+                  "betAmount": 170000,
+                  "rewardAmount": 18360000,
+                  "accumulatedSpent": 17370000
+                },
+                {
+                  "index": 379,
+                  "betAmount": 170000,
+                  "rewardAmount": 18360000,
+                  "accumulatedSpent": 17540000
+                },
+                {
+                  "index": 380,
+                  "betAmount": 170000,
+                  "rewardAmount": 18360000,
+                  "accumulatedSpent": 17710000
+                },
+                {
+                  "index": 381,
+                  "betAmount": 170000,
+                  "rewardAmount": 18360000,
+                  "accumulatedSpent": 17880000
+                },
+                {
+                  "index": 382,
+                  "betAmount": 170000,
+                  "rewardAmount": 18360000,
+                  "accumulatedSpent": 18050000
+                },
+                {
+                  "index": 383,
+                  "betAmount": 170000,
+                  "rewardAmount": 18360000,
+                  "accumulatedSpent": 18220000
+                },
+                {
+                  "index": 384,
+                  "betAmount": 180000,
+                  "rewardAmount": 19440000,
+                  "accumulatedSpent": 18400000
+                },
+                {
+                  "index": 385,
+                  "betAmount": 180000,
+                  "rewardAmount": 19440000,
+                  "accumulatedSpent": 18580000
+                },
+                {
+                  "index": 386,
+                  "betAmount": 180000,
+                  "rewardAmount": 19440000,
+                  "accumulatedSpent": 18760000
+                },
+                {
+                  "index": 387,
+                  "betAmount": 180000,
+                  "rewardAmount": 19440000,
+                  "accumulatedSpent": 18940000
+                },
+                {
+                  "index": 388,
+                  "betAmount": 180000,
+                  "rewardAmount": 19440000,
+                  "accumulatedSpent": 19120000
+                },
+                {
+                  "index": 389,
+                  "betAmount": 180000,
+                  "rewardAmount": 19440000,
+                  "accumulatedSpent": 19300000
+                },
+                {
+                  "index": 390,
+                  "betAmount": 190000,
+                  "rewardAmount": 20520000,
+                  "accumulatedSpent": 19490000
+                },
+                {
+                  "index": 391,
+                  "betAmount": 190000,
+                  "rewardAmount": 20520000,
+                  "accumulatedSpent": 19680000
+                },
+                {
+                  "index": 392,
+                  "betAmount": 190000,
+                  "rewardAmount": 20520000,
+                  "accumulatedSpent": 19870000
+                },
+                {
+                  "index": 393,
+                  "betAmount": 190000,
+                  "rewardAmount": 20520000,
+                  "accumulatedSpent": 20060000
+                },
+                {
+                  "index": 394,
+                  "betAmount": 190000,
+                  "rewardAmount": 20520000,
+                  "accumulatedSpent": 20250000
+                },
+                {
+                  "index": 395,
+                  "betAmount": 200000,
+                  "rewardAmount": 21600000,
+                  "accumulatedSpent": 20450000
+                },
+                {
+                  "index": 396,
+                  "betAmount": 200000,
+                  "rewardAmount": 21600000,
+                  "accumulatedSpent": 20650000
+                },
+                {
+                  "index": 397,
+                  "betAmount": 200000,
+                  "rewardAmount": 21600000,
+                  "accumulatedSpent": 20850000
+                },
+                {
+                  "index": 398,
+                  "betAmount": 200000,
+                  "rewardAmount": 21600000,
+                  "accumulatedSpent": 21050000
+                },
+                {
+                  "index": 399,
+                  "betAmount": 200000,
+                  "rewardAmount": 21600000,
+                  "accumulatedSpent": 21250000
+                },
+                {
+                  "index": 400,
+                  "betAmount": 200000,
+                  "rewardAmount": 21600000,
+                  "accumulatedSpent": 21450000
+                },
+                {
+                  "index": 401,
+                  "betAmount": 210000,
+                  "rewardAmount": 22680000,
+                  "accumulatedSpent": 21660000
+                },
+                {
+                  "index": 402,
+                  "betAmount": 210000,
+                  "rewardAmount": 22680000,
+                  "accumulatedSpent": 21870000
+                },
+                {
+                  "index": 403,
+                  "betAmount": 210000,
+                  "rewardAmount": 22680000,
+                  "accumulatedSpent": 22080000
+                },
+                {
+                  "index": 404,
+                  "betAmount": 210000,
+                  "rewardAmount": 22680000,
+                  "accumulatedSpent": 22290000
+                },
+                {
+                  "index": 405,
+                  "betAmount": 210000,
+                  "rewardAmount": 22680000,
+                  "accumulatedSpent": 22500000
+                },
+                {
+                  "index": 406,
+                  "betAmount": 220000,
+                  "rewardAmount": 23760000,
+                  "accumulatedSpent": 22720000
+                },
+                {
+                  "index": 407,
+                  "betAmount": 220000,
+                  "rewardAmount": 23760000,
+                  "accumulatedSpent": 22940000
+                },
+                {
+                  "index": 408,
+                  "betAmount": 220000,
+                  "rewardAmount": 23760000,
+                  "accumulatedSpent": 23160000
+                },
+                {
+                  "index": 409,
+                  "betAmount": 220000,
+                  "rewardAmount": 23760000,
+                  "accumulatedSpent": 23380000
+                },
+                {
+                  "index": 410,
+                  "betAmount": 220000,
+                  "rewardAmount": 23760000,
+                  "accumulatedSpent": 23600000
+                },
+                {
+                  "index": 411,
+                  "betAmount": 230000,
+                  "rewardAmount": 24840000,
+                  "accumulatedSpent": 23830000
+                },
+                {
+                  "index": 412,
+                  "betAmount": 230000,
+                  "rewardAmount": 24840000,
+                  "accumulatedSpent": 24060000
+                },
+                {
+                  "index": 413,
+                  "betAmount": 230000,
+                  "rewardAmount": 24840000,
+                  "accumulatedSpent": 24290000
+                },
+                {
+                  "index": 414,
+                  "betAmount": 230000,
+                  "rewardAmount": 24840000,
+                  "accumulatedSpent": 24520000
+                },
+                {
+                  "index": 415,
+                  "betAmount": 240000,
+                  "rewardAmount": 25920000,
+                  "accumulatedSpent": 24760000
+                },
+                {
+                  "index": 416,
+                  "betAmount": 240000,
+                  "rewardAmount": 25920000,
+                  "accumulatedSpent": 25000000
+                },
+                {
+                  "index": 417,
+                  "betAmount": 240000,
+                  "rewardAmount": 25920000,
+                  "accumulatedSpent": 25240000
+                },
+                {
+                  "index": 418,
+                  "betAmount": 240000,
+                  "rewardAmount": 25920000,
+                  "accumulatedSpent": 25480000
+                },
+                {
+                  "index": 419,
+                  "betAmount": 240000,
+                  "rewardAmount": 25920000,
+                  "accumulatedSpent": 25720000
+                },
+                {
+                  "index": 420,
+                  "betAmount": 250000,
+                  "rewardAmount": 27000000,
+                  "accumulatedSpent": 25970000
+                },
+                {
+                  "index": 421,
+                  "betAmount": 250000,
+                  "rewardAmount": 27000000,
+                  "accumulatedSpent": 26220000
+                },
+                {
+                  "index": 422,
+                  "betAmount": 250000,
+                  "rewardAmount": 27000000,
+                  "accumulatedSpent": 26470000
+                },
+                {
+                  "index": 423,
+                  "betAmount": 250000,
+                  "rewardAmount": 27000000,
+                  "accumulatedSpent": 26720000
+                },
+                {
+                  "index": 424,
+                  "betAmount": 260000,
+                  "rewardAmount": 28080000,
+                  "accumulatedSpent": 26980000
+                },
+                {
+                  "index": 425,
+                  "betAmount": 260000,
+                  "rewardAmount": 28080000,
+                  "accumulatedSpent": 27240000
+                },
+                {
+                  "index": 426,
+                  "betAmount": 260000,
+                  "rewardAmount": 28080000,
+                  "accumulatedSpent": 27500000
+                },
+                {
+                  "index": 427,
+                  "betAmount": 260000,
+                  "rewardAmount": 28080000,
+                  "accumulatedSpent": 27760000
+                },
+                {
+                  "index": 428,
+                  "betAmount": 270000,
+                  "rewardAmount": 29160000,
+                  "accumulatedSpent": 28030000
+                },
+                {
+                  "index": 429,
+                  "betAmount": 270000,
+                  "rewardAmount": 29160000,
+                  "accumulatedSpent": 28300000
+                },
+                {
+                  "index": 430,
+                  "betAmount": 270000,
+                  "rewardAmount": 29160000,
+                  "accumulatedSpent": 28570000
+                },
+                {
+                  "index": 431,
+                  "betAmount": 270000,
+                  "rewardAmount": 29160000,
+                  "accumulatedSpent": 28840000
+                },
+                {
+                  "index": 432,
+                  "betAmount": 280000,
+                  "rewardAmount": 30240000,
+                  "accumulatedSpent": 29120000
+                },
+                {
+                  "index": 433,
+                  "betAmount": 280000,
+                  "rewardAmount": 30240000,
+                  "accumulatedSpent": 29400000
+                },
+                {
+                  "index": 434,
+                  "betAmount": 280000,
+                  "rewardAmount": 30240000,
+                  "accumulatedSpent": 29680000
+                },
+                {
+                  "index": 435,
+                  "betAmount": 280000,
+                  "rewardAmount": 30240000,
+                  "accumulatedSpent": 29960000
+                },
+                {
+                  "index": 436,
+                  "betAmount": 290000,
+                  "rewardAmount": 31320000,
+                  "accumulatedSpent": 30250000
+                },
+                {
+                  "index": 437,
+                  "betAmount": 290000,
+                  "rewardAmount": 31320000,
+                  "accumulatedSpent": 30540000
+                },
+                {
+                  "index": 438,
+                  "betAmount": 290000,
+                  "rewardAmount": 31320000,
+                  "accumulatedSpent": 30830000
+                },
+                {
+                  "index": 439,
+                  "betAmount": 290000,
+                  "rewardAmount": 31320000,
+                  "accumulatedSpent": 31120000
+                },
+                {
+                  "index": 440,
+                  "betAmount": 300000,
+                  "rewardAmount": 32400000,
+                  "accumulatedSpent": 31420000
+                },
+                {
+                  "index": 441,
+                  "betAmount": 300000,
+                  "rewardAmount": 32400000,
+                  "accumulatedSpent": 31720000
+                },
+                {
+                  "index": 442,
+                  "betAmount": 300000,
+                  "rewardAmount": 32400000,
+                  "accumulatedSpent": 32020000
+                },
+                {
+                  "index": 443,
+                  "betAmount": 310000,
+                  "rewardAmount": 33480000,
+                  "accumulatedSpent": 32330000
+                },
+                {
+                  "index": 444,
+                  "betAmount": 310000,
+                  "rewardAmount": 33480000,
+                  "accumulatedSpent": 32640000
+                },
+                {
+                  "index": 445,
+                  "betAmount": 310000,
+                  "rewardAmount": 33480000,
+                  "accumulatedSpent": 32950000
+                },
+                {
+                  "index": 446,
+                  "betAmount": 310000,
+                  "rewardAmount": 33480000,
+                  "accumulatedSpent": 33260000
+                },
+                {
+                  "index": 447,
+                  "betAmount": 320000,
+                  "rewardAmount": 34560000,
+                  "accumulatedSpent": 33580000
+                },
+                {
+                  "index": 448,
+                  "betAmount": 320000,
+                  "rewardAmount": 34560000,
+                  "accumulatedSpent": 33900000
+                },
+                {
+                  "index": 449,
+                  "betAmount": 320000,
+                  "rewardAmount": 34560000,
+                  "accumulatedSpent": 34220000
+                },
+                {
+                  "index": 450,
+                  "betAmount": 330000,
+                  "rewardAmount": 35640000,
+                  "accumulatedSpent": 34550000
+                },
+                {
+                  "index": 451,
+                  "betAmount": 330000,
+                  "rewardAmount": 35640000,
+                  "accumulatedSpent": 34880000
+                },
+                {
+                  "index": 452,
+                  "betAmount": 330000,
+                  "rewardAmount": 35640000,
+                  "accumulatedSpent": 35210000
+                },
+                {
+                  "index": 453,
+                  "betAmount": 330000,
+                  "rewardAmount": 35640000,
+                  "accumulatedSpent": 35540000
+                },
+                {
+                  "index": 454,
+                  "betAmount": 340000,
+                  "rewardAmount": 36720000,
+                  "accumulatedSpent": 35880000
+                },
+                {
+                  "index": 455,
+                  "betAmount": 340000,
+                  "rewardAmount": 36720000,
+                  "accumulatedSpent": 36220000
+                },
+                {
+                  "index": 456,
+                  "betAmount": 340000,
+                  "rewardAmount": 36720000,
+                  "accumulatedSpent": 36560000
+                },
+                {
+                  "index": 457,
+                  "betAmount": 350000,
+                  "rewardAmount": 37800000,
+                  "accumulatedSpent": 36910000
+                },
+                {
+                  "index": 458,
+                  "betAmount": 350000,
+                  "rewardAmount": 37800000,
+                  "accumulatedSpent": 37260000
+                },
+                {
+                  "index": 459,
+                  "betAmount": 350000,
+                  "rewardAmount": 37800000,
+                  "accumulatedSpent": 37610000
+                },
+                {
+                  "index": 460,
+                  "betAmount": 360000,
+                  "rewardAmount": 38880000,
+                  "accumulatedSpent": 37970000
+                },
+                {
+                  "index": 461,
+                  "betAmount": 360000,
+                  "rewardAmount": 38880000,
+                  "accumulatedSpent": 38330000
+                },
+                {
+                  "index": 462,
+                  "betAmount": 360000,
+                  "rewardAmount": 38880000,
+                  "accumulatedSpent": 38690000
+                },
+                {
+                  "index": 463,
+                  "betAmount": 370000,
+                  "rewardAmount": 39960000,
+                  "accumulatedSpent": 39060000
+                },
+                {
+                  "index": 464,
+                  "betAmount": 370000,
+                  "rewardAmount": 39960000,
+                  "accumulatedSpent": 39430000
+                },
+                {
+                  "index": 465,
+                  "betAmount": 370000,
+                  "rewardAmount": 39960000,
+                  "accumulatedSpent": 39800000
+                },
+                {
+                  "index": 466,
+                  "betAmount": 380000,
+                  "rewardAmount": 41040000,
+                  "accumulatedSpent": 40180000
+                },
+                {
+                  "index": 467,
+                  "betAmount": 380000,
+                  "rewardAmount": 41040000,
+                  "accumulatedSpent": 40560000
+                },
+                {
+                  "index": 468,
+                  "betAmount": 380000,
+                  "rewardAmount": 41040000,
+                  "accumulatedSpent": 40940000
+                },
+                {
+                  "index": 469,
+                  "betAmount": 390000,
+                  "rewardAmount": 42120000,
+                  "accumulatedSpent": 41330000
+                },
+                {
+                  "index": 470,
+                  "betAmount": 390000,
+                  "rewardAmount": 42120000,
+                  "accumulatedSpent": 41720000
+                },
+                {
+                  "index": 471,
+                  "betAmount": 400000,
+                  "rewardAmount": 43200000,
+                  "accumulatedSpent": 42120000
+                },
+                {
+                  "index": 472,
+                  "betAmount": 400000,
+                  "rewardAmount": 43200000,
+                  "accumulatedSpent": 42520000
+                },
+                {
+                  "index": 473,
+                  "betAmount": 400000,
+                  "rewardAmount": 43200000,
+                  "accumulatedSpent": 42920000
+                },
+                {
+                  "index": 474,
+                  "betAmount": 410000,
+                  "rewardAmount": 44280000,
+                  "accumulatedSpent": 43330000
+                },
+                {
+                  "index": 475,
+                  "betAmount": 410000,
+                  "rewardAmount": 44280000,
+                  "accumulatedSpent": 43740000
+                },
+                {
+                  "index": 476,
+                  "betAmount": 410000,
+                  "rewardAmount": 44280000,
+                  "accumulatedSpent": 44150000
+                },
+                {
+                  "index": 477,
+                  "betAmount": 420000,
+                  "rewardAmount": 45360000,
+                  "accumulatedSpent": 44570000
+                },
+                {
+                  "index": 478,
+                  "betAmount": 420000,
+                  "rewardAmount": 45360000,
+                  "accumulatedSpent": 44990000
+                },
+                {
+                  "index": 479,
+                  "betAmount": 430000,
+                  "rewardAmount": 46440000,
+                  "accumulatedSpent": 45420000
+                },
+                {
+                  "index": 480,
+                  "betAmount": 430000,
+                  "rewardAmount": 46440000,
+                  "accumulatedSpent": 45850000
+                },
+                {
+                  "index": 481,
+                  "betAmount": 430000,
+                  "rewardAmount": 46440000,
+                  "accumulatedSpent": 46280000
+                },
+                {
+                  "index": 482,
+                  "betAmount": 440000,
+                  "rewardAmount": 47520000,
+                  "accumulatedSpent": 46720000
+                },
+                {
+                  "index": 483,
+                  "betAmount": 440000,
+                  "rewardAmount": 47520000,
+                  "accumulatedSpent": 47160000
+                },
+                {
+                  "index": 484,
+                  "betAmount": 450000,
+                  "rewardAmount": 48600000,
+                  "accumulatedSpent": 47610000
+                },
+                {
+                  "index": 485,
+                  "betAmount": 450000,
+                  "rewardAmount": 48600000,
+                  "accumulatedSpent": 48060000
+                },
+                {
+                  "index": 486,
+                  "betAmount": 460000,
+                  "rewardAmount": 49680000,
+                  "accumulatedSpent": 48520000
+                },
+                {
+                  "index": 487,
+                  "betAmount": 460000,
+                  "rewardAmount": 49680000,
+                  "accumulatedSpent": 48980000
+                },
+                {
+                  "index": 488,
+                  "betAmount": 460000,
+                  "rewardAmount": 49680000,
+                  "accumulatedSpent": 49440000
+                },
+                {
+                  "index": 489,
+                  "betAmount": 470000,
+                  "rewardAmount": 50760000,
+                  "accumulatedSpent": 49910000
+                },
+                {
+                  "index": 490,
+                  "betAmount": 470000,
+                  "rewardAmount": 50760000,
+                  "accumulatedSpent": 50380000
+                },
+                {
+                  "index": 491,
+                  "betAmount": 480000,
+                  "rewardAmount": 51840000,
+                  "accumulatedSpent": 50860000
+                },
+                {
+                  "index": 492,
+                  "betAmount": 480000,
+                  "rewardAmount": 51840000,
+                  "accumulatedSpent": 51340000
+                },
+                {
+                  "index": 493,
+                  "betAmount": 490000,
+                  "rewardAmount": 52920000,
+                  "accumulatedSpent": 51830000
+                },
+                {
+                  "index": 494,
+                  "betAmount": 490000,
+                  "rewardAmount": 52920000,
+                  "accumulatedSpent": 52320000
+                },
+                {
+                  "index": 495,
+                  "betAmount": 490000,
+                  "rewardAmount": 52920000,
+                  "accumulatedSpent": 52810000
+                },
+                {
+                  "index": 496,
+                  "betAmount": 500000,
+                  "rewardAmount": 54000000,
+                  "accumulatedSpent": 53310000
+                },
+                {
+                  "index": 497,
+                  "betAmount": 500000,
+                  "rewardAmount": 54000000,
+                  "accumulatedSpent": 53810000
+                },
+                {
+                  "index": 498,
+                  "betAmount": 510000,
+                  "rewardAmount": 55080000,
+                  "accumulatedSpent": 54320000
+                },
+                {
+                  "index": 499,
+                  "betAmount": 510000,
+                  "rewardAmount": 55080000,
+                  "accumulatedSpent": 54830000
+                },
+                {
+                  "index": 500,
+                  "betAmount": 520000,
+                  "rewardAmount": 56160000,
+                  "accumulatedSpent": 55350000
+                }
+              ]
+            },
+            "statistics": {
+              "roundCount": 500,
+              "requiredBankrollAmount": 55350000,
+              "maximumBetAmount": 520000,
+              "averageBetAmount": 110700,
+              "minimumBetAmount": 10000,
+              "expectedProfitAmount": 810000
+            },
+            "request": {
+              "rewardMultiplier": 120,
+              "roundCount": 500,
+              "minimumBet": 10000,
+              "betStep": 10000,
+              "targetProfit": {
+                "mode": "fixedAmount",
+                "amount": 100000
+              },
+              "winTax": {
+                "threshold": 10000000,
+                "ratePercent": 10
+              }
+            },
+            "userBankroll": 30000000
+          },
+          "status": "ready",
+          "completedThroughRound": 0,
+          "createdAt": "2026-01-15T10:00:00.000Z"
+        }
+      ],
+      "currentPlanId": "plan-fixture-001",
+      "timeline": [
+        {
+          "at": "2026-01-15T10:00:00.000Z",
+          "type": "session-created"
+        }
+      ],
+      "notes": "",
+      "startedAt": null,
+      "profitAmount": null,
+      "favorite": true,
+      "archived": false,
+      "tags": [
+        "review"
+      ],
+      "createdAt": "2026-01-15T10:00:00.000Z",
+      "updatedAt": "2026-01-15T10:00:00.000Z"
+    }
+  ],
+  "customGamePresets": [],
+  "activePresetId": "bingo-120",
+  "capitalPlanner": {
+    "totalBankroll": 30000000,
+    "strategy": "balanced",
+    "risk": "normal",
+    "presetId": "bingo-120"
+  },
+  "recommendationSet": null,
+  "libraryCollections": [
+    {
+      "id": "lib-col-1",
+      "name": "Saved",
+      "tag": "saved"
+    }
+  ],
+  "planningDraft": {
+    "draftId": "draft-001",
+    "planId": "plan-draft-001",
+    "presetId": "bingo-120",
+    "formValues": {
+      "presetId": "bingo-120",
+      "marketId": "total-4",
+      "targetProfit": "100.000",
+      "roundCount": "500",
+      "rewardMultiplier": "120",
+      "minimumBet": "10.000",
+      "maximumBet": "1.000.000",
+      "betStep": "10.000",
+      "userBankroll": "30.000.000",
+      "winTaxEnabled": true,
+      "winTaxThreshold": "10.000.000",
+      "winTaxRatePercent": "10"
+    },
+    "generated": {
+      "strategy": {
+        "rounds": [
+          {
+            "index": 1,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 10000
+          },
+          {
+            "index": 2,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 20000
+          },
+          {
+            "index": 3,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 30000
+          },
+          {
+            "index": 4,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 40000
+          },
+          {
+            "index": 5,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 50000
+          },
+          {
+            "index": 6,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 60000
+          },
+          {
+            "index": 7,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 70000
+          },
+          {
+            "index": 8,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 80000
+          },
+          {
+            "index": 9,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 90000
+          },
+          {
+            "index": 10,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 100000
+          },
+          {
+            "index": 11,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 110000
+          },
+          {
+            "index": 12,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 120000
+          },
+          {
+            "index": 13,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 130000
+          },
+          {
+            "index": 14,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 140000
+          },
+          {
+            "index": 15,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 150000
+          },
+          {
+            "index": 16,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 160000
+          },
+          {
+            "index": 17,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 170000
+          },
+          {
+            "index": 18,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 180000
+          },
+          {
+            "index": 19,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 190000
+          },
+          {
+            "index": 20,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 200000
+          },
+          {
+            "index": 21,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 210000
+          },
+          {
+            "index": 22,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 220000
+          },
+          {
+            "index": 23,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 230000
+          },
+          {
+            "index": 24,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 240000
+          },
+          {
+            "index": 25,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 250000
+          },
+          {
+            "index": 26,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 260000
+          },
+          {
+            "index": 27,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 270000
+          },
+          {
+            "index": 28,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 280000
+          },
+          {
+            "index": 29,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 290000
+          },
+          {
+            "index": 30,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 300000
+          },
+          {
+            "index": 31,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 310000
+          },
+          {
+            "index": 32,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 320000
+          },
+          {
+            "index": 33,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 330000
+          },
+          {
+            "index": 34,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 340000
+          },
+          {
+            "index": 35,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 350000
+          },
+          {
+            "index": 36,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 360000
+          },
+          {
+            "index": 37,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 370000
+          },
+          {
+            "index": 38,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 380000
+          },
+          {
+            "index": 39,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 390000
+          },
+          {
+            "index": 40,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 400000
+          },
+          {
+            "index": 41,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 410000
+          },
+          {
+            "index": 42,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 420000
+          },
+          {
+            "index": 43,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 430000
+          },
+          {
+            "index": 44,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 440000
+          },
+          {
+            "index": 45,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 450000
+          },
+          {
+            "index": 46,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 460000
+          },
+          {
+            "index": 47,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 470000
+          },
+          {
+            "index": 48,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 480000
+          },
+          {
+            "index": 49,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 490000
+          },
+          {
+            "index": 50,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 500000
+          },
+          {
+            "index": 51,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 510000
+          },
+          {
+            "index": 52,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 520000
+          },
+          {
+            "index": 53,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 530000
+          },
+          {
+            "index": 54,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 540000
+          },
+          {
+            "index": 55,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 550000
+          },
+          {
+            "index": 56,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 560000
+          },
+          {
+            "index": 57,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 570000
+          },
+          {
+            "index": 58,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 580000
+          },
+          {
+            "index": 59,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 590000
+          },
+          {
+            "index": 60,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 600000
+          },
+          {
+            "index": 61,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 610000
+          },
+          {
+            "index": 62,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 620000
+          },
+          {
+            "index": 63,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 630000
+          },
+          {
+            "index": 64,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 640000
+          },
+          {
+            "index": 65,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 650000
+          },
+          {
+            "index": 66,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 660000
+          },
+          {
+            "index": 67,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 670000
+          },
+          {
+            "index": 68,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 680000
+          },
+          {
+            "index": 69,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 690000
+          },
+          {
+            "index": 70,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 700000
+          },
+          {
+            "index": 71,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 710000
+          },
+          {
+            "index": 72,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 720000
+          },
+          {
+            "index": 73,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 730000
+          },
+          {
+            "index": 74,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 740000
+          },
+          {
+            "index": 75,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 750000
+          },
+          {
+            "index": 76,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 760000
+          },
+          {
+            "index": 77,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 770000
+          },
+          {
+            "index": 78,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 780000
+          },
+          {
+            "index": 79,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 790000
+          },
+          {
+            "index": 80,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 800000
+          },
+          {
+            "index": 81,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 810000
+          },
+          {
+            "index": 82,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 820000
+          },
+          {
+            "index": 83,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 830000
+          },
+          {
+            "index": 84,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 840000
+          },
+          {
+            "index": 85,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 850000
+          },
+          {
+            "index": 86,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 860000
+          },
+          {
+            "index": 87,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 870000
+          },
+          {
+            "index": 88,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 880000
+          },
+          {
+            "index": 89,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 890000
+          },
+          {
+            "index": 90,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 900000
+          },
+          {
+            "index": 91,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 910000
+          },
+          {
+            "index": 92,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 920000
+          },
+          {
+            "index": 93,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 930000
+          },
+          {
+            "index": 94,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 940000
+          },
+          {
+            "index": 95,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 950000
+          },
+          {
+            "index": 96,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 960000
+          },
+          {
+            "index": 97,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 970000
+          },
+          {
+            "index": 98,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 980000
+          },
+          {
+            "index": 99,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 990000
+          },
+          {
+            "index": 100,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 1000000
+          },
+          {
+            "index": 101,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 1010000
+          },
+          {
+            "index": 102,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 1020000
+          },
+          {
+            "index": 103,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 1030000
+          },
+          {
+            "index": 104,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 1040000
+          },
+          {
+            "index": 105,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 1050000
+          },
+          {
+            "index": 106,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 1060000
+          },
+          {
+            "index": 107,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 1070000
+          },
+          {
+            "index": 108,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 1080000
+          },
+          {
+            "index": 109,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 1090000
+          },
+          {
+            "index": 110,
+            "betAmount": 10000,
+            "rewardAmount": 1200000,
+            "accumulatedSpent": 1100000
+          },
+          {
+            "index": 111,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1120000
+          },
+          {
+            "index": 112,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1140000
+          },
+          {
+            "index": 113,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1160000
+          },
+          {
+            "index": 114,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1180000
+          },
+          {
+            "index": 115,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1200000
+          },
+          {
+            "index": 116,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1220000
+          },
+          {
+            "index": 117,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1240000
+          },
+          {
+            "index": 118,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1260000
+          },
+          {
+            "index": 119,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1280000
+          },
+          {
+            "index": 120,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1300000
+          },
+          {
+            "index": 121,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1320000
+          },
+          {
+            "index": 122,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1340000
+          },
+          {
+            "index": 123,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1360000
+          },
+          {
+            "index": 124,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1380000
+          },
+          {
+            "index": 125,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1400000
+          },
+          {
+            "index": 126,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1420000
+          },
+          {
+            "index": 127,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1440000
+          },
+          {
+            "index": 128,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1460000
+          },
+          {
+            "index": 129,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1480000
+          },
+          {
+            "index": 130,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1500000
+          },
+          {
+            "index": 131,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1520000
+          },
+          {
+            "index": 132,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1540000
+          },
+          {
+            "index": 133,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1560000
+          },
+          {
+            "index": 134,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1580000
+          },
+          {
+            "index": 135,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1600000
+          },
+          {
+            "index": 136,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1620000
+          },
+          {
+            "index": 137,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1640000
+          },
+          {
+            "index": 138,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1660000
+          },
+          {
+            "index": 139,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1680000
+          },
+          {
+            "index": 140,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1700000
+          },
+          {
+            "index": 141,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1720000
+          },
+          {
+            "index": 142,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1740000
+          },
+          {
+            "index": 143,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1760000
+          },
+          {
+            "index": 144,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1780000
+          },
+          {
+            "index": 145,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1800000
+          },
+          {
+            "index": 146,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1820000
+          },
+          {
+            "index": 147,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1840000
+          },
+          {
+            "index": 148,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1860000
+          },
+          {
+            "index": 149,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1880000
+          },
+          {
+            "index": 150,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1900000
+          },
+          {
+            "index": 151,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1920000
+          },
+          {
+            "index": 152,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1940000
+          },
+          {
+            "index": 153,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1960000
+          },
+          {
+            "index": 154,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 1980000
+          },
+          {
+            "index": 155,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2000000
+          },
+          {
+            "index": 156,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2020000
+          },
+          {
+            "index": 157,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2040000
+          },
+          {
+            "index": 158,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2060000
+          },
+          {
+            "index": 159,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2080000
+          },
+          {
+            "index": 160,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2100000
+          },
+          {
+            "index": 161,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2120000
+          },
+          {
+            "index": 162,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2140000
+          },
+          {
+            "index": 163,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2160000
+          },
+          {
+            "index": 164,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2180000
+          },
+          {
+            "index": 165,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2200000
+          },
+          {
+            "index": 166,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2220000
+          },
+          {
+            "index": 167,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2240000
+          },
+          {
+            "index": 168,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2260000
+          },
+          {
+            "index": 169,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2280000
+          },
+          {
+            "index": 170,
+            "betAmount": 20000,
+            "rewardAmount": 2400000,
+            "accumulatedSpent": 2300000
+          },
+          {
+            "index": 171,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2330000
+          },
+          {
+            "index": 172,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2360000
+          },
+          {
+            "index": 173,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2390000
+          },
+          {
+            "index": 174,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2420000
+          },
+          {
+            "index": 175,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2450000
+          },
+          {
+            "index": 176,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2480000
+          },
+          {
+            "index": 177,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2510000
+          },
+          {
+            "index": 178,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2540000
+          },
+          {
+            "index": 179,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2570000
+          },
+          {
+            "index": 180,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2600000
+          },
+          {
+            "index": 181,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2630000
+          },
+          {
+            "index": 182,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2660000
+          },
+          {
+            "index": 183,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2690000
+          },
+          {
+            "index": 184,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2720000
+          },
+          {
+            "index": 185,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2750000
+          },
+          {
+            "index": 186,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2780000
+          },
+          {
+            "index": 187,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2810000
+          },
+          {
+            "index": 188,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2840000
+          },
+          {
+            "index": 189,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2870000
+          },
+          {
+            "index": 190,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2900000
+          },
+          {
+            "index": 191,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2930000
+          },
+          {
+            "index": 192,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2960000
+          },
+          {
+            "index": 193,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 2990000
+          },
+          {
+            "index": 194,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3020000
+          },
+          {
+            "index": 195,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3050000
+          },
+          {
+            "index": 196,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3080000
+          },
+          {
+            "index": 197,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3110000
+          },
+          {
+            "index": 198,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3140000
+          },
+          {
+            "index": 199,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3170000
+          },
+          {
+            "index": 200,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3200000
+          },
+          {
+            "index": 201,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3230000
+          },
+          {
+            "index": 202,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3260000
+          },
+          {
+            "index": 203,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3290000
+          },
+          {
+            "index": 204,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3320000
+          },
+          {
+            "index": 205,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3350000
+          },
+          {
+            "index": 206,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3380000
+          },
+          {
+            "index": 207,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3410000
+          },
+          {
+            "index": 208,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3440000
+          },
+          {
+            "index": 209,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3470000
+          },
+          {
+            "index": 210,
+            "betAmount": 30000,
+            "rewardAmount": 3600000,
+            "accumulatedSpent": 3500000
+          },
+          {
+            "index": 211,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 3540000
+          },
+          {
+            "index": 212,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 3580000
+          },
+          {
+            "index": 213,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 3620000
+          },
+          {
+            "index": 214,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 3660000
+          },
+          {
+            "index": 215,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 3700000
+          },
+          {
+            "index": 216,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 3740000
+          },
+          {
+            "index": 217,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 3780000
+          },
+          {
+            "index": 218,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 3820000
+          },
+          {
+            "index": 219,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 3860000
+          },
+          {
+            "index": 220,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 3900000
+          },
+          {
+            "index": 221,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 3940000
+          },
+          {
+            "index": 222,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 3980000
+          },
+          {
+            "index": 223,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4020000
+          },
+          {
+            "index": 224,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4060000
+          },
+          {
+            "index": 225,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4100000
+          },
+          {
+            "index": 226,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4140000
+          },
+          {
+            "index": 227,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4180000
+          },
+          {
+            "index": 228,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4220000
+          },
+          {
+            "index": 229,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4260000
+          },
+          {
+            "index": 230,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4300000
+          },
+          {
+            "index": 231,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4340000
+          },
+          {
+            "index": 232,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4380000
+          },
+          {
+            "index": 233,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4420000
+          },
+          {
+            "index": 234,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4460000
+          },
+          {
+            "index": 235,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4500000
+          },
+          {
+            "index": 236,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4540000
+          },
+          {
+            "index": 237,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4580000
+          },
+          {
+            "index": 238,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4620000
+          },
+          {
+            "index": 239,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4660000
+          },
+          {
+            "index": 240,
+            "betAmount": 40000,
+            "rewardAmount": 4800000,
+            "accumulatedSpent": 4700000
+          },
+          {
+            "index": 241,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 4750000
+          },
+          {
+            "index": 242,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 4800000
+          },
+          {
+            "index": 243,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 4850000
+          },
+          {
+            "index": 244,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 4900000
+          },
+          {
+            "index": 245,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 4950000
+          },
+          {
+            "index": 246,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5000000
+          },
+          {
+            "index": 247,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5050000
+          },
+          {
+            "index": 248,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5100000
+          },
+          {
+            "index": 249,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5150000
+          },
+          {
+            "index": 250,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5200000
+          },
+          {
+            "index": 251,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5250000
+          },
+          {
+            "index": 252,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5300000
+          },
+          {
+            "index": 253,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5350000
+          },
+          {
+            "index": 254,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5400000
+          },
+          {
+            "index": 255,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5450000
+          },
+          {
+            "index": 256,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5500000
+          },
+          {
+            "index": 257,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5550000
+          },
+          {
+            "index": 258,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5600000
+          },
+          {
+            "index": 259,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5650000
+          },
+          {
+            "index": 260,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5700000
+          },
+          {
+            "index": 261,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5750000
+          },
+          {
+            "index": 262,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5800000
+          },
+          {
+            "index": 263,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5850000
+          },
+          {
+            "index": 264,
+            "betAmount": 50000,
+            "rewardAmount": 6000000,
+            "accumulatedSpent": 5900000
+          },
+          {
+            "index": 265,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 5960000
+          },
+          {
+            "index": 266,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6020000
+          },
+          {
+            "index": 267,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6080000
+          },
+          {
+            "index": 268,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6140000
+          },
+          {
+            "index": 269,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6200000
+          },
+          {
+            "index": 270,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6260000
+          },
+          {
+            "index": 271,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6320000
+          },
+          {
+            "index": 272,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6380000
+          },
+          {
+            "index": 273,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6440000
+          },
+          {
+            "index": 274,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6500000
+          },
+          {
+            "index": 275,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6560000
+          },
+          {
+            "index": 276,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6620000
+          },
+          {
+            "index": 277,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6680000
+          },
+          {
+            "index": 278,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6740000
+          },
+          {
+            "index": 279,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6800000
+          },
+          {
+            "index": 280,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6860000
+          },
+          {
+            "index": 281,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6920000
+          },
+          {
+            "index": 282,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 6980000
+          },
+          {
+            "index": 283,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 7040000
+          },
+          {
+            "index": 284,
+            "betAmount": 60000,
+            "rewardAmount": 7200000,
+            "accumulatedSpent": 7100000
+          },
+          {
+            "index": 285,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 7170000
+          },
+          {
+            "index": 286,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 7240000
+          },
+          {
+            "index": 287,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 7310000
+          },
+          {
+            "index": 288,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 7380000
+          },
+          {
+            "index": 289,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 7450000
+          },
+          {
+            "index": 290,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 7520000
+          },
+          {
+            "index": 291,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 7590000
+          },
+          {
+            "index": 292,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 7660000
+          },
+          {
+            "index": 293,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 7730000
+          },
+          {
+            "index": 294,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 7800000
+          },
+          {
+            "index": 295,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 7870000
+          },
+          {
+            "index": 296,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 7940000
+          },
+          {
+            "index": 297,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 8010000
+          },
+          {
+            "index": 298,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 8080000
+          },
+          {
+            "index": 299,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 8150000
+          },
+          {
+            "index": 300,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 8220000
+          },
+          {
+            "index": 301,
+            "betAmount": 70000,
+            "rewardAmount": 8400000,
+            "accumulatedSpent": 8290000
+          },
+          {
+            "index": 302,
+            "betAmount": 80000,
+            "rewardAmount": 9600000,
+            "accumulatedSpent": 8370000
+          },
+          {
+            "index": 303,
+            "betAmount": 80000,
+            "rewardAmount": 9600000,
+            "accumulatedSpent": 8450000
+          },
+          {
+            "index": 304,
+            "betAmount": 80000,
+            "rewardAmount": 9600000,
+            "accumulatedSpent": 8530000
+          },
+          {
+            "index": 305,
+            "betAmount": 80000,
+            "rewardAmount": 9600000,
+            "accumulatedSpent": 8610000
+          },
+          {
+            "index": 306,
+            "betAmount": 80000,
+            "rewardAmount": 9600000,
+            "accumulatedSpent": 8690000
+          },
+          {
+            "index": 307,
+            "betAmount": 80000,
+            "rewardAmount": 9600000,
+            "accumulatedSpent": 8770000
+          },
+          {
+            "index": 308,
+            "betAmount": 80000,
+            "rewardAmount": 9600000,
+            "accumulatedSpent": 8850000
+          },
+          {
+            "index": 309,
+            "betAmount": 80000,
+            "rewardAmount": 9600000,
+            "accumulatedSpent": 8930000
+          },
+          {
+            "index": 310,
+            "betAmount": 80000,
+            "rewardAmount": 9600000,
+            "accumulatedSpent": 9010000
+          },
+          {
+            "index": 311,
+            "betAmount": 80000,
+            "rewardAmount": 9600000,
+            "accumulatedSpent": 9090000
+          },
+          {
+            "index": 312,
+            "betAmount": 80000,
+            "rewardAmount": 9600000,
+            "accumulatedSpent": 9170000
+          },
+          {
+            "index": 313,
+            "betAmount": 80000,
+            "rewardAmount": 9600000,
+            "accumulatedSpent": 9250000
+          },
+          {
+            "index": 314,
+            "betAmount": 80000,
+            "rewardAmount": 9600000,
+            "accumulatedSpent": 9330000
+          },
+          {
+            "index": 315,
+            "betAmount": 80000,
+            "rewardAmount": 9600000,
+            "accumulatedSpent": 9410000
+          },
+          {
+            "index": 316,
+            "betAmount": 80000,
+            "rewardAmount": 9600000,
+            "accumulatedSpent": 9490000
+          },
+          {
+            "index": 317,
+            "betAmount": 90000,
+            "rewardAmount": 9720000,
+            "accumulatedSpent": 9580000
+          },
+          {
+            "index": 318,
+            "betAmount": 100000,
+            "rewardAmount": 10800000,
+            "accumulatedSpent": 9680000
+          },
+          {
+            "index": 319,
+            "betAmount": 100000,
+            "rewardAmount": 10800000,
+            "accumulatedSpent": 9780000
+          },
+          {
+            "index": 320,
+            "betAmount": 100000,
+            "rewardAmount": 10800000,
+            "accumulatedSpent": 9880000
+          },
+          {
+            "index": 321,
+            "betAmount": 100000,
+            "rewardAmount": 10800000,
+            "accumulatedSpent": 9980000
+          },
+          {
+            "index": 322,
+            "betAmount": 100000,
+            "rewardAmount": 10800000,
+            "accumulatedSpent": 10080000
+          },
+          {
+            "index": 323,
+            "betAmount": 100000,
+            "rewardAmount": 10800000,
+            "accumulatedSpent": 10180000
+          },
+          {
+            "index": 324,
+            "betAmount": 100000,
+            "rewardAmount": 10800000,
+            "accumulatedSpent": 10280000
+          },
+          {
+            "index": 325,
+            "betAmount": 100000,
+            "rewardAmount": 10800000,
+            "accumulatedSpent": 10380000
+          },
+          {
+            "index": 326,
+            "betAmount": 100000,
+            "rewardAmount": 10800000,
+            "accumulatedSpent": 10480000
+          },
+          {
+            "index": 327,
+            "betAmount": 100000,
+            "rewardAmount": 10800000,
+            "accumulatedSpent": 10580000
+          },
+          {
+            "index": 328,
+            "betAmount": 100000,
+            "rewardAmount": 10800000,
+            "accumulatedSpent": 10680000
+          },
+          {
+            "index": 329,
+            "betAmount": 110000,
+            "rewardAmount": 11880000,
+            "accumulatedSpent": 10790000
+          },
+          {
+            "index": 330,
+            "betAmount": 110000,
+            "rewardAmount": 11880000,
+            "accumulatedSpent": 10900000
+          },
+          {
+            "index": 331,
+            "betAmount": 110000,
+            "rewardAmount": 11880000,
+            "accumulatedSpent": 11010000
+          },
+          {
+            "index": 332,
+            "betAmount": 110000,
+            "rewardAmount": 11880000,
+            "accumulatedSpent": 11120000
+          },
+          {
+            "index": 333,
+            "betAmount": 110000,
+            "rewardAmount": 11880000,
+            "accumulatedSpent": 11230000
+          },
+          {
+            "index": 334,
+            "betAmount": 110000,
+            "rewardAmount": 11880000,
+            "accumulatedSpent": 11340000
+          },
+          {
+            "index": 335,
+            "betAmount": 110000,
+            "rewardAmount": 11880000,
+            "accumulatedSpent": 11450000
+          },
+          {
+            "index": 336,
+            "betAmount": 110000,
+            "rewardAmount": 11880000,
+            "accumulatedSpent": 11560000
+          },
+          {
+            "index": 337,
+            "betAmount": 110000,
+            "rewardAmount": 11880000,
+            "accumulatedSpent": 11670000
+          },
+          {
+            "index": 338,
+            "betAmount": 110000,
+            "rewardAmount": 11880000,
+            "accumulatedSpent": 11780000
+          },
+          {
+            "index": 339,
+            "betAmount": 120000,
+            "rewardAmount": 12960000,
+            "accumulatedSpent": 11900000
+          },
+          {
+            "index": 340,
+            "betAmount": 120000,
+            "rewardAmount": 12960000,
+            "accumulatedSpent": 12020000
+          },
+          {
+            "index": 341,
+            "betAmount": 120000,
+            "rewardAmount": 12960000,
+            "accumulatedSpent": 12140000
+          },
+          {
+            "index": 342,
+            "betAmount": 120000,
+            "rewardAmount": 12960000,
+            "accumulatedSpent": 12260000
+          },
+          {
+            "index": 343,
+            "betAmount": 120000,
+            "rewardAmount": 12960000,
+            "accumulatedSpent": 12380000
+          },
+          {
+            "index": 344,
+            "betAmount": 120000,
+            "rewardAmount": 12960000,
+            "accumulatedSpent": 12500000
+          },
+          {
+            "index": 345,
+            "betAmount": 120000,
+            "rewardAmount": 12960000,
+            "accumulatedSpent": 12620000
+          },
+          {
+            "index": 346,
+            "betAmount": 120000,
+            "rewardAmount": 12960000,
+            "accumulatedSpent": 12740000
+          },
+          {
+            "index": 347,
+            "betAmount": 120000,
+            "rewardAmount": 12960000,
+            "accumulatedSpent": 12860000
+          },
+          {
+            "index": 348,
+            "betAmount": 130000,
+            "rewardAmount": 14040000,
+            "accumulatedSpent": 12990000
+          },
+          {
+            "index": 349,
+            "betAmount": 130000,
+            "rewardAmount": 14040000,
+            "accumulatedSpent": 13120000
+          },
+          {
+            "index": 350,
+            "betAmount": 130000,
+            "rewardAmount": 14040000,
+            "accumulatedSpent": 13250000
+          },
+          {
+            "index": 351,
+            "betAmount": 130000,
+            "rewardAmount": 14040000,
+            "accumulatedSpent": 13380000
+          },
+          {
+            "index": 352,
+            "betAmount": 130000,
+            "rewardAmount": 14040000,
+            "accumulatedSpent": 13510000
+          },
+          {
+            "index": 353,
+            "betAmount": 130000,
+            "rewardAmount": 14040000,
+            "accumulatedSpent": 13640000
+          },
+          {
+            "index": 354,
+            "betAmount": 130000,
+            "rewardAmount": 14040000,
+            "accumulatedSpent": 13770000
+          },
+          {
+            "index": 355,
+            "betAmount": 130000,
+            "rewardAmount": 14040000,
+            "accumulatedSpent": 13900000
+          },
+          {
+            "index": 356,
+            "betAmount": 140000,
+            "rewardAmount": 15120000,
+            "accumulatedSpent": 14040000
+          },
+          {
+            "index": 357,
+            "betAmount": 140000,
+            "rewardAmount": 15120000,
+            "accumulatedSpent": 14180000
+          },
+          {
+            "index": 358,
+            "betAmount": 140000,
+            "rewardAmount": 15120000,
+            "accumulatedSpent": 14320000
+          },
+          {
+            "index": 359,
+            "betAmount": 140000,
+            "rewardAmount": 15120000,
+            "accumulatedSpent": 14460000
+          },
+          {
+            "index": 360,
+            "betAmount": 140000,
+            "rewardAmount": 15120000,
+            "accumulatedSpent": 14600000
+          },
+          {
+            "index": 361,
+            "betAmount": 140000,
+            "rewardAmount": 15120000,
+            "accumulatedSpent": 14740000
+          },
+          {
+            "index": 362,
+            "betAmount": 140000,
+            "rewardAmount": 15120000,
+            "accumulatedSpent": 14880000
+          },
+          {
+            "index": 363,
+            "betAmount": 140000,
+            "rewardAmount": 15120000,
+            "accumulatedSpent": 15020000
+          },
+          {
+            "index": 364,
+            "betAmount": 150000,
+            "rewardAmount": 16200000,
+            "accumulatedSpent": 15170000
+          },
+          {
+            "index": 365,
+            "betAmount": 150000,
+            "rewardAmount": 16200000,
+            "accumulatedSpent": 15320000
+          },
+          {
+            "index": 366,
+            "betAmount": 150000,
+            "rewardAmount": 16200000,
+            "accumulatedSpent": 15470000
+          },
+          {
+            "index": 367,
+            "betAmount": 150000,
+            "rewardAmount": 16200000,
+            "accumulatedSpent": 15620000
+          },
+          {
+            "index": 368,
+            "betAmount": 150000,
+            "rewardAmount": 16200000,
+            "accumulatedSpent": 15770000
+          },
+          {
+            "index": 369,
+            "betAmount": 150000,
+            "rewardAmount": 16200000,
+            "accumulatedSpent": 15920000
+          },
+          {
+            "index": 370,
+            "betAmount": 150000,
+            "rewardAmount": 16200000,
+            "accumulatedSpent": 16070000
+          },
+          {
+            "index": 371,
+            "betAmount": 160000,
+            "rewardAmount": 17280000,
+            "accumulatedSpent": 16230000
+          },
+          {
+            "index": 372,
+            "betAmount": 160000,
+            "rewardAmount": 17280000,
+            "accumulatedSpent": 16390000
+          },
+          {
+            "index": 373,
+            "betAmount": 160000,
+            "rewardAmount": 17280000,
+            "accumulatedSpent": 16550000
+          },
+          {
+            "index": 374,
+            "betAmount": 160000,
+            "rewardAmount": 17280000,
+            "accumulatedSpent": 16710000
+          },
+          {
+            "index": 375,
+            "betAmount": 160000,
+            "rewardAmount": 17280000,
+            "accumulatedSpent": 16870000
+          },
+          {
+            "index": 376,
+            "betAmount": 160000,
+            "rewardAmount": 17280000,
+            "accumulatedSpent": 17030000
+          },
+          {
+            "index": 377,
+            "betAmount": 170000,
+            "rewardAmount": 18360000,
+            "accumulatedSpent": 17200000
+          },
+          {
+            "index": 378,
+            "betAmount": 170000,
+            "rewardAmount": 18360000,
+            "accumulatedSpent": 17370000
+          },
+          {
+            "index": 379,
+            "betAmount": 170000,
+            "rewardAmount": 18360000,
+            "accumulatedSpent": 17540000
+          },
+          {
+            "index": 380,
+            "betAmount": 170000,
+            "rewardAmount": 18360000,
+            "accumulatedSpent": 17710000
+          },
+          {
+            "index": 381,
+            "betAmount": 170000,
+            "rewardAmount": 18360000,
+            "accumulatedSpent": 17880000
+          },
+          {
+            "index": 382,
+            "betAmount": 170000,
+            "rewardAmount": 18360000,
+            "accumulatedSpent": 18050000
+          },
+          {
+            "index": 383,
+            "betAmount": 170000,
+            "rewardAmount": 18360000,
+            "accumulatedSpent": 18220000
+          },
+          {
+            "index": 384,
+            "betAmount": 180000,
+            "rewardAmount": 19440000,
+            "accumulatedSpent": 18400000
+          },
+          {
+            "index": 385,
+            "betAmount": 180000,
+            "rewardAmount": 19440000,
+            "accumulatedSpent": 18580000
+          },
+          {
+            "index": 386,
+            "betAmount": 180000,
+            "rewardAmount": 19440000,
+            "accumulatedSpent": 18760000
+          },
+          {
+            "index": 387,
+            "betAmount": 180000,
+            "rewardAmount": 19440000,
+            "accumulatedSpent": 18940000
+          },
+          {
+            "index": 388,
+            "betAmount": 180000,
+            "rewardAmount": 19440000,
+            "accumulatedSpent": 19120000
+          },
+          {
+            "index": 389,
+            "betAmount": 180000,
+            "rewardAmount": 19440000,
+            "accumulatedSpent": 19300000
+          },
+          {
+            "index": 390,
+            "betAmount": 190000,
+            "rewardAmount": 20520000,
+            "accumulatedSpent": 19490000
+          },
+          {
+            "index": 391,
+            "betAmount": 190000,
+            "rewardAmount": 20520000,
+            "accumulatedSpent": 19680000
+          },
+          {
+            "index": 392,
+            "betAmount": 190000,
+            "rewardAmount": 20520000,
+            "accumulatedSpent": 19870000
+          },
+          {
+            "index": 393,
+            "betAmount": 190000,
+            "rewardAmount": 20520000,
+            "accumulatedSpent": 20060000
+          },
+          {
+            "index": 394,
+            "betAmount": 190000,
+            "rewardAmount": 20520000,
+            "accumulatedSpent": 20250000
+          },
+          {
+            "index": 395,
+            "betAmount": 200000,
+            "rewardAmount": 21600000,
+            "accumulatedSpent": 20450000
+          },
+          {
+            "index": 396,
+            "betAmount": 200000,
+            "rewardAmount": 21600000,
+            "accumulatedSpent": 20650000
+          },
+          {
+            "index": 397,
+            "betAmount": 200000,
+            "rewardAmount": 21600000,
+            "accumulatedSpent": 20850000
+          },
+          {
+            "index": 398,
+            "betAmount": 200000,
+            "rewardAmount": 21600000,
+            "accumulatedSpent": 21050000
+          },
+          {
+            "index": 399,
+            "betAmount": 200000,
+            "rewardAmount": 21600000,
+            "accumulatedSpent": 21250000
+          },
+          {
+            "index": 400,
+            "betAmount": 200000,
+            "rewardAmount": 21600000,
+            "accumulatedSpent": 21450000
+          },
+          {
+            "index": 401,
+            "betAmount": 210000,
+            "rewardAmount": 22680000,
+            "accumulatedSpent": 21660000
+          },
+          {
+            "index": 402,
+            "betAmount": 210000,
+            "rewardAmount": 22680000,
+            "accumulatedSpent": 21870000
+          },
+          {
+            "index": 403,
+            "betAmount": 210000,
+            "rewardAmount": 22680000,
+            "accumulatedSpent": 22080000
+          },
+          {
+            "index": 404,
+            "betAmount": 210000,
+            "rewardAmount": 22680000,
+            "accumulatedSpent": 22290000
+          },
+          {
+            "index": 405,
+            "betAmount": 210000,
+            "rewardAmount": 22680000,
+            "accumulatedSpent": 22500000
+          },
+          {
+            "index": 406,
+            "betAmount": 220000,
+            "rewardAmount": 23760000,
+            "accumulatedSpent": 22720000
+          },
+          {
+            "index": 407,
+            "betAmount": 220000,
+            "rewardAmount": 23760000,
+            "accumulatedSpent": 22940000
+          },
+          {
+            "index": 408,
+            "betAmount": 220000,
+            "rewardAmount": 23760000,
+            "accumulatedSpent": 23160000
+          },
+          {
+            "index": 409,
+            "betAmount": 220000,
+            "rewardAmount": 23760000,
+            "accumulatedSpent": 23380000
+          },
+          {
+            "index": 410,
+            "betAmount": 220000,
+            "rewardAmount": 23760000,
+            "accumulatedSpent": 23600000
+          },
+          {
+            "index": 411,
+            "betAmount": 230000,
+            "rewardAmount": 24840000,
+            "accumulatedSpent": 23830000
+          },
+          {
+            "index": 412,
+            "betAmount": 230000,
+            "rewardAmount": 24840000,
+            "accumulatedSpent": 24060000
+          },
+          {
+            "index": 413,
+            "betAmount": 230000,
+            "rewardAmount": 24840000,
+            "accumulatedSpent": 24290000
+          },
+          {
+            "index": 414,
+            "betAmount": 230000,
+            "rewardAmount": 24840000,
+            "accumulatedSpent": 24520000
+          },
+          {
+            "index": 415,
+            "betAmount": 240000,
+            "rewardAmount": 25920000,
+            "accumulatedSpent": 24760000
+          },
+          {
+            "index": 416,
+            "betAmount": 240000,
+            "rewardAmount": 25920000,
+            "accumulatedSpent": 25000000
+          },
+          {
+            "index": 417,
+            "betAmount": 240000,
+            "rewardAmount": 25920000,
+            "accumulatedSpent": 25240000
+          },
+          {
+            "index": 418,
+            "betAmount": 240000,
+            "rewardAmount": 25920000,
+            "accumulatedSpent": 25480000
+          },
+          {
+            "index": 419,
+            "betAmount": 240000,
+            "rewardAmount": 25920000,
+            "accumulatedSpent": 25720000
+          },
+          {
+            "index": 420,
+            "betAmount": 250000,
+            "rewardAmount": 27000000,
+            "accumulatedSpent": 25970000
+          },
+          {
+            "index": 421,
+            "betAmount": 250000,
+            "rewardAmount": 27000000,
+            "accumulatedSpent": 26220000
+          },
+          {
+            "index": 422,
+            "betAmount": 250000,
+            "rewardAmount": 27000000,
+            "accumulatedSpent": 26470000
+          },
+          {
+            "index": 423,
+            "betAmount": 250000,
+            "rewardAmount": 27000000,
+            "accumulatedSpent": 26720000
+          },
+          {
+            "index": 424,
+            "betAmount": 260000,
+            "rewardAmount": 28080000,
+            "accumulatedSpent": 26980000
+          },
+          {
+            "index": 425,
+            "betAmount": 260000,
+            "rewardAmount": 28080000,
+            "accumulatedSpent": 27240000
+          },
+          {
+            "index": 426,
+            "betAmount": 260000,
+            "rewardAmount": 28080000,
+            "accumulatedSpent": 27500000
+          },
+          {
+            "index": 427,
+            "betAmount": 260000,
+            "rewardAmount": 28080000,
+            "accumulatedSpent": 27760000
+          },
+          {
+            "index": 428,
+            "betAmount": 270000,
+            "rewardAmount": 29160000,
+            "accumulatedSpent": 28030000
+          },
+          {
+            "index": 429,
+            "betAmount": 270000,
+            "rewardAmount": 29160000,
+            "accumulatedSpent": 28300000
+          },
+          {
+            "index": 430,
+            "betAmount": 270000,
+            "rewardAmount": 29160000,
+            "accumulatedSpent": 28570000
+          },
+          {
+            "index": 431,
+            "betAmount": 270000,
+            "rewardAmount": 29160000,
+            "accumulatedSpent": 28840000
+          },
+          {
+            "index": 432,
+            "betAmount": 280000,
+            "rewardAmount": 30240000,
+            "accumulatedSpent": 29120000
+          },
+          {
+            "index": 433,
+            "betAmount": 280000,
+            "rewardAmount": 30240000,
+            "accumulatedSpent": 29400000
+          },
+          {
+            "index": 434,
+            "betAmount": 280000,
+            "rewardAmount": 30240000,
+            "accumulatedSpent": 29680000
+          },
+          {
+            "index": 435,
+            "betAmount": 280000,
+            "rewardAmount": 30240000,
+            "accumulatedSpent": 29960000
+          },
+          {
+            "index": 436,
+            "betAmount": 290000,
+            "rewardAmount": 31320000,
+            "accumulatedSpent": 30250000
+          },
+          {
+            "index": 437,
+            "betAmount": 290000,
+            "rewardAmount": 31320000,
+            "accumulatedSpent": 30540000
+          },
+          {
+            "index": 438,
+            "betAmount": 290000,
+            "rewardAmount": 31320000,
+            "accumulatedSpent": 30830000
+          },
+          {
+            "index": 439,
+            "betAmount": 290000,
+            "rewardAmount": 31320000,
+            "accumulatedSpent": 31120000
+          },
+          {
+            "index": 440,
+            "betAmount": 300000,
+            "rewardAmount": 32400000,
+            "accumulatedSpent": 31420000
+          },
+          {
+            "index": 441,
+            "betAmount": 300000,
+            "rewardAmount": 32400000,
+            "accumulatedSpent": 31720000
+          },
+          {
+            "index": 442,
+            "betAmount": 300000,
+            "rewardAmount": 32400000,
+            "accumulatedSpent": 32020000
+          },
+          {
+            "index": 443,
+            "betAmount": 310000,
+            "rewardAmount": 33480000,
+            "accumulatedSpent": 32330000
+          },
+          {
+            "index": 444,
+            "betAmount": 310000,
+            "rewardAmount": 33480000,
+            "accumulatedSpent": 32640000
+          },
+          {
+            "index": 445,
+            "betAmount": 310000,
+            "rewardAmount": 33480000,
+            "accumulatedSpent": 32950000
+          },
+          {
+            "index": 446,
+            "betAmount": 310000,
+            "rewardAmount": 33480000,
+            "accumulatedSpent": 33260000
+          },
+          {
+            "index": 447,
+            "betAmount": 320000,
+            "rewardAmount": 34560000,
+            "accumulatedSpent": 33580000
+          },
+          {
+            "index": 448,
+            "betAmount": 320000,
+            "rewardAmount": 34560000,
+            "accumulatedSpent": 33900000
+          },
+          {
+            "index": 449,
+            "betAmount": 320000,
+            "rewardAmount": 34560000,
+            "accumulatedSpent": 34220000
+          },
+          {
+            "index": 450,
+            "betAmount": 330000,
+            "rewardAmount": 35640000,
+            "accumulatedSpent": 34550000
+          },
+          {
+            "index": 451,
+            "betAmount": 330000,
+            "rewardAmount": 35640000,
+            "accumulatedSpent": 34880000
+          },
+          {
+            "index": 452,
+            "betAmount": 330000,
+            "rewardAmount": 35640000,
+            "accumulatedSpent": 35210000
+          },
+          {
+            "index": 453,
+            "betAmount": 330000,
+            "rewardAmount": 35640000,
+            "accumulatedSpent": 35540000
+          },
+          {
+            "index": 454,
+            "betAmount": 340000,
+            "rewardAmount": 36720000,
+            "accumulatedSpent": 35880000
+          },
+          {
+            "index": 455,
+            "betAmount": 340000,
+            "rewardAmount": 36720000,
+            "accumulatedSpent": 36220000
+          },
+          {
+            "index": 456,
+            "betAmount": 340000,
+            "rewardAmount": 36720000,
+            "accumulatedSpent": 36560000
+          },
+          {
+            "index": 457,
+            "betAmount": 350000,
+            "rewardAmount": 37800000,
+            "accumulatedSpent": 36910000
+          },
+          {
+            "index": 458,
+            "betAmount": 350000,
+            "rewardAmount": 37800000,
+            "accumulatedSpent": 37260000
+          },
+          {
+            "index": 459,
+            "betAmount": 350000,
+            "rewardAmount": 37800000,
+            "accumulatedSpent": 37610000
+          },
+          {
+            "index": 460,
+            "betAmount": 360000,
+            "rewardAmount": 38880000,
+            "accumulatedSpent": 37970000
+          },
+          {
+            "index": 461,
+            "betAmount": 360000,
+            "rewardAmount": 38880000,
+            "accumulatedSpent": 38330000
+          },
+          {
+            "index": 462,
+            "betAmount": 360000,
+            "rewardAmount": 38880000,
+            "accumulatedSpent": 38690000
+          },
+          {
+            "index": 463,
+            "betAmount": 370000,
+            "rewardAmount": 39960000,
+            "accumulatedSpent": 39060000
+          },
+          {
+            "index": 464,
+            "betAmount": 370000,
+            "rewardAmount": 39960000,
+            "accumulatedSpent": 39430000
+          },
+          {
+            "index": 465,
+            "betAmount": 370000,
+            "rewardAmount": 39960000,
+            "accumulatedSpent": 39800000
+          },
+          {
+            "index": 466,
+            "betAmount": 380000,
+            "rewardAmount": 41040000,
+            "accumulatedSpent": 40180000
+          },
+          {
+            "index": 467,
+            "betAmount": 380000,
+            "rewardAmount": 41040000,
+            "accumulatedSpent": 40560000
+          },
+          {
+            "index": 468,
+            "betAmount": 380000,
+            "rewardAmount": 41040000,
+            "accumulatedSpent": 40940000
+          },
+          {
+            "index": 469,
+            "betAmount": 390000,
+            "rewardAmount": 42120000,
+            "accumulatedSpent": 41330000
+          },
+          {
+            "index": 470,
+            "betAmount": 390000,
+            "rewardAmount": 42120000,
+            "accumulatedSpent": 41720000
+          },
+          {
+            "index": 471,
+            "betAmount": 400000,
+            "rewardAmount": 43200000,
+            "accumulatedSpent": 42120000
+          },
+          {
+            "index": 472,
+            "betAmount": 400000,
+            "rewardAmount": 43200000,
+            "accumulatedSpent": 42520000
+          },
+          {
+            "index": 473,
+            "betAmount": 400000,
+            "rewardAmount": 43200000,
+            "accumulatedSpent": 42920000
+          },
+          {
+            "index": 474,
+            "betAmount": 410000,
+            "rewardAmount": 44280000,
+            "accumulatedSpent": 43330000
+          },
+          {
+            "index": 475,
+            "betAmount": 410000,
+            "rewardAmount": 44280000,
+            "accumulatedSpent": 43740000
+          },
+          {
+            "index": 476,
+            "betAmount": 410000,
+            "rewardAmount": 44280000,
+            "accumulatedSpent": 44150000
+          },
+          {
+            "index": 477,
+            "betAmount": 420000,
+            "rewardAmount": 45360000,
+            "accumulatedSpent": 44570000
+          },
+          {
+            "index": 478,
+            "betAmount": 420000,
+            "rewardAmount": 45360000,
+            "accumulatedSpent": 44990000
+          },
+          {
+            "index": 479,
+            "betAmount": 430000,
+            "rewardAmount": 46440000,
+            "accumulatedSpent": 45420000
+          },
+          {
+            "index": 480,
+            "betAmount": 430000,
+            "rewardAmount": 46440000,
+            "accumulatedSpent": 45850000
+          },
+          {
+            "index": 481,
+            "betAmount": 430000,
+            "rewardAmount": 46440000,
+            "accumulatedSpent": 46280000
+          },
+          {
+            "index": 482,
+            "betAmount": 440000,
+            "rewardAmount": 47520000,
+            "accumulatedSpent": 46720000
+          },
+          {
+            "index": 483,
+            "betAmount": 440000,
+            "rewardAmount": 47520000,
+            "accumulatedSpent": 47160000
+          },
+          {
+            "index": 484,
+            "betAmount": 450000,
+            "rewardAmount": 48600000,
+            "accumulatedSpent": 47610000
+          },
+          {
+            "index": 485,
+            "betAmount": 450000,
+            "rewardAmount": 48600000,
+            "accumulatedSpent": 48060000
+          },
+          {
+            "index": 486,
+            "betAmount": 460000,
+            "rewardAmount": 49680000,
+            "accumulatedSpent": 48520000
+          },
+          {
+            "index": 487,
+            "betAmount": 460000,
+            "rewardAmount": 49680000,
+            "accumulatedSpent": 48980000
+          },
+          {
+            "index": 488,
+            "betAmount": 460000,
+            "rewardAmount": 49680000,
+            "accumulatedSpent": 49440000
+          },
+          {
+            "index": 489,
+            "betAmount": 470000,
+            "rewardAmount": 50760000,
+            "accumulatedSpent": 49910000
+          },
+          {
+            "index": 490,
+            "betAmount": 470000,
+            "rewardAmount": 50760000,
+            "accumulatedSpent": 50380000
+          },
+          {
+            "index": 491,
+            "betAmount": 480000,
+            "rewardAmount": 51840000,
+            "accumulatedSpent": 50860000
+          },
+          {
+            "index": 492,
+            "betAmount": 480000,
+            "rewardAmount": 51840000,
+            "accumulatedSpent": 51340000
+          },
+          {
+            "index": 493,
+            "betAmount": 490000,
+            "rewardAmount": 52920000,
+            "accumulatedSpent": 51830000
+          },
+          {
+            "index": 494,
+            "betAmount": 490000,
+            "rewardAmount": 52920000,
+            "accumulatedSpent": 52320000
+          },
+          {
+            "index": 495,
+            "betAmount": 490000,
+            "rewardAmount": 52920000,
+            "accumulatedSpent": 52810000
+          },
+          {
+            "index": 496,
+            "betAmount": 500000,
+            "rewardAmount": 54000000,
+            "accumulatedSpent": 53310000
+          },
+          {
+            "index": 497,
+            "betAmount": 500000,
+            "rewardAmount": 54000000,
+            "accumulatedSpent": 53810000
+          },
+          {
+            "index": 498,
+            "betAmount": 510000,
+            "rewardAmount": 55080000,
+            "accumulatedSpent": 54320000
+          },
+          {
+            "index": 499,
+            "betAmount": 510000,
+            "rewardAmount": 55080000,
+            "accumulatedSpent": 54830000
+          },
+          {
+            "index": 500,
+            "betAmount": 520000,
+            "rewardAmount": 56160000,
+            "accumulatedSpent": 55350000
+          }
+        ]
+      },
+      "statistics": {
+        "roundCount": 500,
+        "requiredBankrollAmount": 55350000,
+        "maximumBetAmount": 520000,
+        "averageBetAmount": 110700,
+        "minimumBetAmount": 10000,
+        "expectedProfitAmount": 810000
+      },
+      "request": {
+        "rewardMultiplier": 120,
+        "roundCount": 500,
+        "minimumBet": 10000,
+        "betStep": 10000,
+        "targetProfit": {
+          "mode": "fixedAmount",
+          "amount": 100000
+        },
+        "winTax": {
+          "threshold": 10000000,
+          "ratePercent": 10
+        }
+      },
+      "userBankroll": 30000000
+    },
+    "createdAt": "2026-01-15T09:00:00.000Z"
+  },
+  "planCandidate": null,
+  "notifications": [],
+  "notificationPreferences": {
+    "win": true,
+    "remaining": true,
+    "collector": true,
+    "recommendation": true,
+    "desktop": false,
+    "sound": true
+  },
+  "_maintainerExperimentalField": "preserve-me"
+}
