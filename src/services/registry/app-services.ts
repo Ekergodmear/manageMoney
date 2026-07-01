@@ -12,6 +12,8 @@ import type { Logger } from '@/services/logger/logger';
 import { Logger as LoggerImpl } from '@/services/logger/logger';
 import type { LogSink } from '@/services/logger/sinks/log-sink';
 import { ConsoleSink } from '@/services/logger/sinks/console-sink';
+import type { PersistenceHealthMonitor } from '@/services/storage/persistence-health';
+import { PersistenceHealthMonitor as PersistenceHealthMonitorImpl } from '@/services/storage/persistence-health';
 import type { PersistenceService } from '@/services/storage/PersistenceService';
 import { PersistenceService as PersistenceServiceImpl } from '@/services/storage/PersistenceService';
 import { IndexedDbDriver } from '@/services/storage/IndexedDbDriver';
@@ -23,6 +25,8 @@ import { EventStore } from '@/services/telemetry/event-store';
 export interface AppServices {
   readonly clock: Clock;
   readonly storage: PersistenceService;
+  readonly storageDriver: StorageDriver;
+  readonly persistenceHealth: PersistenceHealthMonitor;
   readonly events: EventBus;
   readonly telemetry: TelemetryStore;
   readonly logger: Logger;
@@ -40,7 +44,9 @@ export interface CreateAppServicesOptions {
   readonly operational?: boolean;
 }
 
-function createNoopOperational(clock: Clock): Pick<AppServices, 'telemetry' | 'logger' | 'health'> {
+function createNoopOperational(
+  clock: Clock,
+): Pick<AppServices, 'telemetry' | 'logger' | 'health' | 'persistenceHealth'> {
   const noopTelemetry = {
     append: () => Promise.resolve(),
     readAll: () => Promise.resolve([]),
@@ -51,7 +57,23 @@ function createNoopOperational(clock: Clock): Pick<AppServices, 'telemetry' | 'l
     getSnapshot: () => ({ status: 'ok' as const, messages: [], updatedAt: clock.now() }),
     dispose: () => undefined,
   } as unknown as HealthService;
-  return { telemetry: noopTelemetry, logger: noopLogger, health: noopHealth };
+  const noopPersistenceHealth = {
+    getView: () => ({
+      status: 'healthy' as const,
+      lastLoadAt: null,
+      lastSaveAt: null,
+      lastMigration: null,
+      lastError: null,
+    }),
+    setOffline: () => undefined,
+    dispose: () => undefined,
+  } as unknown as PersistenceHealthMonitor;
+  return {
+    telemetry: noopTelemetry,
+    logger: noopLogger,
+    health: noopHealth,
+    persistenceHealth: noopPersistenceHealth,
+  };
 }
 
 export function createAppServices(options: CreateAppServicesOptions = {}): AppServices {
@@ -61,11 +83,14 @@ export function createAppServices(options: CreateAppServicesOptions = {}): AppSe
   const flags = createFlags(config);
   const events = new EventBusImpl(clock);
   const storage = new PersistenceServiceImpl(storageDriver, events);
+  const persistenceHealth = new PersistenceHealthMonitorImpl(events, clock);
 
   if (options.operational === false) {
+    persistenceHealth.dispose();
     return {
       clock,
       storage,
+      storageDriver,
       events,
       config,
       flags,
@@ -83,6 +108,8 @@ export function createAppServices(options: CreateAppServicesOptions = {}): AppSe
   return {
     clock,
     storage,
+    storageDriver,
+    persistenceHealth,
     events,
     telemetry,
     logger,
@@ -106,6 +133,7 @@ export function resetAppServicesForTests(services?: AppServices): void {
     defaultServices.telemetry.dispose();
     defaultServices.logger.dispose();
     defaultServices.health.dispose();
+    defaultServices.persistenceHealth.dispose();
   }
   defaultServices = services ?? null;
 }

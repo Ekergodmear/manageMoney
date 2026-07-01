@@ -1,6 +1,7 @@
 import type { CollectorHealthResponse } from '@/features/game-monitor/collector-api-types';
 import type { DiagnosticSnapshot } from '@/product-shell/types/diagnostics';
 import type { DiagnosticsPorts } from '@/product-shell/ui/diagnostics/create-capabilities';
+import { refreshPersistenceCapability } from '@/product-shell/ui/diagnostics/persistence-capability';
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -23,7 +24,6 @@ function snapshot(
 
 export interface AppDiagnosticsDeps {
   readonly fetchCollectorHealth: () => Promise<CollectorHealthResponse | null>;
-  readonly sessionCount: number;
   readonly notificationCount: number;
   readonly unreadNotificationCount: number;
   readonly statisticsError: string | null;
@@ -65,11 +65,7 @@ export function createAppDiagnosticsPorts(deps: AppDiagnosticsDeps): Diagnostics
   return {
     refreshCollector: async () => mapCollectorHealth(await deps.fetchCollectorHealth()),
 
-    refreshStorage: async () =>
-      snapshot('info', `${deps.sessionCount} sessions stored locally`, [
-        { label: 'Sessions', value: String(deps.sessionCount) },
-        { label: 'Backend', value: 'IndexedDB' },
-      ]),
+    refreshStorage: refreshPersistenceCapability,
 
     refreshRuntime: async () =>
       snapshot(

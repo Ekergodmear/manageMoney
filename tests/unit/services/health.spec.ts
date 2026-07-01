@@ -38,5 +38,6 @@ describe('HealthService', () => {
     services.telemetry.dispose();
     services.logger.dispose();
     services.health.dispose();
+    services.persistenceHealth.dispose();
   });
 });

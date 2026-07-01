@@ -159,6 +159,10 @@ export interface StorageOpenedEvent extends AppEventBase {
   readonly type: 'StorageOpened';
 }
 
+export interface StorageSavedEvent extends AppEventBase {
+  readonly type: 'StorageSaved';
+}
+
 export interface StorageFailedEvent extends AppEventBase {
   readonly type: 'StorageFailed';
   readonly reason: string;
@@ -195,6 +199,7 @@ export interface SyncFailedEvent extends AppEventBase {
 
 export type SystemEvent =
   | StorageOpenedEvent
+  | StorageSavedEvent
   | StorageFailedEvent
   | MigrationCompletedEvent
   | TelemetryFlushFailedEvent
@@ -240,6 +245,7 @@ export const TELEMETRY_EVENT_TYPES: readonly AppEventType[] = [
   'PresetSaved',
   'ScenarioPromoted',
   'StorageOpened',
+  'StorageSaved',
   'StorageFailed',
   'MigrationCompleted',
   'TelemetryFlushFailed',
@@ -252,6 +258,7 @@ export const TELEMETRY_EVENT_TYPES: readonly AppEventType[] = [
 /** Health chỉ nghe System */
 export const HEALTH_EVENT_TYPES: readonly SystemEventType[] = [
   'StorageOpened',
+  'StorageSaved',
   'StorageFailed',
   'MigrationCompleted',
   'TelemetryFlushFailed',

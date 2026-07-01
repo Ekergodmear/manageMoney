@@ -37,13 +37,16 @@ export class PersistenceService {
     }
   }
 
-  save(state: PersistedAppState): Promise<void> {
-    return this.repository.save(state).catch((error: unknown) => {
+  async save(state: PersistedAppState): Promise<void> {
+    try {
+      await this.repository.save(state);
+      this.events?.emit(this.events.createEvent('StorageSaved', {}));
+    } catch (error: unknown) {
       this.events?.emit(
         this.events.createEvent('StorageFailed', {
           reason: error instanceof Error ? error.message : 'storage save failed',
         }),
       );
-    });
+    }
   }
 }

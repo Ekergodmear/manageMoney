@@ -544,7 +544,6 @@ function AppRoot(): JSX.Element {
               return null;
             }
           },
-          sessionCount: persisted.sessions.length,
           notificationCount: persisted.notifications.length,
           unreadNotificationCount: notificationUnreadCount,
           statisticsError: gameStatisticsError,
@@ -561,7 +560,6 @@ function AppRoot(): JSX.Element {
       gameStatisticsLoading,
       notificationUnreadCount,
       persisted.notifications.length,
-      persisted.sessions.length,
       services.config.build.buildVersion,
       services.flags,
       services.health,
