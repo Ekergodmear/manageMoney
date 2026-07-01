@@ -5,6 +5,7 @@ import type { SessionRepository } from '@/services/storage/repositories/session-
 import { isAppendPlanCandidate } from '@/features/planning/plan-candidate-types';
 import type { Session } from '@/features/session/session-domain';
 import { findPlan, getCurrentPlan } from '@/features/session/session-domain';
+import type { PersistedAppState } from '@/features/session/session-types';
 import {
   buildPlanAddedEvent,
   createPlanFromCandidate,
@@ -22,6 +23,7 @@ export type PromoteCandidateToPlanSuccess = {
   readonly ok: true;
   readonly session: Session;
   readonly planId: string;
+  readonly nextState: PersistedAppState;
 };
 
 export type PromoteCandidateToPlanFailure = {
@@ -40,7 +42,8 @@ export class PromoteCandidateToPlanUseCase {
   constructor(private readonly deps: PromoteCandidateToPlanUseCaseDeps) {}
 
   async execute(): Promise<PromoteCandidateToPlanResult> {
-    const candidate = await this.deps.candidates.get();
+    const state = await this.deps.sessions.loadState();
+    const candidate = state.planCandidate;
     if (candidate === null) {
       return { ok: false, reason: 'no-candidate' };
     }
@@ -48,7 +51,6 @@ export class PromoteCandidateToPlanUseCase {
       return { ok: false, reason: 'session-not-found' };
     }
 
-    const state = await this.deps.sessions.loadState();
     const session = state.sessions.find((s) => s.id === candidate.sessionId);
     if (session === undefined) {
       return { ok: false, reason: 'session-not-found' };
@@ -73,13 +75,13 @@ export class PromoteCandidateToPlanUseCase {
       updatedAt: at,
     };
 
-    const nextState = {
+    const nextState: PersistedAppState = {
       ...state,
+      activeSessionId: updatedSession.id,
       sessions: state.sessions.map((s) => (s.id === session.id ? updatedSession : s)),
       planCandidate: null,
     };
     await this.deps.sessions.saveState(nextState);
-    await this.deps.candidates.clear();
 
     this.deps.events.emit(
       this.deps.events.createEvent('PlanPromoted', {
@@ -90,7 +92,7 @@ export class PromoteCandidateToPlanUseCase {
       }),
     );
 
-    return { ok: true, session: updatedSession, planId: newPlan.id };
+    return { ok: true, session: updatedSession, planId: newPlan.id, nextState };
   }
 }
 

@@ -8,6 +8,7 @@ import {
   type PlanCandidate,
 } from '@/features/planning/plan-candidate-types';
 import { getCurrentPlan } from '@/features/session/session-domain';
+import type { PersistedAppState } from '@/features/session/session-types';
 
 export interface CreateImprovementCandidateUseCaseDeps {
   readonly candidates: PlanCandidateRepository;
@@ -24,6 +25,7 @@ export interface CreateImprovementCandidateInput {
 export type CreateImprovementCandidateSuccess = {
   readonly ok: true;
   readonly candidate: PlanCandidate;
+  readonly nextState: PersistedAppState;
 };
 
 export type CreateImprovementCandidateFailure = {
@@ -66,7 +68,7 @@ export class CreateImprovementCandidateUseCase {
       createdAt,
     });
 
-    await this.deps.candidates.save(candidate);
+    const nextState = await this.deps.candidates.saveCandidate(candidate);
 
     this.deps.events.emit(
       this.deps.events.createEvent('ImprovementCandidateCreated', {
@@ -77,7 +79,7 @@ export class CreateImprovementCandidateUseCase {
       }),
     );
 
-    return { ok: true, candidate };
+    return { ok: true, candidate, nextState };
   }
 }
 

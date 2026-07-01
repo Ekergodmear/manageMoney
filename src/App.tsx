@@ -126,14 +126,6 @@ function findSession(sessions: readonly Session[], id: string | null): Session |
   return sessions.find((s) => s.id === id) ?? null;
 }
 
-function upsertSession(sessions: readonly Session[], session: Session): Session[] {
-  const index = sessions.findIndex((s) => s.id === session.id);
-  if (index < 0) {
-    return [session, ...sessions];
-  }
-  return sessions.map((s, i) => (i === index ? session : s));
-}
-
 export function App(): JSX.Element {
   return (
     <AppServicesProvider>
@@ -775,7 +767,7 @@ function AppRoot(): JSX.Element {
       showToast('Không tạo được phương án cải thiện');
       return;
     }
-    persist({ ...persisted, planCandidate: result.candidate });
+    applyPersistedState(result.nextState);
     setSessionView('improve-review');
   }
 
@@ -791,12 +783,7 @@ function AppRoot(): JSX.Element {
       showToast('Không có phương án để thêm');
       return;
     }
-    persist({
-      ...persisted,
-      planCandidate: null,
-      sessions: upsertSession(persisted.sessions, result.session),
-      activeSessionId: result.session.id,
-    });
+    applyPersistedState(result.nextState);
     setSessionView(result.session.status === 'playing' ? 'playing' : 'overview');
     showToast('Plan mới đã được thêm vào session');
   }
