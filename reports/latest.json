@@ -1,6 +1,6 @@
 {
-  "date": "2026-06-30T11:55:36.459Z",
-  "commit": "6f9ddcc1dadcf6b56920bf2f1ea2c05a6966a315",
+  "date": "2026-07-01T09:23:28.757Z",
+  "commit": "d6acaf6462eb8a05403e64f62c185d4dedf8e66f",
   "branch": "release/internal-rc",
   "status": "PASS",
   "verdict": "READY FOR RC",
@@ -18,9 +18,9 @@
     "soak": "SKIP",
     "performance": "SKIP"
   },
-  "durationMs": 130919,
-  "buildTimeMs": 14181,
-  "bundleBytes": 997106,
+  "durationMs": 191291,
+  "buildTimeMs": 24638,
+  "bundleBytes": 1054878,
   "qualityScore": 100,
   "totalWarnings": 0
 }

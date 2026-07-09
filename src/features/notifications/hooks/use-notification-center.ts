@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useRef } from 'react';
 
+import { fetchDrawFeedStatus } from '@/features/game-data/adapters/draw-feed-status';
+import { formatDrawPeriodLabel } from '@/features/game-data/adapters/draw-period-label';
 import {
   notificationService,
   type NotificationPresentHandlers,
 } from '@/features/notifications/notification-service';
 import type { NotificationState } from '@/features/notifications/notification-types';
 import type { SettlementAlert } from '@/features/game-data/alerts/settlement-alerts';
-import { fetchLatestDraw } from '@/features/game-data/adapters/draw-feed-adapter';
 import { useServices } from '@/services/registry/AppServicesProvider';
 
 const COLLECTOR_POLL_MS = 30_000;
+
+type FeedConnectionState = 'unknown' | 'offline' | 'maintenance' | 'online';
 
 export interface UseNotificationCenterOptions {
   readonly state: NotificationState;
@@ -80,19 +83,21 @@ export function useNotificationCenter({
   useEffect(() => {
     const cancelledRef = { current: false };
     let timer: ReturnType<typeof setTimeout> | undefined;
-    let lastOnline: boolean | null = null;
-    let consecutiveFailures = 0;
+    let connectionState: FeedConnectionState = 'unknown';
+    let consecutiveOffline = 0;
+    let consecutiveStale = 0;
 
     async function poll(): Promise<void> {
-      const draw = await fetchLatestDraw();
+      const status = await fetchDrawFeedStatus();
       if (cancelledRef.current) {
         return;
       }
 
-      if (draw === null) {
-        consecutiveFailures += 1;
-        if (consecutiveFailures >= 2 && lastOnline !== false) {
-          lastOnline = false;
+      if (!status.collectorReachable) {
+        consecutiveOffline += 1;
+        consecutiveStale = 0;
+        if (consecutiveOffline >= 2 && connectionState !== 'offline') {
+          connectionState = 'offline';
           const next = notificationService.ingestCollectorStatus(
             stateRef.current,
             false,
@@ -102,10 +107,30 @@ export function useNotificationCenter({
             onStateChangeRef.current(next);
           }
         }
+      } else if (status.drawStale) {
+        consecutiveStale += 1;
+        consecutiveOffline = 0;
+        if (consecutiveStale >= 2 && connectionState !== 'maintenance') {
+          connectionState = 'maintenance';
+          const next = notificationService.ingestSourceMaintenance(
+            stateRef.current,
+            true,
+            status.lastDrawPeriodLabel,
+            handlers(),
+          );
+          if (next !== null) {
+            onStateChangeRef.current(next);
+          }
+        }
       } else {
-        consecutiveFailures = 0;
-        if (lastOnline === false) {
-          lastOnline = true;
+        consecutiveOffline = 0;
+        consecutiveStale = 0;
+        const latestLabel =
+          status.latestDraw !== null
+            ? formatDrawPeriodLabel(status.latestDraw.drawAt)
+            : status.lastDrawPeriodLabel;
+
+        if (connectionState === 'offline') {
           const next = notificationService.ingestCollectorStatus(
             stateRef.current,
             true,
@@ -114,9 +139,19 @@ export function useNotificationCenter({
           if (next !== null) {
             onStateChangeRef.current(next);
           }
-        } else if (lastOnline === null) {
-          lastOnline = true;
+        } else if (connectionState === 'maintenance') {
+          const next = notificationService.ingestSourceMaintenance(
+            stateRef.current,
+            false,
+            latestLabel,
+            handlers(),
+          );
+          if (next !== null) {
+            onStateChangeRef.current(next);
+          }
         }
+
+        connectionState = 'online';
       }
 
       timer = setTimeout(() => {

@@ -38,18 +38,24 @@ Mặc định: `http://localhost:8788`
 
 Web app: `VITE_COLLECTOR_API_URL=http://localhost:8788` → sidebar **Game Monitor**.
 
-## Bingo18 source
+## Bingo18 source (hybrid)
 
-Reverse-engineered từ `bingo18.top/script.js` → `GET /data/data.json`:
+| Giai đoạn | Nguồn | API |
+|-----------|--------|-----|
+| Trước **01/07/2026** | [bingo18.top](https://bingo18.top/) | `GET /data/data.json` → `gbingoDraws[]` |
+| Từ **01/07/2026** | [kqxso.top](https://kqxso.top/vietlot/thong-ke-bingo18) | `GET /api/gbingo/draws?startDate=&endDate=` (backend ketquasoxo) |
 
-```json
-{ "gbingoDraws": [{ "drawAt": "...", "winningResult": "236" }] }
-```
+Cả hai đều trả `drawAt` + `winningResult` (3 xúc xắc). kqxso dùng `metadata.originalTime` (+07) làm giờ kỳ quay.
 
-`COLLECTOR_BINGO18_API_URL` override URL nếu cần.
+Env:
 
-**Lần đầu (DB trống):** import **toàn bộ** `gbingoDraws` từ `data.json` (~vài chục nghìn kỳ).  
-**Sau đó / deploy Vercel:** chỉ append kỳ mới hơn `lastDrawKey` (realtime).
+- `COLLECTOR_BINGO18_API_URL` — legacy bingo18.top (mặc định `https://bingo18.top/data/data.json`)
+- `COLLECTOR_KQXSO_ENABLED=1` — bật nguồn mới (mặc định bật)
+- `COLLECTOR_KQXSO_SINCE=2026-07-01` — ngày chuyển nguồn
+- `COLLECTOR_KQXSO_DRAWS_URL` — mặc định `https://kqxso.top/api/gbingo/draws`
+
+**Lần đầu (DB trống):** import legacy + kqxso từ 01/07.  
+**Sau đó:** poll merge — chỉ append kỳ mới hơn `lastDrawKey`.
 
 Muốn import lại từ đầu: xóa `data/draws.db` rồi restart collector.
 

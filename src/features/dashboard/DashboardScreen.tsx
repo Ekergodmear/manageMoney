@@ -8,7 +8,7 @@ import { CAPITAL_GOAL_LABELS } from '@/features/capital/capital-planner-types';
 import { GameStatisticsWidgets } from '@/features/dashboard/GameStatisticsWidgets';
 import { RecentActivityWidget } from '@/features/dashboard/RecentActivityWidget';
 import type { AppNotification } from '@/features/notifications/notification-types';
-import type { GameStatisticsSnapshot } from '@/features/game-data/statistics/statistics-types';
+import type { DrawRecord, GameStatisticsSnapshot } from '@/features/game-data/statistics/statistics-types';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
 import { marketLabelFromPreset } from '@/features/game-data/markets/market-catalog';
 import type { CollectorDrawResult } from '@/features/game-monitor/collector-api-types';
@@ -16,6 +16,7 @@ import { accumulatedAtRound } from '@/features/planner/plan-display';
 import type { RecommendationSet } from '@/features/recommendation/recommendation-set-types';
 import type { Session } from '@/features/session/session-domain';
 import { getCurrentPlan } from '@/features/session/session-domain';
+import { WorkspacePageGrid } from '@/layout/WorkspacePage';
 import { formatAmount } from '@/lib/money-format';
 
 interface DashboardScreenProps {
@@ -25,8 +26,10 @@ interface DashboardScreenProps {
   readonly presets: readonly GamePolicyPreset[];
   readonly recommendationSet: RecommendationSet | null;
   readonly gameStatistics: GameStatisticsSnapshot | null;
+  readonly gameDraws?: readonly DrawRecord[];
   readonly gameStatisticsLoading?: boolean;
   readonly gameStatisticsError?: string | null;
+  readonly onRefreshGameStatistics?: () => void;
   readonly notifications: readonly AppNotification[];
   readonly onOpenNotifications?: () => void;
   readonly latestDraw: CollectorDrawResult | null;
@@ -123,6 +126,82 @@ function CapitalRecommendationCard({
   );
 }
 
+function DashboardHeader({
+  userName,
+  subtitle,
+}: {
+  userName: string;
+  subtitle?: ReactNode;
+}): ReactNode {
+  return (
+    <div>
+      <h2 className="text-2xl font-bold tracking-tight">Xin chào {userName}</h2>
+      {subtitle !== undefined ? <div className="mt-2 text-sm text-muted-foreground">{subtitle}</div> : null}
+    </div>
+  );
+}
+
+function DashboardCapitalColumn({
+  capitalOverview,
+  recommendationSet,
+  presets,
+  onOpenCapitalPlanner,
+}: {
+  capitalOverview: CapitalOverview;
+  recommendationSet: RecommendationSet | null;
+  presets: readonly GamePolicyPreset[];
+  onOpenCapitalPlanner: () => void;
+}): ReactNode {
+  return (
+    <>
+      <CapitalSummary overview={capitalOverview} onOpenCapitalPlanner={onOpenCapitalPlanner} />
+      {recommendationSet !== null ? (
+        <CapitalRecommendationCard
+          set={recommendationSet}
+          presets={presets}
+          onOpenCapitalPlanner={onOpenCapitalPlanner}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function DashboardInsightsColumn({
+  gameStatistics,
+  gameDraws = [],
+  gameStatisticsLoading,
+  gameStatisticsError,
+  onRefreshGameStatistics,
+  notifications,
+  onOpenNotifications,
+}: {
+  gameStatistics: GameStatisticsSnapshot | null;
+  gameDraws?: readonly DrawRecord[];
+  gameStatisticsLoading: boolean;
+  gameStatisticsError: string | null;
+  onRefreshGameStatistics?: () => void;
+  notifications: readonly AppNotification[];
+  onOpenNotifications?: () => void;
+}): ReactNode {
+  return (
+    <>
+      <GameStatisticsWidgets
+        snapshot={gameStatistics}
+        draws={gameDraws}
+        loading={gameStatisticsLoading}
+        error={gameStatisticsError}
+        {...(onRefreshGameStatistics !== undefined
+          ? { onRefreshStatistics: onRefreshGameStatistics }
+          : {})}
+      />
+      <RecentActivityWidget
+        notifications={notifications}
+        {...(onOpenNotifications !== undefined ? { onOpenNotifications } : {})}
+      />
+    </>
+  );
+}
+
 export function DashboardScreen({
   userName = 'bạn',
   activeSession,
@@ -130,8 +209,10 @@ export function DashboardScreen({
   presets,
   recommendationSet,
   gameStatistics,
+  gameDraws = [],
   gameStatisticsLoading = false,
   gameStatisticsError = null,
+  onRefreshGameStatistics,
   notifications,
   onOpenNotifications,
   latestDraw,
@@ -145,39 +226,45 @@ export function DashboardScreen({
     activeSession !== null &&
     (activeSession.status === 'playing' || activeSession.status === 'draft');
 
+  const insightsColumn = (
+    <DashboardInsightsColumn
+      gameStatistics={gameStatistics}
+      gameDraws={gameDraws}
+      gameStatisticsLoading={gameStatisticsLoading}
+      gameStatisticsError={gameStatisticsError}
+      {...(onRefreshGameStatistics !== undefined
+        ? { onRefreshGameStatistics }
+        : {})}
+      notifications={notifications}
+      {...(onOpenNotifications !== undefined ? { onOpenNotifications } : {})}
+    />
+  );
+
   if (!hasActive || currentPlan === null) {
     return (
-      <div className="w-full max-w-lg space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Xin chào {userName}</h2>
-        </div>
-        <CapitalSummary overview={capitalOverview} onOpenCapitalPlanner={onOpenCapitalPlanner} />
-        {recommendationSet !== null ? (
-          <CapitalRecommendationCard
-            set={recommendationSet}
-            presets={presets}
-            onOpenCapitalPlanner={onOpenCapitalPlanner}
-          />
-        ) : null}
-        <GameStatisticsWidgets
-          snapshot={gameStatistics}
-          loading={gameStatisticsLoading}
-          error={gameStatisticsError}
-        />
-        <RecentActivityWidget
-          notifications={notifications}
-          {...(onOpenNotifications !== undefined ? { onOpenNotifications } : {})}
-        />
-        <Card>
-          <CardContent className="space-y-4 p-6 text-center">
-            <p className="text-muted-foreground">Bạn chưa có session nào.</p>
-            <Button onClick={onNewSession} className="w-full sm:w-auto">
-              <Plus className="h-4 w-4" />
-              Chiến lược mới (Capital Planner)
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <WorkspacePageGrid
+        header={<DashboardHeader userName={userName} />}
+        primary={
+          <>
+            <DashboardCapitalColumn
+              capitalOverview={capitalOverview}
+              recommendationSet={recommendationSet}
+              presets={presets}
+              onOpenCapitalPlanner={onOpenCapitalPlanner}
+            />
+            <Card>
+              <CardContent className="space-y-4 p-6 text-center sm:text-left">
+                <p className="text-muted-foreground">Bạn chưa có session nào.</p>
+                <Button onClick={onNewSession} className="w-full sm:w-auto">
+                  <Plus className="h-4 w-4" />
+                  Chiến lược mới (Capital Planner)
+                </Button>
+              </CardContent>
+            </Card>
+          </>
+        }
+        secondary={insightsColumn}
+      />
     );
   }
 
@@ -205,134 +292,130 @@ export function DashboardScreen({
 
   if (activeSession.status === 'draft' && currentPlan.status === 'ready') {
     return (
-      <div className="w-full max-w-lg space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Xin chào {userName}</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Session sẵn sàng — mở Session để bắt đầu.
-          </p>
-        </div>
-        <CapitalSummary overview={capitalOverview} onOpenCapitalPlanner={onOpenCapitalPlanner} />
-        {recommendationSet !== null ? (
-          <CapitalRecommendationCard
-            set={recommendationSet}
-            presets={presets}
-            onOpenCapitalPlanner={onOpenCapitalPlanner}
+      <WorkspacePageGrid
+        header={
+          <DashboardHeader
+            userName={userName}
+            subtitle="Session sẵn sàng — mở Session để bắt đầu."
           />
-        ) : null}
-        <GameStatisticsWidgets
-          snapshot={gameStatistics}
-          loading={gameStatisticsLoading}
-          error={gameStatisticsError}
-        />
-        <Card className="border-primary/20 shadow-md">
-          <CardContent className="space-y-4 p-6">
-            <p className="font-medium">
-              {activeSession.title}
-              {preset !== undefined
-                ? ` · ${marketLabelFromPreset(preset, currentPlan.marketId)}`
-                : ''}{' '}
-              · {totalRounds} kỳ
-            </p>
-            <Button onClick={onOpenSession} className="w-full">
-              <Play className="h-4 w-4" />
-              Mở Session
-            </Button>
-            <Button variant="outline" onClick={onNewSession} className="w-full">
-              Capital Planner
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+        }
+        primary={
+          <>
+            <DashboardCapitalColumn
+              capitalOverview={capitalOverview}
+              recommendationSet={recommendationSet}
+              presets={presets}
+              onOpenCapitalPlanner={onOpenCapitalPlanner}
+            />
+            <Card className="border-primary/20 shadow-md">
+              <CardContent className="space-y-4 p-6">
+                <p className="font-medium">
+                  {activeSession.title}
+                  {preset !== undefined
+                    ? ` · ${marketLabelFromPreset(preset, currentPlan.marketId)}`
+                    : ''}{' '}
+                  · {totalRounds} kỳ
+                </p>
+                <Button onClick={onOpenSession} className="w-full">
+                  <Play className="h-4 w-4" />
+                  Mở Session
+                </Button>
+                <Button variant="outline" onClick={onNewSession} className="w-full">
+                  Capital Planner
+                </Button>
+              </CardContent>
+            </Card>
+          </>
+        }
+        secondary={insightsColumn}
+      />
     );
   }
 
   return (
-    <div className="w-full max-w-lg space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Xin chào {userName}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          <strong className="text-foreground">{activeSession.title}</strong> đang chơi.
-        </p>
-      </div>
-
-      <CapitalSummary overview={capitalOverview} onOpenCapitalPlanner={onOpenCapitalPlanner} />
-      {recommendationSet !== null ? (
-        <CapitalRecommendationCard
-          set={recommendationSet}
-          presets={presets}
-          onOpenCapitalPlanner={onOpenCapitalPlanner}
+    <WorkspacePageGrid
+      header={
+        <DashboardHeader
+          userName={userName}
+          subtitle={
+            <>
+              <strong className="text-foreground">{activeSession.title}</strong> đang chơi.
+            </>
+          }
         />
-      ) : null}
+      }
+      primary={
+        <>
+          <DashboardCapitalColumn
+            capitalOverview={capitalOverview}
+            recommendationSet={recommendationSet}
+            presets={presets}
+            onOpenCapitalPlanner={onOpenCapitalPlanner}
+          />
+          <Card className="border-primary/20 shadow-md">
+            <CardContent className="space-y-5 p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Active Session
+                  </p>
+                  <p className="mt-1 text-lg font-semibold">
+                    {activeSession.title}
+                    {preset !== undefined
+                      ? ` · ${marketLabelFromPreset(preset, currentPlan.marketId)}`
+                      : ''}
+                  </p>
+                </div>
+                <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium">
+                  {liveStatus}
+                </span>
+              </div>
 
-      <GameStatisticsWidgets
-        snapshot={gameStatistics}
-        loading={gameStatisticsLoading}
-        error={gameStatisticsError}
-      />
-      <RecentActivityWidget
-        notifications={notifications}
-        {...(onOpenNotifications !== undefined ? { onOpenNotifications } : {})}
-      />
+              <div>
+                <p className="text-sm text-muted-foreground">{currentPlan.label}</p>
+                <p className="mt-1 text-lg font-semibold">
+                  {completedThroughRound} / {totalRounds}
+                </p>
+                <p className="mt-2 font-mono text-sm tracking-widest text-primary">
+                  {'█'.repeat(barFilled)}
+                  {'░'.repeat(10 - barFilled)} {progressPct}%
+                </p>
+              </div>
 
-      <Card className="border-primary/20 shadow-md">
-        <CardContent className="space-y-5 p-6">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Active Session
-              </p>
-              <p className="mt-1 text-lg font-semibold">
-                {activeSession.title}
-                {preset !== undefined
-                  ? ` · ${marketLabelFromPreset(preset, currentPlan.marketId)}`
-                  : ''}
-              </p>
-            </div>
-            <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium">
-              {liveStatus}
-            </span>
-          </div>
+              <div className="grid gap-4 border-t border-border pt-4 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs text-muted-foreground">Tiền đã chi</p>
+                  <p className="text-xl font-bold">{formatAmount(accumulated)} đ</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Lần cược tiếp</p>
+                  <p className="text-xl font-bold">
+                    {nextBet > 0 ? `${formatAmount(nextBet)} đ` : '—'}
+                  </p>
+                </div>
+              </div>
 
-          <div>
-            <p className="text-sm text-muted-foreground">{currentPlan.label}</p>
-            <p className="mt-1 text-lg font-semibold">
-              {completedThroughRound} / {totalRounds}
-            </p>
-            <p className="mt-2 font-mono text-sm tracking-widest text-primary">
-              {'█'.repeat(barFilled)}
-              {'░'.repeat(10 - barFilled)} {progressPct}%
-            </p>
-          </div>
+              <div className="border-t border-border pt-4">
+                <p className="text-xs text-muted-foreground">Kỳ gần nhất</p>
+                <p className="font-mono text-sm font-semibold">
+                  {latestDraw?.drawKey ?? lastPlayed?.drawKey ?? '—'}
+                </p>
+                {latestDraw !== null ? (
+                  <p className="text-xs text-muted-foreground">
+                    {latestDraw.dice.join('-')} · Tổng {latestDraw.total}
+                  </p>
+                ) : null}
+              </div>
 
-          <div className="border-t border-border pt-4">
-            <p className="text-xs text-muted-foreground">Tiền đã chi</p>
-            <p className="text-xl font-bold">{formatAmount(accumulated)} đ</p>
-          </div>
-
-          <div className="border-t border-border pt-4">
-            <p className="text-xs text-muted-foreground">Kỳ gần nhất</p>
-            <p className="font-mono text-sm font-semibold">
-              {latestDraw?.drawKey ?? lastPlayed?.drawKey ?? '—'}
-            </p>
-            {latestDraw !== null ? (
-              <p className="text-xs text-muted-foreground">
-                {latestDraw.dice.join('-')} · Tổng {latestDraw.total}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="border-t border-border pt-4">
-            <p className="text-xs text-muted-foreground">Lần cược tiếp</p>
-            <p className="text-xl font-bold">{nextBet > 0 ? `${formatAmount(nextBet)} đ` : '—'}</p>
-          </div>
-
-          <Button onClick={onOpenSession} className="w-full" size="lg">
-            <Play className="h-4 w-4" />
-            Mở Session
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+              <Button onClick={onOpenSession} className="w-full" size="lg">
+                <Play className="h-4 w-4" />
+                Mở Session
+              </Button>
+            </CardContent>
+          </Card>
+        </>
+      }
+      secondary={insightsColumn}
+    />
   );
 }

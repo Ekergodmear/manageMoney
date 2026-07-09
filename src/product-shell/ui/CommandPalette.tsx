@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 
 import { zIndexClass } from '@/design/tokens/z-index';
 import { cn } from '@/lib/utils';
@@ -76,6 +76,28 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps): ReactNod
     }
   }
 
+  function handlePaletteKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      onClose();
+      return;
+    }
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setSelectedIndex((index) => Math.min(index + 1, Math.max(selectableItems.length - 1, 0)));
+      return;
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setSelectedIndex((index) => Math.max(index - 1, 0));
+      return;
+    }
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      void runSelectedItem();
+    }
+  }
+
   if (!open) {
     return null;
   }
@@ -97,29 +119,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps): ReactNod
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
-        onKeyDown={(event) => {
-          if (event.key === 'Escape') {
-            event.preventDefault();
-            onClose();
-            return;
-          }
-          if (event.key === 'ArrowDown') {
-            event.preventDefault();
-            setSelectedIndex((index) =>
-              Math.min(index + 1, Math.max(selectableItems.length - 1, 0)),
-            );
-            return;
-          }
-          if (event.key === 'ArrowUp') {
-            event.preventDefault();
-            setSelectedIndex((index) => Math.max(index - 1, 0));
-            return;
-          }
-          if (event.key === 'Enter') {
-            event.preventDefault();
-            void runSelectedItem();
-          }
-        }}
+        onKeyDown={handlePaletteKeyDown}
       >
         <div className="border-b border-border px-4 py-3">
           <input
@@ -129,6 +129,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps): ReactNod
             placeholder="Search commands…"
             className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             aria-label="Search commands"
+            onKeyDown={handlePaletteKeyDown}
             onChange={(event) => {
               setQuery(event.target.value);
             }}

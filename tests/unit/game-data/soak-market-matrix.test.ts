@@ -145,7 +145,7 @@ describe('Soak gate — 4 market matrix', () => {
         flower: null,
         smallLarge: 'small' as const,
       },
-      multiplier: 6,
+      multiplier: 4.4,
       ways: 27,
     },
     {
@@ -166,7 +166,7 @@ describe('Soak gate — 4 market matrix', () => {
         flower: null,
         smallLarge: 'small' as const,
       },
-      multiplier: 180,
+      multiplier: 120,
       ways: 1,
     },
     {
@@ -218,8 +218,8 @@ describe('Soak gate — 4 market matrix', () => {
       });
       expect(win.marketId).toBe(id);
       expect(win.marketMatched).toBe(true);
-      expect(win.prize).toBe(bet * multiplier);
-      expect(win.netPrize).toBe(bet * multiplier);
+      expect(win.prize).toBe(Math.round(bet * multiplier));
+      expect(win.netPrize).toBe(Math.round(bet * multiplier));
       expect(win.tax).toBe(0);
       expect(win.profit).toBe(win.netPrize - bet);
 

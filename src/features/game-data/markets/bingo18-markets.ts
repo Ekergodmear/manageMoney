@@ -5,18 +5,18 @@ import { withMarketEconomics } from '@/features/game-data/markets/market-metrics
 import { DICE_OUTCOMES, probabilityFromWays, sizeWays, TOTAL_WAYS } from './bingo18-probability';
 
 /** Hệ số thưởng Bingo18 chuẩn (đối xứng theo tổng). */
-const TOTAL_MULTIPLIERS: Readonly<Record<number, number>> = {
+export const BINGO18_TOTAL_MULTIPLIERS: Readonly<Record<number, number>> = {
   3: 120,
   4: 40,
   5: 20,
   6: 12,
   7: 8,
-  8: 6,
-  9: 5,
-  10: 6,
-  11: 6,
-  12: 5,
-  13: 6,
+  8: 5.5,
+  9: 4.7,
+  10: 4.4,
+  11: 4.4,
+  12: 4.7,
+  13: 5.5,
   14: 8,
   15: 12,
   16: 20,
@@ -24,7 +24,10 @@ const TOTAL_MULTIPLIERS: Readonly<Record<number, number>> = {
   18: 120,
 };
 
-const FLOWER_FACE = 180;
+export const BINGO18_FLOWER_MULTIPLIER = 120;
+
+const TOTAL_MULTIPLIERS = BINGO18_TOTAL_MULTIPLIERS;
+const FLOWER_FACE = BINGO18_FLOWER_MULTIPLIER;
 const SIZE_MULTIPLIERS = { small: 2, tie: 5, large: 2 } as const;
 const SIZE_LABELS = { small: 'Xỉu', tie: 'Hòa', large: 'Tài' } as const;
 

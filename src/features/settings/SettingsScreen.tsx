@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { requestNotificationPermission } from '@/features/notifications/browser-notification';
 import type { NotificationPreferences } from '@/features/notifications/notification-types';
 import { DesignPlayground } from '@/design/playground/DesignPlayground';
+import { WorkspacePage } from '@/layout/WorkspacePage';
 import { useServices } from '@/services/registry/AppServicesProvider';
 
 interface SettingsScreenProps {
@@ -46,7 +47,7 @@ export function SettingsScreen({
   }
 
   return (
-    <div className="w-full max-w-lg space-y-4">
+    <WorkspacePage width="wide" className="space-y-4">
       <div>
         <h2 className="text-xl font-bold tracking-tight">Cài đặt</h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -54,6 +55,7 @@ export function SettingsScreen({
         </p>
       </div>
 
+      <div className="grid gap-4 lg:grid-cols-2">
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Giao diện</CardTitle>
@@ -185,12 +187,13 @@ export function SettingsScreen({
           <p>Ngôn ngữ · Định dạng số · PDF · Excel</p>
         </CardContent>
       </Card>
+      </div>
 
       <p className="text-center text-xs text-muted-foreground">
         Stake Planner v{config.build.buildVersion} · {config.build.commitHash.slice(0, 7)} · Built{' '}
         {config.build.buildDate}
       </p>
-    </div>
+    </WorkspacePage>
   );
 }
 

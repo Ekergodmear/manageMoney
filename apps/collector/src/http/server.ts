@@ -24,12 +24,18 @@ export interface DashboardPayload {
   readonly todayStats: ReturnType<typeof buildTodayStats>;
 }
 
-function sendJson(res: ServerResponse, status: number, body: unknown, corsOrigin: string): void {
+function sendJson(
+  res: ServerResponse,
+  status: number,
+  body: unknown,
+  corsOrigin: string,
+  methods = 'GET, POST, OPTIONS',
+): void {
   const payload = JSON.stringify(body);
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': corsOrigin,
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Methods': methods,
     'Access-Control-Allow-Headers': 'Content-Type',
   });
   res.end(payload);
@@ -95,10 +101,27 @@ export function createCollectorHttpServer(options: CollectorHttpOptions) {
     if (method === 'OPTIONS') {
       res.writeHead(204, {
         'Access-Control-Allow-Origin': corsOrigin,
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
       });
       res.end();
+      return;
+    }
+
+    if (method === 'POST' && (url === '/sync/backfill' || url === '/sync/backfill/')) {
+      void options.collector
+        .syncFullHistory()
+        .then((result) => {
+          sendJson(res, result.ok ? 200 : 502, result, corsOrigin);
+        })
+        .catch((err: unknown) => {
+          sendJson(
+            res,
+            500,
+            { ok: false, message: err instanceof Error ? err.message : String(err) },
+            corsOrigin,
+          );
+        });
       return;
     }
 
@@ -169,12 +192,36 @@ async function routeGet(
     return;
   }
 
+  if (url.startsWith('/draws/by-day')) {
+    const parsed = new URL(url, 'http://localhost');
+    const date = parsed.searchParams.get('date');
+    if (date === null || date === '') {
+      sendJson(res, 400, { error: 'date query param required (YYYY-MM-DD)' }, corsOrigin);
+      return;
+    }
+    const dayCompact = date.replace(/-/g, '');
+    if (!/^\d{8}$/.test(dayCompact)) {
+      sendJson(res, 400, { error: 'date must be YYYY-MM-DD' }, corsOrigin);
+      return;
+    }
+    const draws = await sink.findByGameDay(dayCompact);
+    sendJson(res, 200, { draws, date, count: draws.length }, corsOrigin);
+    return;
+  }
+
   if (url.startsWith('/draws/between')) {
     const parsed = new URL(url, 'http://localhost');
+    const fromKey = parsed.searchParams.get('fromKey');
+    const toKey = parsed.searchParams.get('toKey');
+    if (fromKey !== null && toKey !== null && fromKey !== '' && toKey !== '') {
+      const draws = await sink.findBetweenDrawKeys(fromKey, toKey);
+      sendJson(res, 200, { draws, fromKey, toKey, count: draws.length }, corsOrigin);
+      return;
+    }
     const from = parsed.searchParams.get('from');
     const to = parsed.searchParams.get('to');
     if (from === null || to === null || from === '' || to === '') {
-      sendJson(res, 400, { error: 'from and to query params required (ISO datetime)' }, corsOrigin);
+      sendJson(res, 400, { error: 'from/to (ISO) or fromKey/toKey required' }, corsOrigin);
       return;
     }
     const draws = await sink.findBetween(from, to);
@@ -185,6 +232,24 @@ async function routeGet(
   if (url === '/stats/today' || url === '/stats/today/') {
     const generatedAt = new Date().toISOString();
     sendJson(res, 200, await buildTodayStatsPayload(sink, generatedAt), corsOrigin);
+    return;
+  }
+
+  if (url === '/stats/daily-counts' || url === '/stats/daily-counts/') {
+    const counts = await sink.countByGameDay();
+    const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
+    sendJson(
+      res,
+      200,
+      {
+        timezone: 'Asia/Ho_Chi_Minh',
+        total,
+        days: Object.keys(counts).length,
+        counts,
+        generatedAt: new Date().toISOString(),
+      },
+      corsOrigin,
+    );
     return;
   }
 

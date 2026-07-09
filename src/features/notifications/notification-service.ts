@@ -1,6 +1,7 @@
 import {
   notificationFromCollectorStatus,
   notificationFromRecommendationGenerated,
+  notificationFromSourceMaintenance,
   notificationsFromSettlementAlerts,
   shouldPresentToast,
 } from '@/features/notifications/notification-center';
@@ -59,6 +60,19 @@ export class NotificationService {
     handlers: NotificationPresentHandlers = {},
   ): NotificationState | null {
     const item = notificationFromCollectorStatus(online, state.preferences);
+    if (item === null) {
+      return null;
+    }
+    return this.ingestMany(state, [item], handlers);
+  }
+
+  ingestSourceMaintenance(
+    state: NotificationState,
+    active: boolean,
+    lastDrawPeriod: string | null,
+    handlers: NotificationPresentHandlers = {},
+  ): NotificationState | null {
+    const item = notificationFromSourceMaintenance(active, lastDrawPeriod, state.preferences);
     if (item === null) {
       return null;
     }

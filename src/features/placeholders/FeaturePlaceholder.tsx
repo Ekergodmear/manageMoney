@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { WorkspacePage } from '@/layout/WorkspacePage';
 import { cn } from '@/lib/utils';
 
 export function NavBadgePill({ badge }: { badge: 'beta' | 'soon' }): ReactNode {
@@ -34,7 +35,7 @@ export function FeaturePlaceholder({
   bullets = [],
 }: FeaturePlaceholderProps): ReactNode {
   return (
-    <div className="w-full max-w-2xl space-y-4">
+    <WorkspacePage width="content" className="space-y-4">
       <div>
         <h2 className="text-xl font-bold tracking-tight">{title}</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
@@ -57,7 +58,7 @@ export function FeaturePlaceholder({
           </CardContent>
         ) : null}
       </Card>
-    </div>
+    </WorkspacePage>
   );
 }
 
@@ -65,7 +66,7 @@ export function GuidePreviewScreen(): ReactNode {
   const steps = ['Generate', 'Improve', 'Continue', 'Simulation'] as const;
 
   return (
-    <div className="w-full max-w-2xl space-y-4">
+    <WorkspacePage width="content" className="space-y-4">
       <div>
         <h2 className="text-xl font-bold tracking-tight">Hướng dẫn</h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -122,6 +123,6 @@ export function GuidePreviewScreen(): ReactNode {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </WorkspacePage>
   );
 }

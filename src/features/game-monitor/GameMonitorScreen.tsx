@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { buildSourceMaintenanceCaption } from '@/features/game-data/adapters/draw-period-label';
+import { useDrawFeedStatus } from '@/features/game-data/hooks/use-draw-feed-status';
 import { fetchGameMonitorSnapshot } from '@/features/game-monitor/collector-api';
 import type { GameMonitorSnapshot } from '@/features/game-monitor/collector-api-types';
 import { SimpleBarChart } from '@/features/game-monitor/SimpleBarChart';
@@ -50,6 +52,7 @@ function statusDot(status: string | undefined): ReactNode {
 export function GameMonitorScreen(): ReactNode {
   const [snapshot, setSnapshot] = useState<GameMonitorSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
+  const feedStatus = useDrawFeedStatus();
 
   const refresh = useCallback(async () => {
     const data = await fetchGameMonitorSnapshot();
@@ -79,6 +82,13 @@ export function GameMonitorScreen(): ReactNode {
       label: String(f.value),
       value: f.count,
     })) ?? [];
+  const todayEmptyDueToMaintenance =
+    (today?.drawCount ?? 0) === 0 &&
+    feedStatus?.collectorReachable === true &&
+    feedStatus.drawStale === true;
+  const todayMaintenanceCaption = todayEmptyDueToMaintenance
+    ? buildSourceMaintenanceCaption(feedStatus?.lastDrawPeriodLabel ?? null)
+    : null;
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
@@ -216,7 +226,9 @@ export function GameMonitorScreen(): ReactNode {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {totals.length === 0 ? (
+            {todayMaintenanceCaption !== null ? (
+              <p className="text-sm text-amber-700 dark:text-amber-400">{todayMaintenanceCaption}</p>
+            ) : totals.length === 0 ? (
               <p className="text-sm text-muted-foreground">—</p>
             ) : (
               <SimpleBarChart items={totals} />
@@ -229,7 +241,9 @@ export function GameMonitorScreen(): ReactNode {
             <CardTitle className="text-base">Today — Hoa 111–666</CardTitle>
           </CardHeader>
           <CardContent>
-            {flowers.length === 0 ? (
+            {todayMaintenanceCaption !== null ? (
+              <p className="text-sm text-amber-700 dark:text-amber-400">{todayMaintenanceCaption}</p>
+            ) : flowers.length === 0 ? (
               <p className="text-sm text-muted-foreground">—</p>
             ) : (
               <SimpleBarChart items={flowers} />

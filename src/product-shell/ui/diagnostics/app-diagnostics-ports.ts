@@ -1,4 +1,5 @@
 import type { CollectorHealthResponse } from '@/features/game-monitor/collector-api-types';
+import { isCollectorDependencyMessage } from '@/features/game-monitor/collector-dependency';
 import type { DiagnosticSnapshot } from '@/product-shell/types/diagnostics';
 import type { DiagnosticsPorts } from '@/product-shell/ui/diagnostics/create-capabilities';
 import { refreshPersistenceCapability } from '@/product-shell/ui/diagnostics/persistence-capability';
@@ -37,21 +38,28 @@ export interface AppDiagnosticsDeps {
 function mapCollectorHealth(health: CollectorHealthResponse | null): DiagnosticSnapshot {
   if (health === null) {
     return snapshot(
-      'critical',
-      'Collector unreachable',
+      'info',
+      'External service unavailable',
       [
-        { label: 'Status', value: 'offline' },
+        { label: 'Service', value: 'Collector' },
+        { label: 'State', value: 'offline' },
         { label: 'Hint', value: 'Start collector service on localhost:8788' },
       ],
-      'error',
+      'disabled',
     );
   }
 
   const severity =
     health.status === 'running' ? 'info' : health.status === 'degraded' ? 'warning' : 'critical';
+  const summary =
+    health.status === 'running'
+      ? `${health.drawCount.toLocaleString()} draws · ${health.activeAdapterId}`
+      : health.status === 'degraded'
+        ? `Collector degraded · ${health.activeAdapterId}`
+        : 'Collector stopped';
   return snapshot(
     severity,
-    `${health.drawCount.toLocaleString()} draws · ${health.activeAdapterId}`,
+    summary,
     [
       { label: 'Status', value: health.status },
       { label: 'Last draw', value: health.lastDrawKey ?? '—' },
@@ -90,6 +98,19 @@ export function createAppDiagnosticsPorts(deps: AppDiagnosticsDeps): Diagnostics
 
     refreshStatistics: () => {
       if (deps.statisticsError !== null) {
+        if (isCollectorDependencyMessage(deps.statisticsError)) {
+          return Promise.resolve(
+            snapshot(
+              'warning',
+              'Statistics degraded — external dependency',
+              [
+                { label: 'Dependency', value: 'Collector' },
+                { label: 'Detail', value: deps.statisticsError },
+              ],
+              'warning',
+            ),
+          );
+        }
         return Promise.resolve(
           snapshot(
             'critical',

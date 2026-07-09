@@ -3,6 +3,7 @@ import type { OperationalHealthStatus } from '../diagnostics/types.js';
 import type { CollectorState, ResumeState } from '../types/collector-state.js';
 import type { DrawResult } from '../types/draw-result.js';
 import { loadRetryObservabilitySnapshot } from '../retry/retry-state.js';
+import { newerDrawKey } from '../util/draw-key.js';
 import { formatDoctorReport } from './format-doctor-report.js';
 import { deriveOperationalStatus } from './operational-status.js';
 
@@ -55,8 +56,12 @@ export function buildCollectorHealth(
     resumedFromDrawKey: state.resumedFromDrawKey,
     activeAdapterId: adapterId,
     drawCount,
-    lastDrawKey: state.lastDrawKey ?? latestDraw?.drawKey ?? null,
-    latestDraw: latestDraw ?? state.lastDraw,
+    lastDrawKey: newerDrawKey(state.lastDrawKey, latestDraw?.drawKey ?? null),
+    latestDraw:
+      latestDraw !== null &&
+      (state.lastDraw === null || latestDraw.drawKey >= state.lastDraw.drawKey)
+        ? latestDraw
+        : state.lastDraw,
   };
 }
 

@@ -39,6 +39,22 @@ export function marketLabelFromPreset(preset: GamePolicyPreset, marketId: string
   return marketLabel(marketId, resolvePresetMarkets(preset));
 }
 
+export function formatMultiplierDisplay(multiplier: number): string {
+  return Number.isInteger(multiplier) ? String(multiplier) : multiplier.toFixed(1);
+}
+
+/** Nhãn plan kèm hệ số — vd. `Tổng 10 · ×4.4`. */
+export function marketPlanLabelFromPreset(
+  preset: GamePolicyPreset,
+  marketId: string,
+): string {
+  const market = findMarketForPlan(preset, marketId);
+  if (market === undefined) {
+    return marketId;
+  }
+  return `${market.label} · ×${formatMultiplierDisplay(market.multiplier)}`;
+}
+
 export function findMarketForPlan(
   preset: GamePolicyPreset | undefined,
   marketId: string,

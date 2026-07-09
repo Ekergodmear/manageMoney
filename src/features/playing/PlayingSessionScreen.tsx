@@ -140,7 +140,7 @@ export function PlayingSessionScreen({
   }
 
   return (
-    <div className="w-full max-w-lg space-y-5">
+    <div className="w-full space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold tracking-tight">

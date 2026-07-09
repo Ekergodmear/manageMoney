@@ -14,6 +14,7 @@ import type { PollStrategy } from './strategy/poll-strategy.js';
 import { initialCollectorState, type CollectorState } from './types/collector-state.js';
 import type { DrawResult } from './types/draw-result.js';
 import { syncFullDrawHistory, type SyncHistoryResult } from './sync/sync-full-history.js';
+import { newerDrawKey } from './util/draw-key.js';
 
 export interface CollectorOptions {
   readonly sink: DrawSink;
@@ -56,10 +57,16 @@ export class Collector {
     if (this.running) return;
     this.running = true;
     const loaded = await this.options.sink.loadCollectorState();
-    const resume = deriveResumeStateOnStart(loaded);
-    this.resumeSessionActive = loaded.lastDrawKey !== null;
+    const latestInDb = await this.options.sink.findLatest();
+    const reconciledLastKey = newerDrawKey(loaded.lastDrawKey, latestInDb?.drawKey ?? null);
+    const reconciled =
+      reconciledLastKey !== loaded.lastDrawKey && latestInDb !== null
+        ? { ...loaded, lastDrawKey: latestInDb.drawKey, lastDraw: latestInDb }
+        : loaded;
+    const resume = deriveResumeStateOnStart(reconciled);
+    this.resumeSessionActive = reconciled.lastDrawKey !== null;
     this.state = {
-      ...loaded,
+      ...reconciled,
       ...resume,
       status: 'running',
     };

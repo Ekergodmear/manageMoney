@@ -90,6 +90,43 @@ describe('SqliteDrawSink', () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
+  it('findRecent and findLatest use draw_key not draw_at', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'collector-test-'));
+    const dbPath = join(dir, 'test.db');
+    const sink = new SqliteDrawSink(dbPath);
+    const with555: DrawResult = {
+      ...sampleDraw('20260628132300', '2026-06-28T06:23:00.000Z'),
+      flower: '555',
+      dice: [5, 5, 5],
+      total: 15,
+    };
+    const mockLaterAt = sampleDraw('100501', '2026-07-01T12:00:00.000Z');
+    const latest = sampleDraw('20260701091100', '2026-07-01T02:11:00.000Z');
+    await sink.appendMany([with555, mockLaterAt, latest]);
+
+    expect((await sink.findLatest())?.drawKey).toBe('20260701091100');
+
+    const recent = await sink.findRecent(10);
+    expect(recent.map((d) => d.drawKey)).toEqual([
+      '100501',
+      '20260628132300',
+      '20260701091100',
+    ]);
+
+    let drought555 = 0;
+    for (let i = recent.length - 1; i >= 0; i--) {
+      const draw = recent[i];
+      if (draw?.flower === '555') {
+        drought555 = recent.length - 1 - i;
+        break;
+      }
+    }
+    expect(drought555).toBe(1);
+
+    await sink.close();
+    rmSync(dir, { recursive: true, force: true });
+  });
+
   it('persists and loads collector state with lastDrawKey', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'collector-test-'));
     const dbPath = join(dir, 'test.db');

@@ -15,8 +15,26 @@ const http = createCollectorHttpServer({
   adapterId: adapter.id,
 });
 
-void collector.start();
-void http.listen();
+async function bootstrap(): Promise<void> {
+  const shouldSyncOnStart =
+    process.env['COLLECTOR_SYNC_ON_START'] === '1' ||
+    (adapter.id === 'bingo18' && process.env['COLLECTOR_SYNC_ON_START'] !== '0');
+
+  if (shouldSyncOnStart && adapter.id === 'bingo18') {
+    const purged = await sink.purgeDrawsNotFromSource('bingo18');
+    if (purged > 0) {
+      collectorLog(`Removed ${String(purged)} draw(s) from other adapters`);
+    }
+    collectorLog('Startup sync: merging full bingo18 history…');
+    const result = await collector.syncFullHistory();
+    collectorLog(result.message);
+  }
+
+  await collector.start();
+  await http.listen();
+}
+
+void bootstrap();
 
 function shutdown(): void {
   collectorLog('Shutting down...');

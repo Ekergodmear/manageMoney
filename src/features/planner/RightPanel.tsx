@@ -6,6 +6,8 @@ import { Separator } from '@/components/ui/separator';
 import { accumulatedAtRound } from '@/features/planner/plan-display';
 import type { GenerateResult, PlannerFormValues } from '@/features/planner/plan-service';
 import { displayMoney, estimateBankrollHint } from '@/features/planner/schema';
+import { marketPlanLabelFromPreset } from '@/features/game-data/markets/market-catalog';
+import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
 import { formatAmount } from '@/lib/money-format';
 
 function SummaryRow({
@@ -33,8 +35,18 @@ function SummaryRow({
   );
 }
 
-export function FormRightPanel({ form }: { form: PlannerFormValues }): ReactNode {
+export function FormRightPanel({
+  form,
+  preset,
+}: {
+  form: PlannerFormValues;
+  preset?: GamePolicyPreset | undefined;
+}): ReactNode {
   const bankrollHint = estimateBankrollHint(form);
+  const marketSummary =
+    preset !== undefined
+      ? marketPlanLabelFromPreset(preset, form.marketId)
+      : form.marketId;
 
   return (
     <>
@@ -43,14 +55,11 @@ export function FormRightPanel({ form }: { form: PlannerFormValues }): ReactNode
           <CardTitle className="text-sm">Tóm tắt</CardTitle>
         </CardHeader>
         <CardContent className="p-3 pt-0">
+          <SummaryRow label="Cược theo" value={marketSummary} highlight />
+          <Separator className="my-1" />
           <SummaryRow label="Mục tiêu" value={displayMoney(form.targetProfit)} />
           <Separator className="my-1" />
           <SummaryRow label="Số vòng" value={form.roundCount || '—'} />
-          <Separator className="my-1" />
-          <SummaryRow
-            label="Hệ số"
-            value={form.rewardMultiplier ? `×${form.rewardMultiplier}` : '—'}
-          />
           <Separator className="my-1" />
           <SummaryRow label="Cược min" value={displayMoney(form.minimumBet)} />
           <Separator className="my-1" />

@@ -254,7 +254,7 @@ export const DEFAULT_PLANNER_FORM: PlannerFormValues = {
   marketId: 'total-4',
   targetProfit: '100.000',
   roundCount: '500',
-  rewardMultiplier: '120',
+  rewardMultiplier: '40',
   minimumBet: '10.000',
   maximumBet: '1.000.000',
   betStep: '10.000',

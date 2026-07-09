@@ -2,7 +2,7 @@ import type {
   GamePolicyPreset,
   ContinuePolicyConfig,
 } from '@/features/game-designer/game-policy-types';
-import { marketLabelFromPreset } from '@/features/game-data/markets/market-catalog';
+import { marketPlanLabelFromPreset } from '@/features/game-data/markets/market-catalog';
 import type { CollectorDrawResult } from '@/features/game-monitor/collector-api-types';
 import type { ImproveOption } from '@/features/improve/improve-service';
 import { ImproveCandidateReviewScreen } from '@/features/improve/ImproveCandidateReviewScreen';
@@ -96,7 +96,7 @@ export function SessionPlannerScreen({
           sessionStatus={playingStatus}
           betMarketLabel={
             preset !== undefined
-              ? marketLabelFromPreset(preset, currentPlan.marketId)
+              ? marketPlanLabelFromPreset(preset, currentPlan.marketId)
               : currentPlan.marketId
           }
           latestDraw={latestDraw}

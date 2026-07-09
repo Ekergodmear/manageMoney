@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { computeTargetWinRatePercent, formatPercent } from '@/features/planner/plan-display';
 import type { GenerateResult } from '@/features/planner/plan-service';
+import { WorkspacePage } from '@/layout/WorkspacePage';
 import { formatAmount } from '@/lib/money-format';
 
 interface PlanReadyScreenProps {
@@ -35,7 +36,7 @@ export function PlanReadyScreen({
   const bankrollShort = userBankroll !== null && userBankroll < statistics.requiredBankrollAmount;
 
   return (
-    <div className="w-full max-w-3xl space-y-5">
+    <WorkspacePage width="wide" className="space-y-5">
       <div>
         <h2 className="text-xl font-bold tracking-tight">Kế hoạch đã sẵn sàng</h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -121,7 +122,7 @@ export function PlanReadyScreen({
           </Button>
         </CardContent>
       </Card>
-    </div>
+    </WorkspacePage>
   );
 }
 

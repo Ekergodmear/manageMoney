@@ -43,4 +43,31 @@ describe('collector health', () => {
     expect(text).toContain('Status            Healthy');
     expect(text).toContain('Latest Draw       20260629215300');
   });
+
+  it('prefers newer draw in DB over stale state lastDrawKey', () => {
+    const staleState = {
+      ...initialCollectorState(),
+      lastDrawKey: '20260630215300',
+    };
+    const latestDraw = {
+      drawKey: '20260701091100',
+      gameId: 'bingo18',
+      marketVersion: 1,
+      drawAt: '2026-07-01T09:11:00+07:00',
+      publishedAt: '2026-07-01T09:11:00+07:00',
+      publishedEstimated: true,
+      collectedAt: new Date().toISOString(),
+      latencyMs: 0,
+      dice: [1, 2, 3] as const,
+      total: 6,
+      flower: null,
+      smallLarge: 'small' as const,
+      source: 'bingo18',
+      rawPayload: {},
+      rawResponse: null,
+    };
+    const health = buildCollectorHealth(staleState, 'bingo18', 100, latestDraw);
+    expect(health.lastDrawKey).toBe('20260701091100');
+    expect(health.latestDraw?.drawKey).toBe('20260701091100');
+  });
 });

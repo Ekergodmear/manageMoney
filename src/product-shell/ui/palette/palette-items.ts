@@ -74,7 +74,11 @@ function buildSearchRows(parsed: ParsedPaletteQuery, commands: readonly AppComma
 export function buildPaletteRows(input: BuildPaletteRowsInput): readonly PaletteRow[] {
   const parsed = parsePaletteQuery(input.query);
   if (parsed.mode === 'recent') {
-    return buildRecentRows(input.recent, input.resolveCommandTitle);
+    const recentRows = buildRecentRows(input.recent, input.resolveCommandTitle);
+    if (recentRows.length > 0) {
+      return recentRows;
+    }
+    return buildSearchRows({ mode: 'category', text: '' }, input.visibleCommands);
   }
   return buildSearchRows(parsed, input.visibleCommands);
 }

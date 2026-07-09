@@ -38,6 +38,8 @@ function isEnabled(kind: NotificationKind, prefs: NotificationPreferences): bool
       return prefs.remaining;
     case 'collector-offline':
     case 'collector-online':
+    case 'source-maintenance':
+    case 'source-maintenance-ended':
       return prefs.collector;
     case 'recommendation-new':
       return prefs.recommendation;
@@ -116,7 +118,38 @@ export function notificationFromCollectorStatus(
     kind,
     emoji: online ? '✅' : '⚠',
     title: online ? 'Collector đã hoạt động' : 'Collector mất kết nối',
-    body: online ? 'Đã kết nối lại nguồn draw.' : 'Không lấy được draw mới — kiểm tra Collector.',
+    body: online ? 'Đã kết nối lại nguồn draw.' : 'Không kết nối được Collector — kiểm tra dịch vụ local.',
+  });
+}
+
+export function notificationFromSourceMaintenance(
+  active: boolean,
+  lastDrawPeriod: string | null,
+  prefs: NotificationPreferences,
+): AppNotification | null {
+  const kind = active ? 'source-maintenance' : 'source-maintenance-ended';
+  if (!isEnabled(kind, prefs)) {
+    return null;
+  }
+  if (active) {
+    return createNotification({
+      kind,
+      emoji: '🔧',
+      title: 'Web nguồn đang bảo trì',
+      body:
+        lastDrawPeriod !== null
+          ? `Chưa thu thập được kỳ mới từ kỳ ${lastDrawPeriod} đến hiện tại.`
+          : 'Chưa thu thập được dữ liệu draw mới.',
+    });
+  }
+  return createNotification({
+    kind,
+    emoji: '✅',
+    title: 'Web nguồn hoạt động lại',
+    body:
+      lastDrawPeriod !== null
+        ? `Đã có kỳ mới lúc ${lastDrawPeriod}.`
+        : 'Đã thu thập được draw mới.',
   });
 }
 
@@ -141,7 +174,8 @@ export function shouldPresentToast(notification: AppNotification): boolean {
     notification.kind === 'win' ||
     notification.kind === 'rounds-remaining' ||
     notification.kind === 'plan-finished' ||
-    notification.kind === 'collector-offline'
+    notification.kind === 'collector-offline' ||
+    notification.kind === 'source-maintenance'
   );
 }
 
@@ -149,7 +183,8 @@ export function shouldPlaySound(notification: AppNotification): boolean {
   return (
     notification.kind === 'win' ||
     notification.kind === 'plan-finished' ||
-    notification.kind === 'collector-offline'
+    notification.kind === 'collector-offline' ||
+    notification.kind === 'source-maintenance'
   );
 }
 
@@ -157,6 +192,8 @@ export function shouldShowDesktop(notification: AppNotification): boolean {
   return (
     notification.kind === 'win' ||
     notification.kind === 'collector-offline' ||
-    notification.kind === 'collector-online'
+    notification.kind === 'collector-online' ||
+    notification.kind === 'source-maintenance' ||
+    notification.kind === 'source-maintenance-ended'
   );
 }

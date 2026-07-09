@@ -27,6 +27,8 @@ export interface DrawSink {
   findByGameDay(dayCompact: string): Promise<readonly DrawResult[]>;
   /** Draw counts keyed by YYYY-MM-DD (game TZ via draw_key). */
   countByGameDay(): Promise<Readonly<Record<string, number>>>;
+  /** Dev cleanup when adapter changes — not used on normal ingest. */
+  purgeDrawsNotFromSource(source: string): Promise<number>;
   loadCollectorState(): Promise<CollectorState>;
   saveCollectorState(state: CollectorState): Promise<void>;
   close(): Promise<void>;

@@ -13,7 +13,11 @@ import {
   computeRollingWindow,
 } from '@/features/game-data/statistics/rolling-window';
 
-function buildDistributions(draws: readonly DrawRecord[]): GameStatisticsSnapshot['distributions'] {
+function buildDistributions(
+  draws: readonly DrawRecord[],
+  options: { readonly fillBuckets?: boolean } = {},
+): GameStatisticsSnapshot['distributions'] {
+  const fillBuckets = options.fillBuckets ?? false;
   const totalCounts = new Map<number, number>();
   const flowerCounts = new Map<string, number>();
   const sizeCounts = new Map<string, number>();
@@ -26,21 +30,25 @@ function buildDistributions(draws: readonly DrawRecord[]): GameStatisticsSnapsho
     sizeCounts.set(draw.smallLarge, (sizeCounts.get(draw.smallLarge) ?? 0) + 1);
   }
 
-  const totals = [...totalCounts.entries()]
-    .sort(([a], [b]) => a - b)
-    .map(([total, count]) => ({
-      key: String(total),
-      label: String(total),
-      count,
-    }));
+  const totalKeys = fillBuckets
+    ? Array.from({ length: 16 }, (_, i) => i + 3)
+    : [...totalCounts.keys()].sort((a, b) => a - b);
 
-  const flowers = [...flowerCounts.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([flower, count]) => ({
-      key: flower,
-      label: flower,
-      count,
-    }));
+  const totals = totalKeys.map((total) => ({
+    key: String(total),
+    label: String(total),
+    count: totalCounts.get(total) ?? 0,
+  }));
+
+  const flowerKeys = fillBuckets
+    ? (['111', '222', '333', '444', '555', '666'] as const)
+    : [...flowerCounts.keys()].sort((a, b) => a.localeCompare(b));
+
+  const flowers = flowerKeys.map((flower) => ({
+    key: flower,
+    label: `Hoa ${flower}`,
+    count: flowerCounts.get(flower) ?? 0,
+  }));
 
   const sizeLabels: Record<string, string> = {
     small: 'Xỉu',
@@ -56,6 +64,8 @@ function buildDistributions(draws: readonly DrawRecord[]): GameStatisticsSnapsho
 
   return { totals, flowers, sizes };
 }
+
+export { buildDistributions };
 
 function buildRankings(markets: readonly MarketFrequencyStat[]): MarketRankings {
   const byFrequency = [...markets]

@@ -114,6 +114,7 @@ import {
   type StatusTone,
 } from '@/product-shell/ui';
 import type { CollectorHealthResponse } from '@/features/game-monitor/collector-api-types';
+import { isCollectorDependencyMessage } from '@/features/game-monitor/collector-dependency';
 import { getCollectorApiBase } from '@/features/game-monitor/collector-endpoint';
 
 interface ToastState {
@@ -422,10 +423,10 @@ function AppRoot(): JSX.Element {
   const collectorStatusSnapshot = useMemo((): CollectorStatusSnapshot => {
     let tone: StatusTone = 'ok';
     let label = 'Collector 🟢';
-    if (gameStatisticsError) {
+    if (gameStatisticsError !== null && !isCollectorDependencyMessage(gameStatisticsError)) {
       tone = 'error';
       label = 'Collector 🔴';
-    } else if (gameStatisticsLoading) {
+    } else if (gameStatisticsError !== null || gameStatisticsLoading) {
       tone = 'warning';
       label = 'Collector 🟡';
     }
@@ -1272,9 +1273,10 @@ function AppRoot(): JSX.Element {
   const showRightPanel =
     activeWorkspace === 'planning' || (activeWorkspace === 'session' && sessionView === 'playing');
 
+  const planningPreset = findPreset(allPresets, liveForm.presetId);
   const rightPanel =
     activeWorkspace === 'planning' ? (
-      <FormRightPanel form={liveForm} />
+      <FormRightPanel form={liveForm} preset={planningPreset} />
     ) : currentPlan !== null && activeWorkspace === 'session' && sessionView === 'playing' ? (
       <>
         <PlayingProgressPanel
@@ -1287,7 +1289,7 @@ function AppRoot(): JSX.Element {
         />
       </>
     ) : (
-      <FormRightPanel form={liveForm} />
+      <FormRightPanel form={liveForm} preset={planningPreset} />
     );
 
   return (

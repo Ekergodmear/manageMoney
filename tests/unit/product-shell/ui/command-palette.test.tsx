@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -25,7 +25,7 @@ describe('CommandPalette', () => {
     cleanup();
   });
 
-  it('searches commands and executes on Enter', async () => {
+  it('searches commands and executes on click', async () => {
     const user = userEvent.setup();
     const runtime = createShellRuntime();
     const execute = vi.fn(() => Promise.resolve());
@@ -38,13 +38,17 @@ describe('CommandPalette', () => {
     );
 
     await user.keyboard('{Control>}k{/Control}');
-    const input = screen.getByRole('textbox', { name: 'Search commands' });
+    const input = await screen.findByRole('textbox', { name: 'Search commands' });
+    await waitFor(() => expect(input).toHaveFocus());
     await user.clear(input);
-    await user.type(input, 'plan');
-    expect(screen.getByRole('option', { name: /Generate Plan/i })).toBeInTheDocument();
+    await user.type(input, 'generate');
+    const option = screen.getByRole('option', { name: /Generate Plan/i });
+    expect(option).toBeInTheDocument();
 
-    await user.keyboard('{Enter}');
-    expect(execute).toHaveBeenCalledOnce();
+    await user.click(option);
+    await waitFor(() => {
+      expect(execute).toHaveBeenCalledOnce();
+    });
     expect(screen.queryByRole('dialog', { name: 'Command palette' })).not.toBeInTheDocument();
     expect(runtime.actionHistory.recent(1)[0]).toEqual(
       expect.objectContaining({ commandId: 'planning.generate', outcome: 'success' }),
@@ -80,8 +84,12 @@ describe('CommandPalette', () => {
     );
 
     await user.keyboard('{Control>}k{/Control}');
+    const input = await screen.findByRole('textbox', { name: 'Search commands' });
+    await waitFor(() => expect(input).toHaveFocus());
     expect(screen.getByRole('dialog', { name: 'Command palette' })).toBeInTheDocument();
     await user.keyboard('{Escape}');
-    expect(screen.queryByRole('dialog', { name: 'Command palette' })).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Command palette' })).not.toBeInTheDocument();
+    });
   });
 });

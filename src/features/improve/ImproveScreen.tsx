@@ -14,6 +14,7 @@ import {
   type ImproveOption,
 } from '@/features/improve/improve-service';
 import type { GenerateResult, PlannerFormValues } from '@/features/planner/plan-service';
+import { WorkspacePage } from '@/layout/WorkspacePage';
 import { formatAmount } from '@/lib/money-format';
 import { cn } from '@/lib/utils';
 
@@ -64,7 +65,7 @@ export function ImproveScreen({
   const { statistics, userBankroll } = generated;
 
   return (
-    <div className="w-full max-w-3xl space-y-5">
+    <WorkspacePage width="wide" className="space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold tracking-tight">Improve</h2>
@@ -178,7 +179,7 @@ export function ImproveScreen({
           </div>
         </div>
       ) : null}
-    </div>
+    </WorkspacePage>
   );
 }
 

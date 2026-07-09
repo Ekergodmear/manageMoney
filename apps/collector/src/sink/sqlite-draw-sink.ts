@@ -177,7 +177,7 @@ export class SqliteDrawSink implements DrawSink {
 
   findLatest(): Promise<DrawResult | null> {
     const row = this.db
-      .prepare(`SELECT ${SELECT_DRAW_COLUMNS} FROM draw_results ORDER BY draw_at DESC LIMIT 1`)
+      .prepare(`SELECT ${SELECT_DRAW_COLUMNS} FROM draw_results ORDER BY draw_key DESC LIMIT 1`)
       .get() as Record<string, unknown> | undefined;
     return Promise.resolve(row !== undefined ? rowToDraw(row) : null);
   }
@@ -214,7 +214,7 @@ export class SqliteDrawSink implements DrawSink {
   findRecent(limit: number): Promise<readonly DrawResult[]> {
     const capped = Math.max(1, Math.min(limit, 50_000));
     const rows = this.db
-      .prepare(`SELECT ${SELECT_DRAW_COLUMNS} FROM draw_results ORDER BY draw_at DESC LIMIT ?`)
+      .prepare(`SELECT ${SELECT_DRAW_COLUMNS} FROM draw_results ORDER BY draw_key DESC LIMIT ?`)
       .all(capped) as Array<Record<string, unknown>>;
     return Promise.resolve(rows.map(rowToDraw).reverse());
   }
@@ -267,6 +267,14 @@ export class SqliteDrawSink implements DrawSink {
       out[row.day_key] = row.c;
     }
     return Promise.resolve(out);
+  }
+
+  /** Remove draws from other adapters (e.g. mock left after switching to bingo18). */
+  purgeDrawsNotFromSource(source: string): Promise<number> {
+    const result = this.db
+      .prepare(`DELETE FROM draw_results WHERE source IS NULL OR source != ?`)
+      .run(source);
+    return Promise.resolve(result.changes);
   }
 
   loadCollectorState(): Promise<CollectorState> {

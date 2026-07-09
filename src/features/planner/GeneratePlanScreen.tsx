@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { InfoTip } from '@/components/ui/tooltip';
 import { PresetPicker } from '@/features/game-designer/PresetPicker';
-import { MarketPicker } from '@/features/game-designer/MarketPicker';
+import { PlanMarketPicker } from '@/features/planner/plan-market-picker';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
 import { applyMarketToForm, findPreset } from '@/features/game-designer/preset-utils';
 import type { PlannerFormValues } from '@/features/planner/plan-service';
@@ -133,7 +133,7 @@ export function GeneratePlanScreen({
           <CardContent className="grid gap-3 p-4 pt-0 sm:grid-cols-2">
             {activePreset !== undefined ? (
               <div className="sm:col-span-2">
-                <MarketPicker
+                <PlanMarketPicker
                   preset={activePreset}
                   value={marketId}
                   onChange={(id) => {
@@ -149,22 +149,9 @@ export function GeneratePlanScreen({
                     }
                   }}
                 />
+                <input type="hidden" {...register('rewardMultiplier')} />
               </div>
             ) : null}
-            <Field
-              id="rewardMultiplier"
-              label="Hệ số (×)"
-              hint="Từ market đã chọn"
-              error={errors.rewardMultiplier?.message}
-            >
-              <Input
-                id="rewardMultiplier"
-                className={inputClass}
-                inputMode="decimal"
-                readOnly
-                {...register('rewardMultiplier')}
-              />
-            </Field>
             <Field
               id="minimumBet"
               label="Minimum bet (đ)"

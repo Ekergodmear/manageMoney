@@ -61,4 +61,19 @@ describe('palette recent rows', () => {
       expect.objectContaining({ kind: 'recent', title: 'Export CSV', outcome: 'failure' }),
     );
   });
+
+  it('lists all commands when query is empty and recent history is empty', () => {
+    const rows = buildPaletteRows({
+      query: '',
+      recent: [],
+      visibleCommands: [command('navigation.open-planning', 'Open Planning', 'Navigation')],
+      resolveCommandTitle: () => undefined,
+    });
+    expect(rows.some((row) => row.kind === 'command')).toBe(true);
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: 'command', command: expect.objectContaining({ id: 'navigation.open-planning' }) }),
+      ]),
+    );
+  });
 });

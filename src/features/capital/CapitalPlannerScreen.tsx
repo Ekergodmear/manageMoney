@@ -13,7 +13,7 @@ import type {
 } from '@/features/capital/capital-planner-types';
 import { CAPITAL_GOAL_LABELS, RISK_LABELS } from '@/features/capital/capital-planner-types';
 import { PresetPicker } from '@/features/game-designer/PresetPicker';
-import { MarketPicker } from '@/features/game-designer/MarketPicker';
+import { PlanMarketPicker } from '@/features/planner/plan-market-picker';
 import type { GamePolicyPreset } from '@/features/game-designer/game-policy-types';
 import { applyMarketToForm, applyPresetToForm } from '@/features/game-designer/preset-utils';
 import {
@@ -31,6 +31,7 @@ import { DEFAULT_PLANNER_FORM } from '@/features/planner/plan-service';
 import { formatMoneyFieldValue } from '@/features/planner/schema';
 import { formatAmount, parseMoneyPositiveInt } from '@/lib/money-format';
 import { formatPercent } from '@/features/planner/plan-display';
+import { WorkspacePage } from '@/layout/WorkspacePage';
 import { cn } from '@/lib/utils';
 
 const GOALS: CapitalGoal[] = ['max-profit', 'longest-play', 'lowest-bet', 'balanced'];
@@ -183,7 +184,7 @@ export function CapitalPlannerScreen({
   }
 
   return (
-    <div className="w-full max-w-2xl space-y-6">
+    <WorkspacePage width="wide">
       <div>
         <div className="flex items-center gap-2">
           <Landmark className="h-5 w-5 text-primary" />
@@ -194,6 +195,7 @@ export function CapitalPlannerScreen({
         </p>
       </div>
 
+      <div className="grid gap-6 lg:grid-cols-2">
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Vốn &amp; Game</CardTitle>
@@ -217,7 +219,7 @@ export function CapitalPlannerScreen({
             onSelect={onPresetSelect}
           />
           {activePreset !== undefined ? (
-            <MarketPicker preset={activePreset} value={marketId} onChange={setMarketId} />
+            <PlanMarketPicker preset={activePreset} value={marketId} onChange={setMarketId} />
           ) : null}
         </CardContent>
       </Card>
@@ -245,6 +247,7 @@ export function CapitalPlannerScreen({
           {error !== null ? <p className="text-sm text-destructive">{error}</p> : null}
         </CardContent>
       </Card>
+      </div>
 
       {recommendationSet !== null ? (
         <RecommendationSetPanel
@@ -253,7 +256,7 @@ export function CapitalPlannerScreen({
           onUseRecommendation={onUseRecommendation}
         />
       ) : null}
-    </div>
+    </WorkspacePage>
   );
 }
 
@@ -301,7 +304,7 @@ function RecommendationSetPanel({
           </p>
         </div>
 
-        <div className="space-y-3">
+        <div className="grid gap-3 lg:grid-cols-2">
           {set.recommendations.map((rec) => (
             <RecommendationCard
               key={rec.recommendationId}

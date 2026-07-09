@@ -4,6 +4,8 @@ export type NotificationKind =
   | 'plan-finished'
   | 'collector-offline'
   | 'collector-online'
+  | 'source-maintenance'
+  | 'source-maintenance-ended'
   | 'recommendation-new';
 
 export interface AppNotification {
