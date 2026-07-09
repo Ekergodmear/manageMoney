@@ -1,8 +1,9 @@
 # Spec 007 — Optimization Engine
 
-**Sprint:** 3  
-**Branch:** `optimization-v1` (after RC — not `main`)
+**Branch:** `optimization-v1`  
+**RFC stack:** ✅ RFC-001 → RFC-005 accepted  
+**Module:** `src/core/optimization/`
 
-Find optimal plan under constraints. Uses **ConstraintSolver + StrategyBuilder** — NOT SimulationEngine.
+**Start:** `docs/rfc/README.md`
 
-**Gate:** `docs/design/sprint-3-gate.md` — SDK client only, four review questions.
+Sprint 3 implementation gate is **open**. Specification complete before code.

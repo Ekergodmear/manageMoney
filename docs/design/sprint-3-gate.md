@@ -1,7 +1,11 @@
-# Sprint 3 — Gate (OptimizationEngine)
+# Sprint 3 — Gate (Optimization)
 
 **Status:** Locked — effective after Core SDK v1 RC  
-**Prerequisite:** Commit A pushed, commit B tagged (`v1.0.0-rc.1`)
+**Prerequisite:** Tags `v1.0.0-rc.1`, `core-sdk-v1-freeze` on `main`
+
+**Optimization RFC:** Design docs live on `optimization-v1` only — see `docs/rfc/README.md` on that branch. **Do not merge RFC drafts to `main` until approved.**
+
+No Sprint 3 code until RFCs are maintainer-approved.
 
 ---
 
@@ -108,8 +112,8 @@ Solver is Production Ready — Optimization **builds on** Solver, does not modif
 
 ## References
 
-- `API_FREEZE.md`
-- `PUBLIC_API.md`
-- `RELEASE_MANIFEST.md`
+- `docs/rfc/README.md` — RFC index (this branch)
+- `API_FREEZE.md` (on `main`)
+- `PUBLIC_API.md` (on `main`)
 - `specs/007-optimization/`
 - ADR-037

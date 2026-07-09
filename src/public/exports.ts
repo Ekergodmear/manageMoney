@@ -31,6 +31,7 @@ export type {
   RoundCount,
   MinimumBet,
   BetStep,
+  WinTax,
 } from '@/application/dto';
 
 export type {

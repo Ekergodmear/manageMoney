@@ -66,6 +66,8 @@ const simulation = simulateWinAtRound(strategy, winAtRound);
 | Amounts          | `BetAmount`, `RewardAmount`, `ProfitAmount`, `BankrollAmount`                              |
 | Simulation trace | `RoundSimulation`, `RoundResult` (type-only — read via `SimulationResult.rounds`)          |
 
+`rewardMultiplier` accepts integers and values with **up to 2 decimal places** (e.g. `1.95`, `9.8`, `20`).
+
 Full inventory: `docs/design/public-api-inventory.md`
 
 ---

@@ -1,0 +1,27 @@
+{
+  "name": "@stake/collector",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Draw acquisition service — fetch and append-only save. No Session, no app UI.",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "dev": "tsx watch src/main.ts",
+    "doctor": "tsx src/doctor/main.ts",
+    "sync": "tsx src/sync/main.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.4"
+  }
+}

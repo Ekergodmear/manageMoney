@@ -1,0 +1,107 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --motion-fast: 150ms;
+  --motion-normal: 220ms;
+  --motion-slow: 320ms;
+  --radius: 0.75rem;
+  --background: #f4f6fb;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --primary: #7c3aed;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f8fafc;
+  --muted-foreground: #64748b;
+  --accent: #ede9fe;
+  --accent-foreground: #5b21b6;
+  --border: #e8ecf4;
+  --input: #e8ecf4;
+  --ring: #a78bfa;
+  --destructive: #dc2626;
+  --warning: #fffbeb;
+  --warning-foreground: #92400e;
+  --success: #ecfdf5;
+  --success-foreground: #065f46;
+}
+
+.dark {
+  --background: #0f1117;
+  --foreground: #f1f5f9;
+  --card: #1a1d27;
+  --card-foreground: #f1f5f9;
+  --primary: #a78bfa;
+  --primary-foreground: #1e1b4b;
+  --secondary: #1e2433;
+  --secondary-foreground: #f1f5f9;
+  --muted: #141820;
+  --muted-foreground: #94a3b8;
+  --accent: #2e1065;
+  --accent-foreground: #ddd6fe;
+  --border: #2a3040;
+  --input: #2a3040;
+  --ring: #7c3aed;
+  --warning: #422006;
+  --warning-foreground: #fde68a;
+  --success: #052e16;
+  --success-foreground: #86efac;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    margin: 0;
+  }
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

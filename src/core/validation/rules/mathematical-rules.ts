@@ -3,6 +3,10 @@
  */
 
 import type { CalculationRequest } from '@/application/dto';
+import {
+  encodeRewardMultiplier,
+  minimumRewardAmount,
+} from '@/core/monetary/reward-multiplier-encoding';
 
 import { ValidationCodes } from '../error-codes';
 import type { ValidationPhase } from '../types';
@@ -50,7 +54,8 @@ function solverOverflowRisk(request: CalculationRequest): boolean {
     return false;
   }
 
-  const rewardBound = request.minimumBet * request.rewardMultiplier;
+  const encoded = encodeRewardMultiplier(request.rewardMultiplier);
+  const rewardBound = minimumRewardAmount(request.minimumBet, encoded);
   return rewardBound <= MAX_SAFE;
 }
 

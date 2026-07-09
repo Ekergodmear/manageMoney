@@ -16,6 +16,8 @@ export default tseslint.config(
       '.vite/',
       'scripts/',
       'tests/consumer/smoke.mjs',
+      'apps/collector/data/',
+      'apps/collector/vitest.config.ts',
     ],
   },
   js.configs.recommended,
@@ -71,6 +73,10 @@ export default tseslint.config(
         },
       ],
     },
+  },
+  {
+    files: ['examples/**/*.ts'],
+    extends: [tseslint.configs.disableTypeChecked],
   },
   {
     files: [

@@ -3,6 +3,7 @@
  */
 
 import type { CalculationRequest, TargetProfit } from '@/application/dto';
+import { encodeRewardMultiplier, rewardFromBet } from '@/core/monetary/reward-multiplier-encoding';
 import { resolveTarget } from '@/core/solver/resolve-target';
 import { solve } from '@/core/solver';
 import type { Strategy } from '@/core/models';
@@ -29,7 +30,7 @@ export function requiredBankrollAmount(strategy: Strategy): number {
 }
 
 export function assertStrategyInvariants(request: CalculationRequest, strategy: Strategy): void {
-  const m = request.rewardMultiplier;
+  const encoded = encodeRewardMultiplier(request.rewardMultiplier);
   const bMin = request.minimumBet;
   const s = request.betStep;
 
@@ -57,7 +58,7 @@ export function assertStrategyInvariants(request: CalculationRequest, strategy: 
     if (round.betAmount % s !== 0) {
       throw new Error(`I3 violated at round ${String(round.index)}`);
     }
-    if (round.rewardAmount !== round.betAmount * m) {
+    if (round.rewardAmount !== rewardFromBet(round.betAmount, encoded)) {
       throw new Error(`I5 violated at round ${String(round.index)}`);
     }
     if (!Number.isInteger(round.betAmount)) {

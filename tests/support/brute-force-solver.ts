@@ -5,6 +5,7 @@
 
 import type { ValidatedCalculationRequest } from '@/application/dto';
 import type { Round, Strategy } from '@/core/models';
+import { encodeRewardMultiplier, rewardFromBet } from '@/core/monetary/reward-multiplier-encoding';
 
 import { solve } from '@/core/solver';
 import { resolveTarget } from '@/core/solver/resolve-target';
@@ -14,7 +15,7 @@ import { solveMinimalFeasibleBet } from '@/core/solver/solve-minimal-feasible-be
 const MAX_EXTRA_STEPS = 12;
 
 function buildStrategy(request: ValidatedCalculationRequest, bets: readonly number[]): Strategy {
-  const m = request.rewardMultiplier;
+  const encoded = encodeRewardMultiplier(request.rewardMultiplier);
   let accumulatedBefore = 0;
   const rounds: Round[] = [];
 
@@ -24,7 +25,7 @@ function buildStrategy(request: ValidatedCalculationRequest, bets: readonly numb
     rounds.push({
       index: i + 1,
       betAmount: bet,
-      rewardAmount: bet * m,
+      rewardAmount: rewardFromBet(bet, encoded),
       accumulatedSpent: accumulatedAfter,
     });
     accumulatedBefore = accumulatedAfter;
@@ -62,18 +63,18 @@ function search(
   }
 
   const pStar = resolveTarget(request.targetProfit, accumulatedBefore);
+  const encoded = encodeRewardMultiplier(request.rewardMultiplier);
   const minBet = solveMinimalFeasibleBet(
     accumulatedBefore,
     pStar,
-    request.rewardMultiplier,
+    encoded,
     request.minimumBet,
     request.betStep,
   );
   const maxBet = minBet + request.betStep * MAX_EXTRA_STEPS;
-  const m = request.rewardMultiplier;
 
   for (let bet = minBet; bet <= maxBet; bet += request.betStep) {
-    const reward = bet * m;
+    const reward = rewardFromBet(bet, encoded);
     const accumulatedAfter = accumulatedBefore + bet;
     if (reward - accumulatedAfter >= pStar) {
       bets.push(bet);

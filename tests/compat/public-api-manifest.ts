@@ -4,9 +4,11 @@
  */
 
 export const PUBLIC_RUNTIME_EXPORTS = [
+  'OptimizationReasons',
   'ValidationCodes',
   'buildStatistics',
   'buildStrategy',
+  'optimize',
   'simulateWinAtRound',
   'solve',
   'validateCalculationRequest',
@@ -19,6 +21,13 @@ export const PUBLIC_TYPE_EXPORTS = [
   'CalculationRequest',
   'Failure',
   'MinimumBet',
+  'OptimizationErrorCode',
+  'OptimizationExplanation',
+  'OptimizationFailure',
+  'OptimizationReason',
+  'OptimizationRequest',
+  'OptimizationResult',
+  'OptimizationSuccess',
   'ProfitAmount',
   'Result',
   'RewardAmount',
@@ -38,4 +47,5 @@ export const PUBLIC_TYPE_EXPORTS = [
   'ValidationError',
   'ValidationLayer',
   'ValidationResult',
+  'WinTax',
 ] as const;

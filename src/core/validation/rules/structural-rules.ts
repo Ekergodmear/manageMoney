@@ -3,6 +3,7 @@
  */
 
 import type { CalculationRequest } from '@/application/dto';
+import { hasAtMostTwoDecimalPlaces } from '@/core/monetary/reward-multiplier-encoding';
 
 import {
   getTargetProfitMode,
@@ -44,6 +45,17 @@ export const structuralRules: ValidationPhase = [
     layer: 'structural',
     message: 'rewardMultiplier must be a finite number',
     isValid: (request) => whenRequestValid(request, (r) => isFiniteNumber(r.rewardMultiplier)),
+  },
+  {
+    code: ValidationCodes.S013_REWARD_MULTIPLIER_PRECISION,
+    path: 'rewardMultiplier',
+    layer: 'structural',
+    message: 'rewardMultiplier must have at most 2 decimal places',
+    isValid: (request) =>
+      whenRequestValid(
+        request,
+        (r) => isFiniteNumber(r.rewardMultiplier) && hasAtMostTwoDecimalPlaces(r.rewardMultiplier),
+      ),
   },
   {
     code: ValidationCodes.S003_ROUND_COUNT_NAN,
@@ -131,6 +143,40 @@ export const structuralRules: ValidationPhase = [
           return true;
         }
         return isFiniteNumber(r.targetProfit.percentage);
+      }),
+  },
+  {
+    code: ValidationCodes.S014_WIN_TAX_THRESHOLD_INVALID,
+    path: 'winTax.threshold',
+    layer: 'structural',
+    message: 'winTax.threshold must be a finite integer',
+    isValid: (request) =>
+      whenRequestValid(request, (r) => {
+        if (r.winTax === undefined) {
+          return true;
+        }
+        return (
+          typeof r.winTax === 'object' &&
+          isFiniteNumber(r.winTax.threshold) &&
+          Number.isInteger(r.winTax.threshold)
+        );
+      }),
+  },
+  {
+    code: ValidationCodes.S015_WIN_TAX_RATE_INVALID,
+    path: 'winTax.ratePercent',
+    layer: 'structural',
+    message: 'winTax.ratePercent must be a finite integer',
+    isValid: (request) =>
+      whenRequestValid(request, (r) => {
+        if (r.winTax === undefined) {
+          return true;
+        }
+        return (
+          typeof r.winTax === 'object' &&
+          isFiniteNumber(r.winTax.ratePercent) &&
+          Number.isInteger(r.winTax.ratePercent)
+        );
       }),
   },
 ];

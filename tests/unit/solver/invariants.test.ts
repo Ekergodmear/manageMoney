@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { CalculationRequest, TargetProfit } from '@/application/dto';
+import { encodeRewardMultiplier, rewardFromBet } from '@/core/monetary/reward-multiplier-encoding';
 import { resolveTarget } from '@/core/solver/resolve-target';
 import { solveMinimalFeasibleBet } from '@/core/solver/solve-minimal-feasible-bet';
 import { solve } from '@/core/solver';
@@ -27,7 +28,7 @@ function pStar(targetProfit: TargetProfit, accumulatedSpentBefore: number): numb
 describe('ConstraintSolver — invariants I1–I8', () => {
   const request = fixedGolden.request as CalculationRequest;
   const strategy = solveStrategy(request);
-  const m = request.rewardMultiplier;
+  const encoded = encodeRewardMultiplier(request.rewardMultiplier);
   const bMin = request.minimumBet;
   const s = request.betStep;
 
@@ -43,7 +44,7 @@ describe('ConstraintSolver — invariants I1–I8', () => {
       expect(profit).toBeGreaterThanOrEqual(target);
       expect(round.betAmount).toBeGreaterThanOrEqual(bMin);
       expect(round.betAmount % s).toBe(0);
-      expect(round.rewardAmount).toBe(round.betAmount * m);
+      expect(round.rewardAmount).toBe(rewardFromBet(round.betAmount, encoded));
       expect(Number.isInteger(round.betAmount)).toBe(true);
       expect(round.accumulatedSpent).toBe(accumulatedSpentBefore + round.betAmount);
 
@@ -72,12 +73,18 @@ describe('ConstraintSolver — constructive proof checkpoints', () => {
   };
 
   it('round 1 (§1 constructive proof)', () => {
-    const bet = solveMinimalFeasibleBet(0, 100_000, 20, 10_000, 1_000);
+    const bet = solveMinimalFeasibleBet(0, 100_000, encodeRewardMultiplier(20), 10_000, 1_000);
     expect(bet).toBe(10_000);
   });
 
   it('round 12 (§2 constructive proof)', () => {
-    const bet = solveMinimalFeasibleBet(111_000, 100_000, 20, 10_000, 1_000);
+    const bet = solveMinimalFeasibleBet(
+      111_000,
+      100_000,
+      encodeRewardMultiplier(20),
+      10_000,
+      1_000,
+    );
     expect(bet).toBe(12_000);
   });
 

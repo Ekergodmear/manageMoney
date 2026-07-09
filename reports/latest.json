@@ -1,0 +1,26 @@
+{
+  "date": "2026-07-01T09:23:28.757Z",
+  "commit": "d6acaf6462eb8a05403e64f62c185d4dedf8e66f",
+  "branch": "release/internal-rc",
+  "status": "PASS",
+  "verdict": "READY FOR RC",
+  "reasons": [],
+  "tests": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "unit": "PASS",
+    "architecture": "PASS",
+    "gameData": "PASS",
+    "notifications": "PASS",
+    "build": "PASS",
+    "smoke": "PASS",
+    "property": "SKIP",
+    "soak": "SKIP",
+    "performance": "SKIP"
+  },
+  "durationMs": 191291,
+  "buildTimeMs": 24638,
+  "bundleBytes": 1054878,
+  "qualityScore": 100,
+  "totalWarnings": 0
+}

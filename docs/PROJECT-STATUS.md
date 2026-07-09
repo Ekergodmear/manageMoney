@@ -1,69 +1,77 @@
 # Project Status
 
-**Purpose:** Maintainer dashboard — current state at a glance.  
-**Not** a technical spec. For depth, see `ROADMAP.md`, `CORE-STABILITY.md`, `API_FREEZE.md`.
-
+**Purpose:** Where the project stands — at a glance.  
+**Branch:** `optimization-v1`  
 **Last updated:** 2026-06-25
 
 ---
 
-## Components
+## Platform
 
-| Component          | Status           |
-| ------------------ | ---------------- |
-| Core SDK           | Stable           |
-| Public API         | Frozen           |
-| ValidationEngine   | Stable           |
-| ConstraintSolver   | Production Ready |
-| StrategyBuilder    | Stable           |
-| StatisticsBuilder  | Stable           |
-| SimulationEngine   | Stable           |
-| OptimizationEngine | Planned          |
-| UI                 | Planned          |
+|             |                                                                                  |
+| ----------- | -------------------------------------------------------------------------------- |
+| **Package** | `@stake/constraint-engine`                                                       |
+| **Version** | `v1.0.0-rc.1`                                                                    |
+| **Status**  | **Stable** — decimal multiplier shipped (`28d5800`)                              |
+| **Proof**   | 380+ tests, property + differential, regression M=20, arithmetic migration brief |
+
+Platform work is **complete** for current product needs. Further changes require SemVer gate — see [`PUBLIC_API.md`](../PUBLIC_API.md).
 
 ---
 
-## Current version
+## Product
+
+|            |                                                                                   |
+| ---------- | --------------------------------------------------------------------------------- |
+| **Name**   | Stake Planner                                                                     |
+| **Status** | **Feature 1 — awaiting user evidence**                                            |
+| **Spec**   | [feature-1-generate-plan.md](product/feature-1-generate-plan.md)                  |
+| **App**    | [`stake-planner.vercel.app`](https://stake-planner.vercel.app) · local `pnpm dev` |
+
+---
+
+## Current focus
+
+**Lane Product:** **#018 — Feature 1 usability validation** — [`feature-1-dogfood-notes.md`](product/feature-1-dogfood-notes.md) §#018
+
+**Lane Platform (parallel, docs-first):** **Game Policy Brief** — [`design/game-policy-brief.md`](design/game-policy-brief.md) — **approved** (Translator + SolverConstraints); implementation after Phase 1 sign-off
+
+**Không viết code Platform** cho đến khi Game Policy brief sign-off. **Không viết code Product** cho đến khi #018 freeze — trừ blocker usability.
+
+---
+
+## Roadmap (chốt)
 
 ```text
-Core SDK: v1.0.0-rc.1
+⏳  #018 stranger test
+    ↓
+✅  Freeze Feature 1 (Released)
+    ↓
+📝  Feature 2 brief — Improve Plan
+    ↓
+🚀  Feature 2 implement
+    ↓
+✨  UX Polish Sprint (animation, a11y, dark mode — sau F2)
 ```
 
-Tags: `core-sdk-v1-freeze`, `v1.0.0-rc.1`
-
----
-
-## Next milestone
-
-```text
-Optimization — branch optimization-v1 (RFC in progress; not on main)
-```
-
----
-
-## Maintainer mindset (post–Core SDK v1)
-
-- `main` = release line; Optimization on a separate branch.
-- Core SDK is treated as a **published dependency** — even in the same repo.
-- No new layers, ADRs, or workflows without a strong, documented reason.
-- Core changes only with spec evidence (bug fix or spec gap).
-
-**Sprint 3 review focus:**
-
-| Criterion   | Question                                                 |
-| ----------- | -------------------------------------------------------- |
-| Correctness | Does the optimization algorithm match its specification? |
-| Composition | Does it use the Core SDK Public API correctly?           |
-| Isolation   | Is Optimization independent of Core internals?           |
-| Performance | Does it meet expected complexity bounds?                 |
+Full roadmap: [`ROADMAP.md`](../ROADMAP.md)
 
 ---
 
 ## Quick links
 
-| Topic           | Document                                      |
-| --------------- | --------------------------------------------- |
-| Release steps   | `RELEASE_MANIFEST.md`                         |
-| Module gates    | `docs/CORE-STABILITY.md`                      |
-| Public contract | `API_FREEZE.md`, `PUBLIC_API.md`              |
-| Sprint 3        | Branch `optimization-v1` only — not on `main` |
+| Topic                           | Document                                                                       |
+| ------------------------------- | ------------------------------------------------------------------------------ |
+| Feature 1 dogfood + #018 script | [`product/feature-1-dogfood-notes.md`](product/feature-1-dogfood-notes.md)     |
+| Arithmetic migration            | [`design/arithmetic-migration-brief.md`](design/arithmetic-migration-brief.md) |
+| Game policy (Platform)          | [`design/game-policy-brief.md`](design/game-policy-brief.md)                   |
+| Product problem                 | [`rfc/product/RFC-101-user-problem.md`](rfc/product/RFC-101-user-problem.md)   |
+| User journey                    | [`rfc/product/RFC-102-user-journey.md`](rfc/product/RFC-102-user-journey.md)   |
+| SDK cookbook                    | [`cookbook/README.md`](cookbook/README.md)                                     |
+
+---
+
+## Branch policy
+
+- `main` — Core SDK release line (`v1.0.0-rc.1`)
+- `optimization-v1` — Optimization + Stake Planner product line

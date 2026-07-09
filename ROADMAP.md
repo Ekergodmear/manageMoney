@@ -1,158 +1,109 @@
 # Stake Planner — Roadmap
 
-**Product:** Stake Planner (UI app)  
-**Engine:** Calculation Engine SDK — future package `constraint-engine` (ADR-030)  
-**Last Updated:** 2026-06-25  
-**Current Sprint:** Core SDK v1 released — Optimization on `optimization-v1`  
-**Status dashboard:** `docs/PROJECT-STATUS.md`
+**Product:** Stake Planner  
+**Platform:** `@stake/constraint-engine` (stable)  
+**Last updated:** 2026-06-25
 
 ---
 
-## Sprint 2.7 — closed items
+## Product features
 
-| Phase | Deliverable                          | Status |
-| ----- | ------------------------------------ | ------ |
-| 2.7A  | Public API audit (architect)         | ✅     |
-| 2.7B  | `src/public/index.ts` + compat tests | ✅     |
-| —     | `API_FREEZE.md`                      | ✅     |
-
----
-
-## Sprint 2.7C — SDK Publish Candidate (current)
-
-**Sequence:** `2.7C → v1.0.0-rc.1 → v1.0.0 → Sprint 3`
-
-See `docs/design/sprint-2.7c-spec.md`.
-
-| Phase      | Deliverable                     | Status |
-| ---------- | ------------------------------- | ------ |
-| **2.7C.1** | README + LICENSE + CONTRIBUTING | ✅     |
-| **2.7C.2** | Benchmark baseline (public API) | ✅     |
-| **2.7C.3** | Packaging + `pnpm pack`         | ✅     |
-| **2.7C.4** | `v1.0.0-rc.1` → tags + manifest | ✅     |
-
-**Sprint 3:** Optimization RFC + implementation — branch `optimization-v1` only. Not merged to `main` until RFC approved.
-
----
-
-## Sprint 2.7 (legacy table)
-
-**Mindset:** Library maintenance — Core SDK v1 feature complete.
-
-| Priority | Deliverable                 | Status |
-| -------- | --------------------------- | ------ |
-| 1        | Public API audit            | ✅     |
-| 2        | API freeze                  | ✅     |
-| 3        | Compatibility policy        | ✅     |
-| 4        | Compat + architecture tests | ✅     |
-| 5–7      | → moved to **2.7C** above   | ⏳     |
-
-ADR-037: ADR discipline from 2.7 onward.
-
-**Review focus:** Public API stability → backward compatibility → performance → SDK UX.
+Each feature answers: _What does the user want?_ _What gets worse if we skip it?_
 
 ```text
-core/           → publishable Calculation Engine SDK
-application/    → orchestration layer
-UI              → one consumer (late — after SDK hardening)
+Feature 1  Generate Plan
+    ↓
+Feature 2  Improve Plan
+    ↓
+Feature 3  Understand Plan
+    ↓
+Feature 4  Keep Plan
+    ↓
+Feature 5  Trust Plan
+    ↓
+Stake Planner v1.0.0
 ```
 
 ---
 
-## Sprint Order
+### Feature 1 — Generate Plan
+
+**Goal:** User has a plan.
+
+Enter reward multiplier, rounds, bets, target profit → see required bankroll and round-by-round bets.
+
+**Success:** < 30 seconds, no documentation required.
+
+**Platform:** `validateCalculationRequest` → `solve` → `buildStrategy` → `buildStatistics`
+
+---
+
+### Feature 2 — Improve Plan
+
+**Goal:** When bankroll is not enough, user still gets a feasible option.
+
+**Success:** User understands a _suggested plan_ exists and can accept it.
+
+**Platform:** `optimize` + structured `explanation`
+
+---
+
+### Feature 3 — Understand Plan
+
+**Goal:** User trusts the plan.
+
+Simulation + explanation — user knows _why_ this plan fits their situation.
+
+**Success:** User proceeds with confidence, not blind acceptance.
+
+**Platform:** `simulateWinAtRound` + UI narrative from `explanation`
+
+---
+
+### Feature 4 — Keep Plan
+
+**Goal:** User can save or share the plan.
+
+**Success:** Export is useful outside the session.
+
+**Platform:** Serialize public types (app-owned schema)
+
+---
+
+### Feature 5 — Trust Plan
+
+**Goal:** Product feels polished and reliable.
+
+Loading states, microcopy, animation, confidence cues.
+
+**Success:** First-time user completes the full journey without friction.
+
+---
+
+## Delivery sequence
 
 ```text
-2.1A  Models + contracts          ✅
-2.1B  DTO (CalculationRequest)    ✅
-2.1C  Mathematical Specification  ✅
-2.2   ValidationEngine            ✅ FROZEN
-2.3   ConstraintSolver            ✅ FROZEN — Production Ready
-2.4   StrategyBuilder             ✅ FROZEN (ADR-034)
-2.5   StatisticsBuilder           ✅ FROZEN (ADR-035)
-2.6   SimulationEngine              ✅ FROZEN (ADR-036)
-2.7   SDK Hardening                 ✅ (2.7A/B + API freeze)
-2.7C  SDK Publish Candidate         ← current
-3     OptimizationEngine (+ OptimizationRequest)
-4     Plugin Architecture + mutation testing (Stryker)
-5+    Application orchestration + UI
+Product Reset (docs)     ✅
+    ↓
+stake-planner CLI        dogfooding — generate | optimize
+    ↓
+Stake Planner UI         Features 1 → 5
+    ↓
+v1.0.0
 ```
 
----
-
-## Sprint 2.3 — ConstraintSolver (closed)
-
-| Step     | Deliverable                                   | Status    |
-| -------- | --------------------------------------------- | --------- |
-| **2.3A** | Problem Definition                            | ✅ FROZEN |
-| **2.3B** | Pseudo-code                                   | ✅ FROZEN |
-| **2.3C** | State Machine                                 | ✅ FROZEN |
-| **2.3D** | Constructive Proof                            | ✅ FROZEN |
-| **2.3E** | TypeScript implementation                     | ✅ FROZEN |
-| **2.3F** | Formal Verification (property + differential) | ✅ FROZEN |
+CLI is a **dogfooding tool**, not a product. Two commands, plain output, then move to UI.
 
 ---
 
-## Sprint 2.7 — SDK Hardening (closed)
+## Platform (complete)
 
-**Mindset:** Library maintenance — Core SDK v1 feature complete.
+`@stake/constraint-engine` — no feature roadmap here.
 
-| Priority | Deliverable                                               | Status         |
-| -------- | --------------------------------------------------------- | -------------- |
-| 1        | **Public API audit** — `src/public/index.ts`              | ✅ 2.7A / 2.7B |
-| 2        | **API freeze** — `API_FREEZE.md`                          | ✅             |
-| 3        | **Compatibility policy** — `docs/COMPATIBILITY-POLICY.md` | ✅             |
-| 4        | Compat + architecture tests                               | ✅             |
+| Milestone                      | Status               |
+| ------------------------------ | -------------------- |
+| Core SDK v1 + public API       | ✅ `v1.0.0-rc.1`     |
+| Optimization engine + export   | ✅ Production ready  |
+| Consumer validation + cookbook | ✅ Sprint 3 complete |
 
-**Continued in Sprint 2.7C** — see `docs/design/sprint-2.7c-spec.md`.
-
-ADR-037: ADR discipline from 2.7 onward.
-
-**Review focus (post-2.7B):** Public API stability → backward compatibility → performance → SDK UX.
-
----
-
-## Architecture (frozen through v1.0.0)
-
-```text
-ValidationEngine          ✅ Stable
-      ↓
-ConstraintSolver          ✅ Production Ready
-      ↓
-StrategyBuilder           ✅ FROZEN (ADR-034)
-      ↓
-StatisticsBuilder         ✅ FROZEN (ADR-035)
-      ↓
-Application               (→ StrategyResult)
-      ↓
-SimulationEngine          ✅ FROZEN (ADR-036) — Strategy only
-      ↓
-OptimizationEngine        Sprint 3
-```
-
----
-
-## Review focus by layer
-
-| Layer             | Review focus                               |
-| ----------------- | ------------------------------------------ |
-| ConstraintSolver  | Closed — spec changes only via design gate |
-| StrategyBuilder   | Closed — ADR-034                           |
-| StatisticsBuilder | Closed — ADR-035                           |
-| SimulationEngine  | Deterministic interpreter; Strategy only   |
-| SDK Hardening     | Public API, packaging, SemVer, docs        |
-
-### Layer groups
-
-```text
-Construction:  Validation → Solver → StrategyBuilder
-Observation:   StatisticsBuilder, SimulationEngine
-Decision:      OptimizationEngine
-```
-
-Post-2.6: `docs/CORE-STABILITY.md` — module stability map.
-
----
-
-## Done Gate
-
-Core modules are **production-ready** when specification, tests, and public contract are frozen — not when UI exists.
+Platform changes: SemVer, [`PUBLIC_API.md`](PUBLIC_API.md), [`docs/CORE-STABILITY.md`](docs/CORE-STABILITY.md).

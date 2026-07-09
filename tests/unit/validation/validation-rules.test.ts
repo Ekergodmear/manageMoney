@@ -50,6 +50,26 @@ describe('structuralRules — branch coverage', () => {
     expect(errors.some((e) => e.code === ValidationCodes.S002_REWARD_MULTIPLIER_NAN)).toBe(true);
   });
 
+  it('S013 rewardMultiplier too many decimal places', () => {
+    const errors = runPhase(
+      { ...validCalculationRequest, rewardMultiplier: 1.333 },
+      structuralRules,
+    );
+    expect(errors.some((e) => e.code === ValidationCodes.S013_REWARD_MULTIPLIER_PRECISION)).toBe(
+      true,
+    );
+  });
+
+  it('S013 passes for two decimal places', () => {
+    const errors = runPhase(
+      { ...validCalculationRequest, rewardMultiplier: 1.95 },
+      structuralRules,
+    );
+    expect(errors.some((e) => e.code === ValidationCodes.S013_REWARD_MULTIPLIER_PRECISION)).toBe(
+      false,
+    );
+  });
+
   it('S004 minimumBet NaN', () => {
     const errors = runPhase(
       { ...validCalculationRequest, minimumBet: Number.NaN },
